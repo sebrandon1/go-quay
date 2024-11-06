@@ -54,24 +54,24 @@ type RepositoryWithTags struct {
 // GetRepository returns a repository with tags information baked in
 func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags, error) {
 	// Note: For some reason the API does not return tags in an array but as a map
-	req, err := newRequest("GET", "https://quay.io/api/v1/repository/"+namespace+"/"+repository, nil)
+	req, err := NewRequest("GET", "https://quay.io/api/v1/repository/"+namespace+"/"+repository, nil)
 	if err != nil {
 		return RepositoryWithTags{}, err
 	}
 
 	var repo Repository
-	err = c.get(req, &repo)
+	err = c.Get(req, &repo)
 	if err != nil {
 		return RepositoryWithTags{}, err
 	}
 
-	req, err = newRequest("GET", "https://quay.io/api/v1/repository/"+namespace+"/"+repository+"/tag", nil)
+	req, err = NewRequest("GET", "https://quay.io/api/v1/repository/"+namespace+"/"+repository+"/tag", nil)
 	if err != nil {
 		return RepositoryWithTags{}, err
 	}
 
 	var tags RepositoryTags
-	err = c.get(req, &tags)
+	err = c.Get(req, &tags)
 	if err != nil {
 		return RepositoryWithTags{}, err
 	}
