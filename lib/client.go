@@ -21,7 +21,7 @@ func NewClient(bearerToken string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) get(req *http.Request, v interface{}) error {
+func (c *Client) Get(req *http.Request, v interface{}) error {
 	req.Header.Set("Authorization", "Bearer "+c.BearerToken)
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
@@ -37,6 +37,6 @@ func decodeJSON(r io.Reader, v interface{}) error {
 	return json.NewDecoder(r).Decode(v)
 }
 
-func newRequest(method, url string, body io.Reader) (*http.Request, error) {
+func NewRequest(method, url string, body io.Reader) (*http.Request, error) {
 	return http.NewRequest(method, url, body)
 }
