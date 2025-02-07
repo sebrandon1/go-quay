@@ -3,5 +3,5 @@ package main
 import "github.com/sebrandon1/go-quay/cmd"
 
 func main() {
-	cmd.Execute()
+	_ = cmd.Execute()
 }

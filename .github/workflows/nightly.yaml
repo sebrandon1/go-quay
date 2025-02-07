@@ -1,0 +1,52 @@
+name: Quay Verification
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  pull_request:
+    branches:
+      - main
+
+env:
+  QUAY_NAMESPACE: redhat-best-practices-for-k8s
+  QUAY_REPOSITORY: certsuite
+
+jobs:
+  verify-quay:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      - name: Build the application
+        run: make build
+
+      # Perform requests to the Quay API to verify that the application is working as expected
+      - name: Verify Get (aggregatedlogs)
+        run: |
+          TODAY=$(date +%m/%d/%Y)
+          SEVEN_DAYS_AGO=$(date --date "7 days ago" +%m/%d/%Y)
+          ./go-quay get aggregatedlogs -n $QUAY_NAMESPACE -r $QUAY_REPOSITORY -t ${{ secrets.QUAY_TOKEN }} -s $SEVEN_DAYS_AGO -e $TODAY > /dev/null
+
+          if [ $? -ne 0 ]; then
+            echo "Failed to verify Get (aggregatedlogs)"
+            exit 1
+          fi
+
+      - name: Verify Get (repository)
+        run: |
+          ./go-quay get repository -n $QUAY_NAMESPACE -r $QUAY_REPOSITORY -t ${{ secrets.QUAY_TOKEN }} > /dev/null
+
+          if [ $? -ne 0 ]; then
+            echo "Failed to verify Get (repository)"
+            exit 1
+          fi
