@@ -1,4 +1,6 @@
 # go-quay
+![Quay API Verified Nightly](https://github.com/sebrandon1/go-quay/actions/workflows/nightly.yaml/badge.svg)
+
 A Go wrapper around Quay APIs
 
 ## Table of API Coverage
