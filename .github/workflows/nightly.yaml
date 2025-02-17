@@ -6,6 +6,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 env:
   QUAY_NAMESPACE: redhat-best-practices-for-k8s
