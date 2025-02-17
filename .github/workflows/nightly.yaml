@@ -30,6 +30,9 @@ jobs:
       - name: Build the application
         run: make build
 
+      - name: tmate session
+        uses: mxschmitt/action-tmate@v3
+
       # Perform requests to the Quay API to verify that the application is working as expected
       - name: Verify Get (aggregatedlogs)
         run: |
