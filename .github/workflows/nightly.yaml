@@ -32,6 +32,7 @@ jobs:
 
       # Perform requests to the Quay API to verify that the application is working as expected
       - name: Verify Get (aggregatedlogs)
+        if: ${{ github.ref == 'refs/heads/main' && github.repository_owner == 'sebrandon1' }}
         run: |
           TODAY=$(date +%m/%d/%Y)
           SEVEN_DAYS_AGO=$(date --date "7 days ago" +%m/%d/%Y)
@@ -43,6 +44,7 @@ jobs:
           fi
 
       - name: Verify Get (repository)
+        if: ${{ github.ref == 'refs/heads/main' && github.repository_owner == 'sebrandon1' }}
         run: |
           ./go-quay get repository -n $QUAY_NAMESPACE -r $QUAY_REPOSITORY -t ${{ secrets.QUAY_TOKEN }} > /dev/null
 
