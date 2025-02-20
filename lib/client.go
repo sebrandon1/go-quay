@@ -3,6 +3,7 @@ package lib
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -29,6 +30,11 @@ func (c *Client) get(req *http.Request, v interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
 	defer resp.Body.Close()
 	return decodeJSON(resp.Body, v)
 }
