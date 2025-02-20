@@ -95,7 +95,7 @@ type OrganizationLogs struct {
 // GetAggregatedLogs returns the aggregated logs for a repository
 func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate string) (*AggregatedLogs, error) {
 	// Get new request
-	req, err := NewRequest("GET", QuayURL+"/repository/"+namespace+"/"+repository+"/aggregatelogs", nil)
+	req, err := newRequest("GET", QuayURL+"/repository/"+namespace+"/"+repository+"/aggregatelogs", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 	req.URL.RawQuery = decoded
 
 	var logs AggregatedLogs
-	err = c.Get(req, &logs)
+	err = c.get(req, &logs)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 // GetLogs returns the logs for a repository
 func (c *Client) GetLogs(namespace, repository, next_page string) (*Logs, error) {
 	// Get new request
-	req, err := NewRequest("GET", QuayURL+"/repository/"+namespace+"/"+repository+"/logs", nil)
+	req, err := newRequest("GET", QuayURL+"/repository/"+namespace+"/"+repository+"/logs", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (c *Client) GetLogs(namespace, repository, next_page string) (*Logs, error)
 	}
 
 	var logs Logs
-	err = c.Get(req, &logs)
+	err = c.get(req, &logs)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func (c *Client) GetLogs(namespace, repository, next_page string) (*Logs, error)
 // GetOrganizationLogs returns the logs for an organization
 func (c *Client) GetOrganizationLogs(namespace, next_page string) (*OrganizationLogs, error) {
 	// Get new request
-	req, err := NewRequest("GET", QuayURL+"/organization/"+namespace+"/logs", nil)
+	req, err := newRequest("GET", QuayURL+"/organization/"+namespace+"/logs", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +167,7 @@ func (c *Client) GetOrganizationLogs(namespace, next_page string) (*Organization
 	}
 
 	var logs OrganizationLogs
-	err = c.Get(req, &logs)
+	err = c.get(req, &logs)
 	if err != nil {
 		return nil, err
 	}
