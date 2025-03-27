@@ -35,7 +35,7 @@ func (c *Client) get(req *http.Request, v interface{}) error {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	func() {
+	defer func() {
 		err := resp.Body.Close()
 		if err != nil {
 			fmt.Println("error closing response body:", err)
