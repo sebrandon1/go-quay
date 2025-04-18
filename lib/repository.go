@@ -1,5 +1,7 @@
 package lib
 
+import "fmt"
+
 type RepositoryTags struct {
 	Tags []struct {
 		Name           string `json:"name,omitempty"`
@@ -53,27 +55,30 @@ type RepositoryWithTags struct {
 
 // GetRepository returns a repository with tags information baked in
 func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags, error) {
-	// Note: For some reason the API does not return tags in an array but as a map
-	req, err := newRequest("GET", "https://quay.io/api/v1/repository/"+namespace+"/"+repository, nil)
+	baseURL := "https://quay.io/api/v1/repository/"
+
+	// Fetch repository details
+	repoURL := fmt.Sprintf("%s%s/%s", baseURL, namespace, repository)
+	req, err := newRequest("GET", repoURL, nil)
 	if err != nil {
-		return RepositoryWithTags{}, err
+		return RepositoryWithTags{}, fmt.Errorf("failed to create request for repository: %w", err)
 	}
 
 	var repo Repository
-	err = c.get(req, &repo)
-	if err != nil {
-		return RepositoryWithTags{}, err
+	if err := c.get(req, &repo); err != nil {
+		return RepositoryWithTags{}, fmt.Errorf("failed to fetch repository details: %w", err)
 	}
 
-	req, err = newRequest("GET", "https://quay.io/api/v1/repository/"+namespace+"/"+repository+"/tag", nil)
+	// Fetch repository tags
+	tagsURL := fmt.Sprintf("%s%s/%s/tag", baseURL, namespace, repository)
+	req, err = newRequest("GET", tagsURL, nil)
 	if err != nil {
-		return RepositoryWithTags{}, err
+		return RepositoryWithTags{}, fmt.Errorf("failed to create request for tags: %w", err)
 	}
 
 	var tags RepositoryTags
-	err = c.get(req, &tags)
-	if err != nil {
-		return RepositoryWithTags{}, err
+	if err := c.get(req, &tags); err != nil {
+		return RepositoryWithTags{}, fmt.Errorf("failed to fetch repository tags: %w", err)
 	}
 
 	repoWithTags := RepositoryWithTags{

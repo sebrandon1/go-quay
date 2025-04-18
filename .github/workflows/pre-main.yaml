@@ -23,3 +23,6 @@ jobs:
 
     - name: Run GolangCI-Lint
       uses: golangci/golangci-lint-action@v7
+
+    - name: Run 'make test'
+      run: make test
