@@ -8,3 +8,11 @@ build:
 
 lint:
 	golangci-lint run ./...
+
+test:
+	go test ./... -v
+
+clean:
+	rm -f $(APP_NAME)
+
+.PHONY: vet build lint test clean

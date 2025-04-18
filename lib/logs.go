@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"net/url"
+	"fmt"
 )
 
 const (
@@ -95,54 +95,39 @@ type OrganizationLogs struct {
 // GetAggregatedLogs returns the aggregated logs for a repository
 func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate string) (*AggregatedLogs, error) {
 	// Get new request
-	req, err := newRequest("GET", QuayURL+"/repository/"+namespace+"/"+repository+"/aggregatelogs", nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/aggregatelogs", QuayURL, namespace, repository), nil)
 	if err != nil {
 		return nil, err
 	}
-
-	// Set the bearer token
-	req.Header.Add("Authorization", "Bearer "+c.BearerToken)
 
 	// set the query parameters for starttime and endtime
 	q := req.URL.Query()
 	q.Add("starttime", startDate)
 	q.Add("endtime", endDate)
-
-	decoded, err := url.QueryUnescape(q.Encode())
-	if err != nil {
-		return nil, err
-	}
-	req.URL.RawQuery = decoded
+	req.URL.RawQuery = q.Encode()
 
 	var logs AggregatedLogs
-	err = c.get(req, &logs)
-	if err != nil {
+	if err := c.get(req, &logs); err != nil {
 		return nil, err
 	}
 	return &logs, nil
 }
 
 // GetLogs returns the logs for a repository
-func (c *Client) GetLogs(namespace, repository, next_page string) (*Logs, error) {
-	// Get new request
-	req, err := newRequest("GET", QuayURL+"/repository/"+namespace+"/"+repository+"/logs", nil)
+func (c *Client) GetLogs(namespace, repository, nextPage string) (*Logs, error) {
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/logs", QuayURL, namespace, repository), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// Set the bearer token
-	req.Header.Add("Authorization", "Bearer "+c.BearerToken)
-
-	// set the query parameters for next_page
-	if next_page != "" {
+	if nextPage != "" {
 		q := req.URL.Query()
-		q.Add("next_page", next_page)
+		q.Add("next_page", nextPage)
 		req.URL.RawQuery = q.Encode()
 	}
 
 	var logs Logs
-	err = c.get(req, &logs)
-	if err != nil {
+	if err := c.get(req, &logs); err != nil {
 		return nil, err
 	}
 	return &logs, nil
