@@ -2,94 +2,30 @@ package lib
 
 import (
 	"fmt"
+	"log"
+	"net/http"
 )
 
 const (
 	QuayURL = "https://quay.io/api/v1"
 )
 
-type AggregatedLogs struct {
-	Aggregated []struct {
-		Kind     string `json:"kind"`
-		Count    int    `json:"count"`
-		Datetime string `json:"datetime"`
-	} `json:"aggregated"`
+// checkResponseStatus validates the HTTP response status code.
+func checkResponseStatus(resp *http.Response) error {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		log.Printf("HTTP error: status code %d, status %s", resp.StatusCode, resp.Status)
+		return fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
+	}
+	return nil
 }
 
-type Logs struct {
-	StartTime string `json:"start_time,omitempty"`
-	EndTime   string `json:"end_time,omitempty"`
-	Logs      []struct {
-		Kind     string `json:"kind,omitempty"`
-		Metadata struct {
-			Repo           string `json:"repo,omitempty"`
-			Namespace      string `json:"namespace,omitempty"`
-			UserAgent      string `json:"user-agent,omitempty"`
-			ManifestDigest string `json:"manifest_digest,omitempty"`
-			Username       string `json:"username,omitempty"`
-			IsRobot        bool   `json:"is_robot,omitempty"`
-			ResolvedIP     struct {
-				Provider       string `json:"provider,omitempty"`
-				Service        string `json:"service,omitempty"`
-				SyncToken      string `json:"sync_token,omitempty"`
-				CountryIsoCode string `json:"country_iso_code,omitempty"`
-				AwsRegion      any    `json:"aws_region,omitempty"`
-				Continent      string `json:"continent,omitempty"`
-			} `json:"resolved_ip,omitempty"`
-		} `json:"metadata,omitempty"`
-		IP        string `json:"ip,omitempty"`
-		Datetime  string `json:"datetime,omitempty"`
-		Performer struct {
-			Kind    string `json:"kind,omitempty"`
-			Name    string `json:"name,omitempty"`
-			IsRobot bool   `json:"is_robot,omitempty"`
-			Avatar  struct {
-				Name  string `json:"name,omitempty"`
-				Hash  string `json:"hash,omitempty"`
-				Color string `json:"color,omitempty"`
-				Kind  string `json:"kind,omitempty"`
-			} `json:"avatar,omitempty"`
-		} `json:"performer,omitempty"`
-	} `json:"logs,omitempty"`
-	NextPage string `json:"next_page,omitempty"`
-}
-
-type OrganizationLogs struct {
-	StartTime string `json:"start_time,omitempty"`
-	EndTime   string `json:"end_time,omitempty"`
-	Logs      []struct {
-		Kind     string `json:"kind,omitempty"`
-		Metadata struct {
-			Repo       string `json:"repo,omitempty"`
-			Namespace  string `json:"namespace,omitempty"`
-			UserAgent  string `json:"user-agent,omitempty"`
-			Tag        string `json:"tag,omitempty"`
-			Username   string `json:"username,omitempty"`
-			IsRobot    bool   `json:"is_robot,omitempty"`
-			ResolvedIP struct {
-				Provider       string `json:"provider,omitempty"`
-				Service        string `json:"service,omitempty"`
-				SyncToken      string `json:"sync_token,omitempty"`
-				CountryIsoCode string `json:"country_iso_code,omitempty"`
-				AwsRegion      any    `json:"aws_region,omitempty"`
-				Continent      string `json:"continent,omitempty"`
-			} `json:"resolved_ip,omitempty"`
-		} `json:"metadata,omitempty"`
-		IP        string `json:"ip,omitempty"`
-		Datetime  string `json:"datetime,omitempty"`
-		Performer struct {
-			Kind    string `json:"kind,omitempty"`
-			Name    string `json:"name,omitempty"`
-			IsRobot bool   `json:"is_robot,omitempty"`
-			Avatar  struct {
-				Name  string `json:"name,omitempty"`
-				Hash  string `json:"hash,omitempty"`
-				Color string `json:"color,omitempty"`
-				Kind  string `json:"kind,omitempty"`
-			} `json:"avatar,omitempty"`
-		} `json:"performer,omitempty"`
-	} `json:"logs,omitempty"`
-	NextPage string `json:"next_page,omitempty"`
+// addQueryParams adds query parameters to a request URL.
+func addQueryParams(req *http.Request, params map[string]string) {
+	q := req.URL.Query()
+	for key, value := range params {
+		q.Add(key, value)
+	}
+	req.URL.RawQuery = q.Encode()
 }
 
 // GetAggregatedLogs returns the aggregated logs for a repository
@@ -100,16 +36,21 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 		return nil, err
 	}
 
-	// set the query parameters for starttime and endtime
-	q := req.URL.Query()
-	q.Add("starttime", startDate)
-	q.Add("endtime", endDate)
-	req.URL.RawQuery = q.Encode()
+	// Set query parameters
+	addQueryParams(req, map[string]string{
+		"starttime": startDate,
+		"endtime":   endDate,
+	})
 
 	var logs AggregatedLogs
 	if err := c.get(req, &logs); err != nil {
 		return nil, err
 	}
+
+	if err := checkResponseStatus(req.Response); err != nil {
+		return nil, err
+	}
+
 	return &logs, nil
 }
 
@@ -120,16 +61,20 @@ func (c *Client) GetLogs(namespace, repository, nextPage string) (*Logs, error) 
 		return nil, err
 	}
 
+	// Set query parameters
 	if nextPage != "" {
-		q := req.URL.Query()
-		q.Add("next_page", nextPage)
-		req.URL.RawQuery = q.Encode()
+		addQueryParams(req, map[string]string{"next_page": nextPage})
 	}
 
 	var logs Logs
 	if err := c.get(req, &logs); err != nil {
 		return nil, err
 	}
+
+	if err := checkResponseStatus(req.Response); err != nil {
+		return nil, err
+	}
+
 	return &logs, nil
 }
 
@@ -144,11 +89,9 @@ func (c *Client) GetOrganizationLogs(namespace, next_page string) (*Organization
 	// Set the bearer token
 	req.Header.Add("Authorization", "Bearer "+c.BearerToken)
 
-	// set the query parameters for next_page
+	// Set query parameters
 	if next_page != "" {
-		q := req.URL.Query()
-		q.Add("next_page", next_page)
-		req.URL.RawQuery = q.Encode()
+		addQueryParams(req, map[string]string{"next_page": next_page})
 	}
 
 	var logs OrganizationLogs
@@ -156,5 +99,10 @@ func (c *Client) GetOrganizationLogs(namespace, next_page string) (*Organization
 	if err != nil {
 		return nil, err
 	}
+
+	if err := checkResponseStatus(req.Response); err != nil {
+		return nil, err
+	}
+
 	return &logs, nil
 }
