@@ -2,22 +2,12 @@ package lib
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 )
 
 const (
 	QuayURL = "https://quay.io/api/v1"
 )
-
-// checkResponseStatus validates the HTTP response status code.
-func checkResponseStatus(resp *http.Response) error {
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		log.Printf("HTTP error: status code %d, status %s", resp.StatusCode, resp.Status)
-		return fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
-	}
-	return nil
-}
 
 // addQueryParams adds query parameters to a request URL.
 func addQueryParams(req *http.Request, params map[string]string) {
@@ -47,10 +37,6 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 		return nil, err
 	}
 
-	if err := checkResponseStatus(req.Response); err != nil {
-		return nil, err
-	}
-
 	return &logs, nil
 }
 
@@ -68,10 +54,6 @@ func (c *Client) GetLogs(namespace, repository, nextPage string) (*Logs, error) 
 
 	var logs Logs
 	if err := c.get(req, &logs); err != nil {
-		return nil, err
-	}
-
-	if err := checkResponseStatus(req.Response); err != nil {
 		return nil, err
 	}
 
@@ -97,10 +79,6 @@ func (c *Client) GetOrganizationLogs(namespace, next_page string) (*Organization
 	var logs OrganizationLogs
 	err = c.get(req, &logs)
 	if err != nil {
-		return nil, err
-	}
-
-	if err := checkResponseStatus(req.Response); err != nil {
 		return nil, err
 	}
 
