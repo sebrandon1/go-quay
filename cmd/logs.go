@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/openshift/cluster-node-tuning-operator/test/e2e/performanceprofile/functests/utils/log"
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
@@ -35,11 +36,13 @@ var aggregatedLogsCmd = &cobra.Command{
 
 		logs, err := client.GetAggregatedLogs(namespace, repository, startdate, enddate)
 		if err != nil {
+			log.Infof("Error getting aggregated logs: %v", err)
 			panic(err)
 		}
 
 		jsonOutput, err := json.Marshal(logs)
 		if err != nil {
+			log.Infof("Error marshaling logs to JSON: %v", err)
 			panic(err)
 		}
 
