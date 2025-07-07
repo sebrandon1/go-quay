@@ -74,3 +74,65 @@ type OrganizationLogs struct {
 	Logs      []LogEntry `json:"logs,omitempty"`
 	NextPage  string     `json:"next_page,omitempty"`
 }
+
+// BillingInfo represents billing information for an organization or user.
+type BillingInfo struct {
+	Plan        string            `json:"plan,omitempty"`
+	PlanType    string            `json:"plan_type,omitempty"`
+	IsActive    bool              `json:"is_active,omitempty"`
+	ExpiresAt   string            `json:"expires_at,omitempty"`
+	HasPayment  bool              `json:"has_payment,omitempty"`
+	IsTrial     bool              `json:"is_trial,omitempty"`
+	TrialUntil  string            `json:"trial_until,omitempty"`
+	UsedPrivate int               `json:"used_private,omitempty"`
+	PlanPrivate int               `json:"plan_private,omitempty"`
+	Metadata    map[string]string `json:"metadata,omitempty"`
+}
+
+// Subscription represents a subscription plan.
+type Subscription struct {
+	ID          string            `json:"id,omitempty"`
+	Name        string            `json:"name,omitempty"`
+	Description string            `json:"description,omitempty"`
+	Price       int               `json:"price,omitempty"`
+	Currency    string            `json:"currency,omitempty"`
+	Period      string            `json:"period,omitempty"`
+	Features    []string          `json:"features,omitempty"`
+	Limits      map[string]int    `json:"limits,omitempty"`
+	Metadata    map[string]string `json:"metadata,omitempty"`
+}
+
+// PaymentMethod represents a payment method.
+type PaymentMethod struct {
+	ID          string `json:"id,omitempty"`
+	Type        string `json:"type,omitempty"`
+	LastFour    string `json:"last_four,omitempty"`
+	Brand       string `json:"brand,omitempty"`
+	ExpiryMonth int    `json:"expiry_month,omitempty"`
+	ExpiryYear  int    `json:"expiry_year,omitempty"`
+	IsDefault   bool   `json:"is_default,omitempty"`
+	CreatedAt   string `json:"created_at,omitempty"`
+}
+
+// Invoice represents a billing invoice.
+type Invoice struct {
+	ID          string `json:"id,omitempty"`
+	Number      string `json:"number,omitempty"`
+	Status      string `json:"status,omitempty"`
+	Amount      int    `json:"amount,omitempty"`
+	Currency    string `json:"currency,omitempty"`
+	CreatedAt   string `json:"created_at,omitempty"`
+	DueDate     string `json:"due_date,omitempty"`
+	PaidAt      string `json:"paid_at,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
+// UsageStats represents usage statistics for billing.
+type UsageStats struct {
+	PrivateRepos   int    `json:"private_repos,omitempty"`
+	PublicRepos    int    `json:"public_repos,omitempty"`
+	StorageBytes   int    `json:"storage_bytes,omitempty"`
+	BandwidthBytes int    `json:"bandwidth_bytes,omitempty"`
+	BuildMinutes   int    `json:"build_minutes,omitempty"`
+	Period         string `json:"period,omitempty"`
+}
