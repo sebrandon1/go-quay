@@ -18,6 +18,7 @@ func init() {
 	rootCmd.AddCommand(getCmd)
 	getCmd.AddCommand(aggregatedLogsCmd)
 	getCmd.AddCommand(repositoryCmd)
+	getCmd.AddCommand(billingCmd)
 }
 
 // Execute executes the root command.

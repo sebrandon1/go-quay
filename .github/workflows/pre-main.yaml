@@ -26,3 +26,40 @@ jobs:
 
     - name: Run 'make test'
       run: make test
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: vet-and-lint
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+
+    - name: Check if running from fork
+      id: fork-check
+      run: |
+        if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+          echo "is_fork=true" >> $GITHUB_OUTPUT
+          echo "Running from fork: ${{ github.event.pull_request.head.repo.full_name }}"
+        else
+          echo "is_fork=false" >> $GITHUB_OUTPUT
+          echo "Running from upstream: ${{ github.repository }}"
+        fi
+
+    - name: Skip integration tests (fork)
+      if: steps.fork-check.outputs.is_fork == 'true'
+      run: |
+        echo "⚠️  Skipping integration tests for fork PRs (secrets not available)"
+        echo "✅ Integration tests will run when merged to upstream"
+
+    - name: Run integration tests
+      if: steps.fork-check.outputs.is_fork == 'false'
+      env:
+        QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+        QUAY_ORG: ${{ secrets.QUAY_TEST_ORG }}
+      run: make integration-test
