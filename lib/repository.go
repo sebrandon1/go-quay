@@ -1,3 +1,15 @@
+/*
+Package lib provides Quay.io API client functionality.
+
+This file covers REPOSITORY endpoints:
+
+Repository Management:
+  - GET /api/v1/repository/{namespace}/{repository}        - GetRepository()
+  - GET /api/v1/repository/{namespace}/{repository}/tag    - GetRepository() (includes tags)
+
+The GetRepository() function combines repository details with tag information
+for a complete view of the repository.
+*/
 package lib
 
 import "fmt"
