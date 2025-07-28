@@ -150,25 +150,6 @@ var userInvoicesCmd = &cobra.Command{
 	},
 }
 
-// NOTE: Usage commands are commented out because the usage endpoints don't exist in the Quay API
-// orgUsageCmd gets usage statistics for an organization
-// var orgUsageCmd = &cobra.Command{
-// 	Use:   "org-usage",
-// 	Short: "Get usage statistics for an organization",
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 		fmt.Println("Usage endpoints are not available in the Quay API")
-// 	},
-// }
-
-// userUsageCmd gets usage statistics for the current user
-// var userUsageCmd = &cobra.Command{
-// 	Use:   "user-usage",
-// 	Short: "Get usage statistics for the current user",
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 		fmt.Println("Usage endpoints are not available in the Quay API")
-// 	},
-// }
-
 // plansCmd gets available subscription plans
 var plansCmd = &cobra.Command{
 	Use:   "plans",
@@ -222,17 +203,6 @@ func init() {
 		panic(err)
 	}
 
-	// orgUsageCmd flags commented out - endpoint doesn't exist
-	// orgUsageCmd.PersistentFlags().StringVarP(&billingOrgName, "organization", "o", "", "Organization name")
-	// orgUsageCmd.PersistentFlags().StringVarP(&billingPeriod, "period", "p", "", "Usage period (e.g., '30d', 'current_month')")
-	// orgUsageCmd.PersistentFlags().StringVarP(&billingToken, "token", "t", "", "Bearer token")
-	// if err := orgUsageCmd.MarkPersistentFlagRequired("organization"); err != nil {
-	// 	panic(err)
-	// }
-	// if err := orgUsageCmd.MarkPersistentFlagRequired("token"); err != nil {
-	// 	panic(err)
-	// }
-
 	// Add persistent flags for user commands
 	userBillingCmd.PersistentFlags().StringVarP(&billingToken, "token", "t", "", "Bearer token")
 	if err := userBillingCmd.MarkPersistentFlagRequired("token"); err != nil {
@@ -249,13 +219,6 @@ func init() {
 		panic(err)
 	}
 
-	// userUsageCmd flags commented out - endpoint doesn't exist
-	// userUsageCmd.PersistentFlags().StringVarP(&billingPeriod, "period", "p", "", "Usage period (e.g., '30d', 'current_month')")
-	// userUsageCmd.PersistentFlags().StringVarP(&billingToken, "token", "t", "", "Bearer token")
-	// if err := userUsageCmd.MarkPersistentFlagRequired("token"); err != nil {
-	// 	panic(err)
-	// }
-
 	plansCmd.PersistentFlags().StringVarP(&billingToken, "token", "t", "", "Bearer token")
 	if err := plansCmd.MarkPersistentFlagRequired("token"); err != nil {
 		panic(err)
@@ -268,7 +231,5 @@ func init() {
 	billingCmd.AddCommand(userSubscriptionCmd)
 	billingCmd.AddCommand(orgInvoicesCmd)
 	billingCmd.AddCommand(userInvoicesCmd)
-	// billingCmd.AddCommand(orgUsageCmd)  // Commented out - endpoint doesn't exist
-	// billingCmd.AddCommand(userUsageCmd)  // Commented out - endpoint doesn't exist
 	billingCmd.AddCommand(plansCmd)
 }

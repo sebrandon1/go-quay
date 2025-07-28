@@ -1,3 +1,22 @@
+/*
+Package lib provides Quay.io API client functionality.
+
+This file covers BILLING AND SUBSCRIPTION endpoints:
+
+Organization Billing:
+  - GET /api/v1/organization/{orgname}/plan           - GetOrganizationBilling()
+  - GET /api/v1/organization/{orgname}/plan           - GetOrganizationSubscription()
+  - GET /api/v1/organization/{orgname}/invoices       - GetOrganizationInvoices()
+
+User Billing:
+  - GET /api/v1/user/plan                            - GetUserBilling()
+  - GET /api/v1/user/plan                            - GetUserSubscription()
+
+Plans:
+  - GET /api/v1/plans                                - GetAvailablePlans()
+
+Note: User invoice endpoints and payment method endpoints are not available in Quay API.
+*/
 package lib
 
 import (
@@ -120,16 +139,6 @@ func (c *Client) GetUserInvoices() ([]Invoice, error) {
 // GetUserPaymentMethods - NOT AVAILABLE in Quay API
 // func (c *Client) GetUserPaymentMethods() ([]PaymentMethod, error) {
 // 	return nil, fmt.Errorf("payment methods endpoint not available in Quay API")
-// }
-
-// GetOrganizationUsage - NOT AVAILABLE in Quay API
-// func (c *Client) GetOrganizationUsage(orgname, period string) (*UsageStats, error) {
-// 	return nil, fmt.Errorf("usage endpoint not available in Quay API")
-// }
-
-// GetUserUsage - NOT AVAILABLE in Quay API
-// func (c *Client) GetUserUsage(period string) (*UsageStats, error) {
-// 	return nil, fmt.Errorf("usage endpoint not available in Quay API")
 // }
 
 // GetAvailablePlans returns available subscription plans

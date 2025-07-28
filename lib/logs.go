@@ -1,3 +1,17 @@
+/*
+Package lib provides Quay.io API client functionality.
+
+This file covers LOGGING endpoints:
+
+Repository Logs:
+  - GET /api/v1/repository/{namespace}/{repository}/aggregatelogs  - GetAggregatedLogs()
+  - GET /api/v1/repository/{namespace}/{repository}/logs           - GetLogs()
+
+Organization Logs:
+  - GET /api/v1/organization/{orgname}/logs                        - GetOrganizationLogs()
+
+All log endpoints support pagination via next_page parameter.
+*/
 package lib
 
 import (
