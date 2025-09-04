@@ -17,18 +17,18 @@ The following APIs are covered by the repo:
 | Discovery              | No      | No      |                                                                                                                                                                                                                     |
 | Error                  | No      | No      |                                                                                                                                                                                                                     |
 | Messages               | No      | No      |                                                                                                                                                                                                                     |
-| Logs                   | Partial | Partial | /api/v1/repository/{repository}/aggregatelogs |
+| Logs                   | Partial | Partial | /api/v1/repository/{namespace}/{repository}/aggregatelogs, /api/v1/repository/{namespace}/{repository}/logs, /api/v1/organization/{orgname}/logs |
 | Manifest               | No      | No      |                                                                                                                                                                                                                     |
-| Organization           | No      | No      |                                                                                                                                                                                                                     |
+| Organization           | Yes     | Yes     | /api/v1/organization/{orgname}, /api/v1/organization/{orgname}/members, /api/v1/organization/{orgname}/teams, /api/v1/organization/{orgname}/team/{teamname}, /api/v1/organization/{orgname}/robots, /api/v1/organization/{orgname}/quota, /api/v1/organization/{orgname}/autoprunepolicy, /api/v1/organization/{orgname}/applications |
 | Permission             | No      | No      |                                                                                                                                                                                                                     |
 | Prototype              | No      | No      |                                                                                                                                                                                                                     |
-| Repository             | Partial | Partial | /api/v1/repository/{repository}                                                                                                 |
+| Repository             | Partial | Partial | /api/v1/repository/{namespace}/{repository}, /api/v1/repository/{namespace}/{repository}/tag                                   |
 | RepositoryNotification | No      | No      |                                                                                                                                                                                                                     |
 | RepoToken              | No      | No      |                                                                                                                                                                                                                     |
 | Robot                  | No      | No      |                                                                                                                                                                                                                     |
 | Search                 | No      | No      |                                                                                                                                                                                                                     |
 | SecScan                | No      | No      |                                                                                                                                                                                                                     |
-| Tag                    | Partial | Partial | /api/v1/repository/{repository}/tag                                                                                                                   |
+| Tag                    | Partial | Partial | /api/v1/repository/{namespace}/{repository}/tag (included in Repository API)                                                                       |
 | Team                   | No      | No      |                                                                                                                                                                                                                     |
 | Trigger                | No      | No      |                                                                                                                                                                                                                     |
 | User                   | No      | No      | 
@@ -115,3 +115,68 @@ This returns comprehensive repository information including:
 - Repository metadata (description, visibility, permissions)
 - All repository tags with details (size, last modified, expiration)
 - Organization and user permissions
+
+### Organization API
+
+The organization API provides comprehensive management of organizations, teams, members, robots, and related settings.
+
+#### Get organization information
+```bash
+./go-quay get organization info \
+  --organization ORG_NAME \
+  --token YOUR_TOKEN
+```
+
+#### Manage organization members
+```bash
+# List all members
+./go-quay get organization members \
+  -o myorg \
+  -t YOUR_TOKEN
+```
+
+#### Manage teams
+```bash
+# List all teams in an organization
+./go-quay get organization teams \
+  -o myorg \
+  -t YOUR_TOKEN
+
+# Get specific team information
+./go-quay get organization team \
+  -o myorg \
+  --team TEAM_NAME \
+  -t YOUR_TOKEN
+
+# Get team members
+./go-quay get organization team-members \
+  -o myorg \
+  --team TEAM_NAME \
+  -t YOUR_TOKEN
+```
+
+#### Manage robot accounts
+```bash
+# List organization robot accounts
+./go-quay get organization robots \
+  -o myorg \
+  -t YOUR_TOKEN
+```
+
+#### Get organization quota and policies
+```bash
+# Get organization quota information
+./go-quay get organization quota \
+  -o myorg \
+  -t YOUR_TOKEN
+
+# Get auto-prune policies
+./go-quay get organization auto-prune \
+  -o myorg \
+  -t YOUR_TOKEN
+
+# Get OAuth applications
+./go-quay get organization applications \
+  -o myorg \
+  -t YOUR_TOKEN
+```
