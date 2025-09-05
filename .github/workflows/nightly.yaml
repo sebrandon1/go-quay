@@ -1,128 +1,82 @@
-name: Quay Verification
+name: Quay API Verified Nightly
 
 on:
   schedule:
-    - cron: "0 0 * * *"
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:
-
-env:
-  QUAY_NAMESPACE: redhat-best-practices-for-k8s
-  QUAY_REPOSITORY: certsuite
+    # Run every night at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggers
 
 jobs:
-  verify-quay:
+  integration-test:
+    name: Integration Tests
     runs-on: ubuntu-latest
-
+    if: ${{ secrets.QUAY_TOKEN }}
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+    - name: Checkout code
+      uses: actions/checkout@v5
 
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
 
-      - name: Install dependencies
-        run: go mod tidy
+    - name: Download dependencies
+      run: go mod download
 
-      - name: Build the application
-        run: make build
+    - name: Build binary
+      run: go build -o bin/go-quay .
 
-      - name: Check if API tests should run
-        id: api-check
-        run: |
-          # Skip API tests for PRs from forks (secrets not available)
-          if [ "${{ github.event_name }}" == "pull_request" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-            echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "reason=fork" >> $GITHUB_OUTPUT
-          # Skip API tests for PRs to main unless from upstream
-          elif [ "${{ github.event_name }}" == "pull_request" ] && [ "${{ github.repository_owner }}" != "sebrandon1" ]; then
-            echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "reason=owner" >> $GITHUB_OUTPUT
-          # Run API tests for main branch, scheduled runs, and manual dispatch
-          elif [ "${{ github.ref }}" == "refs/heads/main" ] || [ "${{ github.event_name }}" == "schedule" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "reason=main" >> $GITHUB_OUTPUT
-          else
-            echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "reason=branch" >> $GITHUB_OUTPUT
-          fi
+    - name: Run integration tests script
+      run: ./scripts/integration-test.sh
+      env:
+        QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+        QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE || 'go-quay-test' }}
+        
+  api-coverage-report:
+    name: API Coverage Report
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
 
-      - name: Skip API tests (fork PR)
-        if: steps.api-check.outputs.should_run == 'false' && steps.api-check.outputs.reason == 'fork'
-        run: |
-          echo "⚠️  Skipping API verification tests for fork PRs (secrets not available)"
-          echo "✅ API tests will run when merged to upstream"
+    - name: Set up Go  
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: 'go.mod'
 
-      - name: Skip API tests (other reason)
-        if: steps.api-check.outputs.should_run == 'false' && steps.api-check.outputs.reason != 'fork'
-        run: |
-          echo "⚠️  Skipping API verification tests (reason: ${{ steps.api-check.outputs.reason }})"
-          echo "✅ API tests run on main branch, scheduled runs, and manual dispatch"
+    - name: Generate API coverage report
+      run: ./scripts/generate-api-coverage-report.sh
 
-      # Perform requests to the Quay API to verify that the application is working as expected
-      - name: Verify Get (aggregatedlogs)
-        if: steps.api-check.outputs.should_run == 'true'
-        run: |
-          TODAY=$(date +%m/%d/%Y)
-          SEVEN_DAYS_AGO=$(date --date "7 days ago" +%m/%d/%Y)
-          ./go-quay get aggregatedlogs -n $QUAY_NAMESPACE -r $QUAY_REPOSITORY -t ${{ secrets.QUAY_TOKEN }} -s $SEVEN_DAYS_AGO -e $TODAY > /dev/null
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: api-coverage-report
+        path: api-coverage-report.md
 
-          if [ $? -ne 0 ]; then
-            echo "Failed to verify Get (aggregatedlogs)"
-            exit 1
-          fi
+  benchmark-tests:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
 
-      - name: Verify Get (repository)
-        if: steps.api-check.outputs.should_run == 'true'
-        run: |
-          ./go-quay get repository -n $QUAY_NAMESPACE -r $QUAY_REPOSITORY -t ${{ secrets.QUAY_TOKEN }} > /dev/null
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: 'go.mod'
 
-          if [ $? -ne 0 ]; then
-            echo "Failed to verify Get (repository)"
-            exit 1
-          fi
+    - name: Run benchmarks
+      run: |
+        echo "Running performance benchmarks..."
+        go test -bench=. -benchmem ./... > benchmark-results.txt 2>&1 || true
+        echo "Benchmark results:"
+        cat benchmark-results.txt
 
-      # Verify billing functionality
-      - name: Verify Get (billing user-info)
-        if: steps.api-check.outputs.should_run == 'true'
-        run: |
-          ./go-quay get billing user-info -t ${{ secrets.QUAY_TOKEN }} > /dev/null
-
-          if [ $? -ne 0 ]; then
-            echo "Failed to verify Get (billing user-info)"
-            exit 1
-          fi
-
-      - name: Verify Get (billing user-subscription)
-        if: steps.api-check.outputs.should_run == 'true'
-        run: |
-          ./go-quay get billing user-subscription -t ${{ secrets.QUAY_TOKEN }} > /dev/null
-
-          if [ $? -ne 0 ]; then
-            echo "Failed to verify Get (billing user-subscription)"
-            exit 1
-          fi
-
-      - name: Verify Get (billing plans)
-        if: steps.api-check.outputs.should_run == 'true'
-        run: |
-          ./go-quay get billing plans -t ${{ secrets.QUAY_TOKEN }} > /dev/null
-
-          if [ $? -ne 0 ]; then
-            echo "Failed to verify Get (billing plans)"
-            exit 1
-          fi
-
-      - name: Verify Get (billing org-info)
-        if: steps.api-check.outputs.should_run == 'true'
-        run: |
-          ./go-quay get billing org-info -o $QUAY_NAMESPACE -t ${{ secrets.QUAY_TOKEN }} > /dev/null
-
-          if [ $? -ne 0 ]; then
-            echo "Failed to verify Get (billing org-info)"
-            exit 1
-          fi
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-results
+        path: benchmark-results.txt

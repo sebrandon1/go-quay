@@ -19,7 +19,7 @@ import (
 	"net/http"
 )
 
-const (
+var (
 	QuayURL = "https://quay.io/api/v1"
 )
 

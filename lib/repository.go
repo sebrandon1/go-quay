@@ -4,8 +4,11 @@ Package lib provides Quay.io API client functionality.
 This file covers REPOSITORY endpoints:
 
 Repository Management:
-  - GET /api/v1/repository/{namespace}/{repository}        - GetRepository()
-  - GET /api/v1/repository/{namespace}/{repository}/tag    - GetRepository() (includes tags)
+  - POST /api/v1/repository                                - CreateRepository()
+  - GET  /api/v1/repository/{namespace}/{repository}       - GetRepository()
+  - PUT  /api/v1/repository/{namespace}/{repository}       - UpdateRepository()
+  - DELETE /api/v1/repository/{namespace}/{repository}     - DeleteRepository()
+  - GET  /api/v1/repository/{namespace}/{repository}/tag   - GetRepository() (includes tags)
 
 The GetRepository() function combines repository details with tag information
 for a complete view of the repository.
@@ -67,10 +70,8 @@ type RepositoryWithTags struct {
 
 // GetRepository returns a repository with tags information baked in
 func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags, error) {
-	baseURL := "https://quay.io/api/v1/repository/"
-
 	// Fetch repository details
-	repoURL := fmt.Sprintf("%s%s/%s", baseURL, namespace, repository)
+	repoURL := fmt.Sprintf("%s/repository/%s/%s", QuayURL, namespace, repository)
 	req, err := newRequest("GET", repoURL, nil)
 	if err != nil {
 		return RepositoryWithTags{}, fmt.Errorf("failed to create request for repository: %w", err)
@@ -82,7 +83,7 @@ func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags
 	}
 
 	// Fetch repository tags
-	tagsURL := fmt.Sprintf("%s%s/%s/tag", baseURL, namespace, repository)
+	tagsURL := fmt.Sprintf("%s/repository/%s/%s/tag", QuayURL, namespace, repository)
 	req, err = newRequest("GET", tagsURL, nil)
 	if err != nil {
 		return RepositoryWithTags{}, fmt.Errorf("failed to create request for tags: %w", err)
@@ -112,4 +113,63 @@ func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags
 	}
 
 	return repoWithTags, nil
+}
+
+// CreateRepository creates a new repository
+func (c *Client) CreateRepository(namespace, repository, visibility, description string) (*Repository, error) {
+	req, err := newRequestWithBody("POST", QuayURL+"/repository", CreateRepositoryRequest{
+		Repository:  repository,
+		Namespace:   namespace,
+		Visibility:  visibility,
+		Description: description,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create repository request: %w", err)
+	}
+
+	var repo Repository
+	if err := c.post(req, &repo); err != nil {
+		return nil, fmt.Errorf("failed to create repository: %w", err)
+	}
+
+	return &repo, nil
+}
+
+// UpdateRepository updates an existing repository
+func (c *Client) UpdateRepository(namespace, repository, description, visibility string) (*Repository, error) {
+	updateReq := UpdateRepositoryRequest{}
+
+	// Only include fields that are not empty
+	if description != "" {
+		updateReq.Description = description
+	}
+	if visibility != "" {
+		updateReq.Visibility = visibility
+	}
+
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/repository/%s/%s", QuayURL, namespace, repository), updateReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create update repository request: %w", err)
+	}
+
+	var repo Repository
+	if err := c.put(req, &repo); err != nil {
+		return nil, fmt.Errorf("failed to update repository: %w", err)
+	}
+
+	return &repo, nil
+}
+
+// DeleteRepository deletes a repository
+func (c *Client) DeleteRepository(namespace, repository string) error {
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s", QuayURL, namespace, repository), nil)
+	if err != nil {
+		return fmt.Errorf("failed to create delete repository request: %w", err)
+	}
+
+	if err := c.delete(req); err != nil {
+		return fmt.Errorf("failed to delete repository: %w", err)
+	}
+
+	return nil
 }

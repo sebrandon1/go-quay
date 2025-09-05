@@ -20,6 +20,9 @@ func init() {
 	getCmd.AddCommand(repositoryCmd)
 	getCmd.AddCommand(billingCmd)
 	getCmd.AddCommand(organizationCmd)
+	getCmd.AddCommand(permissionsCmd)
+	getCmd.AddCommand(tagCmd)
+	getCmd.AddCommand(userCmd)
 }
 
 // Execute executes the root command.
