@@ -8,6 +8,13 @@ Common Types:
 
 Repository Types:
   - Repository, RepositoryWithTags, RepositoryTags - Repository data structures
+  - CreateRepositoryRequest, UpdateRepositoryRequest - Repository management requests
+
+Repository Permission Types:
+  - RepositoryPermission, RepositoryPermissions, SetRepositoryPermissionRequest - Repository permissions
+
+Enhanced Tag Types:
+  - Tag, TagHistory, UpdateTagRequest - Enhanced tag operations with metadata
 
 Log Types:
   - LogEntry, AggregatedLogEntry, Logs, AggregatedLogs, OrganizationLogs - Logging data
@@ -40,7 +47,14 @@ Proxy Cache Types:
   - ProxyCacheConfig
 
 User Types:
-  - User
+  - User, UserDetails - Basic and detailed user information
+  - StarredRepository, StarredRepositories - User starred repositories
+
+Search Types:
+  - SearchResult - Repository search results
+
+Error Types:
+  - QuayError - API error responses
 
 Request Types:
   - CreateOrganizationRequest, CreateTeamRequest, CreateRobotRequest, CreateApplicationRequest, CreateQuotaRequest, CreateAutoPruneRequest
@@ -403,4 +417,125 @@ type CreateAutoPruneRequest struct {
 	Method     string `json:"method"`
 	Value      int    `json:"value"`
 	TagPattern string `json:"tag_pattern,omitempty"`
+}
+
+// Repository Management Structures
+
+// CreateRepositoryRequest represents the request to create a repository
+type CreateRepositoryRequest struct {
+	Repository  string `json:"repository"`
+	Namespace   string `json:"namespace,omitempty"`
+	Visibility  string `json:"visibility,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
+// UpdateRepositoryRequest represents the request to update a repository
+type UpdateRepositoryRequest struct {
+	Description string `json:"description,omitempty"`
+	Visibility  string `json:"visibility,omitempty"`
+}
+
+// Repository Permissions Structures
+
+// RepositoryPermission represents a permission for a repository
+type RepositoryPermission struct {
+	Name       string `json:"name,omitempty"`
+	Kind       string `json:"kind,omitempty"`
+	Avatar     Avatar `json:"avatar,omitempty"`
+	Role       string `json:"role,omitempty"`
+	IsRobot    bool   `json:"is_robot,omitempty"`
+	IsOrgAdmin bool   `json:"is_org_admin,omitempty"`
+}
+
+// RepositoryPermissions represents the response for repository permissions
+type RepositoryPermissions struct {
+	Permissions []RepositoryPermission `json:"permissions,omitempty"`
+}
+
+// SetRepositoryPermissionRequest represents the request to set repository permission
+type SetRepositoryPermissionRequest struct {
+	Role string `json:"role"`
+}
+
+// Enhanced Tag Structures
+
+// Tag represents a repository tag with enhanced metadata
+type Tag struct {
+	Name           string            `json:"name,omitempty"`
+	Reversion      bool              `json:"reversion,omitempty"`
+	StartTs        int64             `json:"start_ts,omitempty"`
+	ManifestDigest string            `json:"manifest_digest,omitempty"`
+	IsManifestList bool              `json:"is_manifest_list,omitempty"`
+	Size           int64             `json:"size,omitempty"`
+	LastModified   string            `json:"last_modified,omitempty"`
+	EndTs          int64             `json:"end_ts,omitempty"`
+	Expiration     string            `json:"expiration,omitempty"`
+	DockerImageID  string            `json:"docker_image_id,omitempty"`
+	ImageID        string            `json:"image_id,omitempty"`
+	V1Metadata     map[string]string `json:"v1_metadata,omitempty"`
+}
+
+// TagHistory represents the history of a tag
+type TagHistory struct {
+	Tags []Tag `json:"tags,omitempty"`
+}
+
+// UpdateTagRequest represents the request to update a tag
+type UpdateTagRequest struct {
+	Expiration string `json:"expiration,omitempty"`
+}
+
+// User Account Structures
+
+// UserDetails represents detailed user information
+type UserDetails struct {
+	Anonymous      bool   `json:"anonymous,omitempty"`
+	Username       string `json:"username,omitempty"`
+	Email          string `json:"email,omitempty"`
+	Verified       bool   `json:"verified,omitempty"`
+	Avatar         Avatar `json:"avatar,omitempty"`
+	Organizations  []User `json:"organizations,omitempty"`
+	CanCreateRepo  bool   `json:"can_create_repo,omitempty"`
+	PreferredUsers bool   `json:"preferred_users,omitempty"`
+	TagExpirationS int    `json:"tag_expiration_s,omitempty"`
+}
+
+// StarredRepository represents a starred repository
+type StarredRepository struct {
+	Namespace    string  `json:"namespace,omitempty"`
+	Name         string  `json:"name,omitempty"`
+	Description  string  `json:"description,omitempty"`
+	IsPublic     bool    `json:"is_public,omitempty"`
+	Kind         string  `json:"kind,omitempty"`
+	LastModified string  `json:"last_modified,omitempty"`
+	Popularity   float64 `json:"popularity,omitempty"`
+}
+
+// StarredRepositories represents the response for starred repositories
+type StarredRepositories struct {
+	Repositories []StarredRepository `json:"repositories,omitempty"`
+}
+
+// Search and Discovery Structures
+
+// SearchResult represents a repository search result
+type SearchResult struct {
+	Repositories []struct {
+		Namespace   string `json:"namespace,omitempty"`
+		Name        string `json:"name,omitempty"`
+		Description string `json:"description,omitempty"`
+		IsPublic    bool   `json:"is_public,omitempty"`
+		Popularity  int    `json:"popularity,omitempty"`
+	} `json:"repositories,omitempty"`
+}
+
+// Error Response Structure
+
+// QuayError represents a Quay API error response
+type QuayError struct {
+	Status      int                    `json:"status,omitempty"`
+	Error       string                 `json:"error,omitempty"`
+	ErrorType   string                 `json:"error_type,omitempty"`
+	Detail      string                 `json:"detail,omitempty"`
+	ErrorDetail map[string]interface{} `json:"error_detail,omitempty"`
 }

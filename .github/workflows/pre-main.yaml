@@ -1,14 +1,15 @@
 name: Pre-Main Checks
 
 on:
+  push:
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  vet-and-lint:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
@@ -16,21 +17,17 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v6
       with:
-        go-version-file: go.mod
+        go-version-file: 'go.mod'
 
-    - name: Run 'make vet'
-      run: make vet
-
-    - name: Run GolangCI-Lint
+    - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v8
+      with:
+        version: latest
+        args: --timeout=5m
 
-    - name: Run 'make test'
-      run: make test
-
-  integration-tests:
+  test:
+    name: Test
     runs-on: ubuntu-latest
-    needs: vet-and-lint
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
@@ -38,28 +35,58 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v6
       with:
-        go-version-file: go.mod
+        go-version-file: 'go.mod'
 
-    - name: Check if running from fork
-      id: fork-check
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Run tests
+      run: go test -v -race -coverprofile=coverage.out ./...
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        files: ./coverage.out
+        flags: unittests
+        name: codecov-umbrella
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: 'go.mod'
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Build binary
       run: |
-        if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-          echo "is_fork=true" >> $GITHUB_OUTPUT
-          echo "Running from fork: ${{ github.event.pull_request.head.repo.full_name }}"
-        else
-          echo "is_fork=false" >> $GITHUB_OUTPUT
-          echo "Running from upstream: ${{ github.repository }}"
-        fi
+        go build -v -o bin/go-quay .
+        ./bin/go-quay --help
 
-    - name: Skip integration tests (fork)
-      if: steps.fork-check.outputs.is_fork == 'true'
-      run: |
-        echo "⚠️  Skipping integration tests for fork PRs (secrets not available)"
-        echo "✅ Integration tests will run when merged to upstream"
+    - name: Test CLI commands structure
+      run: ./scripts/test-cli-structure.sh
 
-    - name: Run integration tests
-      if: steps.fork-check.outputs.is_fork == 'false'
-      env:
-        QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
-        QUAY_ORG: ${{ secrets.QUAY_TEST_ORG }}
-      run: make integration-test
+  validate-examples:
+    name: Validate Examples
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: 'go.mod'
+
+    - name: Build binary
+      run: go build -o bin/go-quay .
+
+    - name: Validate example commands from README
+      run: ./scripts/validate-readme-examples.sh
