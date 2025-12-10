@@ -13,7 +13,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Set up Go
       uses: actions/setup-go@v6
@@ -38,7 +38,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Set up Go  
       uses: actions/setup-go@v6
@@ -49,7 +49,7 @@ jobs:
       run: ./scripts/generate-api-coverage-report.sh
 
     - name: Upload coverage report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: api-coverage-report
         path: api-coverage-report.md
@@ -60,7 +60,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Set up Go
       uses: actions/setup-go@v6
@@ -75,7 +75,7 @@ jobs:
         cat benchmark-results.txt
 
     - name: Upload benchmark results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: benchmark-results
         path: benchmark-results.txt
