@@ -23,6 +23,7 @@ func init() {
 	getCmd.AddCommand(permissionsCmd)
 	getCmd.AddCommand(tagCmd)
 	getCmd.AddCommand(userCmd)
+	getCmd.AddCommand(manifestCmd)
 }
 
 // Execute executes the root command.
