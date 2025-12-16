@@ -28,6 +28,8 @@ func init() {
 	getCmd.AddCommand(robotCmd)
 	getCmd.AddCommand(searchCmd)
 	getCmd.AddCommand(teamCmd)
+	getCmd.AddCommand(buildCmd)
+	getCmd.AddCommand(notificationCmd)
 }
 
 // Execute executes the root command.

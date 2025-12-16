@@ -13,7 +13,7 @@ The following APIs are covered by the repo. Each API links to the corresponding 
 | API                    | Cmd     | Lib     | Covered                                                                                                                                                                                                             |
 | ---------------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Billing](https://docs.quay.io/api/swagger/#operation--api-v1-user-plan-get)                | Yes     | Yes     | /api/v1/user/plan, /api/v1/organization/{orgname}/plan, /api/v1/organization/{orgname}/invoices, /api/v1/plans/                                                                                                   |
-| [Build](https://docs.quay.io/api/swagger/#Build)                  | No      | No      |                                                                                                                                                                                                                     |
+| [Build](https://docs.quay.io/api/swagger/#Build)                  | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/build/, /api/v1/repository/{namespace}/{repository}/build/{build_uuid}, /api/v1/repository/{namespace}/{repository}/build/{build_uuid}/logs |
 | [Discovery](https://docs.quay.io/api/swagger/#Discovery)              | No      | No      |                                                                                                                                                                                                                     |
 | [Error](https://docs.quay.io/api/swagger/#Error)                  | No      | No      |                                                                                                                                                                                                                     |
 | [Messages](https://docs.quay.io/api/swagger/#Messages)               | No      | No      |                                                                                                                                                                                                                     |
@@ -23,7 +23,7 @@ The following APIs are covered by the repo. Each API links to the corresponding 
 | [Permission](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--permissions-get)             | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/permissions, /api/v1/repository/{namespace}/{repository}/permissions/{username} |
 | [Prototype](https://docs.quay.io/api/swagger/#Prototype)              | No      | No      |                                                                                                                                                                                                                     |
 | [Repository](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--get)             | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}, /api/v1/repository/{namespace}/{repository}/tag, /api/v1/repository, /api/v1/repository/{namespace}/{repository} (CRUD) |
-| [RepositoryNotification](https://docs.quay.io/api/swagger/#RepositoryNotification) | No      | No      |                                                                                                                                                                                                                     |
+| [RepositoryNotification](https://docs.quay.io/api/swagger/#RepositoryNotification) | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/notification/, /api/v1/repository/{namespace}/{repository}/notification/{uuid}, /api/v1/repository/{namespace}/{repository}/notification/{uuid}/test |
 | [RepoToken](https://docs.quay.io/api/swagger/#RepoToken)              | No      | No      |                                                                                                                                                                                                                     |
 | [Robot](https://docs.quay.io/api/swagger/#Robot)                  | Yes     | Yes     | /api/v1/user/robots, /api/v1/user/robots/{robot_shortname}, /api/v1/user/robots/{robot_shortname}/regenerate, /api/v1/user/robots/{robot_shortname}/permissions |
 | [Search](https://docs.quay.io/api/swagger/#Search)                 | Yes     | Yes     | /api/v1/find/repositories, /api/v1/find/all |
@@ -67,6 +67,155 @@ The billing API provides access to subscription plans, billing information, and 
 ./go-quay get billing org-subscription --organization ORG_NAME --token YOUR_TOKEN
 ./go-quay get billing org-invoices --organization ORG_NAME --token YOUR_TOKEN
 ```
+
+### Build API
+
+The build API allows you to manage automated image builds from Dockerfiles.
+
+📖 **API Reference:** [Build endpoints in Swagger](https://docs.quay.io/api/swagger/#Build)
+
+#### List builds for a repository
+```bash
+./go-quay get build list \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --token YOUR_TOKEN
+```
+
+#### Get build details
+```bash
+./go-quay get build info \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid BUILD_UUID \
+  --token YOUR_TOKEN
+```
+
+#### Get build logs
+```bash
+./go-quay get build logs \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid BUILD_UUID \
+  --token YOUR_TOKEN
+```
+
+#### Request a new build
+```bash
+./go-quay get build request \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --archive-url "https://example.com/archive.tar.gz" \
+  --tag latest \
+  --token YOUR_TOKEN
+```
+
+#### Cancel a build
+```bash
+./go-quay get build cancel \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid BUILD_UUID \
+  --confirm \
+  --token YOUR_TOKEN
+```
+
+**Build Phases:**
+- `waiting`: Build is queued
+- `starting`: Build is starting
+- `building`: Build is in progress
+- `pushing`: Pushing built image
+- `complete`: Build completed successfully
+- `error`: Build failed
+
+### Repository Notification API
+
+The notification API allows you to manage webhooks for repository events.
+
+📖 **API Reference:** [RepositoryNotification endpoints in Swagger](https://docs.quay.io/api/swagger/#RepositoryNotification)
+
+#### List notifications for a repository
+```bash
+./go-quay get notification list \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --token YOUR_TOKEN
+```
+
+#### Get notification details
+```bash
+./go-quay get notification info \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid NOTIFICATION_UUID \
+  --token YOUR_TOKEN
+```
+
+#### Create a webhook notification
+```bash
+./go-quay get notification create \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --event repo_push \
+  --method webhook \
+  --url "https://example.com/webhook" \
+  --title "Push Webhook" \
+  --token YOUR_TOKEN
+```
+
+#### Create a Slack notification
+```bash
+./go-quay get notification create \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --event build_success \
+  --method slack \
+  --url "https://hooks.slack.com/services/..." \
+  --title "Build Success" \
+  --token YOUR_TOKEN
+```
+
+#### Test a notification
+```bash
+./go-quay get notification test \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid NOTIFICATION_UUID \
+  --token YOUR_TOKEN
+```
+
+#### Reset notification failure count
+```bash
+./go-quay get notification reset \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid NOTIFICATION_UUID \
+  --token YOUR_TOKEN
+```
+
+#### Delete a notification
+```bash
+./go-quay get notification delete \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid NOTIFICATION_UUID \
+  --confirm \
+  --token YOUR_TOKEN
+```
+
+**Supported Events:**
+- `repo_push`: Image push to repository
+- `build_queued`: Build has been queued
+- `build_start`: Build has started
+- `build_success`: Build completed successfully
+- `build_failure`: Build failed
+- `build_canceled`: Build was canceled
+- `vulnerability_found`: New vulnerability discovered
+
+**Supported Methods:**
+- `webhook`: HTTP POST to a URL
+- `email`: Email notification
+- `slack`: Slack webhook
 
 ### Logs API
 

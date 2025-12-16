@@ -658,6 +658,116 @@ type SecurityVulnerability struct {
 	FixedBy       string                 `json:"FixedBy,omitempty"`
 }
 
+// Build Structures
+
+// Build represents a repository build
+type Build struct {
+	ID              string                 `json:"id,omitempty"`
+	Phase           string                 `json:"phase,omitempty"`
+	Started         string                 `json:"started,omitempty"`
+	DisplayName     string                 `json:"display_name,omitempty"`
+	Status          map[string]interface{} `json:"status,omitempty"`
+	Subdirectory    string                 `json:"subdirectory,omitempty"`
+	Dockerfile      string                 `json:"dockerfile_path,omitempty"`
+	Context         string                 `json:"context,omitempty"`
+	IsWriter        bool                   `json:"is_writer,omitempty"`
+	Trigger         *BuildTrigger          `json:"trigger,omitempty"`
+	TriggerMetadata map[string]interface{} `json:"trigger_metadata,omitempty"`
+	ResourceKey     string                 `json:"resource_key,omitempty"`
+	Pull            *BuildPullRobot        `json:"pull_robot,omitempty"`
+	Repository      *BuildRepository       `json:"repository,omitempty"`
+	Error           string                 `json:"error,omitempty"`
+	ManualUser      string                 `json:"manual_user,omitempty"`
+	Archive         string                 `json:"archive_url,omitempty"`
+	Tags            []string               `json:"tags,omitempty"`
+}
+
+// BuildTrigger represents a build trigger
+type BuildTrigger struct {
+	ID            string `json:"id,omitempty"`
+	Service       string `json:"service,omitempty"`
+	IsActive      bool   `json:"is_active,omitempty"`
+	BuildSource   string `json:"build_source,omitempty"`
+	RepositoryURL string `json:"repository_url,omitempty"`
+}
+
+// BuildPullRobot represents a robot account for pulling
+type BuildPullRobot struct {
+	Name    string `json:"name,omitempty"`
+	IsRobot bool   `json:"is_robot,omitempty"`
+	Kind    string `json:"kind,omitempty"`
+	Avatar  Avatar `json:"avatar,omitempty"`
+}
+
+// BuildRepository represents repository info in a build
+type BuildRepository struct {
+	Namespace string `json:"namespace,omitempty"`
+	Name      string `json:"name,omitempty"`
+}
+
+// Builds represents a list of builds
+type Builds struct {
+	Builds []Build `json:"builds,omitempty"`
+}
+
+// BuildLogs represents build logs
+type BuildLogs struct {
+	Start int             `json:"start,omitempty"`
+	Total int             `json:"total,omitempty"`
+	Logs  []BuildLogEntry `json:"logs,omitempty"`
+}
+
+// BuildLogEntry represents a single log entry in build logs
+type BuildLogEntry struct {
+	Type    string                 `json:"type,omitempty"`
+	Message string                 `json:"message,omitempty"`
+	Data    map[string]interface{} `json:"data,omitempty"`
+}
+
+// RequestBuildRequest represents the request to trigger a build
+type RequestBuildRequest struct {
+	FileID         string   `json:"file_id,omitempty"`
+	ArchiveURL     string   `json:"archive_url,omitempty"`
+	Subdirectory   string   `json:"subdirectory,omitempty"`
+	DockerfilePath string   `json:"dockerfile_path,omitempty"`
+	Context        string   `json:"context,omitempty"`
+	PullRobot      string   `json:"pull_robot,omitempty"`
+	Tags           []string `json:"tags,omitempty"`
+}
+
+// Repository Notification Structures
+
+// RepositoryNotification represents a repository notification/webhook
+type RepositoryNotification struct {
+	UUID             string                 `json:"uuid,omitempty"`
+	Title            string                 `json:"title,omitempty"`
+	Event            string                 `json:"event,omitempty"`
+	Method           string                 `json:"method,omitempty"`
+	Config           map[string]interface{} `json:"config,omitempty"`
+	EventConfig      map[string]interface{} `json:"event_config,omitempty"`
+	NumberOfFailures int                    `json:"number_of_failures,omitempty"`
+}
+
+// RepositoryNotifications represents a list of notifications
+type RepositoryNotifications struct {
+	Notifications []RepositoryNotification `json:"notifications,omitempty"`
+}
+
+// CreateNotificationRequest represents the request to create a notification
+type CreateNotificationRequest struct {
+	Event       string                 `json:"event"`
+	Method      string                 `json:"method"`
+	Config      map[string]interface{} `json:"config"`
+	EventConfig map[string]interface{} `json:"eventConfig,omitempty"`
+	Title       string                 `json:"title,omitempty"`
+}
+
+// TestNotificationResponse represents the response from testing a notification
+type TestNotificationResponse struct {
+	Success bool   `json:"success,omitempty"`
+	Message string `json:"message,omitempty"`
+}
+
 // Error Response Structure
 
 // QuayError represents a Quay API error response
