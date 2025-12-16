@@ -31,6 +31,11 @@ func init() {
 	getCmd.AddCommand(buildCmd)
 	getCmd.AddCommand(notificationCmd)
 	getCmd.AddCommand(triggerCmd)
+	getCmd.AddCommand(discoveryCmd)
+	getCmd.AddCommand(errorTypeCmd)
+	getCmd.AddCommand(messagesCmd)
+	getCmd.AddCommand(prototypeCmd)
+	getCmd.AddCommand(repotokenCmd)
 }
 
 // Execute executes the root command.

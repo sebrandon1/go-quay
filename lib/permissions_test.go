@@ -11,6 +11,8 @@ const (
 	httpGetPerms    = "GET"
 	httpPutPerms    = "PUT"
 	httpDeletePerms = "DELETE"
+
+	permRoleWrite = "write"
 )
 
 func TestGetRepositoryPermissions(t *testing.T) {
@@ -19,7 +21,7 @@ func TestGetRepositoryPermissions(t *testing.T) {
 			{
 				Name: "john.doe",
 				Kind: "user",
-				Role: "write",
+				Role: permRoleWrite,
 				Avatar: Avatar{
 					Name: "john.doe",
 					Kind: "user",
@@ -80,7 +82,7 @@ func TestGetRepositoryPermissions(t *testing.T) {
 	if userPerm.Name != "john.doe" {
 		t.Errorf("Expected user name 'john.doe', got '%s'", userPerm.Name)
 	}
-	if userPerm.Role != "write" {
+	if userPerm.Role != permRoleWrite {
 		t.Errorf("Expected role 'write', got '%s'", userPerm.Role)
 	}
 	if userPerm.IsRobot != false {
@@ -115,7 +117,7 @@ func TestSetRepositoryPermission(t *testing.T) {
 			t.Errorf("Failed to decode request body: %v", err)
 		}
 
-		if req.Role != "write" {
+		if req.Role != permRoleWrite {
 			t.Errorf("Expected role 'write', got '%s'", req.Role)
 		}
 
@@ -132,7 +134,7 @@ func TestSetRepositoryPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.SetRepositoryPermission("testorg", "testrepo", "john.doe", "write")
+	err = client.SetRepositoryPermission("testorg", "testrepo", "john.doe", permRoleWrite)
 	if err != nil {
 		t.Fatalf("SetRepositoryPermission failed: %v", err)
 	}
