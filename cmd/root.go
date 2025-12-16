@@ -24,6 +24,7 @@ func init() {
 	getCmd.AddCommand(tagCmd)
 	getCmd.AddCommand(userCmd)
 	getCmd.AddCommand(manifestCmd)
+	getCmd.AddCommand(secscanCmd)
 }
 
 // Execute executes the root command.

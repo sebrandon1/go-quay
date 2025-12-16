@@ -580,6 +580,49 @@ type AddManifestLabelRequest struct {
 	MediaType string `json:"media_type,omitempty"`
 }
 
+// Security Scan Structures
+
+// SecurityScan represents the security scan result for an image
+type SecurityScan struct {
+	Status string        `json:"status,omitempty"`
+	Data   *SecurityData `json:"data,omitempty"`
+}
+
+// SecurityData contains the detailed security scan information
+type SecurityData struct {
+	Layer *SecurityLayer `json:"Layer,omitempty"`
+}
+
+// SecurityLayer represents the scanned layer information
+type SecurityLayer struct {
+	Name             string            `json:"Name,omitempty"`
+	ParentName       string            `json:"ParentName,omitempty"`
+	NamespaceName    string            `json:"NamespaceName,omitempty"`
+	IndexedByVersion int               `json:"IndexedByVersion,omitempty"`
+	Features         []SecurityFeature `json:"Features,omitempty"`
+}
+
+// SecurityFeature represents a package/feature found in the image
+type SecurityFeature struct {
+	Name            string                  `json:"Name,omitempty"`
+	VersionFormat   string                  `json:"VersionFormat,omitempty"`
+	NamespaceName   string                  `json:"NamespaceName,omitempty"`
+	AddedBy         string                  `json:"AddedBy,omitempty"`
+	Version         string                  `json:"Version,omitempty"`
+	Vulnerabilities []SecurityVulnerability `json:"Vulnerabilities,omitempty"`
+}
+
+// SecurityVulnerability represents a vulnerability found in a feature
+type SecurityVulnerability struct {
+	Name          string                 `json:"Name,omitempty"`
+	NamespaceName string                 `json:"NamespaceName,omitempty"`
+	Description   string                 `json:"Description,omitempty"`
+	Link          string                 `json:"Link,omitempty"`
+	Severity      string                 `json:"Severity,omitempty"`
+	Metadata      map[string]interface{} `json:"Metadata,omitempty"`
+	FixedBy       string                 `json:"FixedBy,omitempty"`
+}
+
 // Error Response Structure
 
 // QuayError represents a Quay API error response

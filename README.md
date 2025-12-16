@@ -18,20 +18,20 @@ The following APIs are covered by the repo. Each API links to the corresponding 
 | [Error](https://docs.quay.io/api/swagger/#Error)                  | No      | No      |                                                                                                                                                                                                                     |
 | [Messages](https://docs.quay.io/api/swagger/#Messages)               | No      | No      |                                                                                                                                                                                                                     |
 | [Logs](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--aggregatelogs-get)                   | Partial | Partial | /api/v1/repository/{namespace}/{repository}/aggregatelogs, /api/v1/repository/{namespace}/{repository}/logs, /api/v1/organization/{orgname}/logs |
-| [Manifest](https://docs.quay.io/api/swagger/#Manifest)               | **Yes** | **Yes** | **/api/v1/repository/{namespace}/{repository}/manifest/{manifestref}**, **/api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels**, **/api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels/{labelid}** |
+| [Manifest](https://docs.quay.io/api/swagger/#Manifest)               | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}, /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels, /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels/{labelid} |
 | [Organization](https://docs.quay.io/api/swagger/#operation--api-v1-organization--orgname--get)           | Yes     | Yes     | /api/v1/organization/{orgname}, /api/v1/organization/{orgname}/members, /api/v1/organization/{orgname}/teams, /api/v1/organization/{orgname}/team/{teamname}, /api/v1/organization/{orgname}/robots, /api/v1/organization/{orgname}/quota, /api/v1/organization/{orgname}/autoprunepolicy, /api/v1/organization/{orgname}/applications |
-| [Permission](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--permissions-get)             | **Yes** | **Yes** | **/api/v1/repository/{namespace}/{repository}/permissions**, **/api/v1/repository/{namespace}/{repository}/permissions/{username}** |
+| [Permission](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--permissions-get)             | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/permissions, /api/v1/repository/{namespace}/{repository}/permissions/{username} |
 | [Prototype](https://docs.quay.io/api/swagger/#Prototype)              | No      | No      |                                                                                                                                                                                                                     |
-| [Repository](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--get)             | **Yes** | **Yes** | /api/v1/repository/{namespace}/{repository}, /api/v1/repository/{namespace}/{repository}/tag, **/api/v1/repository**, **/api/v1/repository/{namespace}/{repository}** (CRUD) |
+| [Repository](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--get)             | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}, /api/v1/repository/{namespace}/{repository}/tag, /api/v1/repository, /api/v1/repository/{namespace}/{repository} (CRUD) |
 | [RepositoryNotification](https://docs.quay.io/api/swagger/#RepositoryNotification) | No      | No      |                                                                                                                                                                                                                     |
 | [RepoToken](https://docs.quay.io/api/swagger/#RepoToken)              | No      | No      |                                                                                                                                                                                                                     |
 | [Robot](https://docs.quay.io/api/swagger/#Robot)                  | No      | No      |                                                                                                                                                                                                                     |
 | [Search](https://docs.quay.io/api/swagger/#Search)                 | No      | No      |                                                                                                                                                                                                                     |
-| [SecScan](https://docs.quay.io/api/swagger/#SecScan)                | No      | No      |                                                                                                                                                                                                                     |
-| [Tag](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--tag-get)                    | **Yes** | **Yes** | /api/v1/repository/{namespace}/{repository}/tag, **/api/v1/repository/{namespace}/{repository}/tag/{tag}**, **/api/v1/repository/{namespace}/{repository}/tag/{tag}/history** |
+| [SecScan](https://docs.quay.io/api/swagger/#SecScan)                | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/security |
+| [Tag](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--tag-get)                    | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/tag, /api/v1/repository/{namespace}/{repository}/tag/{tag}, /api/v1/repository/{namespace}/{repository}/tag/{tag}/history |
 | [Team](https://docs.quay.io/api/swagger/#Team)                   | No      | No      |                                                                                                                                                                                                                     |
 | [Trigger](https://docs.quay.io/api/swagger/#Trigger)                | No      | No      |                                                                                                                                                                                                                     |
-| [User](https://docs.quay.io/api/swagger/#operation--api-v1-user-get)                   | **Yes** | **Yes** | **/api/v1/user**, **/api/v1/user/starred**, **/api/v1/repository/{namespace}/{repository}/star** | 
+| [User](https://docs.quay.io/api/swagger/#operation--api-v1-user-get)                   | Yes     | Yes     | /api/v1/user, /api/v1/user/starred, /api/v1/repository/{namespace}/{repository}/star | 
 
 ## Authentication
 
@@ -346,6 +346,45 @@ Inspect and manage container image manifests, including layers, configuration, a
   --label-id label-123 \
   --token YOUR_TOKEN
 ```
+
+### Security Scan (SecScan) API
+
+Retrieve security vulnerability information for container images.
+
+📖 **API Reference:** [SecScan endpoints in Swagger](https://docs.quay.io/api/swagger/#SecScan)
+
+#### Get security scan results for a manifest
+```bash
+# Get security scan with vulnerability details
+./go-quay get secscan info \
+  --namespace myorg \
+  --repository myrepo \
+  --manifest sha256:abc123def456... \
+  --token YOUR_TOKEN
+
+# Get security scan without vulnerability details (faster)
+./go-quay get secscan info \
+  -n myorg \
+  -r myrepo \
+  -m sha256:abc123def456... \
+  --vulnerabilities=false \
+  -t YOUR_TOKEN
+```
+
+**Scan Status Values:**
+- `scanned`: Scan completed successfully, results available
+- `queued`: Scan is queued and pending
+- `scanning`: Scan is currently in progress
+- `unsupported`: Image type is not supported for scanning
+- `failed`: Scan failed
+
+**Vulnerability Severity Levels:**
+- `Critical`: Severe vulnerabilities requiring immediate attention
+- `High`: Important vulnerabilities to address soon
+- `Medium`: Moderate risk vulnerabilities
+- `Low`: Minor vulnerabilities
+- `Negligible`: Minimal impact vulnerabilities
+- `Unknown`: Severity not determined
 
 ### User API
 
