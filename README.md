@@ -18,7 +18,7 @@ The following APIs are covered by the repo. Each API links to the corresponding 
 | [Error](https://docs.quay.io/api/swagger/#Error)                  | No      | No      |                                                                                                                                                                                                                     |
 | [Messages](https://docs.quay.io/api/swagger/#Messages)               | No      | No      |                                                                                                                                                                                                                     |
 | [Logs](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--aggregatelogs-get)                   | Partial | Partial | /api/v1/repository/{namespace}/{repository}/aggregatelogs, /api/v1/repository/{namespace}/{repository}/logs, /api/v1/organization/{orgname}/logs |
-| [Manifest](https://docs.quay.io/api/swagger/#Manifest)               | No      | No      |                                                                                                                                                                                                                     |
+| [Manifest](https://docs.quay.io/api/swagger/#Manifest)               | **Yes** | **Yes** | **/api/v1/repository/{namespace}/{repository}/manifest/{manifestref}**, **/api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels**, **/api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels/{labelid}** |
 | [Organization](https://docs.quay.io/api/swagger/#operation--api-v1-organization--orgname--get)           | Yes     | Yes     | /api/v1/organization/{orgname}, /api/v1/organization/{orgname}/members, /api/v1/organization/{orgname}/teams, /api/v1/organization/{orgname}/team/{teamname}, /api/v1/organization/{orgname}/robots, /api/v1/organization/{orgname}/quota, /api/v1/organization/{orgname}/autoprunepolicy, /api/v1/organization/{orgname}/applications |
 | [Permission](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--permissions-get)             | **Yes** | **Yes** | **/api/v1/repository/{namespace}/{repository}/permissions**, **/api/v1/repository/{namespace}/{repository}/permissions/{username}** |
 | [Prototype](https://docs.quay.io/api/swagger/#Prototype)              | No      | No      |                                                                                                                                                                                                                     |
@@ -264,6 +264,86 @@ Comprehensive tag management with detailed metadata, history, and operations.
   --repository myrepo \
   --tag latest \
   --manifest sha256:abc123... \
+  --token YOUR_TOKEN
+```
+
+### Manifest API
+
+Inspect and manage container image manifests, including layers, configuration, and labels.
+
+📖 **API Reference:** [Manifest endpoints in Swagger](https://docs.quay.io/api/swagger/#Manifest)
+
+#### Get manifest information
+```bash
+# Get detailed manifest info by digest
+./go-quay get manifest info \
+  --namespace myorg \
+  --repository myrepo \
+  --manifest sha256:abc123def456... \
+  --token YOUR_TOKEN
+```
+
+#### Delete a manifest
+```bash
+# Delete manifest (requires confirmation)
+./go-quay get manifest delete \
+  --namespace myorg \
+  --repository myrepo \
+  --manifest sha256:abc123def456... \
+  --confirm \
+  --token YOUR_TOKEN
+```
+
+**Note:** Manifest deletion is irreversible and will remove all tags pointing to this manifest.
+
+#### List manifest labels
+```bash
+./go-quay get manifest labels \
+  --namespace myorg \
+  --repository myrepo \
+  --manifest sha256:abc123def456... \
+  --token YOUR_TOKEN
+```
+
+#### Get a specific label
+```bash
+./go-quay get manifest label \
+  --namespace myorg \
+  --repository myrepo \
+  --manifest sha256:abc123def456... \
+  --label-id label-123 \
+  --token YOUR_TOKEN
+```
+
+#### Add a label to a manifest
+```bash
+# Add a simple label
+./go-quay get manifest add-label \
+  --namespace myorg \
+  --repository myrepo \
+  --manifest sha256:abc123def456... \
+  --key "environment" \
+  --value "production" \
+  --token YOUR_TOKEN
+
+# Add a label with custom media type
+./go-quay get manifest add-label \
+  -n myorg \
+  -r myrepo \
+  -m sha256:abc123def456... \
+  -k "config" \
+  -v '{"setting": "value"}' \
+  --media-type "application/json" \
+  -t YOUR_TOKEN
+```
+
+#### Remove a label from a manifest
+```bash
+./go-quay get manifest remove-label \
+  --namespace myorg \
+  --repository myrepo \
+  --manifest sha256:abc123def456... \
+  --label-id label-123 \
   --token YOUR_TOKEN
 ```
 

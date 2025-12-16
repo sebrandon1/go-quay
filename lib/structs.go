@@ -529,6 +529,57 @@ type SearchResult struct {
 	} `json:"repositories,omitempty"`
 }
 
+// Manifest Structures
+
+// Manifest represents a container image manifest
+type Manifest struct {
+	Digest         string          `json:"digest,omitempty"`
+	SchemaVersion  int             `json:"schemaVersion,omitempty"`
+	MediaType      string          `json:"mediaType,omitempty"`
+	Size           int64           `json:"size,omitempty"`
+	Layers         []ManifestLayer `json:"layers,omitempty"`
+	Config         ManifestConfig  `json:"config,omitempty"`
+	IsManifestList bool            `json:"is_manifest_list,omitempty"`
+	ManifestData   string          `json:"manifest_data,omitempty"`
+}
+
+// ManifestLayer represents a layer in a manifest
+type ManifestLayer struct {
+	MediaType string `json:"mediaType,omitempty"`
+	Size      int64  `json:"size,omitempty"`
+	Digest    string `json:"digest,omitempty"`
+	Index     int    `json:"index,omitempty"`
+	Command   string `json:"command,omitempty"`
+}
+
+// ManifestConfig represents the config of a manifest
+type ManifestConfig struct {
+	MediaType string `json:"mediaType,omitempty"`
+	Size      int64  `json:"size,omitempty"`
+	Digest    string `json:"digest,omitempty"`
+}
+
+// ManifestLabel represents a label on a manifest
+type ManifestLabel struct {
+	ID         string `json:"id,omitempty"`
+	Key        string `json:"key,omitempty"`
+	Value      string `json:"value,omitempty"`
+	SourceType string `json:"source_type,omitempty"`
+	MediaType  string `json:"media_type,omitempty"`
+}
+
+// ManifestLabels represents the response for manifest labels
+type ManifestLabels struct {
+	Labels []ManifestLabel `json:"labels,omitempty"`
+}
+
+// AddManifestLabelRequest represents the request to add a label to a manifest
+type AddManifestLabelRequest struct {
+	Key       string `json:"key"`
+	Value     string `json:"value"`
+	MediaType string `json:"media_type,omitempty"`
+}
+
 // Error Response Structure
 
 // QuayError represents a Quay API error response
