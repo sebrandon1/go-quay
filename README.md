@@ -26,7 +26,7 @@ The following APIs are covered by the repo. Each API links to the corresponding 
 | [RepositoryNotification](https://docs.quay.io/api/swagger/#RepositoryNotification) | No      | No      |                                                                                                                                                                                                                     |
 | [RepoToken](https://docs.quay.io/api/swagger/#RepoToken)              | No      | No      |                                                                                                                                                                                                                     |
 | [Robot](https://docs.quay.io/api/swagger/#Robot)                  | Yes     | Yes     | /api/v1/user/robots, /api/v1/user/robots/{robot_shortname}, /api/v1/user/robots/{robot_shortname}/regenerate, /api/v1/user/robots/{robot_shortname}/permissions |
-| [Search](https://docs.quay.io/api/swagger/#Search)                 | No      | No      |                                                                                                                                                                                                                     |
+| [Search](https://docs.quay.io/api/swagger/#Search)                 | Yes     | Yes     | /api/v1/find/repositories, /api/v1/find/all |
 | [SecScan](https://docs.quay.io/api/swagger/#SecScan)                | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/security |
 | [Tag](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--tag-get)                    | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/tag, /api/v1/repository/{namespace}/{repository}/tag/{tag}, /api/v1/repository/{namespace}/{repository}/tag/{tag}/history |
 | [Team](https://docs.quay.io/api/swagger/#Team)                   | No      | No      |                                                                                                                                                                                                                     |
@@ -438,6 +438,41 @@ Manage user-level robot accounts for CI/CD automation and automated workflows.
   --name deploybot \
   --token YOUR_TOKEN
 ```
+
+### Search API
+
+Search for repositories, users, organizations, and other entities on Quay.io.
+
+📖 **API Reference:** [Search endpoints in Swagger](https://docs.quay.io/api/swagger/#Search)
+
+#### Search for repositories
+```bash
+# Basic repository search
+./go-quay get search repositories \
+  --query "nginx" \
+  --token YOUR_TOKEN
+
+# Search with pagination
+./go-quay get search repositories \
+  -q "python" \
+  --page 2 \
+  -t YOUR_TOKEN
+```
+
+#### Search all entity types
+```bash
+# Search for repositories, users, organizations, teams, and robots
+./go-quay get search all \
+  --query "redhat" \
+  --token YOUR_TOKEN
+```
+
+**Entity Types in Results:**
+- `repository`: Container image repository
+- `user`: User account
+- `organization`: Organization
+- `team`: Team within an organization
+- `robot`: Robot account
 
 ### User API
 

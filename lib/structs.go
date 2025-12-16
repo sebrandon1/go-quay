@@ -518,7 +518,42 @@ type StarredRepositories struct {
 
 // Search and Discovery Structures
 
-// SearchResult represents a repository search result
+// SearchRepository represents a repository in search results
+type SearchRepository struct {
+	Namespace   string  `json:"namespace,omitempty"`
+	Name        string  `json:"name,omitempty"`
+	Description string  `json:"description,omitempty"`
+	IsPublic    bool    `json:"is_public,omitempty"`
+	Kind        string  `json:"kind,omitempty"`
+	Popularity  float64 `json:"popularity,omitempty"`
+	Score       float64 `json:"score,omitempty"`
+	Href        string  `json:"href,omitempty"`
+}
+
+// SearchRepositoryResult represents the response for repository search
+type SearchRepositoryResult struct {
+	Results       []SearchRepository `json:"results,omitempty"`
+	HasAdditional bool               `json:"has_additional,omitempty"`
+	Page          int                `json:"page,omitempty"`
+	StartIndex    int                `json:"start_index,omitempty"`
+}
+
+// SearchEntity represents a generic entity in search results (user, org, team, robot)
+type SearchEntity struct {
+	Name        string  `json:"name,omitempty"`
+	Description string  `json:"description,omitempty"`
+	Kind        string  `json:"kind,omitempty"`
+	Score       float64 `json:"score,omitempty"`
+	Href        string  `json:"href,omitempty"`
+	Avatar      Avatar  `json:"avatar,omitempty"`
+}
+
+// SearchAllResult represents the response for searching all entities
+type SearchAllResult struct {
+	Results []SearchEntity `json:"results,omitempty"`
+}
+
+// SearchResult represents a repository search result (legacy)
 type SearchResult struct {
 	Repositories []struct {
 		Namespace   string `json:"namespace,omitempty"`
