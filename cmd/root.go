@@ -27,6 +27,7 @@ func init() {
 	getCmd.AddCommand(secscanCmd)
 	getCmd.AddCommand(robotCmd)
 	getCmd.AddCommand(searchCmd)
+	getCmd.AddCommand(teamCmd)
 }
 
 // Execute executes the root command.
