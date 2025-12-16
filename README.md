@@ -25,7 +25,7 @@ The following APIs are covered by the repo. Each API links to the corresponding 
 | [Repository](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--get)             | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}, /api/v1/repository/{namespace}/{repository}/tag, /api/v1/repository, /api/v1/repository/{namespace}/{repository} (CRUD) |
 | [RepositoryNotification](https://docs.quay.io/api/swagger/#RepositoryNotification) | No      | No      |                                                                                                                                                                                                                     |
 | [RepoToken](https://docs.quay.io/api/swagger/#RepoToken)              | No      | No      |                                                                                                                                                                                                                     |
-| [Robot](https://docs.quay.io/api/swagger/#Robot)                  | No      | No      |                                                                                                                                                                                                                     |
+| [Robot](https://docs.quay.io/api/swagger/#Robot)                  | Yes     | Yes     | /api/v1/user/robots, /api/v1/user/robots/{robot_shortname}, /api/v1/user/robots/{robot_shortname}/regenerate, /api/v1/user/robots/{robot_shortname}/permissions |
 | [Search](https://docs.quay.io/api/swagger/#Search)                 | No      | No      |                                                                                                                                                                                                                     |
 | [SecScan](https://docs.quay.io/api/swagger/#SecScan)                | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/security |
 | [Tag](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--tag-get)                    | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/tag, /api/v1/repository/{namespace}/{repository}/tag/{tag}, /api/v1/repository/{namespace}/{repository}/tag/{tag}/history |
@@ -385,6 +385,59 @@ Retrieve security vulnerability information for container images.
 - `Low`: Minor vulnerabilities
 - `Negligible`: Minimal impact vulnerabilities
 - `Unknown`: Severity not determined
+
+### Robot API
+
+Manage user-level robot accounts for CI/CD automation and automated workflows.
+
+📖 **API Reference:** [Robot endpoints in Swagger](https://docs.quay.io/api/swagger/#Robot)
+
+#### List all robot accounts
+```bash
+./go-quay get robot list \
+  --token YOUR_TOKEN
+```
+
+#### Get robot account details
+```bash
+./go-quay get robot info \
+  --name deploybot \
+  --token YOUR_TOKEN
+```
+
+#### Create a new robot account
+```bash
+./go-quay get robot create \
+  --name mybot \
+  --description "CI/CD automation robot" \
+  --token YOUR_TOKEN
+```
+
+**Note:** Save the token from the response - it will not be shown again!
+
+#### Delete a robot account
+```bash
+./go-quay get robot delete \
+  --name oldbot \
+  --confirm \
+  --token YOUR_TOKEN
+```
+
+#### Regenerate robot token
+```bash
+./go-quay get robot regenerate \
+  --name deploybot \
+  --token YOUR_TOKEN
+```
+
+**Note:** The old token will be invalidated immediately.
+
+#### Get robot permissions
+```bash
+./go-quay get robot permissions \
+  --name deploybot \
+  --token YOUR_TOKEN
+```
 
 ### User API
 
