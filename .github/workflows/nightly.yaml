@@ -30,7 +30,9 @@ jobs:
       run: ./scripts/integration-test.sh
       env:
         QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
-        QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE || 'go-quay-test' }}
+        QUAY_ORG: ${{ secrets.QUAY_ORG }}
+        QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE }}
+        QUAY_REPOSITORY: ${{ secrets.QUAY_REPOSITORY }}
         
   api-coverage-report:
     name: API Coverage Report
