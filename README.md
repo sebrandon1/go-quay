@@ -30,7 +30,7 @@ The following APIs are covered by the repo. Each API links to the corresponding 
 | [SecScan](https://docs.quay.io/api/swagger/#SecScan)                | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/security |
 | [Tag](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--tag-get)                    | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/tag, /api/v1/repository/{namespace}/{repository}/tag/{tag}, /api/v1/repository/{namespace}/{repository}/tag/{tag}/history |
 | [Team](https://docs.quay.io/api/swagger/#Team)                   | Yes     | Yes     | /api/v1/organization/{orgname}/team/{teamname}, /api/v1/organization/{orgname}/team/{teamname}/members, /api/v1/organization/{orgname}/team/{teamname}/permissions |
-| [Trigger](https://docs.quay.io/api/swagger/#Trigger)                | No      | No      |                                                                                                                                                                                                                     |
+| [Trigger](https://docs.quay.io/api/swagger/#Trigger)                | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/trigger/, /api/v1/repository/{namespace}/{repository}/trigger/{trigger_uuid}, /api/v1/repository/{namespace}/{repository}/trigger/{trigger_uuid}/start, /api/v1/repository/{namespace}/{repository}/trigger/{trigger_uuid}/activate |
 | [User](https://docs.quay.io/api/swagger/#operation--api-v1-user-get)                   | Yes     | Yes     | /api/v1/user, /api/v1/user/starred, /api/v1/repository/{namespace}/{repository}/star | 
 
 ## Authentication
@@ -127,6 +127,88 @@ The build API allows you to manage automated image builds from Dockerfiles.
 - `pushing`: Pushing built image
 - `complete`: Build completed successfully
 - `error`: Build failed
+
+### Trigger API
+
+The trigger API allows you to manage build triggers for automated builds when code is pushed to connected source repositories.
+
+📖 **API Reference:** [Trigger endpoints in Swagger](https://docs.quay.io/api/swagger/#Trigger)
+
+#### List triggers for a repository
+```bash
+./go-quay get trigger list \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --token YOUR_TOKEN
+```
+
+#### Get trigger details
+```bash
+./go-quay get trigger info \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid TRIGGER_UUID \
+  --token YOUR_TOKEN
+```
+
+#### Delete a trigger
+```bash
+./go-quay get trigger delete \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid TRIGGER_UUID \
+  --token YOUR_TOKEN
+```
+
+#### Enable a trigger
+```bash
+./go-quay get trigger enable \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid TRIGGER_UUID \
+  --token YOUR_TOKEN
+```
+
+#### Disable a trigger
+```bash
+./go-quay get trigger disable \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid TRIGGER_UUID \
+  --token YOUR_TOKEN
+```
+
+#### Manually start a build from trigger
+```bash
+./go-quay get trigger start \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid TRIGGER_UUID \
+  --token YOUR_TOKEN
+
+# Optionally specify a commit SHA
+./go-quay get trigger start \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid TRIGGER_UUID \
+  --commit-sha abc123def456 \
+  --token YOUR_TOKEN
+```
+
+#### Activate a trigger
+```bash
+./go-quay get trigger activate \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid TRIGGER_UUID \
+  --token YOUR_TOKEN
+```
+
+**Supported Trigger Services:**
+- `github`: GitHub repository
+- `gitlab`: GitLab repository
+- `bitbucket`: Bitbucket repository
+- `custom-git`: Custom git repository
 
 ### Repository Notification API
 

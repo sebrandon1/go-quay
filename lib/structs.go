@@ -684,11 +684,33 @@ type Build struct {
 
 // BuildTrigger represents a build trigger
 type BuildTrigger struct {
-	ID            string `json:"id,omitempty"`
-	Service       string `json:"service,omitempty"`
-	IsActive      bool   `json:"is_active,omitempty"`
-	BuildSource   string `json:"build_source,omitempty"`
-	RepositoryURL string `json:"repository_url,omitempty"`
+	ID            string                 `json:"id,omitempty"`
+	Service       string                 `json:"service,omitempty"`
+	IsActive      bool                   `json:"is_active,omitempty"`
+	BuildSource   string                 `json:"build_source,omitempty"`
+	RepositoryURL string                 `json:"repository_url,omitempty"`
+	Config        map[string]interface{} `json:"config,omitempty"`
+	CanInvoke     bool                   `json:"can_invoke,omitempty"`
+	Enabled       bool                   `json:"enabled,omitempty"`
+	DisableReason string                 `json:"disable_reason,omitempty"`
+	PullRobot     *BuildPullRobot        `json:"pull_robot,omitempty"`
+}
+
+// BuildTriggers represents a list of build triggers
+type BuildTriggers struct {
+	Triggers []BuildTrigger `json:"triggers,omitempty"`
+}
+
+// ActivateTriggerRequest represents the request to activate a build trigger
+type ActivateTriggerRequest struct {
+	Config    map[string]interface{} `json:"config,omitempty"`
+	PullRobot string                 `json:"pull_robot,omitempty"`
+}
+
+// ManualTriggerRequest represents the request to manually start a build trigger
+type ManualTriggerRequest struct {
+	CommitSHA string            `json:"commit_sha,omitempty"`
+	Refs      map[string]string `json:"refs,omitempty"`
 }
 
 // BuildPullRobot represents a robot account for pulling

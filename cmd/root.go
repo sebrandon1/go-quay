@@ -30,6 +30,7 @@ func init() {
 	getCmd.AddCommand(teamCmd)
 	getCmd.AddCommand(buildCmd)
 	getCmd.AddCommand(notificationCmd)
+	getCmd.AddCommand(triggerCmd)
 }
 
 // Execute executes the root command.
