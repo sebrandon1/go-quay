@@ -29,7 +29,7 @@ The following APIs are covered by the repo. Each API links to the corresponding 
 | [Search](https://docs.quay.io/api/swagger/#Search)                 | Yes     | Yes     | /api/v1/find/repositories, /api/v1/find/all |
 | [SecScan](https://docs.quay.io/api/swagger/#SecScan)                | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/security |
 | [Tag](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--tag-get)                    | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/tag, /api/v1/repository/{namespace}/{repository}/tag/{tag}, /api/v1/repository/{namespace}/{repository}/tag/{tag}/history |
-| [Team](https://docs.quay.io/api/swagger/#Team)                   | No      | No      |                                                                                                                                                                                                                     |
+| [Team](https://docs.quay.io/api/swagger/#Team)                   | Yes     | Yes     | /api/v1/organization/{orgname}/team/{teamname}, /api/v1/organization/{orgname}/team/{teamname}/members, /api/v1/organization/{orgname}/team/{teamname}/permissions |
 | [Trigger](https://docs.quay.io/api/swagger/#Trigger)                | No      | No      |                                                                                                                                                                                                                     |
 | [User](https://docs.quay.io/api/swagger/#operation--api-v1-user-get)                   | Yes     | Yes     | /api/v1/user, /api/v1/user/starred, /api/v1/repository/{namespace}/{repository}/star | 
 
@@ -473,6 +473,116 @@ Search for repositories, users, organizations, and other entities on Quay.io.
 - `organization`: Organization
 - `team`: Team within an organization
 - `robot`: Robot account
+
+### Team API
+
+Manage teams within an organization, including team members and repository permissions.
+
+📖 **API Reference:** [Team endpoints in Swagger](https://docs.quay.io/api/swagger/#Team)
+
+#### List teams in an organization
+```bash
+./go-quay get team list \
+  --organization myorg \
+  --token YOUR_TOKEN
+```
+
+#### Get team information
+```bash
+./go-quay get team info \
+  --organization myorg \
+  --name developers \
+  --token YOUR_TOKEN
+```
+
+#### Create a new team
+```bash
+# Create a team with member role
+./go-quay get team create \
+  --organization myorg \
+  --name developers \
+  --description "Development team" \
+  --role member \
+  --token YOUR_TOKEN
+```
+
+**Team Roles:**
+- `member`: Inherits default permissions
+- `creator`: Can create new repositories
+- `admin`: Full administrative access
+
+#### Update team settings
+```bash
+./go-quay get team update \
+  --organization myorg \
+  --name developers \
+  --description "Updated description" \
+  --role creator \
+  --token YOUR_TOKEN
+```
+
+#### Delete a team
+```bash
+./go-quay get team delete \
+  --organization myorg \
+  --name developers \
+  --confirm \
+  --token YOUR_TOKEN
+```
+
+#### Manage team members
+```bash
+# List team members
+./go-quay get team members \
+  --organization myorg \
+  --name developers \
+  --token YOUR_TOKEN
+
+# Add a member to a team
+./go-quay get team add-member \
+  --organization myorg \
+  --name developers \
+  --member username \
+  --token YOUR_TOKEN
+
+# Remove a member from a team
+./go-quay get team remove-member \
+  --organization myorg \
+  --name developers \
+  --member username \
+  --confirm \
+  --token YOUR_TOKEN
+```
+
+#### Manage team repository permissions
+```bash
+# List team repository permissions
+./go-quay get team permissions \
+  --organization myorg \
+  --name developers \
+  --token YOUR_TOKEN
+
+# Set repository permission for a team
+./go-quay get team set-permission \
+  --organization myorg \
+  --name developers \
+  --repository myrepo \
+  --role write \
+  --token YOUR_TOKEN
+
+# Remove repository permission from a team
+./go-quay get team remove-permission \
+  --organization myorg \
+  --name developers \
+  --repository myrepo \
+  --confirm \
+  --token YOUR_TOKEN
+```
+
+**Permission Roles:**
+- `read`: Pull images
+- `write`: Pull and push images
+- `admin`: Full administrative access
 
 ### User API
 

@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	testRepoPath = "/api/v1/repository/testorg/testrepo"
-	testTagPath  = "/api/v1/repository/testorg/testrepo/tag"
-	httpGetRepo  = "GET"
+	testRepoPath       = "/api/v1/repository/testorg/testrepo"
+	testTagPath        = "/api/v1/repository/testorg/testrepo/tag"
+	httpGetRepo        = "GET"
+	updatedDescription = "Updated description"
 )
 
 func TestCreateRepository(t *testing.T) {
@@ -87,7 +88,7 @@ func TestUpdateRepository(t *testing.T) {
 	mockRepo := Repository{
 		Namespace:   "testorg",
 		Name:        "testrepo",
-		Description: "Updated description",
+		Description: updatedDescription,
 		IsPublic:    true,
 	}
 
@@ -106,7 +107,7 @@ func TestUpdateRepository(t *testing.T) {
 			t.Errorf("Failed to decode request body: %v", err)
 		}
 
-		if req.Description != "Updated description" {
+		if req.Description != updatedDescription {
 			t.Errorf("Expected description 'Updated description', got '%s'", req.Description)
 		}
 		if req.Visibility != "public" {
@@ -128,12 +129,12 @@ func TestUpdateRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	repo, err := client.UpdateRepository("testorg", "testrepo", "Updated description", "public")
+	repo, err := client.UpdateRepository("testorg", "testrepo", updatedDescription, "public")
 	if err != nil {
 		t.Fatalf("UpdateRepository failed: %v", err)
 	}
 
-	if repo.Description != "Updated description" {
+	if repo.Description != updatedDescription {
 		t.Errorf("Expected description 'Updated description', got '%s'", repo.Description)
 	}
 }
