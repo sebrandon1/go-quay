@@ -14,17 +14,17 @@ The following APIs are covered by the repo. Each API links to the corresponding 
 | ---------------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Billing](https://docs.quay.io/api/swagger/#operation--api-v1-user-plan-get)                | Yes     | Yes     | /api/v1/user/plan, /api/v1/organization/{orgname}/plan, /api/v1/organization/{orgname}/invoices, /api/v1/plans/                                                                                                   |
 | [Build](https://docs.quay.io/api/swagger/#Build)                  | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/build/, /api/v1/repository/{namespace}/{repository}/build/{build_uuid}, /api/v1/repository/{namespace}/{repository}/build/{build_uuid}/logs |
-| [Discovery](https://docs.quay.io/api/swagger/#Discovery)              | No      | No      |                                                                                                                                                                                                                     |
-| [Error](https://docs.quay.io/api/swagger/#Error)                  | No      | No      |                                                                                                                                                                                                                     |
-| [Messages](https://docs.quay.io/api/swagger/#Messages)               | No      | No      |                                                                                                                                                                                                                     |
+| [Discovery](https://docs.quay.io/api/swagger/#Discovery)              | Yes     | Yes     | /api/v1/discovery |
+| [Error](https://docs.quay.io/api/swagger/#Error)                  | Yes     | Yes     | /api/v1/error/{error_type} |
+| [Messages](https://docs.quay.io/api/swagger/#Messages)               | Yes     | Yes     | /api/v1/messages |
 | [Logs](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--aggregatelogs-get)                   | Partial | Partial | /api/v1/repository/{namespace}/{repository}/aggregatelogs, /api/v1/repository/{namespace}/{repository}/logs, /api/v1/organization/{orgname}/logs |
 | [Manifest](https://docs.quay.io/api/swagger/#Manifest)               | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}, /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels, /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels/{labelid} |
 | [Organization](https://docs.quay.io/api/swagger/#operation--api-v1-organization--orgname--get)           | Yes     | Yes     | /api/v1/organization/{orgname}, /api/v1/organization/{orgname}/members, /api/v1/organization/{orgname}/teams, /api/v1/organization/{orgname}/team/{teamname}, /api/v1/organization/{orgname}/robots, /api/v1/organization/{orgname}/quota, /api/v1/organization/{orgname}/autoprunepolicy, /api/v1/organization/{orgname}/applications |
 | [Permission](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--permissions-get)             | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/permissions, /api/v1/repository/{namespace}/{repository}/permissions/{username} |
-| [Prototype](https://docs.quay.io/api/swagger/#Prototype)              | No      | No      |                                                                                                                                                                                                                     |
+| [Prototype](https://docs.quay.io/api/swagger/#Prototype)              | Yes     | Yes     | /api/v1/organization/{orgname}/prototypes, /api/v1/organization/{orgname}/prototypes/{uuid} |
 | [Repository](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--get)             | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}, /api/v1/repository/{namespace}/{repository}/tag, /api/v1/repository, /api/v1/repository/{namespace}/{repository} (CRUD) |
 | [RepositoryNotification](https://docs.quay.io/api/swagger/#RepositoryNotification) | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/notification/, /api/v1/repository/{namespace}/{repository}/notification/{uuid}, /api/v1/repository/{namespace}/{repository}/notification/{uuid}/test |
-| [RepoToken](https://docs.quay.io/api/swagger/#RepoToken)              | No      | No      |                                                                                                                                                                                                                     |
+| [RepoToken](https://docs.quay.io/api/swagger/#RepoToken)              | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/tokens, /api/v1/repository/{namespace}/{repository}/tokens/{code} (DEPRECATED) |
 | [Robot](https://docs.quay.io/api/swagger/#Robot)                  | Yes     | Yes     | /api/v1/user/robots, /api/v1/user/robots/{robot_shortname}, /api/v1/user/robots/{robot_shortname}/regenerate, /api/v1/user/robots/{robot_shortname}/permissions |
 | [Search](https://docs.quay.io/api/swagger/#Search)                 | Yes     | Yes     | /api/v1/find/repositories, /api/v1/find/all |
 | [SecScan](https://docs.quay.io/api/swagger/#SecScan)                | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/security |
@@ -914,4 +914,152 @@ The organization API provides comprehensive management of organizations, teams, 
 ./go-quay get organization applications \
   -o myorg \
   -t YOUR_TOKEN
+```
+
+### Discovery API
+
+The discovery API provides information about available API endpoints and versions.
+
+📖 **API Reference:** [Discovery endpoints in Swagger](https://docs.quay.io/api/swagger/#Discovery)
+
+#### Get API discovery information
+```bash
+./go-quay get discovery \
+  --token YOUR_TOKEN
+```
+
+### Error API
+
+The error API provides details about specific error types returned by the Quay.io API.
+
+📖 **API Reference:** [Error endpoints in Swagger](https://docs.quay.io/api/swagger/#Error)
+
+#### Get error type details
+```bash
+./go-quay get error \
+  --type invalid_token \
+  --token YOUR_TOKEN
+```
+
+### Messages API
+
+The messages API returns system-wide messages for the authenticated user.
+
+📖 **API Reference:** [Messages endpoints in Swagger](https://docs.quay.io/api/swagger/#Messages)
+
+#### Get system messages
+```bash
+./go-quay get messages \
+  --token YOUR_TOKEN
+```
+
+### Prototype API
+
+The prototype API manages default permission prototypes that are automatically applied to new repositories.
+
+📖 **API Reference:** [Prototype endpoints in Swagger](https://docs.quay.io/api/swagger/#Prototype)
+
+#### List all prototypes
+```bash
+./go-quay get prototype list \
+  --organization myorg \
+  --token YOUR_TOKEN
+```
+
+#### Get prototype details
+```bash
+./go-quay get prototype info \
+  --organization myorg \
+  --uuid PROTOTYPE_UUID \
+  --token YOUR_TOKEN
+```
+
+#### Create a prototype
+```bash
+./go-quay get prototype create \
+  --organization myorg \
+  --delegate-name devteam \
+  --delegate-kind team \
+  --role write \
+  --token YOUR_TOKEN
+```
+
+#### Update a prototype
+```bash
+./go-quay get prototype update \
+  --organization myorg \
+  --uuid PROTOTYPE_UUID \
+  --role admin \
+  --token YOUR_TOKEN
+```
+
+#### Delete a prototype
+```bash
+./go-quay get prototype delete \
+  --organization myorg \
+  --uuid PROTOTYPE_UUID \
+  --confirm \
+  --token YOUR_TOKEN
+```
+
+**Delegate Kinds:**
+- `user`: A specific user account
+- `team`: A team within the organization
+- `robot`: A robot account
+
+**Roles:**
+- `read`: Pull images
+- `write`: Pull and push images
+- `admin`: Full administrative access
+
+### RepoToken API (DEPRECATED)
+
+⚠️ **WARNING:** Repository tokens are deprecated. Use robot accounts instead for better security.
+
+📖 **API Reference:** [RepoToken endpoints in Swagger](https://docs.quay.io/api/swagger/#RepoToken)
+
+#### List repository tokens
+```bash
+./go-quay get repotoken list \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --token YOUR_TOKEN
+```
+
+#### Get token details
+```bash
+./go-quay get repotoken info \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --code TOKEN_CODE \
+  --token YOUR_TOKEN
+```
+
+#### Create a token
+```bash
+./go-quay get repotoken create \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --name "CI Token" \
+  --token YOUR_TOKEN
+```
+
+#### Update a token
+```bash
+./go-quay get repotoken update \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --code TOKEN_CODE \
+  --role write \
+  --token YOUR_TOKEN
+```
+
+#### Delete a token
+```bash
+./go-quay get repotoken delete \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --code TOKEN_CODE \
+  --confirm \
+  --token YOUR_TOKEN
 ```

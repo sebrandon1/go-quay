@@ -800,3 +800,115 @@ type QuayError struct {
 	Detail      string                 `json:"detail,omitempty"`
 	ErrorDetail map[string]interface{} `json:"error_detail,omitempty"`
 }
+
+// Discovery Structures
+
+// Discovery represents API discovery information
+type Discovery struct {
+	Version   string                  `json:"version,omitempty"`
+	APIs      map[string]DiscoveryAPI `json:"apis,omitempty"`
+	Endpoints map[string]DiscoveryAPI `json:"endpoints,omitempty"`
+	Info      map[string]interface{}  `json:"info,omitempty"`
+	Services  map[string]interface{}  `json:"services,omitempty"`
+	Contact   map[string]string       `json:"contact,omitempty"`
+}
+
+// DiscoveryAPI represents an API endpoint in discovery
+type DiscoveryAPI struct {
+	Path        string   `json:"path,omitempty"`
+	Methods     []string `json:"methods,omitempty"`
+	Description string   `json:"description,omitempty"`
+}
+
+// Error Type Structures
+
+// ErrorType represents details about a specific error type
+type ErrorType struct {
+	Type        string `json:"type,omitempty"`
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Status      int    `json:"status,omitempty"`
+}
+
+// Messages Structures
+
+// Message represents a system message
+type Message struct {
+	UUID      string `json:"uuid,omitempty"`
+	Content   string `json:"content,omitempty"`
+	Severity  string `json:"severity,omitempty"`
+	MediaType string `json:"media_type,omitempty"`
+	CreatedAt string `json:"created_at,omitempty"`
+}
+
+// Messages represents a list of system messages
+type Messages struct {
+	Messages []Message `json:"messages,omitempty"`
+}
+
+// Prototype (Default Permission) Structures
+
+// Prototype represents a default permission prototype
+type Prototype struct {
+	ID             string             `json:"id,omitempty"`
+	Delegate       PrototypeDelegate  `json:"delegate,omitempty"`
+	ActivatingUser *PrototypeDelegate `json:"activating_user,omitempty"`
+	Role           string             `json:"role,omitempty"`
+}
+
+// PrototypeDelegate represents a delegate in a prototype
+type PrototypeDelegate struct {
+	Name    string `json:"name,omitempty"`
+	Kind    string `json:"kind,omitempty"`
+	IsRobot bool   `json:"is_robot,omitempty"`
+	IsOrg   bool   `json:"is_org,omitempty"`
+	Avatar  Avatar `json:"avatar,omitempty"`
+}
+
+// Prototypes represents a list of prototypes
+type Prototypes struct {
+	Prototypes []Prototype `json:"prototypes,omitempty"`
+}
+
+// CreatePrototypeRequest represents a request to create a prototype
+type CreatePrototypeRequest struct {
+	Delegate       PrototypeDelegateRequest  `json:"delegate"`
+	Role           string                    `json:"role"`
+	ActivatingUser *PrototypeDelegateRequest `json:"activating_user,omitempty"`
+}
+
+// PrototypeDelegateRequest represents a delegate in a create/update request
+type PrototypeDelegateRequest struct {
+	Name string `json:"name"`
+	Kind string `json:"kind"`
+}
+
+// UpdatePrototypeRequest represents a request to update a prototype
+type UpdatePrototypeRequest struct {
+	Role string `json:"role,omitempty"`
+}
+
+// RepoToken Structures (Deprecated - use robot accounts instead)
+
+// RepoToken represents a repository token
+type RepoToken struct {
+	Code         string `json:"code,omitempty"`
+	FriendlyName string `json:"friendlyName,omitempty"`
+	Created      string `json:"created,omitempty"`
+	Role         string `json:"role,omitempty"`
+}
+
+// RepoTokens represents a list of repository tokens
+type RepoTokens struct {
+	Tokens []RepoToken `json:"tokens,omitempty"`
+}
+
+// CreateRepoTokenRequest represents a request to create a repo token
+type CreateRepoTokenRequest struct {
+	FriendlyName string `json:"friendlyName"`
+}
+
+// UpdateRepoTokenRequest represents a request to update a repo token
+type UpdateRepoTokenRequest struct {
+	Role string `json:"role,omitempty"`
+}
