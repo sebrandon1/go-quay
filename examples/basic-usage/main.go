@@ -34,7 +34,7 @@ func main() {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
-	fmt.Println("=== go-quay Basic Usage Example ===\n")
+	fmt.Println("=== go-quay Basic Usage Example ===")
 
 	// Step 3: Get current user information
 	fmt.Println("1. Getting current user information...")
