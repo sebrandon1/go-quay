@@ -57,8 +57,8 @@ func main() {
 	}
 	fmt.Printf("   Name: %s\n", org.Name)
 	fmt.Printf("   Email: %s\n", org.Email)
-	fmt.Printf("   Is Admin: %v\n", org.IsAdmin)
-	fmt.Printf("   Is Member: %v\n", org.IsMember)
+	fmt.Printf("   Is Admin: %v\n", org.IsOrgAdmin)
+	fmt.Printf("   Can Create Repo: %v\n", org.CanCreateRepo)
 	fmt.Println()
 
 	// Step 2: List organization members
@@ -82,12 +82,12 @@ func main() {
 	fmt.Println("3. Teams")
 	fmt.Println("   " + repeat("-", 40))
 
-	teams, err := client.GetOrganizationTeams(*orgName)
+	teams, err := client.GetTeams(*orgName)
 	if err != nil {
 		log.Printf("   Could not get teams: %v\n", err)
 	} else {
-		fmt.Printf("   Total Teams: %d\n", len(teams.Teams))
-		for _, team := range teams.Teams {
+		fmt.Printf("   Total Teams: %d\n", len(teams))
+		for _, team := range teams {
 			fmt.Printf("   - %s (role: %s, members: %d)\n",
 				team.Name, team.Role, team.MemberCount)
 
@@ -108,7 +108,7 @@ func main() {
 	fmt.Println("4. Robot Accounts")
 	fmt.Println("   " + repeat("-", 40))
 
-	robots, err := client.GetOrganizationRobots(*orgName)
+	robots, err := client.GetRobotAccounts(*orgName)
 	if err != nil {
 		log.Printf("   Could not get robots: %v\n", err)
 	} else {
@@ -128,21 +128,15 @@ func main() {
 	fmt.Println("5. Quota Information")
 	fmt.Println("   " + repeat("-", 40))
 
-	quotas, err := client.GetOrganizationQuota(*orgName)
+	quota, err := client.GetQuota(*orgName)
 	if err != nil {
 		log.Printf("   Could not get quota: %v\n", err)
-	} else if len(quotas.Quotas) == 0 {
+	} else if quota.LimitBytes == 0 {
 		fmt.Println("   No quota limits configured")
 	} else {
-		for _, q := range quotas.Quotas {
-			usagePercent := float64(0)
-			if q.LimitBytes > 0 {
-				usagePercent = float64(q.UsedBytes) / float64(q.LimitBytes) * 100
-			}
-			fmt.Printf("   Used: %s / %s (%.1f%%)\n",
-				formatBytes(q.UsedBytes),
-				formatBytes(q.LimitBytes),
-				usagePercent)
+		fmt.Printf("   Limit: %s\n", formatBytes(quota.LimitBytes))
+		if quota.DefaultLimitBytes > 0 {
+			fmt.Printf("   Default Limit: %s\n", formatBytes(quota.DefaultLimitBytes))
 		}
 	}
 	fmt.Println()
@@ -151,7 +145,7 @@ func main() {
 	fmt.Println("6. Auto-Prune Policies")
 	fmt.Println("   " + repeat("-", 40))
 
-	policies, err := client.GetOrganizationAutoPrunePolicies(*orgName)
+	policies, err := client.GetAutoPrunePolicies(*orgName)
 	if err != nil {
 		log.Printf("   Could not get auto-prune policies: %v\n", err)
 	} else if len(policies.Policies) == 0 {
@@ -172,7 +166,7 @@ func main() {
 	fmt.Println("7. OAuth Applications")
 	fmt.Println("   " + repeat("-", 40))
 
-	apps, err := client.GetOrganizationApplications(*orgName)
+	apps, err := client.GetApplications(*orgName)
 	if err != nil {
 		log.Printf("   Could not get applications: %v\n", err)
 	} else if len(apps.Applications) == 0 {
@@ -189,7 +183,7 @@ func main() {
 	fmt.Println("8. Default Permission Prototypes")
 	fmt.Println("   " + repeat("-", 40))
 
-	prototypes, err := client.GetOrganizationPrototypes(*orgName)
+	prototypes, err := client.GetPrototypes(*orgName)
 	if err != nil {
 		log.Printf("   Could not get prototypes: %v\n", err)
 	} else if len(prototypes.Prototypes) == 0 {
@@ -209,7 +203,7 @@ func main() {
 		fmt.Printf("Members: %d\n", len(members.Members))
 	}
 	if teams != nil {
-		fmt.Printf("Teams: %d\n", len(teams.Teams))
+		fmt.Printf("Teams: %d\n", len(teams))
 	}
 	if robots != nil {
 		fmt.Printf("Robots: %d\n", len(robots.Robots))

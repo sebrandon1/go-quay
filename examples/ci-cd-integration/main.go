@@ -61,7 +61,7 @@ func main() {
 
 	// Step 2: List existing robot accounts
 	fmt.Println("2. Checking existing robot accounts...")
-	robots, err := client.GetOrganizationRobots(*namespace)
+	robots, err := client.GetRobotAccounts(*namespace)
 	if err != nil {
 		log.Printf("   Could not list robots: %v\n", err)
 	} else {
@@ -77,7 +77,7 @@ func main() {
 	fmt.Printf("3. Setting up robot account '%s'...\n", fullRobotName)
 
 	// Check if robot exists
-	existingRobot, err := client.GetOrganizationRobot(*namespace, *robotName)
+	existingRobot, err := client.GetRobotAccount(*namespace, *robotName)
 	if err == nil {
 		fmt.Println("   Robot already exists, using existing account")
 		fmt.Printf("   Name: %s\n", existingRobot.Name)
@@ -85,7 +85,7 @@ func main() {
 	} else {
 		// Create new robot
 		fmt.Println("   Creating new robot account...")
-		newRobot, err := client.CreateOrganizationRobot(*namespace, *robotName, "CI/CD automation robot", nil)
+		newRobot, err := client.CreateRobotAccount(*namespace, *robotName, "CI/CD automation robot", nil)
 		if err != nil {
 			log.Fatalf("Failed to create robot: %v", err)
 		}
@@ -119,12 +119,12 @@ func main() {
 	if *webhookURL != "" {
 		fmt.Println("5. Setting up webhook notification...")
 
-		notification, err := client.CreateNotification(*namespace, *repository, lib.CreateNotificationRequest{
+		notification, err := client.CreateNotification(*namespace, *repository, &lib.CreateNotificationRequest{
 			Event:  "repo_push",
 			Method: "webhook",
 			Title:  "CI/CD Push Notification",
-			Config: lib.NotificationConfig{
-				URL: *webhookURL,
+			Config: map[string]interface{}{
+				"url": *webhookURL,
 			},
 		})
 		if err != nil {
@@ -140,7 +140,7 @@ func main() {
 
 	// Step 6: List build triggers
 	fmt.Println("6. Checking build triggers...")
-	triggers, err := client.ListBuildTriggers(*namespace, *repository)
+	triggers, err := client.GetTriggers(*namespace, *repository)
 	if err != nil {
 		log.Printf("   Could not list triggers: %v\n", err)
 	} else if len(triggers.Triggers) == 0 {
@@ -160,7 +160,7 @@ func main() {
 
 	// Step 7: List existing notifications
 	fmt.Println("7. Checking existing notifications...")
-	notifications, err := client.ListNotifications(*namespace, *repository)
+	notifications, err := client.GetNotifications(*namespace, *repository)
 	if err != nil {
 		log.Printf("   Could not list notifications: %v\n", err)
 	} else if len(notifications.Notifications) == 0 {
