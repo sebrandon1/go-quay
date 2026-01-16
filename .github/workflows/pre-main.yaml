@@ -90,3 +90,18 @@ jobs:
 
     - name: Validate example commands from README
       run: ./scripts/validate-readme-examples.sh
+
+  swagger-alignment:
+    name: Check API Coverage
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: 'go.mod'
+
+    - name: Check swagger alignment
+      run: make check-swagger-alignment
