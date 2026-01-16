@@ -220,18 +220,26 @@ func scanSourceEndpoints(libPath, baseURLVar string) ([]ImplementedEndpoint, err
 func normalizePath(path string) string {
 	// Replace %s, %d, %v with {}
 	path = regexp.MustCompile(`%[sdv]`).ReplaceAllString(path, "{}")
+	// Remove query string patterns (e.g., ?{} or ?query={})
+	if idx := strings.Index(path, "?"); idx != -1 {
+		path = path[:idx]
+	}
 	// Remove trailing slashes for comparison
 	path = strings.TrimSuffix(path, "/")
 	return path
 }
 
 func normalizeSpecPath(path string) string {
-	// Replace {param_name} with {}
+	// Remove /api/v1 prefix if present
+	path = strings.TrimPrefix(path, "/api/v1")
+	// The Quay API spec uses {repository} to represent namespace/repo as a single parameter
+	// but the implementation uses separate /{namespace}/{repo} parameters
+	// Replace {repository} with {}/{} to match the implementation pattern
+	path = strings.ReplaceAll(path, "{repository}", "{}/{}")
+	// Replace remaining {param_name} with {}
 	path = regexp.MustCompile(`\{[^}]+\}`).ReplaceAllString(path, "{}")
 	// Remove trailing slashes
 	path = strings.TrimSuffix(path, "/")
-	// Remove /api/v1 prefix if present
-	path = strings.TrimPrefix(path, "/api/v1")
 	return path
 }
 

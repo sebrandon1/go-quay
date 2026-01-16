@@ -799,3 +799,103 @@ func (c *Client) ResetApplicationClientSecret(orgname, clientID string) (*Applic
 
 	return &app, nil
 }
+
+// GetOrganizationCollaborators gets the list of collaborators for an organization
+func (c *Client) GetOrganizationCollaborators(orgname string) (*Collaborators, error) {
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/collaborators", QuayURL, orgname), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var collaborators Collaborators
+	if err := c.get(req, &collaborators); err != nil {
+		return nil, err
+	}
+
+	return &collaborators, nil
+}
+
+// GetOrganizationMember gets information about a specific organization member
+func (c *Client) GetOrganizationMember(orgname, membername string) (*OrganizationMember, error) {
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/members/%s", QuayURL, orgname, membername), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var member OrganizationMember
+	if err := c.get(req, &member); err != nil {
+		return nil, err
+	}
+
+	return &member, nil
+}
+
+// GetOrganizationMarketplace gets marketplace information for an organization
+func (c *Client) GetOrganizationMarketplace(orgname string) (*MarketplaceInfo, error) {
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/marketplace", QuayURL, orgname), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var marketplace MarketplaceInfo
+	if err := c.get(req, &marketplace); err != nil {
+		return nil, err
+	}
+
+	return &marketplace, nil
+}
+
+// CreateOrganizationMarketplaceSubscription creates a marketplace subscription
+func (c *Client) CreateOrganizationMarketplaceSubscription(orgname string, subscription *MarketplaceSubscriptionRequest) error {
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/marketplace", QuayURL, orgname), subscription)
+	if err != nil {
+		return err
+	}
+
+	return c.post(req, nil)
+}
+
+// BatchRemoveOrganizationMarketplaceSubscriptions removes multiple marketplace subscriptions
+func (c *Client) BatchRemoveOrganizationMarketplaceSubscriptions(orgname string, subscriptionIDs []string) error {
+	body := struct {
+		SubscriptionIDs []string `json:"subscription_ids"`
+	}{
+		SubscriptionIDs: subscriptionIDs,
+	}
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/marketplace/batchremove", QuayURL, orgname), body)
+	if err != nil {
+		return err
+	}
+
+	return c.post(req, nil)
+}
+
+// DeleteOrganizationMarketplaceSubscription removes a specific marketplace subscription
+func (c *Client) DeleteOrganizationMarketplaceSubscription(orgname, subscriptionID string) error {
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/marketplace/%s", QuayURL, orgname, subscriptionID), nil)
+	if err != nil {
+		return err
+	}
+
+	return c.delete(req)
+}
+
+// InviteTeamMember invites a member to a team via email
+func (c *Client) InviteTeamMember(orgname, teamname, email string) error {
+	req, err := newRequest("PUT", fmt.Sprintf("%s/organization/%s/team/%s/invite/%s", QuayURL, orgname, teamname, email), nil)
+	if err != nil {
+		return err
+	}
+
+	return c.put(req, nil)
+}
+
+// DeleteTeamInvite deletes a pending team invitation
+func (c *Client) DeleteTeamInvite(orgname, teamname, email string) error {
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/team/%s/invite/%s", QuayURL, orgname, teamname, email), nil)
+	if err != nil {
+		return err
+	}
+
+	return c.delete(req)
+}
