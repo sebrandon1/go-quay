@@ -23,4 +23,11 @@ integration-test: build
 clean:
 	rm -f $(APP_NAME)
 
-.PHONY: vet build lint test integration-test clean
+check-swagger-alignment:
+	@echo "Checking API alignment with Quay.io Swagger spec..."
+	@go run ./scripts/check-swagger-alignment.go \
+		--swagger-url="https://quay.io/api/v1/discovery" \
+		--lib-path="./lib" \
+		--base-url-var="QuayURL"
+
+.PHONY: vet build lint test integration-test clean check-swagger-alignment
