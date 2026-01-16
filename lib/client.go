@@ -173,20 +173,15 @@ func newRequest(method, url string, body io.Reader) (*http.Request, error) {
 	return http.NewRequest(method, url, body)
 }
 
-// mustMarshal marshals a value to JSON and panics on error
-func mustMarshal(v interface{}) []byte {
-	data, err := json.Marshal(v)
-	if err != nil {
-		panic(fmt.Sprintf("failed to marshal JSON: %v", err))
-	}
-	return data
-}
-
 // newRequestWithBody creates a new HTTP request with JSON body
 func newRequestWithBody(method, url string, body interface{}) (*http.Request, error) {
 	var bodyReader io.Reader
 	if body != nil {
-		bodyReader = bytes.NewReader(mustMarshal(body))
+		data, err := json.Marshal(body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal JSON: %w", err)
+		}
+		bodyReader = bytes.NewReader(data)
 	}
 	return http.NewRequest(method, url, bodyReader)
 }

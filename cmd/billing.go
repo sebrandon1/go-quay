@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -27,17 +28,20 @@ var orgBillingCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := lib.NewClient(billingToken)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error creating client:", err)
+			return
 		}
 
 		billing, err := client.GetOrganizationBilling(billingOrgName)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error getting organization billing:", err)
+			return
 		}
 
 		jsonOutput, err := json.Marshal(billing)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error marshaling JSON:", err)
+			return
 		}
 
 		fmt.Println(string(jsonOutput))
@@ -51,17 +55,20 @@ var userBillingCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := lib.NewClient(billingToken)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error creating client:", err)
+			return
 		}
 
 		billing, err := client.GetUserBilling()
 		if err != nil {
-			panic(err)
+			fmt.Println("Error getting user billing:", err)
+			return
 		}
 
 		jsonOutput, err := json.Marshal(billing)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error marshaling JSON:", err)
+			return
 		}
 
 		fmt.Println(string(jsonOutput))
@@ -75,17 +82,20 @@ var orgSubscriptionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := lib.NewClient(billingToken)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error creating client:", err)
+			return
 		}
 
 		subscription, err := client.GetOrganizationSubscription(billingOrgName)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error getting organization subscription:", err)
+			return
 		}
 
 		jsonOutput, err := json.Marshal(subscription)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error marshaling JSON:", err)
+			return
 		}
 
 		fmt.Println(string(jsonOutput))
@@ -99,17 +109,20 @@ var userSubscriptionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := lib.NewClient(billingToken)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error creating client:", err)
+			return
 		}
 
 		subscription, err := client.GetUserSubscription()
 		if err != nil {
-			panic(err)
+			fmt.Println("Error getting user subscription:", err)
+			return
 		}
 
 		jsonOutput, err := json.Marshal(subscription)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error marshaling JSON:", err)
+			return
 		}
 
 		fmt.Println(string(jsonOutput))
@@ -123,17 +136,20 @@ var orgInvoicesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := lib.NewClient(billingToken)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error creating client:", err)
+			return
 		}
 
 		invoices, err := client.GetOrganizationInvoices(billingOrgName)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error getting organization invoices:", err)
+			return
 		}
 
 		jsonOutput, err := json.Marshal(invoices)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error marshaling JSON:", err)
+			return
 		}
 
 		fmt.Println(string(jsonOutput))
@@ -157,17 +173,20 @@ var plansCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := lib.NewClient(billingToken)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error creating client:", err)
+			return
 		}
 
 		plans, err := client.GetAvailablePlans()
 		if err != nil {
-			panic(err)
+			fmt.Println("Error getting available plans:", err)
+			return
 		}
 
 		jsonOutput, err := json.Marshal(plans)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error marshaling JSON:", err)
+			return
 		}
 
 		fmt.Println(string(jsonOutput))
@@ -179,49 +198,59 @@ func init() {
 	orgBillingCmd.PersistentFlags().StringVarP(&billingOrgName, "organization", "o", "", "Organization name")
 	orgBillingCmd.PersistentFlags().StringVarP(&billingToken, "token", "t", "", "Bearer token")
 	if err := orgBillingCmd.MarkPersistentFlagRequired("organization"); err != nil {
-		panic(err)
+		fmt.Printf("Error marking organization flag required: %v\n", err)
+		os.Exit(1)
 	}
 	if err := orgBillingCmd.MarkPersistentFlagRequired("token"); err != nil {
-		panic(err)
+		fmt.Printf("Error marking token flag required: %v\n", err)
+		os.Exit(1)
 	}
 
 	orgSubscriptionCmd.PersistentFlags().StringVarP(&billingOrgName, "organization", "o", "", "Organization name")
 	orgSubscriptionCmd.PersistentFlags().StringVarP(&billingToken, "token", "t", "", "Bearer token")
 	if err := orgSubscriptionCmd.MarkPersistentFlagRequired("organization"); err != nil {
-		panic(err)
+		fmt.Printf("Error marking organization flag required: %v\n", err)
+		os.Exit(1)
 	}
 	if err := orgSubscriptionCmd.MarkPersistentFlagRequired("token"); err != nil {
-		panic(err)
+		fmt.Printf("Error marking token flag required: %v\n", err)
+		os.Exit(1)
 	}
 
 	orgInvoicesCmd.PersistentFlags().StringVarP(&billingOrgName, "organization", "o", "", "Organization name")
 	orgInvoicesCmd.PersistentFlags().StringVarP(&billingToken, "token", "t", "", "Bearer token")
 	if err := orgInvoicesCmd.MarkPersistentFlagRequired("organization"); err != nil {
-		panic(err)
+		fmt.Printf("Error marking organization flag required: %v\n", err)
+		os.Exit(1)
 	}
 	if err := orgInvoicesCmd.MarkPersistentFlagRequired("token"); err != nil {
-		panic(err)
+		fmt.Printf("Error marking token flag required: %v\n", err)
+		os.Exit(1)
 	}
 
 	// Add persistent flags for user commands
 	userBillingCmd.PersistentFlags().StringVarP(&billingToken, "token", "t", "", "Bearer token")
 	if err := userBillingCmd.MarkPersistentFlagRequired("token"); err != nil {
-		panic(err)
+		fmt.Printf("Error marking token flag required: %v\n", err)
+		os.Exit(1)
 	}
 
 	userSubscriptionCmd.PersistentFlags().StringVarP(&billingToken, "token", "t", "", "Bearer token")
 	if err := userSubscriptionCmd.MarkPersistentFlagRequired("token"); err != nil {
-		panic(err)
+		fmt.Printf("Error marking token flag required: %v\n", err)
+		os.Exit(1)
 	}
 
 	userInvoicesCmd.PersistentFlags().StringVarP(&billingToken, "token", "t", "", "Bearer token")
 	if err := userInvoicesCmd.MarkPersistentFlagRequired("token"); err != nil {
-		panic(err)
+		fmt.Printf("Error marking token flag required: %v\n", err)
+		os.Exit(1)
 	}
 
 	plansCmd.PersistentFlags().StringVarP(&billingToken, "token", "t", "", "Bearer token")
 	if err := plansCmd.MarkPersistentFlagRequired("token"); err != nil {
-		panic(err)
+		fmt.Printf("Error marking token flag required: %v\n", err)
+		os.Exit(1)
 	}
 
 	// Add subcommands to the billing command
