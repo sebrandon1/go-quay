@@ -97,3 +97,18 @@ func (c *Client) CancelBuild(namespace, repository, buildUUID string) error {
 
 	return nil
 }
+
+// GetBuildStatus gets the status of a build
+func (c *Client) GetBuildStatus(namespace, repository, buildUUID string) (*BuildStatus, error) {
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/build/%s/status", QuayURL, namespace, repository, buildUUID), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create get build status request: %w", err)
+	}
+
+	var status BuildStatus
+	if err := c.get(req, &status); err != nil {
+		return nil, fmt.Errorf("failed to get build status: %w", err)
+	}
+
+	return &status, nil
+}

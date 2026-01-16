@@ -123,3 +123,24 @@ func (c *Client) ActivateTrigger(namespace, repository, triggerUUID string, acti
 
 	return &trigger, nil
 }
+
+// GetTriggerBuilds gets the builds started by a specific trigger
+func (c *Client) GetTriggerBuilds(namespace, repository, triggerUUID string, limit int) (*Builds, error) {
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/trigger/%s/builds", QuayURL, namespace, repository, triggerUUID), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create get trigger builds request: %w", err)
+	}
+
+	if limit > 0 {
+		q := req.URL.Query()
+		q.Add("limit", fmt.Sprintf("%d", limit))
+		req.URL.RawQuery = q.Encode()
+	}
+
+	var builds Builds
+	if err := c.get(req, &builds); err != nil {
+		return nil, fmt.Errorf("failed to get trigger builds: %w", err)
+	}
+
+	return &builds, nil
+}

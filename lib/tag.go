@@ -99,3 +99,22 @@ func (c *Client) RevertTag(namespace, repository, tag, manifestDigest string) (*
 
 	return &tagInfo, nil
 }
+
+// RestoreTag restores a tag to a previous image
+func (c *Client) RestoreTag(namespace, repository, tag, manifestDigest string) error {
+	body := struct {
+		ManifestDigest string `json:"manifest_digest"`
+	}{
+		ManifestDigest: manifestDigest,
+	}
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/tag/%s/restore", QuayURL, namespace, repository, tag), body)
+	if err != nil {
+		return fmt.Errorf("failed to create restore tag request: %w", err)
+	}
+
+	if err := c.post(req, nil); err != nil {
+		return fmt.Errorf("failed to restore tag: %w", err)
+	}
+
+	return nil
+}

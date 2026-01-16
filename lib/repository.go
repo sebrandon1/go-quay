@@ -173,3 +173,55 @@ func (c *Client) DeleteRepository(namespace, repository string) error {
 
 	return nil
 }
+
+// ListRepositories lists all repositories visible to the user
+func (c *Client) ListRepositories(namespace string, public, starred bool, page, limit int) (*RepositoryList, error) {
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository", QuayURL), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create list repositories request: %w", err)
+	}
+
+	q := req.URL.Query()
+	if namespace != "" {
+		q.Add("namespace", namespace)
+	}
+	if public {
+		q.Add("public", "true")
+	}
+	if starred {
+		q.Add("starred", "true")
+	}
+	if page > 0 {
+		q.Add("page", fmt.Sprintf("%d", page))
+	}
+	if limit > 0 {
+		q.Add("limit", fmt.Sprintf("%d", limit))
+	}
+	req.URL.RawQuery = q.Encode()
+
+	var repos RepositoryList
+	if err := c.get(req, &repos); err != nil {
+		return nil, fmt.Errorf("failed to list repositories: %w", err)
+	}
+
+	return &repos, nil
+}
+
+// ChangeRepositoryVisibility changes the visibility (public/private) of a repository
+func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility string) error {
+	body := struct {
+		Visibility string `json:"visibility"`
+	}{
+		Visibility: visibility,
+	}
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/changevisibility", QuayURL, namespace, repository), body)
+	if err != nil {
+		return fmt.Errorf("failed to create change visibility request: %w", err)
+	}
+
+	if err := c.post(req, nil); err != nil {
+		return fmt.Errorf("failed to change repository visibility: %w", err)
+	}
+
+	return nil
+}

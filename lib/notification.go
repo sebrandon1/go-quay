@@ -122,3 +122,18 @@ func (c *Client) ResetNotification(namespace, repository, uuid string) error {
 
 	return nil
 }
+
+// UpdateNotification updates an existing notification
+func (c *Client) UpdateNotification(namespace, repository, uuid string, notificationReq *CreateNotificationRequest) (*RepositoryNotification, error) {
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/notification/%s", QuayURL, namespace, repository, uuid), notificationReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create update notification request: %w", err)
+	}
+
+	var notification RepositoryNotification
+	if err := c.post(req, &notification); err != nil {
+		return nil, fmt.Errorf("failed to update notification: %w", err)
+	}
+
+	return &notification, nil
+}

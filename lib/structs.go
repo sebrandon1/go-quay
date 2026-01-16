@@ -138,6 +138,14 @@ type OrganizationLogs struct {
 	NextPage  string     `json:"next_page,omitempty"`
 }
 
+// ExportLogsRequest represents the request for exporting logs.
+type ExportLogsRequest struct {
+	StartTime   string `json:"starttime,omitempty"`
+	EndTime     string `json:"endtime,omitempty"`
+	CallbackURL string `json:"callback_url,omitempty"`
+	Email       string `json:"callback_email,omitempty"`
+}
+
 // BillingInfo represents billing information for an organization or user.
 type BillingInfo struct {
 	Plan        string            `json:"plan,omitempty"`
@@ -163,6 +171,24 @@ type Subscription struct {
 	Features    []string          `json:"features,omitempty"`
 	Limits      map[string]int    `json:"limits,omitempty"`
 	Metadata    map[string]string `json:"metadata,omitempty"`
+}
+
+// MarketplaceInfo represents marketplace subscription information.
+type MarketplaceInfo struct {
+	Subscriptions []MarketplaceSubscription `json:"subscriptions,omitempty"`
+	HasPayment    bool                      `json:"has_payment,omitempty"`
+}
+
+// MarketplaceSubscription represents a single marketplace subscription.
+type MarketplaceSubscription struct {
+	ID            string `json:"id,omitempty"`
+	SKU           string `json:"sku,omitempty"`
+	Quantity      int    `json:"quantity,omitempty"`
+	Status        string `json:"status,omitempty"`
+	SubscribedAt  string `json:"subscribed_at,omitempty"`
+	ExpiresAt     string `json:"expires_at,omitempty"`
+	PlanID        string `json:"plan_id,omitempty"`
+	VendorAccount string `json:"vendor_account,omitempty"`
 }
 
 // PaymentMethod represents a payment method.
@@ -216,6 +242,27 @@ type OrganizationMember struct {
 // OrganizationMembers represents the response for organization members
 type OrganizationMembers struct {
 	Members []OrganizationMember `json:"members,omitempty"`
+}
+
+// Collaborator represents a collaborator in an organization
+type Collaborator struct {
+	Name        string   `json:"name,omitempty"`
+	Kind        string   `json:"kind,omitempty"`
+	Avatar      Avatar   `json:"avatar,omitempty"`
+	Teams       []string `json:"teams,omitempty"`
+	Repositories []string `json:"repositories,omitempty"`
+}
+
+// Collaborators represents the response for organization collaborators
+type Collaborators struct {
+	Collaborators []Collaborator `json:"collaborators,omitempty"`
+}
+
+// MarketplaceSubscriptionRequest represents a request to create a marketplace subscription
+type MarketplaceSubscriptionRequest struct {
+	SKU      string `json:"sku"`
+	Quantity int    `json:"quantity,omitempty"`
+	PlanID   string `json:"plan_id,omitempty"`
 }
 
 // Team represents a team within an organization
@@ -378,6 +425,13 @@ type OrganizationRepository struct {
 // OrganizationRepositories represents the response for organization repositories
 type OrganizationRepositories struct {
 	Repositories []OrganizationRepository `json:"repositories,omitempty"`
+}
+
+// RepositoryList represents the response for listing repositories
+type RepositoryList struct {
+	Repositories  []OrganizationRepository `json:"repositories,omitempty"`
+	NextPage      string                   `json:"next_page,omitempty"`
+	HasAdditional bool                     `json:"has_additional,omitempty"`
 }
 
 // CreateOrganizationRequest represents the request to create an organization
@@ -682,6 +736,17 @@ type Build struct {
 	Tags            []string               `json:"tags,omitempty"`
 }
 
+// BuildStatus represents the status of a build
+type BuildStatus struct {
+	ID          string `json:"id,omitempty"`
+	Phase       string `json:"phase,omitempty"`
+	Status      string `json:"status,omitempty"`
+	Error       string `json:"error,omitempty"`
+	Message     string `json:"message,omitempty"`
+	CurrentStep int    `json:"current_step,omitempty"`
+	TotalSteps  int    `json:"total_steps,omitempty"`
+}
+
 // BuildTrigger represents a build trigger
 type BuildTrigger struct {
 	ID            string                 `json:"id,omitempty"`
@@ -818,6 +883,20 @@ type DiscoveryAPI struct {
 	Path        string   `json:"path,omitempty"`
 	Methods     []string `json:"methods,omitempty"`
 	Description string   `json:"description,omitempty"`
+}
+
+// Entity represents a user, robot, or team entity
+type Entity struct {
+	Name     string `json:"name,omitempty"`
+	Kind     string `json:"kind,omitempty"`
+	IsRobot  bool   `json:"is_robot,omitempty"`
+	IsOrgMem bool   `json:"is_org_member,omitempty"`
+	Avatar   Avatar `json:"avatar,omitempty"`
+}
+
+// Entities represents a list of entities from a search
+type Entities struct {
+	Results []Entity `json:"results,omitempty"`
 }
 
 // Error Type Structures
