@@ -7,6 +7,79 @@
 
 A Go wrapper around Quay APIs
 
+## Quick Start
+
+### Installation
+
+```bash
+go get github.com/sebrandon1/go-quay
+```
+
+### Library Usage
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+    "os"
+
+    "github.com/sebrandon1/go-quay/lib"
+)
+
+func main() {
+    // Initialize client with your Quay.io token
+    client, err := lib.NewClient(os.Getenv("QUAY_TOKEN"))
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Get current user info
+    user, err := client.GetUser()
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("Logged in as: %s\n", user.Username)
+
+    // List repositories
+    repos, err := client.ListRepositories("my-namespace", false, false, 1, 10)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("Found %d repositories\n", len(repos.Repositories))
+}
+```
+
+### CLI Usage
+
+```bash
+# Build the CLI
+make build
+
+# Get repository info
+./go-quay get repository info --namespace myorg --repository myapp --token YOUR_TOKEN
+```
+
+## Documentation
+
+- **[Library Guide](./docs/library-guide.md)** - Complete API reference for using go-quay as a library
+- **[Examples](./examples/)** - Runnable example programs
+  - [Basic Usage](./examples/basic-usage/) - Getting started
+  - [Security Scanning](./examples/security-scan/) - Vulnerability scanning
+  - [CI/CD Integration](./examples/ci-cd-integration/) - Robot accounts and webhooks
+  - [Organization Management](./examples/organization-management/) - Teams and quotas
+
+### Tutorials
+
+Step-by-step guides for common workflows:
+
+1. [Getting Started](./docs/tutorials/01-getting-started.md) - Installation and first API calls
+2. [Repository Management](./docs/tutorials/02-repository-management.md) - Create, update, and manage repos
+3. [Security Scanning](./docs/tutorials/03-security-scanning.md) - Scan images for vulnerabilities
+4. [CI/CD Automation](./docs/tutorials/04-ci-cd-automation.md) - Set up robot accounts and webhooks
+5. [Organization Administration](./docs/tutorials/05-organization-admin.md) - Manage teams and quotas
+
 ## Table of API Coverage
 
 The following APIs are covered by the repo. Each API links to the corresponding section in the [Quay.io Swagger documentation](https://docs.quay.io/api/swagger/):
