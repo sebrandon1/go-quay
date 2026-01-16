@@ -246,10 +246,10 @@ type OrganizationMembers struct {
 
 // Collaborator represents a collaborator in an organization
 type Collaborator struct {
-	Name        string   `json:"name,omitempty"`
-	Kind        string   `json:"kind,omitempty"`
-	Avatar      Avatar   `json:"avatar,omitempty"`
-	Teams       []string `json:"teams,omitempty"`
+	Name         string   `json:"name,omitempty"`
+	Kind         string   `json:"kind,omitempty"`
+	Avatar       Avatar   `json:"avatar,omitempty"`
+	Teams        []string `json:"teams,omitempty"`
 	Repositories []string `json:"repositories,omitempty"`
 }
 
