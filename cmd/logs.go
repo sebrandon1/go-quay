@@ -30,17 +30,20 @@ var aggregatedLogsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := lib.NewClient(token)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error creating client:", err)
+			return
 		}
 
 		logs, err := client.GetAggregatedLogs(namespace, repository, startdate, enddate)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error getting aggregated logs:", err)
+			return
 		}
 
 		jsonOutput, err := json.Marshal(logs)
 		if err != nil {
-			panic(err)
+			fmt.Println("Error marshaling JSON:", err)
+			return
 		}
 
 		fmt.Println(string(jsonOutput))
