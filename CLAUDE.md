@@ -24,16 +24,35 @@ go test ./...
 make test
 ```
 
+### Integration Test
+```bash
+# Requires QUAY_TOKEN and QUAY_ORG environment variables
+make integration-test
+```
+
 ### Lint
 ```bash
 make lint
+make vet
+```
+
+### Clean
+```bash
+make clean
+```
+
+### Check API Alignment
+```bash
+make check-swagger-alignment
 ```
 
 ## Architecture
 
 - **`cmd/`** - CLI command implementations using Cobra
 - **`lib/`** - Quay API client library with full API coverage
-- **`scripts/`** - Helper scripts
+- **`docs/`** - Documentation including library guide and tutorials
+- **`examples/`** - Runnable example programs
+- **`scripts/`** - Helper scripts for testing and validation
 - **`main.go`** - Application entry point
 
 ## API Coverage
@@ -41,26 +60,35 @@ make lint
 | API | Commands |
 |-----|----------|
 | Billing | user/plan, organization plans, invoices |
-| Build | repository builds, logs |
+| Build | repository builds, logs, request, cancel |
 | Discovery | API discovery endpoint |
-| Manifest | manifest info, labels |
-| Organization | org details, members, teams, robots, quota |
-| Permission | repository permissions |
+| Error | error type details |
+| Logs | aggregated logs, repository logs, organization logs |
+| Manifest | manifest info, labels (CRUD) |
+| Messages | system messages |
+| Organization | org details, members, teams, robots, quota, auto-prune, applications |
+| Permission | repository permissions (CRUD) |
+| Prototype | default permission prototypes |
 | Repository | CRUD operations, tags |
-| Robot | user robots, permissions |
-| Search | repository search |
+| RepositoryNotification | webhooks for repository events |
+| Robot | user robots, permissions, regenerate |
+| Search | repository search, global search |
 | SecScan | security scanning results |
+| Tag | tag info, history, update, delete, revert |
+| Team | team CRUD, members, permissions |
+| Trigger | build triggers |
+| User | user info, starred repositories |
 
 ## Configuration
 
 Set your Quay.io API token:
 ```bash
-export QUAY_API_TOKEN="your-token"
+export QUAY_TOKEN="your-token"
 ```
 
 ## Requirements
 
-- Go 1.21+
+- Go 1.25+
 - Quay.io API token with appropriate permissions
 
 ## Code Style
