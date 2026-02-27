@@ -53,7 +53,7 @@ jobs:
       run: ./scripts/generate-api-coverage-report.sh
 
     - name: Upload coverage report
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: api-coverage-report
         path: api-coverage-report.md
@@ -79,7 +79,7 @@ jobs:
         cat benchmark-results.txt
 
     - name: Upload benchmark results
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: benchmark-results
         path: benchmark-results.txt
