@@ -296,13 +296,13 @@ type TeamPermissions struct {
 
 // RobotAccount represents a robot account
 type RobotAccount struct {
-	Name         string                 `json:"name,omitempty"`
-	Description  string                 `json:"description,omitempty"`
-	Token        string                 `json:"token,omitempty"`
-	Created      string                 `json:"created,omitempty"`
-	LastAccessed string                 `json:"last_accessed,omitempty"`
-	Teams        []Team                 `json:"teams,omitempty"`
-	Repositories []Repository           `json:"repositories,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Description  string         `json:"description,omitempty"`
+	Token        string         `json:"token,omitempty"`
+	Created      string         `json:"created,omitempty"`
+	LastAccessed string         `json:"last_accessed,omitempty"`
+	Teams        []Team         `json:"teams,omitempty"`
+	Repositories []Repository   `json:"repositories,omitempty"`
 	Unstructured map[string]any `json:"unstructured_metadata,omitempty"`
 }
 
@@ -441,7 +441,7 @@ type CreateTeamRequest struct {
 
 // CreateRobotRequest represents the request to create a robot account
 type CreateRobotRequest struct {
-	Description  string                 `json:"description,omitempty"`
+	Description  string         `json:"description,omitempty"`
 	Unstructured map[string]any `json:"unstructured_metadata,omitempty"`
 }
 
@@ -684,37 +684,37 @@ type SecurityFeature struct {
 
 // SecurityVulnerability represents a vulnerability found in a feature
 type SecurityVulnerability struct {
-	Name          string                 `json:"Name,omitempty"`
-	NamespaceName string                 `json:"NamespaceName,omitempty"`
-	Description   string                 `json:"Description,omitempty"`
-	Link          string                 `json:"Link,omitempty"`
-	Severity      string                 `json:"Severity,omitempty"`
+	Name          string         `json:"Name,omitempty"`
+	NamespaceName string         `json:"NamespaceName,omitempty"`
+	Description   string         `json:"Description,omitempty"`
+	Link          string         `json:"Link,omitempty"`
+	Severity      string         `json:"Severity,omitempty"`
 	Metadata      map[string]any `json:"Metadata,omitempty"`
-	FixedBy       string                 `json:"FixedBy,omitempty"`
+	FixedBy       string         `json:"FixedBy,omitempty"`
 }
 
 // Build Structures
 
 // Build represents a repository build
 type Build struct {
-	ID              string                 `json:"id,omitempty"`
-	Phase           string                 `json:"phase,omitempty"`
-	Started         string                 `json:"started,omitempty"`
-	DisplayName     string                 `json:"display_name,omitempty"`
-	Status          map[string]any `json:"status,omitempty"`
-	Subdirectory    string                 `json:"subdirectory,omitempty"`
-	Dockerfile      string                 `json:"dockerfile_path,omitempty"`
-	Context         string                 `json:"context,omitempty"`
-	IsWriter        bool                   `json:"is_writer,omitempty"`
-	Trigger         *BuildTrigger          `json:"trigger,omitempty"`
-	TriggerMetadata map[string]any `json:"trigger_metadata,omitempty"`
-	ResourceKey     string                 `json:"resource_key,omitempty"`
-	Pull            *BuildPullRobot        `json:"pull_robot,omitempty"`
-	Repository      *BuildRepository       `json:"repository,omitempty"`
-	Error           string                 `json:"error,omitempty"`
-	ManualUser      string                 `json:"manual_user,omitempty"`
-	Archive         string                 `json:"archive_url,omitempty"`
-	Tags            []string               `json:"tags,omitempty"`
+	ID              string           `json:"id,omitempty"`
+	Phase           string           `json:"phase,omitempty"`
+	Started         string           `json:"started,omitempty"`
+	DisplayName     string           `json:"display_name,omitempty"`
+	Status          map[string]any   `json:"status,omitempty"`
+	Subdirectory    string           `json:"subdirectory,omitempty"`
+	Dockerfile      string           `json:"dockerfile_path,omitempty"`
+	Context         string           `json:"context,omitempty"`
+	IsWriter        bool             `json:"is_writer,omitempty"`
+	Trigger         *BuildTrigger    `json:"trigger,omitempty"`
+	TriggerMetadata map[string]any   `json:"trigger_metadata,omitempty"`
+	ResourceKey     string           `json:"resource_key,omitempty"`
+	Pull            *BuildPullRobot  `json:"pull_robot,omitempty"`
+	Repository      *BuildRepository `json:"repository,omitempty"`
+	Error           string           `json:"error,omitempty"`
+	ManualUser      string           `json:"manual_user,omitempty"`
+	Archive         string           `json:"archive_url,omitempty"`
+	Tags            []string         `json:"tags,omitempty"`
 }
 
 // BuildStatus represents the status of a build
@@ -730,16 +730,16 @@ type BuildStatus struct {
 
 // BuildTrigger represents a build trigger
 type BuildTrigger struct {
-	ID            string                 `json:"id,omitempty"`
-	Service       string                 `json:"service,omitempty"`
-	IsActive      bool                   `json:"is_active,omitempty"`
-	BuildSource   string                 `json:"build_source,omitempty"`
-	RepositoryURL string                 `json:"repository_url,omitempty"`
-	Config        map[string]any `json:"config,omitempty"`
-	CanInvoke     bool                   `json:"can_invoke,omitempty"`
-	Enabled       bool                   `json:"enabled,omitempty"`
-	DisableReason string                 `json:"disable_reason,omitempty"`
-	PullRobot     *BuildPullRobot        `json:"pull_robot,omitempty"`
+	ID            string          `json:"id,omitempty"`
+	Service       string          `json:"service,omitempty"`
+	IsActive      bool            `json:"is_active,omitempty"`
+	BuildSource   string          `json:"build_source,omitempty"`
+	RepositoryURL string          `json:"repository_url,omitempty"`
+	Config        map[string]any  `json:"config,omitempty"`
+	CanInvoke     bool            `json:"can_invoke,omitempty"`
+	Enabled       bool            `json:"enabled,omitempty"`
+	DisableReason string          `json:"disable_reason,omitempty"`
+	PullRobot     *BuildPullRobot `json:"pull_robot,omitempty"`
 }
 
 // BuildTriggers represents a list of build triggers
@@ -750,7 +750,7 @@ type BuildTriggers struct {
 // ActivateTriggerRequest represents the request to activate a build trigger
 type ActivateTriggerRequest struct {
 	Config    map[string]any `json:"config,omitempty"`
-	PullRobot string                 `json:"pull_robot,omitempty"`
+	PullRobot string         `json:"pull_robot,omitempty"`
 }
 
 // ManualTriggerRequest represents the request to manually start a build trigger
@@ -787,8 +787,8 @@ type BuildLogs struct {
 
 // BuildLogEntry represents a single log entry in build logs
 type BuildLogEntry struct {
-	Type    string                 `json:"type,omitempty"`
-	Message string                 `json:"message,omitempty"`
+	Type    string         `json:"type,omitempty"`
+	Message string         `json:"message,omitempty"`
 	Data    map[string]any `json:"data,omitempty"`
 }
 
@@ -807,13 +807,13 @@ type RequestBuildRequest struct {
 
 // RepositoryNotification represents a repository notification/webhook
 type RepositoryNotification struct {
-	UUID             string                 `json:"uuid,omitempty"`
-	Title            string                 `json:"title,omitempty"`
-	Event            string                 `json:"event,omitempty"`
-	Method           string                 `json:"method,omitempty"`
+	UUID             string         `json:"uuid,omitempty"`
+	Title            string         `json:"title,omitempty"`
+	Event            string         `json:"event,omitempty"`
+	Method           string         `json:"method,omitempty"`
 	Config           map[string]any `json:"config,omitempty"`
 	EventConfig      map[string]any `json:"event_config,omitempty"`
-	NumberOfFailures int                    `json:"number_of_failures,omitempty"`
+	NumberOfFailures int            `json:"number_of_failures,omitempty"`
 }
 
 // RepositoryNotifications represents a list of notifications
@@ -823,11 +823,11 @@ type RepositoryNotifications struct {
 
 // CreateNotificationRequest represents the request to create a notification
 type CreateNotificationRequest struct {
-	Event       string                 `json:"event"`
-	Method      string                 `json:"method"`
+	Event       string         `json:"event"`
+	Method      string         `json:"method"`
 	Config      map[string]any `json:"config"`
 	EventConfig map[string]any `json:"eventConfig,omitempty"`
-	Title       string                 `json:"title,omitempty"`
+	Title       string         `json:"title,omitempty"`
 }
 
 // TestNotificationResponse represents the response from testing a notification
@@ -840,10 +840,10 @@ type TestNotificationResponse struct {
 
 // QuayError represents a Quay API error response
 type QuayError struct {
-	Status      int                    `json:"status,omitempty"`
-	Error       string                 `json:"error,omitempty"`
-	ErrorType   string                 `json:"error_type,omitempty"`
-	Detail      string                 `json:"detail,omitempty"`
+	Status      int            `json:"status,omitempty"`
+	Error       string         `json:"error,omitempty"`
+	ErrorType   string         `json:"error_type,omitempty"`
+	Detail      string         `json:"detail,omitempty"`
 	ErrorDetail map[string]any `json:"error_detail,omitempty"`
 }
 
@@ -854,8 +854,8 @@ type Discovery struct {
 	Version   string                  `json:"version,omitempty"`
 	APIs      map[string]DiscoveryAPI `json:"apis,omitempty"`
 	Endpoints map[string]DiscoveryAPI `json:"endpoints,omitempty"`
-	Info      map[string]any  `json:"info,omitempty"`
-	Services  map[string]any  `json:"services,omitempty"`
+	Info      map[string]any          `json:"info,omitempty"`
+	Services  map[string]any          `json:"services,omitempty"`
 	Contact   map[string]string       `json:"contact,omitempty"`
 }
 
