@@ -17,11 +17,11 @@ var (
 )
 
 func init() {
-	aggregatedLogsCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "Name of the namespace", "")
-	aggregatedLogsCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "Name of the repository", "")
-	aggregatedLogsCmd.PersistentFlags().StringVarP(&startdate, "startdate", "s", "Start date for the logs", "")
-	aggregatedLogsCmd.PersistentFlags().StringVarP(&enddate, "enddate", "e", "End date for the logs", "")
-	aggregatedLogsCmd.PersistentFlags().StringVarP(&token, "token", "t", "Bearer token", "")
+	aggregatedLogsCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
+	aggregatedLogsCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
+	aggregatedLogsCmd.PersistentFlags().StringVarP(&startdate, "startdate", "s", "", "Start date for the logs")
+	aggregatedLogsCmd.PersistentFlags().StringVarP(&enddate, "enddate", "e", "", "End date for the logs")
+	aggregatedLogsCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 }
 
 var aggregatedLogsCmd = &cobra.Command{

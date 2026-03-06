@@ -7,16 +7,15 @@ Client Setup:
   - NewClient(bearerToken string) (*Client, error)   - Create authenticated client
 
 HTTP Helper Methods:
-  - get(req *http.Request, v interface{}) error      - Execute GET requests
-  - post(req *http.Request, v interface{}) error     - Execute POST requests
-  - put(req *http.Request, v interface{}) error      - Execute PUT requests
+  - get(req *http.Request, v any) error      - Execute GET requests
+  - post(req *http.Request, v any) error     - Execute POST requests
+  - put(req *http.Request, v any) error      - Execute PUT requests
   - delete(req *http.Request) error                  - Execute DELETE requests
 
 Request Helpers:
   - newRequest(method, url string, body io.Reader) (*http.Request, error)
-  - newRequestWithBody(method, url string, body interface{}) (*http.Request, error)
-  - mustMarshal(v interface{}) []byte
-  - decodeJSON(r io.Reader, v interface{}) error
+  - newRequestWithBody(method, url string, body any) (*http.Request, error)
+  - decodeJSON(r io.Reader, v any) error
 
 All HTTP methods include:
   - Bearer token authentication
@@ -47,11 +46,10 @@ func NewClient(bearerToken string) (*Client, error) {
 		return nil, errors.New("bearer token is required")
 	}
 
-	// Create a custom transport to force IPv4 connections
 	transport := &http.Transport{
-		Dial: (&net.Dialer{
+		DialContext: (&net.Dialer{
 			Timeout: 10 * time.Second,
-		}).Dial,
+		}).DialContext,
 		TLSHandshakeTimeout: 10 * time.Second,
 	}
 
@@ -64,7 +62,7 @@ func NewClient(bearerToken string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) get(req *http.Request, v interface{}) error {
+func (c *Client) get(req *http.Request, v any) error {
 	req.Header.Set("Authorization", "Bearer "+c.BearerToken)
 	req.Header.Set("Content-Type", "application/json")
 
@@ -73,11 +71,7 @@ func (c *Client) get(req *http.Request, v interface{}) error {
 		return err
 	}
 
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			fmt.Println("error closing response body:", err)
-		}
-	}()
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -87,7 +81,7 @@ func (c *Client) get(req *http.Request, v interface{}) error {
 	return decodeJSON(resp.Body, v)
 }
 
-func (c *Client) post(req *http.Request, v interface{}) error {
+func (c *Client) post(req *http.Request, v any) error {
 	req.Header.Set("Authorization", "Bearer "+c.BearerToken)
 	req.Header.Set("Content-Type", "application/json")
 
@@ -96,11 +90,7 @@ func (c *Client) post(req *http.Request, v interface{}) error {
 		return err
 	}
 
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			fmt.Println("error closing response body:", err)
-		}
-	}()
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -114,7 +104,7 @@ func (c *Client) post(req *http.Request, v interface{}) error {
 	return nil
 }
 
-func (c *Client) put(req *http.Request, v interface{}) error {
+func (c *Client) put(req *http.Request, v any) error {
 	req.Header.Set("Authorization", "Bearer "+c.BearerToken)
 	req.Header.Set("Content-Type", "application/json")
 
@@ -123,11 +113,7 @@ func (c *Client) put(req *http.Request, v interface{}) error {
 		return err
 	}
 
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			fmt.Println("error closing response body:", err)
-		}
-	}()
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
 		body, _ := io.ReadAll(resp.Body)
@@ -150,11 +136,7 @@ func (c *Client) delete(req *http.Request) error {
 		return err
 	}
 
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			fmt.Println("error closing response body:", err)
-		}
-	}()
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -164,7 +146,7 @@ func (c *Client) delete(req *http.Request) error {
 	return nil
 }
 
-func decodeJSON(r io.Reader, v interface{}) error {
+func decodeJSON(r io.Reader, v any) error {
 	return json.NewDecoder(r).Decode(v)
 }
 
@@ -174,7 +156,7 @@ func newRequest(method, url string, body io.Reader) (*http.Request, error) {
 }
 
 // newRequestWithBody creates a new HTTP request with JSON body
-func newRequestWithBody(method, url string, body interface{}) (*http.Request, error) {
+func newRequestWithBody(method, url string, body any) (*http.Request, error) {
 	var bodyReader io.Reader
 	if body != nil {
 		data, err := json.Marshal(body)

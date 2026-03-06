@@ -51,21 +51,8 @@ type Repository struct {
 }
 
 type RepositoryWithTags struct {
-	Namespace      string         `json:"namespace,omitempty"`
-	Name           string         `json:"name,omitempty"`
-	Kind           string         `json:"kind,omitempty"`
-	Description    string         `json:"description,omitempty"`
-	IsPublic       bool           `json:"is_public,omitempty"`
-	IsOrganization bool           `json:"is_organization,omitempty"`
-	IsStarred      bool           `json:"is_starred,omitempty"`
-	StatusToken    string         `json:"status_token,omitempty"`
-	TrustEnabled   bool           `json:"trust_enabled,omitempty"`
-	TagExpirationS int            `json:"tag_expiration_s,omitempty"`
-	IsFreeAccount  bool           `json:"is_free_account,omitempty"`
-	State          string         `json:"state,omitempty"`
-	CanWrite       bool           `json:"can_write,omitempty"`
-	CanAdmin       bool           `json:"can_admin,omitempty"`
-	Tags           RepositoryTags `json:"tags,omitempty"`
+	Repository
+	Tags RepositoryTags `json:"tags,omitempty"`
 }
 
 // GetRepository returns a repository with tags information baked in
@@ -94,25 +81,10 @@ func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags
 		return RepositoryWithTags{}, fmt.Errorf("failed to fetch repository tags: %w", err)
 	}
 
-	repoWithTags := RepositoryWithTags{
-		Namespace:      repo.Namespace,
-		Name:           repo.Name,
-		Kind:           repo.Kind,
-		Description:    repo.Description,
-		IsPublic:       repo.IsPublic,
-		IsOrganization: repo.IsOrganization,
-		IsStarred:      repo.IsStarred,
-		StatusToken:    repo.StatusToken,
-		TrustEnabled:   repo.TrustEnabled,
-		TagExpirationS: repo.TagExpirationS,
-		IsFreeAccount:  repo.IsFreeAccount,
-		State:          repo.State,
-		CanWrite:       repo.CanWrite,
-		CanAdmin:       repo.CanAdmin,
-		Tags:           tags,
-	}
-
-	return repoWithTags, nil
+	return RepositoryWithTags{
+		Repository: repo,
+		Tags:       tags,
+	}, nil
 }
 
 // CreateRepository creates a new repository

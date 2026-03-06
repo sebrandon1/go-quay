@@ -75,19 +75,17 @@ func (c *Client) GetLogs(namespace, repository, nextPage string) (*Logs, error) 
 }
 
 // GetOrganizationLogs returns the logs for an organization
-func (c *Client) GetOrganizationLogs(orgname, nextPage string) (*OrganizationLogs, error) {
+func (c *Client) GetOrganizationLogs(orgname, nextPage string) (*Logs, error) {
 	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/logs", QuayURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+c.BearerToken)
-
 	if nextPage != "" {
 		addQueryParams(req, map[string]string{"next_page": nextPage})
 	}
 
-	var logs OrganizationLogs
+	var logs Logs
 	if err := c.get(req, &logs); err != nil {
 		return nil, err
 	}
