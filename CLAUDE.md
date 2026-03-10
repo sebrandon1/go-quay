@@ -88,7 +88,7 @@ export QUAY_TOKEN="your-token"
 
 ## Requirements
 
-- Go 1.25+
+- Go 1.26+
 - Quay.io API token with appropriate permissions
 
 ## Code Style
