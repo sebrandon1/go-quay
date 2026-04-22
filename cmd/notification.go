@@ -213,6 +213,45 @@ var notificationResetCmd = &cobra.Command{
 	},
 }
 
+var notificationUpdateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update a notification",
+	Long:  `Update an existing notification (webhook) configuration.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := lib.NewClient(token)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		config := map[string]interface{}{}
+		switch notificationMethod {
+		case "webhook":
+			config["url"] = notificationURL
+		case "email":
+			config["email"] = notificationURL
+		case "slack":
+			config["url"] = notificationURL
+		}
+
+		notificationReq := &lib.CreateNotificationRequest{
+			Event:  notificationEvent,
+			Method: notificationMethod,
+			Config: config,
+			Title:  notificationTitle,
+		}
+
+		notification, err := client.UpdateNotification(notificationNamespace, notificationRepository, notificationUUID, notificationReq)
+		if err != nil {
+			fmt.Printf("Error updating notification: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Notification '%s' updated successfully!\n", notificationUUID)
+		printJSON(notification)
+	},
+}
+
 func init() {
 	// Add subcommands to notification command
 	notificationCmd.AddCommand(notificationListCmd)
@@ -221,25 +260,36 @@ func init() {
 	notificationCmd.AddCommand(notificationDeleteCmd)
 	notificationCmd.AddCommand(notificationTestCmd)
 	notificationCmd.AddCommand(notificationResetCmd)
+	notificationCmd.AddCommand(notificationUpdateCmd)
 
 	// Global notification flags
 	notificationCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 	notificationCmd.PersistentFlags().StringVarP(&notificationNamespace, "namespace", "n", "", "Repository namespace")
 	notificationCmd.PersistentFlags().StringVarP(&notificationRepository, "repository", "r", "", "Repository name")
-	markNotificationFlagRequired(notificationCmd.MarkPersistentFlagRequired("token"))
-	markNotificationFlagRequired(notificationCmd.MarkPersistentFlagRequired("namespace"))
-	markNotificationFlagRequired(notificationCmd.MarkPersistentFlagRequired("repository"))
+	markFlagRequired(notificationCmd.MarkPersistentFlagRequired("token"))
+	markFlagRequired(notificationCmd.MarkPersistentFlagRequired("namespace"))
+	markFlagRequired(notificationCmd.MarkPersistentFlagRequired("repository"))
 
 	initNotificationInfoFlags()
 	initNotificationCreateFlags()
 	initNotificationDeleteFlags()
 	initNotificationTestFlags()
 	initNotificationResetFlags()
+	initNotificationUpdateFlags()
+}
+
+func initNotificationUpdateFlags() {
+	notificationUpdateCmd.Flags().StringVarP(&notificationUUID, "uuid", "u", "", "Notification UUID")
+	notificationUpdateCmd.Flags().StringVarP(&notificationEvent, "event", "e", "", "Event type (repo_push, build_success, etc.)")
+	notificationUpdateCmd.Flags().StringVarP(&notificationMethod, "method", "m", "", "Method (webhook, email, slack)")
+	notificationUpdateCmd.Flags().StringVar(&notificationURL, "url", "", "Webhook URL or email address")
+	notificationUpdateCmd.Flags().StringVar(&notificationTitle, "title", "", "Notification title")
+	markFlagRequired(notificationUpdateCmd.MarkFlagRequired("uuid"))
 }
 
 func initNotificationInfoFlags() {
 	notificationInfoCmd.Flags().StringVarP(&notificationUUID, "uuid", "u", "", "Notification UUID")
-	markNotificationFlagRequired(notificationInfoCmd.MarkFlagRequired("uuid"))
+	markFlagRequired(notificationInfoCmd.MarkFlagRequired("uuid"))
 }
 
 func initNotificationCreateFlags() {
@@ -247,30 +297,23 @@ func initNotificationCreateFlags() {
 	notificationCreateCmd.Flags().StringVarP(&notificationMethod, "method", "m", "", "Method (webhook, email, slack)")
 	notificationCreateCmd.Flags().StringVar(&notificationURL, "url", "", "Webhook URL or email address")
 	notificationCreateCmd.Flags().StringVar(&notificationTitle, "title", "", "Notification title")
-	markNotificationFlagRequired(notificationCreateCmd.MarkFlagRequired("event"))
-	markNotificationFlagRequired(notificationCreateCmd.MarkFlagRequired("method"))
-	markNotificationFlagRequired(notificationCreateCmd.MarkFlagRequired("url"))
+	markFlagRequired(notificationCreateCmd.MarkFlagRequired("event"))
+	markFlagRequired(notificationCreateCmd.MarkFlagRequired("method"))
+	markFlagRequired(notificationCreateCmd.MarkFlagRequired("url"))
 }
 
 func initNotificationDeleteFlags() {
 	notificationDeleteCmd.Flags().StringVarP(&notificationUUID, "uuid", "u", "", "Notification UUID")
 	notificationDeleteCmd.Flags().BoolVar(&confirmNotificationDel, "confirm", false, "Confirm notification deletion")
-	markNotificationFlagRequired(notificationDeleteCmd.MarkFlagRequired("uuid"))
+	markFlagRequired(notificationDeleteCmd.MarkFlagRequired("uuid"))
 }
 
 func initNotificationTestFlags() {
 	notificationTestCmd.Flags().StringVarP(&notificationUUID, "uuid", "u", "", "Notification UUID")
-	markNotificationFlagRequired(notificationTestCmd.MarkFlagRequired("uuid"))
+	markFlagRequired(notificationTestCmd.MarkFlagRequired("uuid"))
 }
 
 func initNotificationResetFlags() {
 	notificationResetCmd.Flags().StringVarP(&notificationUUID, "uuid", "u", "", "Notification UUID")
-	markNotificationFlagRequired(notificationResetCmd.MarkFlagRequired("uuid"))
-}
-
-func markNotificationFlagRequired(err error) {
-	if err != nil {
-		fmt.Printf("Error marking flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	markFlagRequired(notificationResetCmd.MarkFlagRequired("uuid"))
 }

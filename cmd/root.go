@@ -36,6 +36,7 @@ func init() {
 	getCmd.AddCommand(messagesCmd)
 	getCmd.AddCommand(prototypeCmd)
 	getCmd.AddCommand(repotokenCmd)
+	getCmd.AddCommand(logsCmd)
 }
 
 // Execute executes the root command.
