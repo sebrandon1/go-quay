@@ -149,6 +149,27 @@ var tagRevertCmd = &cobra.Command{
 	},
 }
 
+var tagRestoreCmd = &cobra.Command{
+	Use:   "restore",
+	Short: "Restore a tag from a previous state",
+	Long:  `Restore a previously deleted or modified tag using its manifest digest.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := lib.NewClient(token)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		err = client.RestoreTag(namespace, repository, tagName, manifestDigest)
+		if err != nil {
+			fmt.Printf("Error restoring tag: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Successfully restored tag %s/%s:%s from manifest %s\n", namespace, repository, tagName, manifestDigest)
+	},
+}
+
 func init() {
 	// Add subcommands to tag command
 	tagCmd.AddCommand(tagInfoCmd)
@@ -156,6 +177,7 @@ func init() {
 	tagCmd.AddCommand(tagDeleteCmd)
 	tagCmd.AddCommand(tagHistoryCmd)
 	tagCmd.AddCommand(tagRevertCmd)
+	tagCmd.AddCommand(tagRestoreCmd)
 
 	// Global tag flags (repository context)
 	tagCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
@@ -190,6 +212,13 @@ func init() {
 	// Revert command specific flags
 	tagRevertCmd.Flags().StringVarP(&manifestDigest, "manifest", "m", "", "Manifest digest to revert to")
 	if err := tagRevertCmd.MarkFlagRequired("manifest"); err != nil {
+		fmt.Printf("Error marking manifest flag as required: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Restore command specific flags
+	tagRestoreCmd.Flags().StringVarP(&manifestDigest, "manifest", "m", "", "Manifest digest to restore")
+	if err := tagRestoreCmd.MarkFlagRequired("manifest"); err != nil {
 		fmt.Printf("Error marking manifest flag as required: %v\n", err)
 		os.Exit(1)
 	}

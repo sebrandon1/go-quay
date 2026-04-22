@@ -345,76 +345,69 @@ func init() {
 func initTeamGlobalFlags() {
 	teamCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 	teamCmd.PersistentFlags().StringVarP(&teamCmdOrgname, "organization", "o", "", "Organization name")
-	markTeamFlagRequired(teamCmd.MarkPersistentFlagRequired("token"))
-	markTeamFlagRequired(teamCmd.MarkPersistentFlagRequired("organization"))
+	markFlagRequired(teamCmd.MarkPersistentFlagRequired("token"))
+	markFlagRequired(teamCmd.MarkPersistentFlagRequired("organization"))
 }
 
 func initTeamCmdFlags() {
 	// Info command flags
 	teamCmdInfoCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
-	markTeamFlagRequired(teamCmdInfoCmd.MarkFlagRequired("name"))
+	markFlagRequired(teamCmdInfoCmd.MarkFlagRequired("name"))
 
 	// Create command flags
 	teamCreateCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamCreateCmd.Flags().StringVarP(&teamCmdDescription, "description", "d", "", "Team description")
 	teamCreateCmd.Flags().StringVarP(&teamCmdRole, "role", "r", "member", "Team role (member, creator, admin)")
-	markTeamFlagRequired(teamCreateCmd.MarkFlagRequired("name"))
+	markFlagRequired(teamCreateCmd.MarkFlagRequired("name"))
 
 	// Update command flags
 	teamUpdateCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamUpdateCmd.Flags().StringVarP(&teamCmdDescription, "description", "d", "", "Team description")
 	teamUpdateCmd.Flags().StringVarP(&teamCmdRole, "role", "r", "", "Team role (member, creator, admin)")
-	markTeamFlagRequired(teamUpdateCmd.MarkFlagRequired("name"))
+	markFlagRequired(teamUpdateCmd.MarkFlagRequired("name"))
 
 	// Delete command flags
 	teamDeleteCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamDeleteCmd.Flags().BoolVar(&confirmTeamDelete, "confirm", false, "Confirm team deletion")
-	markTeamFlagRequired(teamDeleteCmd.MarkFlagRequired("name"))
+	markFlagRequired(teamDeleteCmd.MarkFlagRequired("name"))
 }
 
 func initTeamMemberCmdFlags() {
 	// Members command flags
 	teamCmdMembersCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
-	markTeamFlagRequired(teamCmdMembersCmd.MarkFlagRequired("name"))
+	markFlagRequired(teamCmdMembersCmd.MarkFlagRequired("name"))
 
 	// Add member command flags
 	teamAddMemberCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamAddMemberCmd.Flags().StringVarP(&teamCmdMemberName, "member", "m", "", "Member name (username or robot)")
-	markTeamFlagRequired(teamAddMemberCmd.MarkFlagRequired("name"))
-	markTeamFlagRequired(teamAddMemberCmd.MarkFlagRequired("member"))
+	markFlagRequired(teamAddMemberCmd.MarkFlagRequired("name"))
+	markFlagRequired(teamAddMemberCmd.MarkFlagRequired("member"))
 
 	// Remove member command flags
 	teamRemoveMemberCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamRemoveMemberCmd.Flags().StringVarP(&teamCmdMemberName, "member", "m", "", "Member name (username or robot)")
 	teamRemoveMemberCmd.Flags().BoolVar(&confirmTeamMemberDel, "confirm", false, "Confirm member removal")
-	markTeamFlagRequired(teamRemoveMemberCmd.MarkFlagRequired("name"))
-	markTeamFlagRequired(teamRemoveMemberCmd.MarkFlagRequired("member"))
+	markFlagRequired(teamRemoveMemberCmd.MarkFlagRequired("name"))
+	markFlagRequired(teamRemoveMemberCmd.MarkFlagRequired("member"))
 }
 
 func initTeamPermissionCmdFlags() {
 	// Permissions command flags
 	teamPermissionsCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
-	markTeamFlagRequired(teamPermissionsCmd.MarkFlagRequired("name"))
+	markFlagRequired(teamPermissionsCmd.MarkFlagRequired("name"))
 
 	// Set permission command flags
 	teamSetPermissionCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamSetPermissionCmd.Flags().StringVarP(&teamCmdRepository, "repository", "R", "", "Repository name")
 	teamSetPermissionCmd.Flags().StringVarP(&teamCmdPermissionRole, "role", "r", "", "Permission role (read, write, admin)")
-	markTeamFlagRequired(teamSetPermissionCmd.MarkFlagRequired("name"))
-	markTeamFlagRequired(teamSetPermissionCmd.MarkFlagRequired("repository"))
-	markTeamFlagRequired(teamSetPermissionCmd.MarkFlagRequired("role"))
+	markFlagRequired(teamSetPermissionCmd.MarkFlagRequired("name"))
+	markFlagRequired(teamSetPermissionCmd.MarkFlagRequired("repository"))
+	markFlagRequired(teamSetPermissionCmd.MarkFlagRequired("role"))
 
 	// Remove permission command flags
 	teamRemovePermissionCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamRemovePermissionCmd.Flags().StringVarP(&teamCmdRepository, "repository", "R", "", "Repository name")
 	teamRemovePermissionCmd.Flags().BoolVar(&confirmTeamPermDel, "confirm", false, "Confirm permission removal")
-	markTeamFlagRequired(teamRemovePermissionCmd.MarkFlagRequired("name"))
-	markTeamFlagRequired(teamRemovePermissionCmd.MarkFlagRequired("repository"))
-}
-
-func markTeamFlagRequired(err error) {
-	if err != nil {
-		fmt.Printf("Error marking flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	markFlagRequired(teamRemovePermissionCmd.MarkFlagRequired("name"))
+	markFlagRequired(teamRemovePermissionCmd.MarkFlagRequired("repository"))
 }

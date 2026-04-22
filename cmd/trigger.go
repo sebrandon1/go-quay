@@ -27,6 +27,7 @@ var (
 	triggerUUID       string
 	triggerCommitSHA  string
 	triggerPullRobot  string
+	triggerBuildLimit int
 )
 
 // triggerCmd represents the trigger command
@@ -265,16 +266,42 @@ var triggerActivateCmd = &cobra.Command{
 	},
 }
 
+var triggerBuildsCmd = &cobra.Command{
+	Use:   "builds",
+	Short: "List builds for a trigger",
+	Long:  `List builds that were started by a specific trigger.`,
+	Run: func(_ *cobra.Command, _ []string) {
+		if triggerUUID == "" {
+			fmt.Println("Error: --uuid is required")
+			os.Exit(1)
+		}
+
+		client, err := lib.NewClient(token)
+		if err != nil {
+			fmt.Println("Error creating client:", err)
+			os.Exit(1)
+		}
+
+		builds, err := client.GetTriggerBuilds(triggerNamespace, triggerRepository, triggerUUID, triggerBuildLimit)
+		if err != nil {
+			fmt.Println("Error getting trigger builds:", err)
+			os.Exit(1)
+		}
+
+		printJSON(builds)
+	},
+}
+
 func setupTriggerFlags() {
 	// Common flags for all subcommands
-	for _, cmd := range []*cobra.Command{triggerListCmd, triggerInfoCmd, triggerDeleteCmd, triggerEnableCmd, triggerDisableCmd, triggerStartCmd, triggerActivateCmd} {
+	for _, cmd := range []*cobra.Command{triggerListCmd, triggerInfoCmd, triggerDeleteCmd, triggerEnableCmd, triggerDisableCmd, triggerStartCmd, triggerActivateCmd, triggerBuildsCmd} {
 		cmd.Flags().StringVarP(&triggerNamespace, "namespace", "n", "", "Namespace/organization")
 		cmd.Flags().StringVarP(&triggerRepository, "repository", "r", "", "Repository name")
 		cmd.Flags().StringVarP(&token, "token", "t", "", "Quay.io API token")
 	}
 
 	// UUID flags for subcommands that need it
-	for _, cmd := range []*cobra.Command{triggerInfoCmd, triggerDeleteCmd, triggerEnableCmd, triggerDisableCmd, triggerStartCmd, triggerActivateCmd} {
+	for _, cmd := range []*cobra.Command{triggerInfoCmd, triggerDeleteCmd, triggerEnableCmd, triggerDisableCmd, triggerStartCmd, triggerActivateCmd, triggerBuildsCmd} {
 		cmd.Flags().StringVar(&triggerUUID, "uuid", "", "UUID of the build trigger")
 	}
 
@@ -283,6 +310,9 @@ func setupTriggerFlags() {
 
 	// Activate command specific flags
 	triggerActivateCmd.Flags().StringVar(&triggerPullRobot, "pull-robot", "", "Robot account to use for pulling base images (optional)")
+
+	// Builds command specific flags
+	triggerBuildsCmd.Flags().IntVarP(&triggerBuildLimit, "limit", "l", 10, "Maximum number of builds to return")
 }
 
 func init() {
@@ -294,6 +324,7 @@ func init() {
 	triggerCmd.AddCommand(triggerDisableCmd)
 	triggerCmd.AddCommand(triggerStartCmd)
 	triggerCmd.AddCommand(triggerActivateCmd)
+	triggerCmd.AddCommand(triggerBuildsCmd)
 
 	// Setup flags
 	setupTriggerFlags()

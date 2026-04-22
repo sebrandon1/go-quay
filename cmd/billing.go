@@ -161,8 +161,19 @@ var userInvoicesCmd = &cobra.Command{
 	Use:   "user-invoices",
 	Short: "Get invoices for the current user",
 	Run: func(cmd *cobra.Command, args []string) {
-		// User invoices endpoint doesn't exist in Quay API - return empty array to match expected format
-		fmt.Println("[]")
+		client, err := lib.NewClient(billingToken)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		invoices, err := client.GetUserInvoices()
+		if err != nil {
+			fmt.Printf("Error getting user invoices: %v\n", err)
+			os.Exit(1)
+		}
+
+		printJSON(invoices)
 	},
 }
 

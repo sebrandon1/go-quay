@@ -166,6 +166,28 @@ var buildCancelCmd = &cobra.Command{
 	},
 }
 
+var buildStatusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "Get build status",
+	Long:  `Get the current status of a specific build.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := lib.NewClient(token)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		status, err := client.GetBuildStatus(buildNamespace, buildRepository, buildUUID)
+		if err != nil {
+			fmt.Printf("Error getting build status: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Status for build %s:\n", buildUUID)
+		printJSON(status)
+	},
+}
+
 func init() {
 	// Add subcommands to build command
 	buildCmd.AddCommand(buildListCmd)
@@ -173,19 +195,26 @@ func init() {
 	buildCmd.AddCommand(buildLogsCmd)
 	buildCmd.AddCommand(buildRequestCmd)
 	buildCmd.AddCommand(buildCancelCmd)
+	buildCmd.AddCommand(buildStatusCmd)
 
 	// Global build flags
 	buildCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 	buildCmd.PersistentFlags().StringVarP(&buildNamespace, "namespace", "n", "", "Repository namespace")
 	buildCmd.PersistentFlags().StringVarP(&buildRepository, "repository", "r", "", "Repository name")
-	markBuildFlagRequired(buildCmd.MarkPersistentFlagRequired("token"))
-	markBuildFlagRequired(buildCmd.MarkPersistentFlagRequired("namespace"))
-	markBuildFlagRequired(buildCmd.MarkPersistentFlagRequired("repository"))
+	markFlagRequired(buildCmd.MarkPersistentFlagRequired("token"))
+	markFlagRequired(buildCmd.MarkPersistentFlagRequired("namespace"))
+	markFlagRequired(buildCmd.MarkPersistentFlagRequired("repository"))
 
 	initBuildListFlags()
 	initBuildInfoFlags()
 	initBuildRequestFlags()
 	initBuildCancelFlags()
+	initBuildStatusFlags()
+}
+
+func initBuildStatusFlags() {
+	buildStatusCmd.Flags().StringVarP(&buildUUID, "uuid", "u", "", "Build UUID")
+	markFlagRequired(buildStatusCmd.MarkFlagRequired("uuid"))
 }
 
 func initBuildListFlags() {
@@ -194,7 +223,7 @@ func initBuildListFlags() {
 
 func initBuildInfoFlags() {
 	buildInfoCmd.Flags().StringVarP(&buildUUID, "uuid", "u", "", "Build UUID")
-	markBuildFlagRequired(buildInfoCmd.MarkFlagRequired("uuid"))
+	markFlagRequired(buildInfoCmd.MarkFlagRequired("uuid"))
 }
 
 func initBuildRequestFlags() {
@@ -202,18 +231,11 @@ func initBuildRequestFlags() {
 	buildRequestCmd.Flags().StringVarP(&buildDockerfile, "dockerfile", "d", "", "Path to Dockerfile within archive")
 	buildRequestCmd.Flags().StringVarP(&buildSubdirectory, "subdirectory", "s", "", "Subdirectory containing build context")
 	buildRequestCmd.Flags().StringSliceVar(&buildTags, "tag", []string{"latest"}, "Tags for the built image")
-	markBuildFlagRequired(buildRequestCmd.MarkFlagRequired("archive-url"))
+	markFlagRequired(buildRequestCmd.MarkFlagRequired("archive-url"))
 }
 
 func initBuildCancelFlags() {
 	buildCancelCmd.Flags().StringVarP(&buildUUID, "uuid", "u", "", "Build UUID")
 	buildCancelCmd.Flags().BoolVar(&confirmBuildCancel, "confirm", false, "Confirm build cancellation")
-	markBuildFlagRequired(buildCancelCmd.MarkFlagRequired("uuid"))
-}
-
-func markBuildFlagRequired(err error) {
-	if err != nil {
-		fmt.Printf("Error marking flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	markFlagRequired(buildCancelCmd.MarkFlagRequired("uuid"))
 }
