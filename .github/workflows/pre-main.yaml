@@ -93,6 +93,23 @@ jobs:
     - name: Validate example commands from README
       run: ./scripts/validate-readme-examples.sh
 
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: 'go.mod'
+
+    - name: Run gosec
+      uses: securego/gosec@master
+      with:
+        args: -exclude-dir=scripts ./...
+
   swagger-alignment:
     name: Check API Coverage
     runs-on: ubuntu-latest
