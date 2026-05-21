@@ -7,10 +7,6 @@ import (
 	"testing"
 )
 
-const (
-	httpGetMessages = "GET"
-)
-
 func TestGetMessages(t *testing.T) {
 	mockResponse := Messages{
 		Messages: []Message{
@@ -18,20 +14,20 @@ func TestGetMessages(t *testing.T) {
 				UUID:      "msg-uuid-123",
 				Content:   "Scheduled maintenance on Sunday",
 				Severity:  "info",
-				MediaType: "text/plain",
+				MediaType: testMediaTypePlain,
 			},
 			{
 				UUID:      "msg-uuid-456",
 				Content:   "New feature available",
 				Severity:  "info",
-				MediaType: "text/plain",
+				MediaType: testMediaTypePlain,
 			},
 		},
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetMessages {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/messages"

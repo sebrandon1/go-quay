@@ -83,6 +83,8 @@ import (
 	"fmt"
 )
 
+const fieldRole = "role"
+
 // Organization Management
 
 // CreateOrganization creates a new organization
@@ -219,7 +221,7 @@ func (c *Client) GetDefaultPermissions(orgname string) (*DefaultPermissions, err
 // CreateDefaultPermission creates a default permission for an organization
 func (c *Client) CreateDefaultPermission(orgname, role, delegateType, delegateName string) (*DefaultPermission, error) {
 	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/prototypes", QuayURL, orgname), map[string]interface{}{
-		"role": role,
+		fieldRole: role,
 		"delegate": map[string]interface{}{
 			"kind": delegateType,
 			"name": delegateName,
@@ -360,7 +362,7 @@ func (c *Client) DeleteTeam(orgname, teamname string) error {
 func (c *Client) UpdateTeam(orgname, teamname, description, role string) (*Team, error) {
 	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/team/%s", QuayURL, orgname, teamname), map[string]interface{}{
 		"description": description,
-		"role":        role,
+		fieldRole:     role,
 	})
 	if err != nil {
 		return nil, err
@@ -431,7 +433,7 @@ func (c *Client) GetTeamPermissions(orgname, teamname string) (*TeamPermissions,
 // SetTeamRepositoryPermission sets repository permission for a team
 func (c *Client) SetTeamRepositoryPermission(orgname, teamname, repository, role string) error {
 	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/team/%s/permissions/%s", QuayURL, orgname, teamname, repository), map[string]interface{}{
-		"role": role,
+		fieldRole: role,
 	})
 	if err != nil {
 		return err
@@ -543,7 +545,7 @@ func (c *Client) GetRobotPermissions(orgname, robotShortname string) (*RobotPerm
 // SetRobotRepositoryPermission sets repository permission for a robot account
 func (c *Client) SetRobotRepositoryPermission(orgname, robotShortname, repository, role string) error {
 	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/robots/%s/permissions/%s", QuayURL, orgname, robotShortname, repository), map[string]interface{}{
-		"role": role,
+		fieldRole: role,
 	})
 	if err != nil {
 		return err

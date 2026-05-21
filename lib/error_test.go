@@ -8,7 +8,6 @@ import (
 )
 
 const (
-	httpGetError  = "GET"
 	testErrorType = "invalid_token"
 )
 
@@ -22,7 +21,7 @@ func TestGetErrorType(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetError {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/error/" + testErrorType

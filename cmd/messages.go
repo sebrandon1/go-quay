@@ -20,7 +20,7 @@ var messagesCmd = &cobra.Command{
 }
 
 var messagesListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   subcmdList,
 	Short: "Get system messages",
 	Long:  `Get system-wide messages including maintenance notifications and announcements.`,
 	Run: func(_ *cobra.Command, _ []string) {
@@ -41,7 +41,7 @@ var messagesListCmd = &cobra.Command{
 }
 
 var messagesCreateCmd = &cobra.Command{
-	Use:   "create",
+	Use:   subcmdCreate,
 	Short: "Create a system message",
 	Long:  `Create a new system-wide message.`,
 	Run: func(_ *cobra.Command, _ []string) {

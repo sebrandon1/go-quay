@@ -7,20 +7,15 @@ import (
 	"testing"
 )
 
-const (
-	httpGetSearch   = "GET"
-	testSearchQuery = "quay"
-)
-
 func TestSearchRepositories(t *testing.T) {
 	mockResult := SearchRepositoryResult{
 		Results: []SearchRepository{
 			{
-				Namespace:   testSearchQuery,
-				Name:        testSearchQuery,
+				Namespace:   testSearchQueryValue,
+				Name:        testSearchQueryValue,
 				Description: "Quay container registry",
 				IsPublic:    true,
-				Kind:        "image",
+				Kind:        testKindImage,
 				Popularity:  100.5,
 				Score:       0.95,
 			},
@@ -29,7 +24,7 @@ func TestSearchRepositories(t *testing.T) {
 				Name:        "quay-operator",
 				Description: "Quay Operator for OpenShift",
 				IsPublic:    true,
-				Kind:        "image",
+				Kind:        testKindImage,
 				Popularity:  50.2,
 				Score:       0.85,
 			},
@@ -42,14 +37,14 @@ func TestSearchRepositories(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResult)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetSearch {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/find/repositories" {
 			t.Errorf("Expected path /api/v1/find/repositories, got %s", r.URL.Path)
 		}
-		if r.URL.Query().Get("query") != testSearchQuery {
-			t.Errorf("Expected query '%s', got '%s'", testSearchQuery, r.URL.Query().Get("query"))
+		if r.URL.Query().Get("query") != testSearchQueryValue {
+			t.Errorf("Expected query '%s', got '%s'", testSearchQueryValue, r.URL.Query().Get("query"))
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -67,7 +62,7 @@ func TestSearchRepositories(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	result, err := client.SearchRepositories(testSearchQuery, 0)
+	result, err := client.SearchRepositories(testSearchQueryValue, 0)
 	if err != nil {
 		t.Fatalf("SearchRepositories failed: %v", err)
 	}
@@ -75,11 +70,11 @@ func TestSearchRepositories(t *testing.T) {
 	if len(result.Results) != 2 {
 		t.Errorf("Expected 2 results, got %d", len(result.Results))
 	}
-	if result.Results[0].Namespace != testSearchQuery {
-		t.Errorf("Expected namespace '%s', got '%s'", testSearchQuery, result.Results[0].Namespace)
+	if result.Results[0].Namespace != testSearchQueryValue {
+		t.Errorf("Expected namespace '%s', got '%s'", testSearchQueryValue, result.Results[0].Namespace)
 	}
-	if result.Results[0].Name != testSearchQuery {
-		t.Errorf("Expected name '%s', got '%s'", testSearchQuery, result.Results[0].Name)
+	if result.Results[0].Name != testSearchQueryValue {
+		t.Errorf("Expected name '%s', got '%s'", testSearchQueryValue, result.Results[0].Name)
 	}
 	if !result.HasAdditional {
 		t.Error("Expected HasAdditional to be true")
@@ -144,7 +139,7 @@ func TestSearchAll(t *testing.T) {
 			{
 				Name:        "quayuser",
 				Description: "Quay developer",
-				Kind:        "user",
+				Kind:        testKindUser,
 				Score:       0.75,
 			},
 			{
@@ -159,14 +154,14 @@ func TestSearchAll(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResult)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetSearch {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/find/all" {
 			t.Errorf("Expected path /api/v1/find/all, got %s", r.URL.Path)
 		}
-		if r.URL.Query().Get("query") != testSearchQuery {
-			t.Errorf("Expected query '%s', got '%s'", testSearchQuery, r.URL.Query().Get("query"))
+		if r.URL.Query().Get("query") != testSearchQueryValue {
+			t.Errorf("Expected query '%s', got '%s'", testSearchQueryValue, r.URL.Query().Get("query"))
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -184,7 +179,7 @@ func TestSearchAll(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	result, err := client.SearchAll(testSearchQuery)
+	result, err := client.SearchAll(testSearchQueryValue)
 	if err != nil {
 		t.Fatalf("SearchAll failed: %v", err)
 	}

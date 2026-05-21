@@ -7,35 +7,27 @@ import (
 	"testing"
 )
 
-const (
-	httpGetPerms    = "GET"
-	httpPutPerms    = "PUT"
-	httpDeletePerms = "DELETE"
-
-	permRoleWrite = "write"
-)
-
 func TestGetRepositoryPermissions(t *testing.T) {
 	mockPermissions := RepositoryPermissions{
 		Permissions: []RepositoryPermission{
 			{
-				Name: "john.doe",
-				Kind: "user",
-				Role: permRoleWrite,
+				Name: testPermUserName,
+				Kind: testKindUser,
+				Role: testRoleWrite,
 				Avatar: Avatar{
-					Name: "john.doe",
-					Kind: "user",
+					Name: testPermUserName,
+					Kind: testKindUser,
 				},
 				IsRobot:    false,
 				IsOrgAdmin: false,
 			},
 			{
 				Name: "testorg+deploybot",
-				Kind: "robot",
-				Role: "read",
+				Kind: testKindRobot,
+				Role: testRoleRead,
 				Avatar: Avatar{
 					Name: "deploybot",
-					Kind: "robot",
+					Kind: testKindRobot,
 				},
 				IsRobot:    true,
 				IsOrgAdmin: false,
@@ -46,7 +38,7 @@ func TestGetRepositoryPermissions(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockPermissions)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetPerms {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/testorg/testrepo/permissions" {
@@ -68,7 +60,7 @@ func TestGetRepositoryPermissions(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	permissions, err := client.GetRepositoryPermissions("testorg", "testrepo")
+	permissions, err := client.GetRepositoryPermissions(testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("GetRepositoryPermissions failed: %v", err)
 	}
@@ -79,10 +71,10 @@ func TestGetRepositoryPermissions(t *testing.T) {
 
 	// Check first permission (user)
 	userPerm := permissions.Permissions[0]
-	if userPerm.Name != "john.doe" {
+	if userPerm.Name != testPermUserName {
 		t.Errorf("Expected user name 'john.doe', got '%s'", userPerm.Name)
 	}
-	if userPerm.Role != permRoleWrite {
+	if userPerm.Role != testRoleWrite {
 		t.Errorf("Expected role 'write', got '%s'", userPerm.Role)
 	}
 	if userPerm.IsRobot != false {
@@ -94,7 +86,7 @@ func TestGetRepositoryPermissions(t *testing.T) {
 	if robotPerm.Name != "testorg+deploybot" {
 		t.Errorf("Expected robot name 'testorg+deploybot', got '%s'", robotPerm.Name)
 	}
-	if robotPerm.Role != "read" {
+	if robotPerm.Role != testRoleRead {
 		t.Errorf("Expected role 'read', got '%s'", robotPerm.Role)
 	}
 	if robotPerm.IsRobot != true {
@@ -104,10 +96,10 @@ func TestGetRepositoryPermissions(t *testing.T) {
 
 func TestSetRepositoryPermission(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPutPerms {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
-		if r.URL.Path != "/api/v1/repository/testorg/testrepo/permissions/john.doe" {
+		if r.URL.Path != "/api/v1/repository/testorg/testrepo/permissions/"+testPermUserName {
 			t.Errorf("Expected path /api/v1/repository/testorg/testrepo/permissions/john.doe, got %s", r.URL.Path)
 		}
 
@@ -117,7 +109,7 @@ func TestSetRepositoryPermission(t *testing.T) {
 			t.Errorf("Failed to decode request body: %v", err)
 		}
 
-		if req.Role != permRoleWrite {
+		if req.Role != testRoleWrite {
 			t.Errorf("Expected role 'write', got '%s'", req.Role)
 		}
 
@@ -134,7 +126,7 @@ func TestSetRepositoryPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.SetRepositoryPermission("testorg", "testrepo", "john.doe", permRoleWrite)
+	err = client.SetRepositoryPermission(testNamespace, testRepository, testPermUserName, testRoleWrite)
 	if err != nil {
 		t.Fatalf("SetRepositoryPermission failed: %v", err)
 	}
@@ -157,9 +149,9 @@ func TestSetRepositoryPermissionInvalidRole(t *testing.T) {
 	}
 
 	// Test with valid roles
-	validRoles := []string{"read", "write", "admin"}
+	validRoles := []string{testRoleRead, testRoleWrite, "admin"}
 	for _, role := range validRoles {
-		err = client.SetRepositoryPermission("testorg", "testrepo", "user", role)
+		err = client.SetRepositoryPermission(testNamespace, testRepository, testKindUser, role)
 		if err != nil {
 			t.Errorf("SetRepositoryPermission failed for valid role '%s': %v", role, err)
 		}
@@ -168,10 +160,10 @@ func TestSetRepositoryPermissionInvalidRole(t *testing.T) {
 
 func TestRemoveRepositoryPermission(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeletePerms {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
-		if r.URL.Path != "/api/v1/repository/testorg/testrepo/permissions/john.doe" {
+		if r.URL.Path != "/api/v1/repository/testorg/testrepo/permissions/"+testPermUserName {
 			t.Errorf("Expected path /api/v1/repository/testorg/testrepo/permissions/john.doe, got %s", r.URL.Path)
 		}
 
@@ -188,7 +180,7 @@ func TestRemoveRepositoryPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.RemoveRepositoryPermission("testorg", "testrepo", "john.doe")
+	err = client.RemoveRepositoryPermission(testNamespace, testRepository, testPermUserName)
 	if err != nil {
 		t.Fatalf("RemoveRepositoryPermission failed: %v", err)
 	}
@@ -212,19 +204,19 @@ func TestPermissionsErrorHandling(t *testing.T) {
 	}
 
 	// Test GetRepositoryPermissions error
-	_, err = client.GetRepositoryPermissions("testorg", "nonexistent")
+	_, err = client.GetRepositoryPermissions(testNamespace, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent repository, got nil")
 	}
 
 	// Test SetRepositoryPermission error
-	err = client.SetRepositoryPermission("testorg", "nonexistent", "user", "read")
+	err = client.SetRepositoryPermission(testNamespace, "nonexistent", testKindUser, testRoleRead)
 	if err == nil {
 		t.Error("Expected error for non-existent repository, got nil")
 	}
 
 	// Test RemoveRepositoryPermission error
-	err = client.RemoveRepositoryPermission("testorg", "nonexistent", "user")
+	err = client.RemoveRepositoryPermission(testNamespace, "nonexistent", testKindUser)
 	if err == nil {
 		t.Error("Expected error for non-existent repository, got nil")
 	}

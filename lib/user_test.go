@@ -7,30 +7,23 @@ import (
 	"testing"
 )
 
-const (
-	httpGet    = "GET"
-	httpPut    = "PUT"
-	httpDelete = "DELETE"
-	testOrg    = "testorg"
-)
-
 func TestGetUser(t *testing.T) {
 	mockUser := UserDetails{
 		Anonymous:      false,
-		Username:       "testuser",
-		Email:          "test@example.com",
+		Username:       testUserName,
+		Email:          testEmailAddress,
 		Verified:       true,
 		CanCreateRepo:  true,
 		PreferredUsers: false,
 		TagExpirationS: 2592000, // 30 days
 		Avatar: Avatar{
-			Name: "testuser",
-			Kind: "user",
+			Name: testUserName,
+			Kind: testKindUser,
 		},
 		Organizations: []User{
 			{
-				Name:     testOrg,
-				Username: testOrg,
+				Name:     testNamespace,
+				Username: testNamespace,
 				Kind:     "organization",
 			},
 		},
@@ -39,7 +32,7 @@ func TestGetUser(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockUser)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGet {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/user" {
@@ -72,10 +65,10 @@ func TestGetUser(t *testing.T) {
 		t.Fatalf("GetUser failed: %v", err)
 	}
 
-	if user.Username != "testuser" {
+	if user.Username != testUserName {
 		t.Errorf("Expected username 'testuser', got '%s'", user.Username)
 	}
-	if user.Email != "test@example.com" {
+	if user.Email != testEmailAddress {
 		t.Errorf("Expected email 'test@example.com', got '%s'", user.Email)
 	}
 	if user.Anonymous != false {
@@ -90,7 +83,7 @@ func TestGetUser(t *testing.T) {
 	if len(user.Organizations) != 1 {
 		t.Errorf("Expected 1 organization, got %d", len(user.Organizations))
 	}
-	if user.Organizations[0].Name != testOrg {
+	if user.Organizations[0].Name != testNamespace {
 		t.Errorf("Expected organization name 'testorg', got '%s'", user.Organizations[0].Name)
 	}
 }
@@ -99,20 +92,20 @@ func TestGetStarredRepositories(t *testing.T) {
 	mockStarred := StarredRepositories{
 		Repositories: []StarredRepository{
 			{
-				Namespace:    "quay",
-				Name:         "quay",
+				Namespace:    testSearchQueryValue,
+				Name:         testSearchQueryValue,
 				Description:  "Container registry and security scanner",
 				IsPublic:     true,
-				Kind:         "image",
+				Kind:         testKindImage,
 				LastModified: "2024-01-15T10:30:00Z",
 				Popularity:   95.5,
 			},
 			{
-				Namespace:    testOrg,
+				Namespace:    testNamespace,
 				Name:         "myapp",
 				Description:  "My test application",
 				IsPublic:     false,
-				Kind:         "image",
+				Kind:         testKindImage,
 				LastModified: "2024-01-10T08:15:00Z",
 				Popularity:   10.2,
 			},
@@ -122,7 +115,7 @@ func TestGetStarredRepositories(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockStarred)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGet {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/user/starred" {
@@ -155,7 +148,7 @@ func TestGetStarredRepositories(t *testing.T) {
 
 	// Check first repository
 	repo1 := starred.Repositories[0]
-	if repo1.Namespace != "quay" || repo1.Name != "quay" {
+	if repo1.Namespace != testSearchQueryValue || repo1.Name != testSearchQueryValue {
 		t.Errorf("Expected first repository 'quay/quay', got '%s/%s'", repo1.Namespace, repo1.Name)
 	}
 	if repo1.IsPublic != true {
@@ -167,7 +160,7 @@ func TestGetStarredRepositories(t *testing.T) {
 
 	// Check second repository
 	repo2 := starred.Repositories[1]
-	if repo2.Namespace != testOrg || repo2.Name != "myapp" {
+	if repo2.Namespace != testNamespace || repo2.Name != "myapp" {
 		t.Errorf("Expected second repository 'testorg/myapp', got '%s/%s'", repo2.Namespace, repo2.Name)
 	}
 	if repo2.IsPublic != false {
@@ -177,7 +170,7 @@ func TestGetStarredRepositories(t *testing.T) {
 
 func TestStarRepository(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPut {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/quay/quay/star" {
@@ -197,7 +190,7 @@ func TestStarRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.StarRepository("quay", "quay")
+	err = client.StarRepository(testSearchQueryValue, testSearchQueryValue)
 	if err != nil {
 		t.Fatalf("StarRepository failed: %v", err)
 	}
@@ -205,7 +198,7 @@ func TestStarRepository(t *testing.T) {
 
 func TestUnstarRepository(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDelete {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/quay/quay/star" {
@@ -225,7 +218,7 @@ func TestUnstarRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.UnstarRepository("quay", "quay")
+	err = client.UnstarRepository(testSearchQueryValue, testSearchQueryValue)
 	if err != nil {
 		t.Fatalf("UnstarRepository failed: %v", err)
 	}
@@ -261,13 +254,13 @@ func TestUserErrorHandling(t *testing.T) {
 	}
 
 	// Test StarRepository error
-	err = client.StarRepository("quay", "quay")
+	err = client.StarRepository(testSearchQueryValue, testSearchQueryValue)
 	if err == nil {
 		t.Error("Expected error for invalid token, got nil")
 	}
 
 	// Test UnstarRepository error
-	err = client.UnstarRepository("quay", "quay")
+	err = client.UnstarRepository(testSearchQueryValue, testSearchQueryValue)
 	if err == nil {
 		t.Error("Expected error for invalid token, got nil")
 	}

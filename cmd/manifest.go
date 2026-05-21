@@ -34,7 +34,7 @@ Available commands:
 
 // Manifest Info
 var manifestInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get detailed manifest information",
 	Long:  `Get detailed information about a specific manifest including layers, config, and metadata.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -57,7 +57,7 @@ var manifestInfoCmd = &cobra.Command{
 
 // Manifest Delete
 var manifestDeleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   subcmdDelete,
 	Short: "Delete a manifest",
 	Long:  `Delete a specific manifest from the repository. This action cannot be undone.`,
 	Run: func(cmd *cobra.Command, args []string) {

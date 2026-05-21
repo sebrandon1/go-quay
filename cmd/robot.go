@@ -34,7 +34,7 @@ Available commands:
 
 // Robot List
 var robotListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   subcmdList,
 	Short: "List all robot accounts",
 	Long:  `List all robot accounts associated with your user account.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -57,7 +57,7 @@ var robotListCmd = &cobra.Command{
 
 // Robot Info
 var robotInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get robot account details",
 	Long:  `Get detailed information about a specific robot account including its token.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -80,7 +80,7 @@ var robotInfoCmd = &cobra.Command{
 
 // Robot Create
 var robotCreateCmd = &cobra.Command{
-	Use:   "create",
+	Use:   subcmdCreate,
 	Short: "Create a new robot account",
 	Long:  `Create a new robot account with the specified name and description.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -104,7 +104,7 @@ var robotCreateCmd = &cobra.Command{
 
 // Robot Delete
 var robotDeleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   subcmdDelete,
 	Short: "Delete a robot account",
 	Long:  `Delete a robot account. This action cannot be undone.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -156,7 +156,7 @@ var robotRegenerateCmd = &cobra.Command{
 
 // Robot Permissions
 var robotPermissionsCmd = &cobra.Command{
-	Use:   "permissions",
+	Use:   subcmdPermissions,
 	Short: "Get robot repository permissions",
 	Long:  `Get the repository permissions assigned to a robot account.`,
 	Run: func(cmd *cobra.Command, args []string) {

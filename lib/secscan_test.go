@@ -9,28 +9,27 @@ import (
 
 const (
 	testSecScanManifestRef = "sha256:abc123def456789"
-	httpGetSecScan         = "GET"
 )
 
 func TestGetManifestSecurity(t *testing.T) {
 	mockSecurityScan := SecurityScan{
-		Status: "scanned",
+		Status: testSecScanStatus,
 		Data: &SecurityData{
 			Layer: &SecurityLayer{
-				Name:             "sha256:abc123",
-				NamespaceName:    "centos:8",
+				Name:             testDigestSHA256,
+				NamespaceName:    testSecScanImageName,
 				IndexedByVersion: 4,
 				Features: []SecurityFeature{
 					{
 						Name:          "openssl",
 						Version:       "1.1.1k",
 						VersionFormat: "rpm",
-						NamespaceName: "centos:8",
+						NamespaceName: testSecScanImageName,
 						AddedBy:       "sha256:layer1",
 						Vulnerabilities: []SecurityVulnerability{
 							{
 								Name:          "CVE-2021-3712",
-								NamespaceName: "centos:8",
+								NamespaceName: testSecScanImageName,
 								Description:   "OpenSSL vulnerability in ASN.1 parsing",
 								Link:          "https://access.redhat.com/security/cve/CVE-2021-3712",
 								Severity:      "Medium",
@@ -42,7 +41,7 @@ func TestGetManifestSecurity(t *testing.T) {
 						Name:          "curl",
 						Version:       "7.61.1",
 						VersionFormat: "rpm",
-						NamespaceName: "centos:8",
+						NamespaceName: testSecScanImageName,
 						AddedBy:       "sha256:layer2",
 					},
 				},
@@ -53,7 +52,7 @@ func TestGetManifestSecurity(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockSecurityScan)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetSecScan {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/repository/testorg/testrepo/manifest/" + testSecScanManifestRef + "/security"
@@ -81,12 +80,12 @@ func TestGetManifestSecurity(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	securityScan, err := client.GetManifestSecurity("testorg", "testrepo", testSecScanManifestRef, true)
+	securityScan, err := client.GetManifestSecurity(testNamespace, testRepository, testSecScanManifestRef, true)
 	if err != nil {
 		t.Fatalf("GetManifestSecurity failed: %v", err)
 	}
 
-	if securityScan.Status != "scanned" {
+	if securityScan.Status != testSecScanStatus {
 		t.Errorf("Expected status 'scanned', got '%s'", securityScan.Status)
 	}
 	if securityScan.Data == nil {
@@ -117,10 +116,10 @@ func TestGetManifestSecurity(t *testing.T) {
 
 func TestGetManifestSecurityWithoutVulnerabilities(t *testing.T) {
 	mockSecurityScan := SecurityScan{
-		Status: "scanned",
+		Status: testSecScanStatus,
 		Data: &SecurityData{
 			Layer: &SecurityLayer{
-				Name:             "sha256:abc123",
+				Name:             testDigestSHA256,
 				IndexedByVersion: 4,
 			},
 		},
@@ -129,7 +128,7 @@ func TestGetManifestSecurityWithoutVulnerabilities(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockSecurityScan)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetSecScan {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 
@@ -153,12 +152,12 @@ func TestGetManifestSecurityWithoutVulnerabilities(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	securityScan, err := client.GetManifestSecurity("testorg", "testrepo", testSecScanManifestRef, false)
+	securityScan, err := client.GetManifestSecurity(testNamespace, testRepository, testSecScanManifestRef, false)
 	if err != nil {
 		t.Fatalf("GetManifestSecurity failed: %v", err)
 	}
 
-	if securityScan.Status != "scanned" {
+	if securityScan.Status != testSecScanStatus {
 		t.Errorf("Expected status 'scanned', got '%s'", securityScan.Status)
 	}
 }
@@ -187,7 +186,7 @@ func TestGetManifestSecurityQueued(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	securityScan, err := client.GetManifestSecurity("testorg", "testrepo", testSecScanManifestRef, true)
+	securityScan, err := client.GetManifestSecurity(testNamespace, testRepository, testSecScanManifestRef, true)
 	if err != nil {
 		t.Fatalf("GetManifestSecurity failed: %v", err)
 	}
@@ -217,7 +216,7 @@ func TestGetManifestSecurityErrorHandling(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetManifestSecurity("testorg", "testrepo", "nonexistent", true)
+	_, err = client.GetManifestSecurity(testNamespace, testRepository, "nonexistent", true)
 	if err == nil {
 		t.Error("Expected error for non-existent manifest, got nil")
 	}
@@ -247,7 +246,7 @@ func TestGetManifestSecurityUnsupported(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	securityScan, err := client.GetManifestSecurity("testorg", "testrepo", testSecScanManifestRef, true)
+	securityScan, err := client.GetManifestSecurity(testNamespace, testRepository, testSecScanManifestRef, true)
 	if err != nil {
 		t.Fatalf("GetManifestSecurity failed: %v", err)
 	}

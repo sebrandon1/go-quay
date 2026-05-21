@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -22,40 +21,6 @@ var (
 	callbackEmail string
 )
 
-var aggregatedLogsCmd = &cobra.Command{
-	Use:   "aggregatedlogs",
-	Short: "Get aggregated logs from Quay.io",
-	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			return
-		}
-
-		logs, err := client.GetAggregatedLogs(namespace, repository, startdate, enddate)
-		if err != nil {
-			fmt.Println("Error getting aggregated logs:", err)
-			return
-		}
-
-		jsonOutput, err := json.Marshal(logs)
-		if err != nil {
-			fmt.Println("Error marshaling JSON:", err)
-			return
-		}
-
-		fmt.Println(string(jsonOutput))
-	},
-}
-
-func init() {
-	aggregatedLogsCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
-	aggregatedLogsCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
-	aggregatedLogsCmd.PersistentFlags().StringVarP(&startdate, "startdate", "s", "", "Start date for the logs")
-	aggregatedLogsCmd.PersistentFlags().StringVarP(&enddate, "enddate", "e", "", "End date for the logs")
-	aggregatedLogsCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
-}
-
 // logsCmd is the parent command group for log management
 var logsCmd = &cobra.Command{
 	Use:   "logs",
@@ -73,9 +38,30 @@ var repoLogsCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		logs, err := client.GetLogs(namespace, repository, nextPage)
+		logs, err := client.GetLogs(namespace, repository, nextPage, startdate, enddate)
 		if err != nil {
 			fmt.Printf("Error getting repository logs: %v\n", err)
+			os.Exit(1)
+		}
+
+		printJSON(logs)
+	},
+}
+
+var repoAggregatedLogsCmd = &cobra.Command{
+	Use:   "repo-aggregated-logs",
+	Short: "Get aggregated repository logs",
+	Long:  `Get aggregated action logs for a specific repository.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := lib.NewClient(token)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		logs, err := client.GetAggregatedLogs(namespace, repository, startdate, enddate)
+		if err != nil {
+			fmt.Printf("Error getting repository aggregated logs: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -94,7 +80,7 @@ var orgLogsCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		logs, err := client.GetOrganizationLogs(orgName, nextPage)
+		logs, err := client.GetOrganizationLogs(orgName, nextPage, startdate, enddate)
 		if err != nil {
 			fmt.Printf("Error getting organization logs: %v\n", err)
 			os.Exit(1)
@@ -136,7 +122,7 @@ var userLogsCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		logs, err := client.GetUserLogs(nextPage)
+		logs, err := client.GetUserLogs(nextPage, startdate, enddate)
 		if err != nil {
 			fmt.Printf("Error getting user logs: %v\n", err)
 			os.Exit(1)
@@ -247,6 +233,7 @@ var exportRepoLogsCmd = &cobra.Command{
 
 func init() {
 	logsCmd.AddCommand(repoLogsCmd)
+	logsCmd.AddCommand(repoAggregatedLogsCmd)
 	logsCmd.AddCommand(orgLogsCmd)
 	logsCmd.AddCommand(orgAggregatedLogsCmd)
 	logsCmd.AddCommand(userLogsCmd)
@@ -261,10 +248,20 @@ func init() {
 	repoLogsCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Repository namespace")
 	repoLogsCmd.Flags().StringVarP(&repository, "repository", "r", "", "Repository name")
 	repoLogsCmd.Flags().StringVar(&nextPage, "next-page", "", "Next page token for pagination")
+	repoLogsCmd.Flags().StringVarP(&startdate, "startdate", "s", "", "Start date for the logs")
+	repoLogsCmd.Flags().StringVarP(&enddate, "enddate", "e", "", "End date for the logs")
+
+	// repo-aggregated-logs flags
+	repoAggregatedLogsCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Repository namespace")
+	repoAggregatedLogsCmd.Flags().StringVarP(&repository, "repository", "r", "", "Repository name")
+	repoAggregatedLogsCmd.Flags().StringVarP(&startdate, "startdate", "s", "", "Start date")
+	repoAggregatedLogsCmd.Flags().StringVarP(&enddate, "enddate", "e", "", "End date")
 
 	// org-logs flags
 	orgLogsCmd.Flags().StringVarP(&orgName, "organization", "o", "", "Organization name")
 	orgLogsCmd.Flags().StringVar(&nextPage, "next-page", "", "Next page token for pagination")
+	orgLogsCmd.Flags().StringVarP(&startdate, "startdate", "s", "", "Start date for the logs")
+	orgLogsCmd.Flags().StringVarP(&enddate, "enddate", "e", "", "End date for the logs")
 
 	// org-aggregated-logs flags
 	orgAggregatedLogsCmd.Flags().StringVarP(&orgName, "organization", "o", "", "Organization name")
@@ -273,6 +270,8 @@ func init() {
 
 	// user-logs flags
 	userLogsCmd.Flags().StringVar(&nextPage, "next-page", "", "Next page token for pagination")
+	userLogsCmd.Flags().StringVarP(&startdate, "startdate", "s", "", "Start date for the logs")
+	userLogsCmd.Flags().StringVarP(&enddate, "enddate", "e", "", "End date for the logs")
 
 	// user-aggregated-logs flags
 	userAggregatedLogsCmd.Flags().StringVarP(&startdate, "startdate", "s", "", "Start date")

@@ -8,31 +8,23 @@ import (
 )
 
 const (
-	httpGetRepoToken    = "GET"
-	httpPostRepoToken   = "POST"
-	httpPutRepoToken    = "PUT"
-	httpDeleteRepoToken = "DELETE"
-
-	testTokenNamespace  = "testorg"
-	testTokenRepository = "testrepo"
-	testTokenCode       = "ABCD1234"
-	testTokenRole       = "read"
+	testTokenCode = "ABCD1234"
 )
 
 func TestGetRepoTokens(t *testing.T) {
 	mockResponse := RepoTokens{
 		Tokens: []RepoToken{
-			{Code: testTokenCode, FriendlyName: "CI Token", Role: testTokenRole},
-			{Code: "EFGH5678", FriendlyName: "Deploy Token", Role: "write"},
+			{Code: testTokenCode, FriendlyName: testRepoTokenName, Role: testRoleRead},
+			{Code: "EFGH5678", FriendlyName: "Deploy Token", Role: testRoleWrite},
 		},
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetRepoToken {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testTokenNamespace + "/" + testTokenRepository + "/tokens"
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/tokens"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -50,7 +42,7 @@ func TestGetRepoTokens(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	tokens, err := client.GetRepoTokens(testTokenNamespace, testTokenRepository)
+	tokens, err := client.GetRepoTokens(testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("GetRepoTokens returned error: %v", err)
 	}
@@ -67,12 +59,12 @@ func TestCreateRepoToken(t *testing.T) {
 	mockResponse := RepoToken{
 		Code:         testTokenCode,
 		FriendlyName: "New CI Token",
-		Role:         testTokenRole,
+		Role:         testRoleRead,
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPostRepoToken {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -94,7 +86,7 @@ func TestCreateRepoToken(t *testing.T) {
 		FriendlyName: "New CI Token",
 	}
 
-	token, err := client.CreateRepoToken(testTokenNamespace, testTokenRepository, createReq)
+	token, err := client.CreateRepoToken(testNamespace, testRepository, createReq)
 	if err != nil {
 		t.Fatalf("CreateRepoToken returned error: %v", err)
 	}
@@ -107,16 +99,16 @@ func TestCreateRepoToken(t *testing.T) {
 func TestGetRepoToken(t *testing.T) {
 	mockResponse := RepoToken{
 		Code:         testTokenCode,
-		FriendlyName: "CI Token",
-		Role:         testTokenRole,
+		FriendlyName: testRepoTokenName,
+		Role:         testRoleRead,
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetRepoToken {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testTokenNamespace + "/" + testTokenRepository + "/tokens/" + testTokenCode
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/tokens/" + testTokenCode
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -134,7 +126,7 @@ func TestGetRepoToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	token, err := client.GetRepoToken(testTokenNamespace, testTokenRepository, testTokenCode)
+	token, err := client.GetRepoToken(testNamespace, testRepository, testTokenCode)
 	if err != nil {
 		t.Fatalf("GetRepoToken returned error: %v", err)
 	}
@@ -147,13 +139,13 @@ func TestGetRepoToken(t *testing.T) {
 func TestUpdateRepoToken(t *testing.T) {
 	mockResponse := RepoToken{
 		Code:         testTokenCode,
-		FriendlyName: "CI Token",
+		FriendlyName: testRepoTokenName,
 		Role:         "write",
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPutRepoToken {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -171,25 +163,25 @@ func TestUpdateRepoToken(t *testing.T) {
 	}
 
 	updateReq := &UpdateRepoTokenRequest{
-		Role: "write",
+		Role: testRoleWrite,
 	}
 
-	token, err := client.UpdateRepoToken(testTokenNamespace, testTokenRepository, testTokenCode, updateReq)
+	token, err := client.UpdateRepoToken(testNamespace, testRepository, testTokenCode, updateReq)
 	if err != nil {
 		t.Fatalf("UpdateRepoToken returned error: %v", err)
 	}
 
-	if token.Role != "write" {
+	if token.Role != testRoleWrite {
 		t.Errorf("Expected role 'write', got %s", token.Role)
 	}
 }
 
 func TestDeleteRepoToken(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeleteRepoToken {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testTokenNamespace + "/" + testTokenRepository + "/tokens/" + testTokenCode
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/tokens/" + testTokenCode
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -206,7 +198,7 @@ func TestDeleteRepoToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteRepoToken(testTokenNamespace, testTokenRepository, testTokenCode)
+	err = client.DeleteRepoToken(testNamespace, testRepository, testTokenCode)
 	if err != nil {
 		t.Fatalf("DeleteRepoToken returned error: %v", err)
 	}
@@ -227,7 +219,7 @@ func TestGetRepoTokensError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetRepoTokens(testTokenNamespace, testTokenRepository)
+	_, err = client.GetRepoTokens(testNamespace, testRepository)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}

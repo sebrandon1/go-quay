@@ -10,18 +10,17 @@ import (
 const (
 	testRepoPath       = "/api/v1/repository/testorg/testrepo"
 	testTagPath        = "/api/v1/repository/testorg/testrepo/tag"
-	httpGetRepo        = "GET"
 	updatedDescription = "Updated description"
 )
 
 func TestCreateRepository(t *testing.T) {
 	// Mock response
 	mockRepo := Repository{
-		Namespace:   "testorg",
-		Name:        "testrepo",
-		Description: "Test repository",
+		Namespace:   testNamespace,
+		Name:        testRepository,
+		Description: testRepoDescription,
 		IsPublic:    false,
-		Kind:        "image",
+		Kind:        testKindImage,
 	}
 
 	mockResponseJSON, _ := json.Marshal(mockRepo)
@@ -29,7 +28,7 @@ func TestCreateRepository(t *testing.T) {
 	// Create test server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Verify request method and path
-		if r.Method != "POST" {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository" {
@@ -43,10 +42,10 @@ func TestCreateRepository(t *testing.T) {
 		}
 
 		expectedReq := CreateRepositoryRequest{
-			Repository:  "testrepo",
-			Namespace:   "testorg",
+			Repository:  testRepository,
+			Namespace:   testNamespace,
 			Visibility:  "private",
-			Description: "Test repository",
+			Description: testRepoDescription,
 		}
 
 		if req != expectedReq {
@@ -70,24 +69,24 @@ func TestCreateRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	repo, err := client.CreateRepository("testorg", "testrepo", "private", "Test repository")
+	repo, err := client.CreateRepository(testNamespace, testRepository, "private", "Test repository")
 	if err != nil {
 		t.Fatalf("CreateRepository failed: %v", err)
 	}
 
 	// Verify response
-	if repo.Name != "testrepo" {
+	if repo.Name != testRepository {
 		t.Errorf("Expected repository name 'testrepo', got '%s'", repo.Name)
 	}
-	if repo.Namespace != "testorg" {
+	if repo.Namespace != testNamespace {
 		t.Errorf("Expected namespace 'testorg', got '%s'", repo.Namespace)
 	}
 }
 
 func TestUpdateRepository(t *testing.T) {
 	mockRepo := Repository{
-		Namespace:   "testorg",
-		Name:        "testrepo",
+		Namespace:   testNamespace,
+		Name:        testRepository,
 		Description: updatedDescription,
 		IsPublic:    true,
 	}
@@ -95,7 +94,7 @@ func TestUpdateRepository(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockRepo)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "PUT" {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
 		if r.URL.Path != testRepoPath {
@@ -129,7 +128,7 @@ func TestUpdateRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	repo, err := client.UpdateRepository("testorg", "testrepo", updatedDescription, "public")
+	repo, err := client.UpdateRepository(testNamespace, testRepository, updatedDescription, "public")
 	if err != nil {
 		t.Fatalf("UpdateRepository failed: %v", err)
 	}
@@ -141,7 +140,7 @@ func TestUpdateRepository(t *testing.T) {
 
 func TestDeleteRepository(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "DELETE" {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
 		if r.URL.Path != testRepoPath {
@@ -161,7 +160,7 @@ func TestDeleteRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteRepository("testorg", "testrepo")
+	err = client.DeleteRepository(testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("DeleteRepository failed: %v", err)
 	}
@@ -169,11 +168,11 @@ func TestDeleteRepository(t *testing.T) {
 
 func TestGetRepository(t *testing.T) {
 	mockRepo := Repository{
-		Namespace:   "testorg",
-		Name:        "testrepo",
-		Description: "Test repository",
+		Namespace:   testNamespace,
+		Name:        testRepository,
+		Description: testRepoDescription,
 		IsPublic:    false,
-		Kind:        "image",
+		Kind:        testKindImage,
 	}
 
 	mockTags := RepositoryTags{
@@ -188,8 +187,8 @@ func TestGetRepository(t *testing.T) {
 			EndTs          int    `json:"end_ts,omitempty"`
 			Expiration     string `json:"expiration,omitempty"`
 		}{
-			{Name: "latest", ManifestDigest: "sha256:abc123"},
-			{Name: "v1.0.0", ManifestDigest: "sha256:def456"},
+			{Name: testTagNameLatest, ManifestDigest: testDigestSHA256},
+			{Name: testTagNameV1, ManifestDigest: "sha256:def456"},
 		},
 		Page:          1,
 		HasAdditional: false,
@@ -199,7 +198,7 @@ func TestGetRepository(t *testing.T) {
 	mockTagsJSON, _ := json.Marshal(mockTags)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetRepo {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 
@@ -228,15 +227,15 @@ func TestGetRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	repoWithTags, err := client.GetRepository("testorg", "testrepo")
+	repoWithTags, err := client.GetRepository(testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("GetRepository failed: %v", err)
 	}
 
-	if repoWithTags.Name != "testrepo" {
+	if repoWithTags.Name != testRepository {
 		t.Errorf("Expected repository name 'testrepo', got '%s'", repoWithTags.Name)
 	}
-	if repoWithTags.Namespace != "testorg" {
+	if repoWithTags.Namespace != testNamespace {
 		t.Errorf("Expected namespace 'testorg', got '%s'", repoWithTags.Namespace)
 	}
 	if len(repoWithTags.Tags.Tags) != 2 {

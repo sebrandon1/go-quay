@@ -9,20 +9,15 @@ import (
 
 const (
 	testRobotShortname = "deploybot"
-	httpGetRobot       = "GET"
-	httpPutRobot       = "PUT"
-	httpPostRobot      = "POST"
-	httpDeleteRobot    = "DELETE"
-	roleWrite          = "write"
 )
 
 func TestGetUserRobotAccounts(t *testing.T) {
 	mockRobots := RobotAccounts{
 		Robots: []RobotAccount{
 			{
-				Name:        "testuser+deploybot",
-				Description: "Deployment robot",
-				Created:     "2024-01-15T10:30:00Z",
+				Name:        testRobotFullName,
+				Description: testRobotDescValue,
+				Created:     testTimestamp,
 			},
 			{
 				Name:        "testuser+cibot",
@@ -35,7 +30,7 @@ func TestGetUserRobotAccounts(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockRobots)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetRobot {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/user/robots" {
@@ -65,23 +60,23 @@ func TestGetUserRobotAccounts(t *testing.T) {
 	if len(robots.Robots) != 2 {
 		t.Errorf("Expected 2 robots, got %d", len(robots.Robots))
 	}
-	if robots.Robots[0].Name != "testuser+deploybot" {
+	if robots.Robots[0].Name != testRobotFullName {
 		t.Errorf("Expected robot name 'testuser+deploybot', got '%s'", robots.Robots[0].Name)
 	}
 }
 
 func TestGetUserRobotAccount(t *testing.T) {
 	mockRobot := RobotAccount{
-		Name:        "testuser+deploybot",
-		Description: "Deployment robot",
+		Name:        testRobotFullName,
+		Description: testRobotDescValue,
 		Token:       "secret-token-123",
-		Created:     "2024-01-15T10:30:00Z",
+		Created:     testTimestamp,
 	}
 
 	mockResponseJSON, _ := json.Marshal(mockRobot)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetRobot {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/user/robots/" + testRobotShortname
@@ -109,7 +104,7 @@ func TestGetUserRobotAccount(t *testing.T) {
 		t.Fatalf("GetUserRobotAccount failed: %v", err)
 	}
 
-	if robot.Name != "testuser+deploybot" {
+	if robot.Name != testRobotFullName {
 		t.Errorf("Expected robot name 'testuser+deploybot', got '%s'", robot.Name)
 	}
 	if robot.Token != "secret-token-123" {
@@ -128,7 +123,7 @@ func TestCreateUserRobotAccount(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockRobot)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPutRobot {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/user/robots/newbot" {
@@ -174,7 +169,7 @@ func TestCreateUserRobotAccount(t *testing.T) {
 
 func TestDeleteUserRobotAccount(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeleteRobot {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/user/robots/" + testRobotShortname
@@ -203,16 +198,16 @@ func TestDeleteUserRobotAccount(t *testing.T) {
 
 func TestRegenerateUserRobotToken(t *testing.T) {
 	mockRobot := RobotAccount{
-		Name:        "testuser+deploybot",
-		Description: "Deployment robot",
+		Name:        testRobotFullName,
+		Description: testRobotDescValue,
 		Token:       "regenerated-token-456",
-		Created:     "2024-01-15T10:30:00Z",
+		Created:     testTimestamp,
 	}
 
 	mockResponseJSON, _ := json.Marshal(mockRobot)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPostRobot {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/user/robots/" + testRobotShortname + "/regenerate"
@@ -250,11 +245,11 @@ func TestGetUserRobotPermissions(t *testing.T) {
 		Permissions: []RobotPermission{
 			{
 				Repository: Repository{Name: "myrepo"},
-				Role:       roleWrite,
+				Role:       testRoleWrite,
 			},
 			{
 				Repository: Repository{Name: "otherrepo"},
-				Role:       "read",
+				Role:       testRoleRead,
 			},
 		},
 	}
@@ -262,7 +257,7 @@ func TestGetUserRobotPermissions(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockPermissions)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetRobot {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/user/robots/" + testRobotShortname + "/permissions"
@@ -293,7 +288,7 @@ func TestGetUserRobotPermissions(t *testing.T) {
 	if len(permissions.Permissions) != 2 {
 		t.Errorf("Expected 2 permissions, got %d", len(permissions.Permissions))
 	}
-	if permissions.Permissions[0].Role != roleWrite {
+	if permissions.Permissions[0].Role != testRoleWrite {
 		t.Errorf("Expected role 'write', got '%s'", permissions.Permissions[0].Role)
 	}
 }

@@ -8,15 +8,9 @@ import (
 )
 
 const (
-	httpGetNotification    = "GET"
-	httpPostNotification   = "POST"
-	httpDeleteNotification = "DELETE"
-
-	testNotificationNamespace  = "testorg"
-	testNotificationRepository = "testrepo"
-	testNotificationUUID       = "notification-uuid-123"
-	testNotificationEvent      = "repo_push"
-	testNotificationMethod     = "webhook"
+	testNotificationUUID   = "notification-uuid-123"
+	testNotificationEvent  = "repo_push"
+	testNotificationMethod = "webhook"
 )
 
 func TestGetNotifications(t *testing.T) {
@@ -29,10 +23,10 @@ func TestGetNotifications(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetNotification {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testNotificationNamespace + "/" + testNotificationRepository + "/notification/"
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/notification/"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -50,7 +44,7 @@ func TestGetNotifications(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	notifications, err := client.GetNotifications(testNotificationNamespace, testNotificationRepository)
+	notifications, err := client.GetNotifications(testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("GetNotifications returned error: %v", err)
 	}
@@ -74,10 +68,10 @@ func TestGetNotification(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetNotification {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testNotificationNamespace + "/" + testNotificationRepository + "/notification/" + testNotificationUUID
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/notification/" + testNotificationUUID
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -95,7 +89,7 @@ func TestGetNotification(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	notification, err := client.GetNotification(testNotificationNamespace, testNotificationRepository, testNotificationUUID)
+	notification, err := client.GetNotification(testNamespace, testRepository, testNotificationUUID)
 	if err != nil {
 		t.Fatalf("GetNotification returned error: %v", err)
 	}
@@ -118,10 +112,10 @@ func TestCreateNotification(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPostNotification {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testNotificationNamespace + "/" + testNotificationRepository + "/notification/"
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/notification/"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -147,7 +141,7 @@ func TestCreateNotification(t *testing.T) {
 		Title:  "New Webhook",
 	}
 
-	notification, err := client.CreateNotification(testNotificationNamespace, testNotificationRepository, notificationReq)
+	notification, err := client.CreateNotification(testNamespace, testRepository, notificationReq)
 	if err != nil {
 		t.Fatalf("CreateNotification returned error: %v", err)
 	}
@@ -159,10 +153,10 @@ func TestCreateNotification(t *testing.T) {
 
 func TestDeleteNotification(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeleteNotification {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testNotificationNamespace + "/" + testNotificationRepository + "/notification/" + testNotificationUUID
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/notification/" + testNotificationUUID
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -179,7 +173,7 @@ func TestDeleteNotification(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteNotification(testNotificationNamespace, testNotificationRepository, testNotificationUUID)
+	err = client.DeleteNotification(testNamespace, testRepository, testNotificationUUID)
 	if err != nil {
 		t.Fatalf("DeleteNotification returned error: %v", err)
 	}
@@ -187,10 +181,10 @@ func TestDeleteNotification(t *testing.T) {
 
 func TestTestNotification(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPostNotification {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testNotificationNamespace + "/" + testNotificationRepository + "/notification/" + testNotificationUUID + "/test"
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/notification/" + testNotificationUUID + "/test"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -207,7 +201,7 @@ func TestTestNotification(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.TestNotification(testNotificationNamespace, testNotificationRepository, testNotificationUUID)
+	err = client.TestNotification(testNamespace, testRepository, testNotificationUUID)
 	if err != nil {
 		t.Fatalf("TestNotification returned error: %v", err)
 	}
@@ -215,10 +209,10 @@ func TestTestNotification(t *testing.T) {
 
 func TestResetNotification(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPostNotification {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testNotificationNamespace + "/" + testNotificationRepository + "/notification/" + testNotificationUUID + "/reset"
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/notification/" + testNotificationUUID + "/reset"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -235,7 +229,7 @@ func TestResetNotification(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.ResetNotification(testNotificationNamespace, testNotificationRepository, testNotificationUUID)
+	err = client.ResetNotification(testNamespace, testRepository, testNotificationUUID)
 	if err != nil {
 		t.Fatalf("ResetNotification returned error: %v", err)
 	}
@@ -256,7 +250,7 @@ func TestGetNotificationsError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetNotifications(testNotificationNamespace, testNotificationRepository)
+	_, err = client.GetNotifications(testNamespace, testRepository)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -277,7 +271,7 @@ func TestGetNotificationError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetNotification(testNotificationNamespace, testNotificationRepository, "nonexistent-uuid")
+	_, err = client.GetNotification(testNamespace, testRepository, "nonexistent-uuid")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}

@@ -39,7 +39,7 @@ Available commands:
 
 // Build List
 var buildListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   subcmdList,
 	Short: "List builds for a repository",
 	Long:  `List all builds for the specified repository.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -62,7 +62,7 @@ var buildListCmd = &cobra.Command{
 
 // Build Info
 var buildInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get build details",
 	Long:  `Get detailed information about a specific build.`,
 	Run: func(cmd *cobra.Command, args []string) {

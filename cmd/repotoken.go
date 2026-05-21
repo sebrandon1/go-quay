@@ -42,7 +42,7 @@ better security, auditing, and permission management.`,
 
 // repotokenListCmd lists all tokens
 var repotokenListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   subcmdList,
 	Short: "List all repository tokens",
 	Long:  `List all tokens for a repository. (DEPRECATED - use robot accounts)`,
 	Run: func(_ *cobra.Command, _ []string) {
@@ -69,7 +69,7 @@ var repotokenListCmd = &cobra.Command{
 
 // repotokenInfoCmd gets a specific token
 var repotokenInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get a specific token",
 	Long:  `Get detailed information about a specific repository token. (DEPRECATED - use robot accounts)`,
 	Run: func(_ *cobra.Command, _ []string) {
@@ -101,7 +101,7 @@ var repotokenInfoCmd = &cobra.Command{
 
 // repotokenCreateCmd creates a new token
 var repotokenCreateCmd = &cobra.Command{
-	Use:   "create",
+	Use:   subcmdCreate,
 	Short: "Create a new token",
 	Long:  `Create a new repository token. (DEPRECATED - use robot accounts)`,
 	Run: func(_ *cobra.Command, _ []string) {
@@ -137,7 +137,7 @@ var repotokenCreateCmd = &cobra.Command{
 
 // repotokenUpdateCmd updates a token
 var repotokenUpdateCmd = &cobra.Command{
-	Use:   "update",
+	Use:   subcmdUpdate,
 	Short: "Update a token",
 	Long:  `Update a repository token's role. (DEPRECATED - use robot accounts)`,
 	Run: func(_ *cobra.Command, _ []string) {
@@ -177,7 +177,7 @@ var repotokenUpdateCmd = &cobra.Command{
 
 // repotokenDeleteCmd deletes a token
 var repotokenDeleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   subcmdDelete,
 	Short: "Delete a token",
 	Long:  `Delete a repository token. (DEPRECATED - use robot accounts)`,
 	Run: func(_ *cobra.Command, _ []string) {
