@@ -186,13 +186,6 @@ func init() {
 	robotCmd.AddCommand(robotRegenerateCmd)
 	robotCmd.AddCommand(robotPermissionsCmd)
 
-	// Global robot flags
-	robotCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
-	if err := robotCmd.MarkPersistentFlagRequired("token"); err != nil {
-		fmt.Printf("Error marking token flag as required: %v\n", err)
-		os.Exit(1)
-	}
-
 	// Info command flags
 	robotInfoCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name (without username prefix)")
 	if err := robotInfoCmd.MarkFlagRequired("name"); err != nil {

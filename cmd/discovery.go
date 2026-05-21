@@ -88,8 +88,6 @@ func init() {
 	discoveryCmd.AddCommand(discoveryAppInfoCmd)
 	discoveryCmd.AddCommand(discoveryEntitiesCmd)
 
-	discoveryCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Quay.io API token")
-
 	discoveryAppInfoCmd.Flags().StringVar(&discoveryClientID, "client-id", "", "OAuth application client ID")
 	if err := discoveryAppInfoCmd.MarkFlagRequired("client-id"); err != nil {
 		fmt.Printf("Error marking client-id flag as required: %v\n", err)

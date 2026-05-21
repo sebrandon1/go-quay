@@ -343,9 +343,7 @@ func init() {
 }
 
 func initTeamGlobalFlags() {
-	teamCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 	teamCmd.PersistentFlags().StringVarP(&teamCmdOrgname, "organization", "o", "", "Organization name")
-	markFlagRequired(teamCmd.MarkPersistentFlagRequired("token"))
 	markFlagRequired(teamCmd.MarkPersistentFlagRequired("organization"))
 }
 

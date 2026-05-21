@@ -83,12 +83,7 @@ func init() {
 	searchCmd.AddCommand(searchAllCmd)
 
 	// Global search flags
-	searchCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 	searchCmd.PersistentFlags().StringVarP(&searchQuery, "query", "q", "", "Search query")
-	if err := searchCmd.MarkPersistentFlagRequired("token"); err != nil {
-		fmt.Printf("Error marking token flag as required: %v\n", err)
-		os.Exit(1)
-	}
 	if err := searchCmd.MarkPersistentFlagRequired("query"); err != nil {
 		fmt.Printf("Error marking query flag as required: %v\n", err)
 		os.Exit(1)

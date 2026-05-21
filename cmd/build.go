@@ -198,10 +198,8 @@ func init() {
 	buildCmd.AddCommand(buildStatusCmd)
 
 	// Global build flags
-	buildCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 	buildCmd.PersistentFlags().StringVarP(&buildNamespace, "namespace", "n", "", "Repository namespace")
 	buildCmd.PersistentFlags().StringVarP(&buildRepository, "repository", "r", "", "Repository name")
-	markFlagRequired(buildCmd.MarkPersistentFlagRequired("token"))
 	markFlagRequired(buildCmd.MarkPersistentFlagRequired("namespace"))
 	markFlagRequired(buildCmd.MarkPersistentFlagRequired("repository"))
 

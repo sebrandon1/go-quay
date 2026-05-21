@@ -64,7 +64,6 @@ func init() {
 	secscanCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
 	secscanCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
 	secscanCmd.PersistentFlags().StringVarP(&secScanManifestRef, "manifest", "m", "", "Manifest reference (digest like sha256:...)")
-	secscanCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 
 	// Mark global flags as required
 	if err := secscanCmd.MarkPersistentFlagRequired("namespace"); err != nil {
@@ -77,10 +76,6 @@ func init() {
 	}
 	if err := secscanCmd.MarkPersistentFlagRequired("manifest"); err != nil {
 		fmt.Printf("Error marking manifest flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := secscanCmd.MarkPersistentFlagRequired("token"); err != nil {
-		fmt.Printf("Error marking token flag as required: %v\n", err)
 		os.Exit(1)
 	}
 

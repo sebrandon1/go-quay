@@ -297,7 +297,6 @@ func setupTriggerFlags() {
 	for _, cmd := range []*cobra.Command{triggerListCmd, triggerInfoCmd, triggerDeleteCmd, triggerEnableCmd, triggerDisableCmd, triggerStartCmd, triggerActivateCmd, triggerBuildsCmd} {
 		cmd.Flags().StringVarP(&triggerNamespace, "namespace", "n", "", "Namespace/organization")
 		cmd.Flags().StringVarP(&triggerRepository, "repository", "r", "", "Repository name")
-		cmd.Flags().StringVarP(&token, "token", "t", "", "Quay.io API token")
 	}
 
 	// UUID flags for subcommands that need it

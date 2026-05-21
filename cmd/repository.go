@@ -205,15 +205,10 @@ func init() {
 	// Global repository flags
 	repositoryCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
 	repositoryCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
-	repositoryCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 
 	// Mark global flags as required
 	if err := repositoryCmd.MarkPersistentFlagRequired("namespace"); err != nil {
 		fmt.Printf("Error marking namespace flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := repositoryCmd.MarkPersistentFlagRequired("token"); err != nil {
-		fmt.Printf("Error marking token flag as required: %v\n", err)
 		os.Exit(1)
 	}
 

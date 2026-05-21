@@ -263,10 +263,8 @@ func init() {
 	notificationCmd.AddCommand(notificationUpdateCmd)
 
 	// Global notification flags
-	notificationCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 	notificationCmd.PersistentFlags().StringVarP(&notificationNamespace, "namespace", "n", "", "Repository namespace")
 	notificationCmd.PersistentFlags().StringVarP(&notificationRepository, "repository", "r", "", "Repository name")
-	markFlagRequired(notificationCmd.MarkPersistentFlagRequired("token"))
 	markFlagRequired(notificationCmd.MarkPersistentFlagRequired("namespace"))
 	markFlagRequired(notificationCmd.MarkPersistentFlagRequired("repository"))
 

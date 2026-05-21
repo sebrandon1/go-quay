@@ -54,6 +54,5 @@ This endpoint provides details about error types that can be returned by the Qua
 }
 
 func init() {
-	errorTypeCmd.Flags().StringVarP(&token, "token", "t", "", "Quay.io API token")
 	errorTypeCmd.Flags().StringVar(&errorTypeName, "type", "", "Error type to look up (e.g., 'invalid_token')")
 }
