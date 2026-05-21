@@ -9,6 +9,10 @@ var rootCmd = &cobra.Command{
 	Short: "Quay CLI interacts with Quay.io API",
 }
 
+func SetVersion(v string) {
+	rootCmd.Version = v
+}
+
 var getCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get objects from Quay.io",

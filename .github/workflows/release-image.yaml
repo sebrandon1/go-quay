@@ -41,6 +41,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: VERSION=${{ steps.version.outputs.tag }}
           tags: |
             quay.io/bapalm/go-quay:${{ steps.version.outputs.tag }}
             quay.io/bapalm/go-quay:${{ steps.version.outputs.major }}
