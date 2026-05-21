@@ -42,7 +42,7 @@ connected source repositories like GitHub, GitLab, or Bitbucket.`,
 
 // triggerListCmd represents the trigger list command
 var triggerListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   subcmdList,
 	Short: "List all build triggers for a repository",
 	Long:  `List all build triggers configured for a repository.`,
 	Run: func(_ *cobra.Command, _ []string) {
@@ -69,7 +69,7 @@ var triggerListCmd = &cobra.Command{
 
 // triggerInfoCmd represents the trigger info command
 var triggerInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get details of a specific build trigger",
 	Long:  `Get detailed information about a specific build trigger by its UUID.`,
 	Run: func(_ *cobra.Command, _ []string) {
@@ -101,7 +101,7 @@ var triggerInfoCmd = &cobra.Command{
 
 // triggerDeleteCmd represents the trigger delete command
 var triggerDeleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   subcmdDelete,
 	Short: "Delete a build trigger",
 	Long:  `Delete a build trigger from a repository.`,
 	Run: func(_ *cobra.Command, _ []string) {

@@ -7,10 +7,6 @@ import (
 	"testing"
 )
 
-const (
-	httpGetDiscovery = "GET"
-)
-
 func TestGetDiscovery(t *testing.T) {
 	mockResponse := Discovery{
 		Version: "v1",
@@ -25,7 +21,7 @@ func TestGetDiscovery(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetDiscovery {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/discovery"

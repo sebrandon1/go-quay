@@ -53,7 +53,7 @@ Available commands:
 
 // Notification List
 var notificationListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   subcmdList,
 	Short: "List notifications for a repository",
 	Long:  `List all notifications (webhooks) for the specified repository.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -76,7 +76,7 @@ var notificationListCmd = &cobra.Command{
 
 // Notification Info
 var notificationInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get notification details",
 	Long:  `Get detailed information about a specific notification.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -99,7 +99,7 @@ var notificationInfoCmd = &cobra.Command{
 
 // Notification Create
 var notificationCreateCmd = &cobra.Command{
-	Use:   "create",
+	Use:   subcmdCreate,
 	Short: "Create a new notification",
 	Long: `Create a new notification (webhook) for the repository.
 
@@ -143,7 +143,7 @@ For slack method, provide the --url flag with the Slack webhook URL.`,
 
 // Notification Delete
 var notificationDeleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   subcmdDelete,
 	Short: "Delete a notification",
 	Long:  `Delete a notification from the repository. This action cannot be undone.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -214,7 +214,7 @@ var notificationResetCmd = &cobra.Command{
 }
 
 var notificationUpdateCmd = &cobra.Command{
-	Use:   "update",
+	Use:   subcmdUpdate,
 	Short: "Update a notification",
 	Long:  `Update an existing notification (webhook) configuration.`,
 	Run: func(cmd *cobra.Command, args []string) {

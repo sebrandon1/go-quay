@@ -33,7 +33,7 @@ Available commands:
 
 // Repository Info (existing functionality)
 var repoInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get repository information from Quay.io",
 	Run: func(cmd *cobra.Command, args []string) {
 		if repository == "" {
@@ -59,7 +59,7 @@ var repoInfoCmd = &cobra.Command{
 
 // Repository Creation
 var repoCreateCmd = &cobra.Command{
-	Use:   "create",
+	Use:   subcmdCreate,
 	Short: "Create a new repository",
 	Long:  `Create a new repository in the specified namespace with optional description and visibility settings.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -87,7 +87,7 @@ var repoCreateCmd = &cobra.Command{
 
 // Repository Update
 var repoUpdateCmd = &cobra.Command{
-	Use:   "update",
+	Use:   subcmdUpdate,
 	Short: "Update repository settings",
 	Long:  `Update repository description and/or visibility settings.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -115,7 +115,7 @@ var repoUpdateCmd = &cobra.Command{
 
 // Repository Deletion
 var repoDeleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   subcmdDelete,
 	Short: "Delete a repository",
 	Long:  `Delete a repository. This action is irreversible and will remove all images and tags.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -147,7 +147,7 @@ var repoDeleteCmd = &cobra.Command{
 }
 
 var repoListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   subcmdList,
 	Short: "List repositories in a namespace",
 	Long:  `List all repositories in a namespace with optional filters.`,
 	Run: func(cmd *cobra.Command, args []string) {

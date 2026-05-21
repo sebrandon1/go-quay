@@ -8,11 +8,8 @@ import (
 )
 
 const (
-	testManifestRef    = "sha256:abc123def456789"
-	testLabelID        = "label-123"
-	httpGetManifest    = "GET"
-	httpPostManifest   = "POST"
-	httpDeleteManifest = "DELETE"
+	testManifestRef = "sha256:abc123def456789"
+	testLabelID     = "label-123"
 )
 
 func TestGetManifest(t *testing.T) {
@@ -46,7 +43,7 @@ func TestGetManifest(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockManifest)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetManifest {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/testorg/testrepo/manifest/"+testManifestRef {
@@ -68,7 +65,7 @@ func TestGetManifest(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	manifest, err := client.GetManifest("testorg", "testrepo", testManifestRef)
+	manifest, err := client.GetManifest(testNamespace, testRepository, testManifestRef)
 	if err != nil {
 		t.Fatalf("GetManifest failed: %v", err)
 	}
@@ -89,7 +86,7 @@ func TestGetManifest(t *testing.T) {
 
 func TestDeleteManifest(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeleteManifest {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/testorg/testrepo/manifest/"+testManifestRef {
@@ -109,7 +106,7 @@ func TestDeleteManifest(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteManifest("testorg", "testrepo", testManifestRef)
+	err = client.DeleteManifest(testNamespace, testRepository, testManifestRef)
 	if err != nil {
 		t.Fatalf("DeleteManifest failed: %v", err)
 	}
@@ -120,17 +117,17 @@ func TestGetManifestLabels(t *testing.T) {
 		Labels: []ManifestLabel{
 			{
 				ID:         "label-1",
-				Key:        "version",
+				Key:        testLabelKeyVersion,
 				Value:      "1.0.0",
-				SourceType: "api",
-				MediaType:  "text/plain",
+				SourceType: testLabelKeyAPI,
+				MediaType:  testMediaTypePlain,
 			},
 			{
 				ID:         "label-2",
 				Key:        "maintainer",
-				Value:      "test@example.com",
-				SourceType: "api",
-				MediaType:  "text/plain",
+				Value:      testEmailAddress,
+				SourceType: testLabelKeyAPI,
+				MediaType:  testMediaTypePlain,
 			},
 		},
 	}
@@ -138,7 +135,7 @@ func TestGetManifestLabels(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockLabels)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetManifest {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/testorg/testrepo/manifest/"+testManifestRef+"/labels" {
@@ -160,7 +157,7 @@ func TestGetManifestLabels(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	labels, err := client.GetManifestLabels("testorg", "testrepo", testManifestRef)
+	labels, err := client.GetManifestLabels(testNamespace, testRepository, testManifestRef)
 	if err != nil {
 		t.Fatalf("GetManifestLabels failed: %v", err)
 	}
@@ -168,10 +165,10 @@ func TestGetManifestLabels(t *testing.T) {
 	if len(labels.Labels) != 2 {
 		t.Errorf("Expected 2 labels, got %d", len(labels.Labels))
 	}
-	if labels.Labels[0].Key != "version" {
+	if labels.Labels[0].Key != testLabelKeyVersion {
 		t.Errorf("Expected first label key 'version', got '%s'", labels.Labels[0].Key)
 	}
-	if labels.Labels[1].Value != "test@example.com" {
+	if labels.Labels[1].Value != testEmailAddress {
 		t.Errorf("Expected second label value 'test@example.com', got '%s'", labels.Labels[1].Value)
 	}
 }
@@ -179,16 +176,16 @@ func TestGetManifestLabels(t *testing.T) {
 func TestAddManifestLabel(t *testing.T) {
 	mockLabel := ManifestLabel{
 		ID:         "new-label-123",
-		Key:        "environment",
-		Value:      "production",
-		SourceType: "api",
-		MediaType:  "text/plain",
+		Key:        testLabelKeyEnvironment,
+		Value:      testLabelValProduction,
+		SourceType: testLabelKeyAPI,
+		MediaType:  testMediaTypePlain,
 	}
 
 	mockResponseJSON, _ := json.Marshal(mockLabel)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPostManifest {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/testorg/testrepo/manifest/"+testManifestRef+"/labels" {
@@ -201,10 +198,10 @@ func TestAddManifestLabel(t *testing.T) {
 			t.Errorf("Failed to decode request body: %v", err)
 		}
 
-		if req.Key != "environment" {
+		if req.Key != testLabelKeyEnvironment {
 			t.Errorf("Expected key 'environment', got '%s'", req.Key)
 		}
-		if req.Value != "production" {
+		if req.Value != testLabelValProduction {
 			t.Errorf("Expected value 'production', got '%s'", req.Value)
 		}
 
@@ -223,15 +220,15 @@ func TestAddManifestLabel(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	label, err := client.AddManifestLabel("testorg", "testrepo", testManifestRef, "environment", "production", "text/plain")
+	label, err := client.AddManifestLabel(testNamespace, testRepository, testManifestRef, testLabelKeyEnvironment, testLabelValProduction, testMediaTypePlain)
 	if err != nil {
 		t.Fatalf("AddManifestLabel failed: %v", err)
 	}
 
-	if label.Key != "environment" {
+	if label.Key != testLabelKeyEnvironment {
 		t.Errorf("Expected label key 'environment', got '%s'", label.Key)
 	}
-	if label.Value != "production" {
+	if label.Value != testLabelValProduction {
 		t.Errorf("Expected label value 'production', got '%s'", label.Value)
 	}
 	if label.ID != "new-label-123" {
@@ -242,16 +239,16 @@ func TestAddManifestLabel(t *testing.T) {
 func TestGetManifestLabel(t *testing.T) {
 	mockLabel := ManifestLabel{
 		ID:         testLabelID,
-		Key:        "version",
+		Key:        testLabelKeyVersion,
 		Value:      "2.0.0",
-		SourceType: "api",
-		MediaType:  "text/plain",
+		SourceType: testLabelKeyAPI,
+		MediaType:  testMediaTypePlain,
 	}
 
 	mockResponseJSON, _ := json.Marshal(mockLabel)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetManifest {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/repository/testorg/testrepo/manifest/" + testManifestRef + "/labels/" + testLabelID
@@ -274,7 +271,7 @@ func TestGetManifestLabel(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	label, err := client.GetManifestLabel("testorg", "testrepo", testManifestRef, testLabelID)
+	label, err := client.GetManifestLabel(testNamespace, testRepository, testManifestRef, testLabelID)
 	if err != nil {
 		t.Fatalf("GetManifestLabel failed: %v", err)
 	}
@@ -282,14 +279,14 @@ func TestGetManifestLabel(t *testing.T) {
 	if label.ID != testLabelID {
 		t.Errorf("Expected label ID '%s', got '%s'", testLabelID, label.ID)
 	}
-	if label.Key != "version" {
+	if label.Key != testLabelKeyVersion {
 		t.Errorf("Expected label key 'version', got '%s'", label.Key)
 	}
 }
 
 func TestDeleteManifestLabel(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeleteManifest {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/repository/testorg/testrepo/manifest/" + testManifestRef + "/labels/" + testLabelID
@@ -310,7 +307,7 @@ func TestDeleteManifestLabel(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteManifestLabel("testorg", "testrepo", testManifestRef, testLabelID)
+	err = client.DeleteManifestLabel(testNamespace, testRepository, testManifestRef, testLabelID)
 	if err != nil {
 		t.Fatalf("DeleteManifestLabel failed: %v", err)
 	}
@@ -334,37 +331,37 @@ func TestManifestErrorHandling(t *testing.T) {
 	}
 
 	// Test GetManifest error
-	_, err = client.GetManifest("testorg", "testrepo", "nonexistent")
+	_, err = client.GetManifest(testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest, got nil")
 	}
 
 	// Test DeleteManifest error
-	err = client.DeleteManifest("testorg", "testrepo", "nonexistent")
+	err = client.DeleteManifest(testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest, got nil")
 	}
 
 	// Test GetManifestLabels error
-	_, err = client.GetManifestLabels("testorg", "testrepo", "nonexistent")
+	_, err = client.GetManifestLabels(testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest, got nil")
 	}
 
 	// Test AddManifestLabel error
-	_, err = client.AddManifestLabel("testorg", "testrepo", "nonexistent", "key", "value", "")
+	_, err = client.AddManifestLabel(testNamespace, testRepository, "nonexistent", "key", "value", "")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest, got nil")
 	}
 
 	// Test GetManifestLabel error
-	_, err = client.GetManifestLabel("testorg", "testrepo", "nonexistent", "labelid")
+	_, err = client.GetManifestLabel(testNamespace, testRepository, "nonexistent", "labelid")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest label, got nil")
 	}
 
 	// Test DeleteManifestLabel error
-	err = client.DeleteManifestLabel("testorg", "testrepo", "nonexistent", "labelid")
+	err = client.DeleteManifestLabel(testNamespace, testRepository, "nonexistent", "labelid")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest label, got nil")
 	}

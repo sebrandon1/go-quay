@@ -58,7 +58,7 @@ Available commands:
 
 // Organization Info
 var orgInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get organization information",
 	Long:  `Get detailed information about an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {

@@ -90,7 +90,7 @@ The following APIs are covered by the repo. Each API links to the corresponding 
 | [Discovery](https://docs.quay.io/api/swagger/#Discovery)              | Yes     | Yes     | /api/v1/discovery |
 | [Error](https://docs.quay.io/api/swagger/#Error)                  | Yes     | Yes     | /api/v1/error/{error_type} |
 | [Messages](https://docs.quay.io/api/swagger/#Messages)               | Yes     | Yes     | /api/v1/messages |
-| [Logs](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--aggregatelogs-get)                   | Partial | Partial | /api/v1/repository/{namespace}/{repository}/aggregatelogs, /api/v1/repository/{namespace}/{repository}/logs, /api/v1/organization/{orgname}/logs |
+| [Logs](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--aggregatelogs-get)                   | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/aggregatelogs, /api/v1/repository/{namespace}/{repository}/logs, /api/v1/organization/{orgname}/logs, /api/v1/organization/{orgname}/aggregatelogs, /api/v1/user/logs, /api/v1/user/aggregatelogs |
 | [Manifest](https://docs.quay.io/api/swagger/#Manifest)               | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}, /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels, /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels/{labelid} |
 | [Organization](https://docs.quay.io/api/swagger/#operation--api-v1-organization--orgname--get)           | Yes     | Yes     | /api/v1/organization/{orgname}, /api/v1/organization/{orgname}/members, /api/v1/organization/{orgname}/teams, /api/v1/organization/{orgname}/team/{teamname}, /api/v1/organization/{orgname}/robots, /api/v1/organization/{orgname}/quota, /api/v1/organization/{orgname}/autoprunepolicy, /api/v1/organization/{orgname}/applications |
 | [Permission](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--permissions-get)             | Yes     | Yes     | /api/v1/repository/{namespace}/{repository}/permissions, /api/v1/repository/{namespace}/{repository}/permissions/{username} |
@@ -374,29 +374,43 @@ The notification API allows you to manage webhooks for repository events.
 
 ### Logs API
 
-The logs API provides access to repository activity logs and aggregated statistics.
+The logs API provides access to repository, organization, and user activity logs with optional date range filtering.
 
 📖 **API Reference:** [Logs endpoints in Swagger](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--aggregatelogs-get)
 
 #### Get aggregated repository logs
 ```bash
-# Get logs for the last 7 days
-./go-quay get aggregatedlogs \
-  --namespace NAMESPACE \
-  --repository REPOSITORY \
-  --startdate "01/01/2024" \
-  --enddate "01/07/2024" \
-  --token YOUR_TOKEN
+./go-quay get logs repo-aggregated-logs \
+  -n NAMESPACE \
+  -r REPOSITORY \
+  -s "2024-01-01" \
+  -e "2024-01-07" \
+  -t YOUR_TOKEN
 ```
 
-#### Example with specific dates
+#### Get repository logs with date filtering
 ```bash
-./go-quay get aggregatedlogs \
-  -n quay \
-  -r my-app \
-  -s "12/01/2023" \
-  -e "12/31/2023" \
+./go-quay get logs repo-logs \
+  -n NAMESPACE \
+  -r REPOSITORY \
+  --startdate "2024-05-01" \
+  --enddate "2024-05-31" \
   -t YOUR_TOKEN
+```
+
+#### Get organization and user logs
+```bash
+# Organization logs
+./go-quay get logs org-logs -o ORG_NAME -t YOUR_TOKEN
+
+# Organization aggregated logs
+./go-quay get logs org-aggregated-logs -o ORG_NAME -s "2024-01-01" -e "2024-01-31" -t YOUR_TOKEN
+
+# User logs
+./go-quay get logs user-logs -t YOUR_TOKEN
+
+# User aggregated logs
+./go-quay get logs user-aggregated-logs -s "2024-01-01" -e "2024-01-31" -t YOUR_TOKEN
 ```
 
 ### Repository API

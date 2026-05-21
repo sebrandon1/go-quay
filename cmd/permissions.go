@@ -17,7 +17,7 @@ var (
 
 // permissionsCmd represents the permissions command group
 var permissionsCmd = &cobra.Command{
-	Use:   "permissions",
+	Use:   subcmdPermissions,
 	Short: "Repository permissions management commands",
 	Long: `Commands for managing repository permissions including listing, setting, and removing user/robot access.
 
@@ -31,7 +31,7 @@ Supported roles: read, write, admin`,
 
 // Permissions List
 var permListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   subcmdList,
 	Short: "List repository permissions",
 	Long:  `List all users and robots that have permissions on this repository.`,
 	Run: func(cmd *cobra.Command, args []string) {

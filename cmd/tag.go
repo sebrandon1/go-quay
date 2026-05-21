@@ -31,7 +31,7 @@ Available commands:
 
 // Tag Info
 var tagInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get detailed tag information",
 	Long:  `Get detailed information about a specific tag including metadata, manifest digest, and size.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -54,7 +54,7 @@ var tagInfoCmd = &cobra.Command{
 
 // Tag Update
 var tagUpdateCmd = &cobra.Command{
-	Use:   "update",
+	Use:   subcmdUpdate,
 	Short: "Update tag metadata",
 	Long:  `Update tag metadata such as expiration date.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -77,7 +77,7 @@ var tagUpdateCmd = &cobra.Command{
 
 // Tag Delete
 var tagDeleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   subcmdDelete,
 	Short: "Delete a tag",
 	Long:  `Delete a specific tag from the repository. This action cannot be undone.`,
 	Run: func(cmd *cobra.Command, args []string) {

@@ -13,10 +13,10 @@ const (
 
 func TestGetTag(t *testing.T) {
 	mockTag := Tag{
-		Name:           "v1.0.0",
+		Name:           testTagNameV1,
 		ManifestDigest: "sha256:abc123def456",
 		Size:           1024000,
-		LastModified:   "2024-01-15T10:30:00Z",
+		LastModified:   testTimestamp,
 		IsManifestList: false,
 		DockerImageID:  "abc123",
 		ImageID:        "def456",
@@ -29,7 +29,7 @@ func TestGetTag(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockTag)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/testorg/testrepo/tag/v1.0.0" {
@@ -51,12 +51,12 @@ func TestGetTag(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	tag, err := client.GetTag("testorg", "testrepo", "v1.0.0")
+	tag, err := client.GetTag(testNamespace, testRepository, testTagNameV1)
 	if err != nil {
 		t.Fatalf("GetTag failed: %v", err)
 	}
 
-	if tag.Name != "v1.0.0" {
+	if tag.Name != testTagNameV1 {
 		t.Errorf("Expected tag name 'v1.0.0', got '%s'", tag.Name)
 	}
 	if tag.ManifestDigest != "sha256:abc123def456" {
@@ -72,15 +72,15 @@ func TestGetTag(t *testing.T) {
 
 func TestUpdateTag(t *testing.T) {
 	mockTag := Tag{
-		Name:         "v1.0.0",
-		Expiration:   "2024-12-31T23:59:59Z",
-		LastModified: "2024-01-15T10:30:00Z",
+		Name:         testTagNameV1,
+		Expiration:   testExpirationTime,
+		LastModified: testTimestamp,
 	}
 
 	mockResponseJSON, _ := json.Marshal(mockTag)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "PUT" {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/testorg/testrepo/tag/v1.0.0" {
@@ -93,7 +93,7 @@ func TestUpdateTag(t *testing.T) {
 			t.Errorf("Failed to decode request body: %v", err)
 		}
 
-		if req.Expiration != "2024-12-31T23:59:59Z" {
+		if req.Expiration != testExpirationTime {
 			t.Errorf("Expected expiration '2024-12-31T23:59:59Z', got '%s'", req.Expiration)
 		}
 
@@ -112,19 +112,19 @@ func TestUpdateTag(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	tag, err := client.UpdateTag("testorg", "testrepo", "v1.0.0", "2024-12-31T23:59:59Z")
+	tag, err := client.UpdateTag(testNamespace, testRepository, testTagNameV1, testExpirationTime)
 	if err != nil {
 		t.Fatalf("UpdateTag failed: %v", err)
 	}
 
-	if tag.Expiration != "2024-12-31T23:59:59Z" {
+	if tag.Expiration != testExpirationTime {
 		t.Errorf("Expected expiration '2024-12-31T23:59:59Z', got '%s'", tag.Expiration)
 	}
 }
 
 func TestDeleteTag(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "DELETE" {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/testorg/testrepo/tag/old-version" {
@@ -144,7 +144,7 @@ func TestDeleteTag(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteTag("testorg", "testrepo", "old-version")
+	err = client.DeleteTag(testNamespace, testRepository, "old-version")
 	if err != nil {
 		t.Fatalf("DeleteTag failed: %v", err)
 	}
@@ -154,13 +154,13 @@ func TestGetTagHistory(t *testing.T) {
 	mockHistory := TagHistory{
 		Tags: []Tag{
 			{
-				Name:           "latest",
-				ManifestDigest: "sha256:abc123",
-				LastModified:   "2024-01-15T10:30:00Z",
+				Name:           testTagNameLatest,
+				ManifestDigest: testDigestSHA256,
+				LastModified:   testTimestamp,
 				Size:           1024000,
 			},
 			{
-				Name:           "latest",
+				Name:           testTagNameLatest,
 				ManifestDigest: testManifestDigest,
 				LastModified:   "2024-01-10T08:15:00Z",
 				Size:           1020000,
@@ -171,7 +171,7 @@ func TestGetTagHistory(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockHistory)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/testorg/testrepo/tag/latest/history" {
@@ -193,7 +193,7 @@ func TestGetTagHistory(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	history, err := client.GetTagHistory("testorg", "testrepo", "latest")
+	history, err := client.GetTagHistory(testNamespace, testRepository, testTagNameLatest)
 	if err != nil {
 		t.Fatalf("GetTagHistory failed: %v", err)
 	}
@@ -203,7 +203,7 @@ func TestGetTagHistory(t *testing.T) {
 	}
 
 	// Check first tag (most recent)
-	if history.Tags[0].ManifestDigest != "sha256:abc123" {
+	if history.Tags[0].ManifestDigest != testDigestSHA256 {
 		t.Errorf("Expected first tag manifest 'sha256:abc123', got '%s'", history.Tags[0].ManifestDigest)
 	}
 
@@ -215,7 +215,7 @@ func TestGetTagHistory(t *testing.T) {
 
 func TestRevertTag(t *testing.T) {
 	mockTag := Tag{
-		Name:           "latest",
+		Name:           testTagNameLatest,
 		ManifestDigest: testManifestDigest,
 		LastModified:   "2024-01-15T11:00:00Z",
 	}
@@ -223,7 +223,7 @@ func TestRevertTag(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockTag)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 		if r.URL.Path != "/api/v1/repository/testorg/testrepo/tag/latest/revert" {
@@ -255,7 +255,7 @@ func TestRevertTag(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	tag, err := client.RevertTag("testorg", "testrepo", "latest", testManifestDigest)
+	tag, err := client.RevertTag(testNamespace, testRepository, testTagNameLatest, testManifestDigest)
 	if err != nil {
 		t.Fatalf("RevertTag failed: %v", err)
 	}
@@ -283,31 +283,31 @@ func TestTagErrorHandling(t *testing.T) {
 	}
 
 	// Test GetTag error
-	_, err = client.GetTag("testorg", "testrepo", "nonexistent")
+	_, err = client.GetTag(testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
 	}
 
 	// Test UpdateTag error
-	_, err = client.UpdateTag("testorg", "testrepo", "nonexistent", "2024-12-31T23:59:59Z")
+	_, err = client.UpdateTag(testNamespace, testRepository, "nonexistent", testExpirationTime)
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
 	}
 
 	// Test DeleteTag error
-	err = client.DeleteTag("testorg", "testrepo", "nonexistent")
+	err = client.DeleteTag(testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
 	}
 
 	// Test GetTagHistory error
-	_, err = client.GetTagHistory("testorg", "testrepo", "nonexistent")
+	_, err = client.GetTagHistory(testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
 	}
 
 	// Test RevertTag error
-	_, err = client.RevertTag("testorg", "testrepo", "nonexistent", "sha256:abc123")
+	_, err = client.RevertTag(testNamespace, testRepository, "nonexistent", testDigestSHA256)
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
 	}

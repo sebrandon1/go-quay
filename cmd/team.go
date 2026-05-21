@@ -45,7 +45,7 @@ Available commands:
 
 // Team List
 var teamListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   subcmdList,
 	Short: "List all teams in an organization",
 	Long:  `List all teams within the specified organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -68,7 +68,7 @@ var teamListCmd = &cobra.Command{
 
 // Team Info
 var teamCmdInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get team details",
 	Long:  `Get detailed information about a specific team.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -91,7 +91,7 @@ var teamCmdInfoCmd = &cobra.Command{
 
 // Team Create
 var teamCreateCmd = &cobra.Command{
-	Use:   "create",
+	Use:   subcmdCreate,
 	Short: "Create a new team",
 	Long: `Create a new team within an organization.
 
@@ -119,7 +119,7 @@ Roles:
 
 // Team Update
 var teamUpdateCmd = &cobra.Command{
-	Use:   "update",
+	Use:   subcmdUpdate,
 	Short: "Update team settings",
 	Long:  `Update team description and role.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -142,7 +142,7 @@ var teamUpdateCmd = &cobra.Command{
 
 // Team Delete
 var teamDeleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   subcmdDelete,
 	Short: "Delete a team",
 	Long:  `Delete a team from an organization. This action cannot be undone.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -243,7 +243,7 @@ var teamRemoveMemberCmd = &cobra.Command{
 
 // Team Permissions
 var teamPermissionsCmd = &cobra.Command{
-	Use:   "permissions",
+	Use:   subcmdPermissions,
 	Short: "List team repository permissions",
 	Long:  `List all repository permissions for a team.`,
 	Run: func(cmd *cobra.Command, args []string) {

@@ -41,7 +41,7 @@ templates for users, teams, or robot accounts.`,
 
 // prototypeListCmd lists all prototypes
 var prototypeListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   subcmdList,
 	Short: "List all permission prototypes",
 	Long:  `List all permission prototypes for an organization.`,
 	Run: func(_ *cobra.Command, _ []string) {
@@ -68,7 +68,7 @@ var prototypeListCmd = &cobra.Command{
 
 // prototypeInfoCmd gets a specific prototype
 var prototypeInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get a specific prototype",
 	Long:  `Get detailed information about a specific permission prototype.`,
 	Run: func(_ *cobra.Command, _ []string) {
@@ -100,7 +100,7 @@ var prototypeInfoCmd = &cobra.Command{
 
 // prototypeCreateCmd creates a new prototype
 var prototypeCreateCmd = &cobra.Command{
-	Use:   "create",
+	Use:   subcmdCreate,
 	Short: "Create a new prototype",
 	Long: `Create a new permission prototype for an organization.
 
@@ -158,7 +158,7 @@ Roles:
 
 // prototypeUpdateCmd updates a prototype
 var prototypeUpdateCmd = &cobra.Command{
-	Use:   "update",
+	Use:   subcmdUpdate,
 	Short: "Update a prototype",
 	Long:  `Update an existing permission prototype's role.`,
 	Run: func(_ *cobra.Command, _ []string) {
@@ -198,7 +198,7 @@ var prototypeUpdateCmd = &cobra.Command{
 
 // prototypeDeleteCmd deletes a prototype
 var prototypeDeleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   subcmdDelete,
 	Short: "Delete a prototype",
 	Long:  `Delete a permission prototype from an organization.`,
 	Run: func(_ *cobra.Command, _ []string) {

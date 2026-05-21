@@ -410,7 +410,7 @@ type OrganizationRepository struct {
 	Kind         string  `json:"kind,omitempty"`
 	Namespace    string  `json:"namespace,omitempty"`
 	LastModified string  `json:"last_modified,omitempty"`
-	Popularity   float64 `json:"popularity,omitempty"`
+	Popularity   float64 `json:"popularity"`
 	TagsCount    int     `json:"tags_count,omitempty"`
 }
 
@@ -554,7 +554,7 @@ type StarredRepository struct {
 	IsPublic     bool    `json:"is_public,omitempty"`
 	Kind         string  `json:"kind,omitempty"`
 	LastModified string  `json:"last_modified,omitempty"`
-	Popularity   float64 `json:"popularity,omitempty"`
+	Popularity   float64 `json:"popularity"`
 }
 
 // StarredRepositories represents the response for starred repositories
@@ -571,7 +571,7 @@ type SearchRepository struct {
 	Description string  `json:"description,omitempty"`
 	IsPublic    bool    `json:"is_public,omitempty"`
 	Kind        string  `json:"kind,omitempty"`
-	Popularity  float64 `json:"popularity,omitempty"`
+	Popularity  float64 `json:"popularity"`
 	Score       float64 `json:"score,omitempty"`
 	Href        string  `json:"href,omitempty"`
 }

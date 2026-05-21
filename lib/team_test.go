@@ -8,17 +8,11 @@ import (
 )
 
 const (
-	httpGetTeam    = "GET"
-	httpPutTeam    = "PUT"
-	httpDeleteTeam = "DELETE"
-
-	testOrgName    = "test-org"
-	testTeamName   = "developers"
-	testMemberName = "testuser"
-	testRepoName   = "test-repo"
-	roleAdmin      = "admin"
-	roleMember     = "member"
-	roleRead       = "read"
+	testOrgName  = "test-org"
+	testTeamName = "developers"
+	testRepoName = "test-repo"
+	roleAdmin    = "admin"
+	roleMember   = "member"
 )
 
 func TestGetTeams(t *testing.T) {
@@ -33,7 +27,7 @@ func TestGetTeams(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetTeam {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/organization/" + testOrgName + "/teams"
@@ -81,7 +75,7 @@ func TestGetTeam(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetTeam {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName
@@ -127,7 +121,7 @@ func TestCreateTeam(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPutTeam {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName
@@ -170,7 +164,7 @@ func TestUpdateTeam(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPutTeam {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName
@@ -209,7 +203,7 @@ func TestUpdateTeam(t *testing.T) {
 
 func TestDeleteTeam(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeleteTeam {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName
@@ -238,14 +232,14 @@ func TestDeleteTeam(t *testing.T) {
 func TestGetTeamMembers(t *testing.T) {
 	mockResponse := TeamMembers{
 		Members: []TeamMember{
-			{Name: testMemberName, Kind: "user", IsRobot: false},
-			{Name: "robot+builder", Kind: "robot", IsRobot: true},
+			{Name: testUserName, Kind: testKindUser, IsRobot: false},
+			{Name: "robot+builder", Kind: testKindRobot, IsRobot: true},
 		},
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetTeam {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/members"
@@ -274,8 +268,8 @@ func TestGetTeamMembers(t *testing.T) {
 	if len(members.Members) != 2 {
 		t.Errorf("Expected 2 members, got %d", len(members.Members))
 	}
-	if members.Members[0].Name != testMemberName {
-		t.Errorf("Expected first member name %s, got %s", testMemberName, members.Members[0].Name)
+	if members.Members[0].Name != testUserName {
+		t.Errorf("Expected first member name %s, got %s", testUserName, members.Members[0].Name)
 	}
 	if members.Members[0].IsRobot {
 		t.Errorf("Expected first member to not be a robot")
@@ -287,10 +281,10 @@ func TestGetTeamMembers(t *testing.T) {
 
 func TestAddTeamMember(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPutTeam {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/members/" + testMemberName
+		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/members/" + testUserName
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -307,7 +301,7 @@ func TestAddTeamMember(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.AddTeamMember(testOrgName, testTeamName, testMemberName)
+	err = client.AddTeamMember(testOrgName, testTeamName, testUserName)
 	if err != nil {
 		t.Fatalf("AddTeamMember returned error: %v", err)
 	}
@@ -315,10 +309,10 @@ func TestAddTeamMember(t *testing.T) {
 
 func TestRemoveTeamMember(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeleteTeam {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/members/" + testMemberName
+		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/members/" + testUserName
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -335,7 +329,7 @@ func TestRemoveTeamMember(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.RemoveTeamMember(testOrgName, testTeamName, testMemberName)
+	err = client.RemoveTeamMember(testOrgName, testTeamName, testUserName)
 	if err != nil {
 		t.Fatalf("RemoveTeamMember returned error: %v", err)
 	}
@@ -344,14 +338,14 @@ func TestRemoveTeamMember(t *testing.T) {
 func TestGetTeamPermissions(t *testing.T) {
 	mockResponse := TeamPermissions{
 		Permissions: []TeamPermission{
-			{Repository: Repository{Name: testRepoName}, Role: roleRead},
-			{Repository: Repository{Name: "another-repo"}, Role: "write"},
+			{Repository: Repository{Name: testRepoName}, Role: testRoleRead},
+			{Repository: Repository{Name: "another-repo"}, Role: testRoleWrite},
 		},
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetTeam {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/permissions"
@@ -383,14 +377,14 @@ func TestGetTeamPermissions(t *testing.T) {
 	if perms.Permissions[0].Repository.Name != testRepoName {
 		t.Errorf("Expected first repo name %s, got %s", testRepoName, perms.Permissions[0].Repository.Name)
 	}
-	if perms.Permissions[0].Role != roleRead {
-		t.Errorf("Expected first role %s, got %s", roleRead, perms.Permissions[0].Role)
+	if perms.Permissions[0].Role != testRoleRead {
+		t.Errorf("Expected first role %s, got %s", testRoleRead, perms.Permissions[0].Role)
 	}
 }
 
 func TestSetTeamRepositoryPermission(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPutTeam {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/permissions/" + testRepoName
@@ -410,7 +404,7 @@ func TestSetTeamRepositoryPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.SetTeamRepositoryPermission(testOrgName, testTeamName, testRepoName, "write")
+	err = client.SetTeamRepositoryPermission(testOrgName, testTeamName, testRepoName, testRoleWrite)
 	if err != nil {
 		t.Fatalf("SetTeamRepositoryPermission returned error: %v", err)
 	}
@@ -418,7 +412,7 @@ func TestSetTeamRepositoryPermission(t *testing.T) {
 
 func TestRemoveTeamRepositoryPermission(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeleteTeam {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
 		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/permissions/" + testRepoName

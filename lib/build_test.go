@@ -8,14 +8,8 @@ import (
 )
 
 const (
-	httpGetBuild    = "GET"
-	httpPostBuild   = "POST"
-	httpDeleteBuild = "DELETE"
-
-	testBuildNamespace  = "testorg"
-	testBuildRepository = "testrepo"
-	testBuildUUID       = "build-uuid-123"
-	testBuildPhase      = "complete"
+	testBuildUUID  = "build-uuid-123"
+	testBuildPhase = "complete"
 )
 
 func TestGetBuilds(t *testing.T) {
@@ -28,10 +22,10 @@ func TestGetBuilds(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetBuild {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testBuildNamespace + "/" + testBuildRepository + "/build/"
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/build/"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -49,7 +43,7 @@ func TestGetBuilds(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	builds, err := client.GetBuilds(testBuildNamespace, testBuildRepository, 0)
+	builds, err := client.GetBuilds(testNamespace, testRepository, 0)
 	if err != nil {
 		t.Fatalf("GetBuilds returned error: %v", err)
 	}
@@ -67,15 +61,15 @@ func TestGetBuild(t *testing.T) {
 		ID:          testBuildUUID,
 		Phase:       testBuildPhase,
 		DisplayName: "Test Build",
-		Started:     "2024-01-15T10:30:00Z",
+		Started:     testTimestamp,
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetBuild {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testBuildNamespace + "/" + testBuildRepository + "/build/" + testBuildUUID
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/build/" + testBuildUUID
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -93,7 +87,7 @@ func TestGetBuild(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	build, err := client.GetBuild(testBuildNamespace, testBuildRepository, testBuildUUID)
+	build, err := client.GetBuild(testNamespace, testRepository, testBuildUUID)
 	if err != nil {
 		t.Fatalf("GetBuild returned error: %v", err)
 	}
@@ -118,10 +112,10 @@ func TestGetBuildLogs(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetBuild {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testBuildNamespace + "/" + testBuildRepository + "/build/" + testBuildUUID + "/logs"
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/build/" + testBuildUUID + "/logs"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -139,7 +133,7 @@ func TestGetBuildLogs(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	logs, err := client.GetBuildLogs(testBuildNamespace, testBuildRepository, testBuildUUID)
+	logs, err := client.GetBuildLogs(testNamespace, testRepository, testBuildUUID)
 	if err != nil {
 		t.Fatalf("GetBuildLogs returned error: %v", err)
 	}
@@ -156,15 +150,15 @@ func TestRequestBuild(t *testing.T) {
 	mockResponse := Build{
 		ID:    testBuildUUID,
 		Phase: "waiting",
-		Tags:  []string{"latest"},
+		Tags:  []string{testTagNameLatest},
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPostBuild {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testBuildNamespace + "/" + testBuildRepository + "/build/"
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/build/"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -185,10 +179,10 @@ func TestRequestBuild(t *testing.T) {
 
 	buildReq := &RequestBuildRequest{
 		ArchiveURL: "https://example.com/archive.tar.gz",
-		Tags:       []string{"latest"},
+		Tags:       []string{testTagNameLatest},
 	}
 
-	build, err := client.RequestBuild(testBuildNamespace, testBuildRepository, buildReq)
+	build, err := client.RequestBuild(testNamespace, testRepository, buildReq)
 	if err != nil {
 		t.Fatalf("RequestBuild returned error: %v", err)
 	}
@@ -200,10 +194,10 @@ func TestRequestBuild(t *testing.T) {
 
 func TestCancelBuild(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeleteBuild {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testBuildNamespace + "/" + testBuildRepository + "/build/" + testBuildUUID
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/build/" + testBuildUUID
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -220,7 +214,7 @@ func TestCancelBuild(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.CancelBuild(testBuildNamespace, testBuildRepository, testBuildUUID)
+	err = client.CancelBuild(testNamespace, testRepository, testBuildUUID)
 	if err != nil {
 		t.Fatalf("CancelBuild returned error: %v", err)
 	}
@@ -241,7 +235,7 @@ func TestGetBuildsError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetBuilds(testBuildNamespace, testBuildRepository, 0)
+	_, err = client.GetBuilds(testNamespace, testRepository, 0)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -262,7 +256,7 @@ func TestGetBuildError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetBuild(testBuildNamespace, testBuildRepository, "nonexistent-uuid")
+	_, err = client.GetBuild(testNamespace, testRepository, "nonexistent-uuid")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}

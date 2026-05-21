@@ -8,15 +8,8 @@ import (
 )
 
 const (
-	httpGetTrigger    = "GET"
-	httpPutTrigger    = "PUT"
-	httpPostTrigger   = "POST"
-	httpDeleteTrigger = "DELETE"
-
-	testTriggerNamespace  = "testorg"
-	testTriggerRepository = "testrepo"
-	testTriggerUUID       = "trigger-uuid-123"
-	testTriggerService    = "github"
+	testTriggerUUID    = "trigger-uuid-123"
+	testTriggerService = "github"
 )
 
 func TestGetTriggers(t *testing.T) {
@@ -29,10 +22,10 @@ func TestGetTriggers(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetTrigger {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testTriggerNamespace + "/" + testTriggerRepository + "/trigger/"
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/trigger/"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -50,7 +43,7 @@ func TestGetTriggers(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	triggers, err := client.GetTriggers(testTriggerNamespace, testTriggerRepository)
+	triggers, err := client.GetTriggers(testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("GetTriggers returned error: %v", err)
 	}
@@ -79,10 +72,10 @@ func TestGetTrigger(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetTrigger {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testTriggerNamespace + "/" + testTriggerRepository + "/trigger/" + testTriggerUUID
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/trigger/" + testTriggerUUID
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -100,7 +93,7 @@ func TestGetTrigger(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	trigger, err := client.GetTrigger(testTriggerNamespace, testTriggerRepository, testTriggerUUID)
+	trigger, err := client.GetTrigger(testNamespace, testRepository, testTriggerUUID)
 	if err != nil {
 		t.Fatalf("GetTrigger returned error: %v", err)
 	}
@@ -118,10 +111,10 @@ func TestGetTrigger(t *testing.T) {
 
 func TestDeleteTrigger(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeleteTrigger {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testTriggerNamespace + "/" + testTriggerRepository + "/trigger/" + testTriggerUUID
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/trigger/" + testTriggerUUID
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -138,7 +131,7 @@ func TestDeleteTrigger(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteTrigger(testTriggerNamespace, testTriggerRepository, testTriggerUUID)
+	err = client.DeleteTrigger(testNamespace, testRepository, testTriggerUUID)
 	if err != nil {
 		t.Fatalf("DeleteTrigger returned error: %v", err)
 	}
@@ -154,10 +147,10 @@ func TestUpdateTrigger(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPutTrigger {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testTriggerNamespace + "/" + testTriggerRepository + "/trigger/" + testTriggerUUID
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/trigger/" + testTriggerUUID
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -175,7 +168,7 @@ func TestUpdateTrigger(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	trigger, err := client.UpdateTrigger(testTriggerNamespace, testTriggerRepository, testTriggerUUID, false)
+	trigger, err := client.UpdateTrigger(testNamespace, testRepository, testTriggerUUID, false)
 	if err != nil {
 		t.Fatalf("UpdateTrigger returned error: %v", err)
 	}
@@ -193,10 +186,10 @@ func TestStartTriggerBuild(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPostTrigger {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testTriggerNamespace + "/" + testTriggerRepository + "/trigger/" + testTriggerUUID + "/start"
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/trigger/" + testTriggerUUID + "/start"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -219,7 +212,7 @@ func TestStartTriggerBuild(t *testing.T) {
 		CommitSHA: "abc123def456",
 	}
 
-	build, err := client.StartTriggerBuild(testTriggerNamespace, testTriggerRepository, testTriggerUUID, triggerReq)
+	build, err := client.StartTriggerBuild(testNamespace, testRepository, testTriggerUUID, triggerReq)
 	if err != nil {
 		t.Fatalf("StartTriggerBuild returned error: %v", err)
 	}
@@ -239,10 +232,10 @@ func TestActivateTrigger(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPostTrigger {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/repository/" + testTriggerNamespace + "/" + testTriggerRepository + "/trigger/" + testTriggerUUID + "/activate"
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/trigger/" + testTriggerUUID + "/activate"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -267,7 +260,7 @@ func TestActivateTrigger(t *testing.T) {
 		},
 	}
 
-	trigger, err := client.ActivateTrigger(testTriggerNamespace, testTriggerRepository, testTriggerUUID, activateReq)
+	trigger, err := client.ActivateTrigger(testNamespace, testRepository, testTriggerUUID, activateReq)
 	if err != nil {
 		t.Fatalf("ActivateTrigger returned error: %v", err)
 	}
@@ -295,7 +288,7 @@ func TestGetTriggersError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetTriggers(testTriggerNamespace, testTriggerRepository)
+	_, err = client.GetTriggers(testNamespace, testRepository)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -316,7 +309,7 @@ func TestGetTriggerError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetTrigger(testTriggerNamespace, testTriggerRepository, "nonexistent-uuid")
+	_, err = client.GetTrigger(testNamespace, testRepository, "nonexistent-uuid")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}

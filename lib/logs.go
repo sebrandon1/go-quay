@@ -19,6 +19,11 @@ import (
 	"net/http"
 )
 
+const (
+	startTimeParam = "starttime"
+	endTimeParam   = "endtime"
+)
+
 var (
 	QuayURL = "https://quay.io/api/v1"
 )
@@ -32,6 +37,23 @@ func addQueryParams(req *http.Request, params map[string]string) {
 	req.URL.RawQuery = q.Encode()
 }
 
+// addLogQueryParams adds optional pagination and date range params to a log request.
+func addLogQueryParams(req *http.Request, nextPage, startDate, endDate string) {
+	params := map[string]string{}
+	if nextPage != "" {
+		params["next_page"] = nextPage
+	}
+	if startDate != "" {
+		params[startTimeParam] = startDate
+	}
+	if endDate != "" {
+		params[endTimeParam] = endDate
+	}
+	if len(params) > 0 {
+		addQueryParams(req, params)
+	}
+}
+
 // GetAggregatedLogs returns the aggregated logs for a repository
 func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate string) (*AggregatedLogs, error) {
 	// Get new request
@@ -42,8 +64,8 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 
 	// Set query parameters
 	addQueryParams(req, map[string]string{
-		"starttime": startDate,
-		"endtime":   endDate,
+		startTimeParam: startDate,
+		endTimeParam:   endDate,
 	})
 
 	var logs AggregatedLogs
@@ -55,16 +77,13 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 }
 
 // GetLogs returns the logs for a repository
-func (c *Client) GetLogs(namespace, repository, nextPage string) (*Logs, error) {
+func (c *Client) GetLogs(namespace, repository, nextPage, startDate, endDate string) (*Logs, error) {
 	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/logs", QuayURL, namespace, repository), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// Set query parameters
-	if nextPage != "" {
-		addQueryParams(req, map[string]string{"next_page": nextPage})
-	}
+	addLogQueryParams(req, nextPage, startDate, endDate)
 
 	var logs Logs
 	if err := c.get(req, &logs); err != nil {
@@ -75,15 +94,13 @@ func (c *Client) GetLogs(namespace, repository, nextPage string) (*Logs, error) 
 }
 
 // GetOrganizationLogs returns the logs for an organization
-func (c *Client) GetOrganizationLogs(orgname, nextPage string) (*Logs, error) {
+func (c *Client) GetOrganizationLogs(orgname, nextPage, startDate, endDate string) (*Logs, error) {
 	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/logs", QuayURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if nextPage != "" {
-		addQueryParams(req, map[string]string{"next_page": nextPage})
-	}
+	addLogQueryParams(req, nextPage, startDate, endDate)
 
 	var logs Logs
 	if err := c.get(req, &logs); err != nil {
@@ -101,8 +118,8 @@ func (c *Client) GetOrganizationAggregatedLogs(orgname, startDate, endDate strin
 	}
 
 	addQueryParams(req, map[string]string{
-		"starttime": startDate,
-		"endtime":   endDate,
+		startTimeParam: startDate,
+		endTimeParam:   endDate,
 	})
 
 	var logs AggregatedLogs
@@ -128,15 +145,13 @@ func (c *Client) ExportOrganizationLogs(orgname string, request *ExportLogsReque
 }
 
 // GetUserLogs returns the logs for the current user
-func (c *Client) GetUserLogs(nextPage string) (*Logs, error) {
+func (c *Client) GetUserLogs(nextPage, startDate, endDate string) (*Logs, error) {
 	req, err := newRequest("GET", fmt.Sprintf("%s/user/logs", QuayURL), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if nextPage != "" {
-		addQueryParams(req, map[string]string{"next_page": nextPage})
-	}
+	addLogQueryParams(req, nextPage, startDate, endDate)
 
 	var logs Logs
 	if err := c.get(req, &logs); err != nil {
@@ -154,8 +169,8 @@ func (c *Client) GetUserAggregatedLogs(startDate, endDate string) (*AggregatedLo
 	}
 
 	addQueryParams(req, map[string]string{
-		"starttime": startDate,
-		"endtime":   endDate,
+		startTimeParam: startDate,
+		endTimeParam:   endDate,
 	})
 
 	var logs AggregatedLogs

@@ -8,14 +8,7 @@ import (
 )
 
 const (
-	httpGetPrototype    = "GET"
-	httpPostPrototype   = "POST"
-	httpPutPrototype    = "PUT"
-	httpDeletePrototype = "DELETE"
-
-	testPrototypeOrg  = "testorg"
 	testPrototypeUUID = "proto-uuid-123"
-	prototypeRoleRead = "read"
 )
 
 func TestGetPrototypes(t *testing.T) {
@@ -23,10 +16,10 @@ func TestGetPrototypes(t *testing.T) {
 		Prototypes: []Prototype{
 			{
 				ID:   testPrototypeUUID,
-				Role: prototypeRoleRead,
+				Role: testRoleRead,
 				Delegate: PrototypeDelegate{
-					Name: "devteam",
-					Kind: "team",
+					Name: testPrototypeTeamName,
+					Kind: testKindTeam,
 				},
 			},
 		},
@@ -34,10 +27,10 @@ func TestGetPrototypes(t *testing.T) {
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetPrototype {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/organization/" + testPrototypeOrg + "/prototypes"
+		expectedPath := "/api/v1/organization/" + testNamespace + "/prototypes"
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -55,7 +48,7 @@ func TestGetPrototypes(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	prototypes, err := client.GetPrototypes(testPrototypeOrg)
+	prototypes, err := client.GetPrototypes(testNamespace)
 	if err != nil {
 		t.Fatalf("GetPrototypes returned error: %v", err)
 	}
@@ -71,16 +64,16 @@ func TestGetPrototypes(t *testing.T) {
 func TestCreatePrototype(t *testing.T) {
 	mockResponse := Prototype{
 		ID:   testPrototypeUUID,
-		Role: prototypeRoleRead,
+		Role: testRoleRead,
 		Delegate: PrototypeDelegate{
-			Name: "devteam",
-			Kind: "team",
+			Name: testPrototypeTeamName,
+			Kind: testKindTeam,
 		},
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPostPrototype {
+		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -100,13 +93,13 @@ func TestCreatePrototype(t *testing.T) {
 
 	createReq := &CreatePrototypeRequest{
 		Delegate: PrototypeDelegateRequest{
-			Name: "devteam",
-			Kind: "team",
+			Name: testPrototypeTeamName,
+			Kind: testKindTeam,
 		},
-		Role: prototypeRoleRead,
+		Role: testRoleRead,
 	}
 
-	prototype, err := client.CreatePrototype(testPrototypeOrg, createReq)
+	prototype, err := client.CreatePrototype(testNamespace, createReq)
 	if err != nil {
 		t.Fatalf("CreatePrototype returned error: %v", err)
 	}
@@ -119,19 +112,19 @@ func TestCreatePrototype(t *testing.T) {
 func TestGetPrototype(t *testing.T) {
 	mockResponse := Prototype{
 		ID:   testPrototypeUUID,
-		Role: prototypeRoleRead,
+		Role: testRoleRead,
 		Delegate: PrototypeDelegate{
-			Name: "devteam",
-			Kind: "team",
+			Name: testPrototypeTeamName,
+			Kind: testKindTeam,
 		},
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpGetPrototype {
+		if r.Method != httpMethodGet {
 			t.Errorf("Expected GET request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/organization/" + testPrototypeOrg + "/prototypes/" + testPrototypeUUID
+		expectedPath := "/api/v1/organization/" + testNamespace + "/prototypes/" + testPrototypeUUID
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -149,7 +142,7 @@ func TestGetPrototype(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	prototype, err := client.GetPrototype(testPrototypeOrg, testPrototypeUUID)
+	prototype, err := client.GetPrototype(testNamespace, testPrototypeUUID)
 	if err != nil {
 		t.Fatalf("GetPrototype returned error: %v", err)
 	}
@@ -162,12 +155,12 @@ func TestGetPrototype(t *testing.T) {
 func TestUpdatePrototype(t *testing.T) {
 	mockResponse := Prototype{
 		ID:   testPrototypeUUID,
-		Role: "write",
+		Role: testRoleWrite,
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpPutPrototype {
+		if r.Method != httpMethodPut {
 			t.Errorf("Expected PUT request, got %s", r.Method)
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -185,25 +178,25 @@ func TestUpdatePrototype(t *testing.T) {
 	}
 
 	updateReq := &UpdatePrototypeRequest{
-		Role: "write",
+		Role: testRoleWrite,
 	}
 
-	prototype, err := client.UpdatePrototype(testPrototypeOrg, testPrototypeUUID, updateReq)
+	prototype, err := client.UpdatePrototype(testNamespace, testPrototypeUUID, updateReq)
 	if err != nil {
 		t.Fatalf("UpdatePrototype returned error: %v", err)
 	}
 
-	if prototype.Role != "write" {
+	if prototype.Role != testRoleWrite {
 		t.Errorf("Expected role 'write', got %s", prototype.Role)
 	}
 }
 
 func TestDeletePrototype(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpDeletePrototype {
+		if r.Method != httpMethodDelete {
 			t.Errorf("Expected DELETE request, got %s", r.Method)
 		}
-		expectedPath := "/api/v1/organization/" + testPrototypeOrg + "/prototypes/" + testPrototypeUUID
+		expectedPath := "/api/v1/organization/" + testNamespace + "/prototypes/" + testPrototypeUUID
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
@@ -220,7 +213,7 @@ func TestDeletePrototype(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeletePrototype(testPrototypeOrg, testPrototypeUUID)
+	err = client.DeletePrototype(testNamespace, testPrototypeUUID)
 	if err != nil {
 		t.Fatalf("DeletePrototype returned error: %v", err)
 	}
@@ -241,7 +234,7 @@ func TestGetPrototypesError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetPrototypes(testPrototypeOrg)
+	_, err = client.GetPrototypes(testNamespace)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}

@@ -23,7 +23,7 @@ Available commands:
 
 // User Info
 var userInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get current user information",
 	Long:  `Get detailed information about the currently authenticated user account.`,
 	Run: func(cmd *cobra.Command, args []string) {

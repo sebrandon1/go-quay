@@ -28,7 +28,7 @@ Available commands:
 
 // SecScan Info
 var secscanInfoCmd = &cobra.Command{
-	Use:   "info",
+	Use:   subcmdInfo,
 	Short: "Get security scan results for a manifest",
 	Long: `Get security scan results for a specific manifest including vulnerability information.
 
