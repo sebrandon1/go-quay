@@ -22,7 +22,7 @@ var orgBillingCmd = &cobra.Command{
 	Use:   "org-info",
 	Short: "Get billing information for an organization",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -42,7 +42,7 @@ var userBillingCmd = &cobra.Command{
 	Use:   "user-info",
 	Short: "Get billing information for the current user",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -62,7 +62,7 @@ var orgSubscriptionCmd = &cobra.Command{
 	Use:   "org-subscription",
 	Short: "Get subscription details for an organization",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -82,7 +82,7 @@ var userSubscriptionCmd = &cobra.Command{
 	Use:   "user-subscription",
 	Short: "Get subscription details for the current user",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -102,7 +102,7 @@ var orgInvoicesCmd = &cobra.Command{
 	Use:   "org-invoices",
 	Short: "Get invoices for an organization",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -122,7 +122,7 @@ var userInvoicesCmd = &cobra.Command{
 	Use:   "user-invoices",
 	Short: "Get invoices for the current user",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -142,7 +142,7 @@ var plansCmd = &cobra.Command{
 	Use:   "plans",
 	Short: "Get available subscription plans",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)

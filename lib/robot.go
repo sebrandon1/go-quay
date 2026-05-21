@@ -22,7 +22,7 @@ import (
 
 // GetUserRobotAccounts retrieves all robot accounts for the authenticated user
 func (c *Client) GetUserRobotAccounts() (*RobotAccounts, error) {
-	req, err := newRequest("GET", QuayURL+"/user/robots", nil)
+	req, err := newRequest("GET", c.BaseURL+"/user/robots", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robots request: %w", err)
 	}
@@ -37,7 +37,7 @@ func (c *Client) GetUserRobotAccounts() (*RobotAccounts, error) {
 
 // GetUserRobotAccount retrieves a specific robot account for the authenticated user
 func (c *Client) GetUserRobotAccount(robotShortname string) (*RobotAccount, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/user/robots/%s", QuayURL, robotShortname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/user/robots/%s", c.BaseURL, robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robot request: %w", err)
 	}
@@ -57,7 +57,7 @@ func (c *Client) CreateUserRobotAccount(robotShortname, description string, unst
 		Unstructured: unstructured,
 	}
 
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/user/robots/%s", QuayURL, robotShortname), createReq)
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/user/robots/%s", c.BaseURL, robotShortname), createReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user robot request: %w", err)
 	}
@@ -72,7 +72,7 @@ func (c *Client) CreateUserRobotAccount(robotShortname, description string, unst
 
 // DeleteUserRobotAccount deletes a robot account for the authenticated user
 func (c *Client) DeleteUserRobotAccount(robotShortname string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/user/robots/%s", QuayURL, robotShortname), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/user/robots/%s", c.BaseURL, robotShortname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete user robot request: %w", err)
 	}
@@ -86,7 +86,7 @@ func (c *Client) DeleteUserRobotAccount(robotShortname string) error {
 
 // RegenerateUserRobotToken regenerates the token for a user's robot account
 func (c *Client) RegenerateUserRobotToken(robotShortname string) (*RobotAccount, error) {
-	req, err := newRequest("POST", fmt.Sprintf("%s/user/robots/%s/regenerate", QuayURL, robotShortname), nil)
+	req, err := newRequest("POST", fmt.Sprintf("%s/user/robots/%s/regenerate", c.BaseURL, robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create regenerate user robot token request: %w", err)
 	}
@@ -101,7 +101,7 @@ func (c *Client) RegenerateUserRobotToken(robotShortname string) (*RobotAccount,
 
 // GetUserRobotPermissions retrieves the repository permissions for a user's robot account
 func (c *Client) GetUserRobotPermissions(robotShortname string) (*RobotPermissions, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/user/robots/%s/permissions", QuayURL, robotShortname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/user/robots/%s/permissions", c.BaseURL, robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robot permissions request: %w", err)
 	}

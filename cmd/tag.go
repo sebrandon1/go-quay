@@ -35,7 +35,7 @@ var tagInfoCmd = &cobra.Command{
 	Short: "Get detailed tag information",
 	Long:  `Get detailed information about a specific tag including metadata, manifest digest, and size.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -58,7 +58,7 @@ var tagUpdateCmd = &cobra.Command{
 	Short: "Update tag metadata",
 	Long:  `Update tag metadata such as expiration date.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -87,7 +87,7 @@ var tagDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -109,7 +109,7 @@ var tagHistoryCmd = &cobra.Command{
 	Short: "Get tag history",
 	Long:  `Get the history of changes for a specific tag, including previous versions and modifications.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -132,7 +132,7 @@ var tagRevertCmd = &cobra.Command{
 	Short: "Revert tag to a previous state",
 	Long:  `Revert a tag to a previous state using its manifest digest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -154,7 +154,7 @@ var tagRestoreCmd = &cobra.Command{
 	Short: "Restore a tag from a previous state",
 	Long:  `Restore a previously deleted or modified tag using its manifest digest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)

@@ -25,7 +25,7 @@ var discoveryAPICmd = &cobra.Command{
 	Short: "Get API discovery information",
 	Long:  `Get API discovery information from Quay.io including available endpoints and versions.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -46,7 +46,7 @@ var discoveryAppInfoCmd = &cobra.Command{
 	Short: "Get application information by client ID",
 	Long:  `Get detailed information about an OAuth application by its client ID.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -67,7 +67,7 @@ var discoveryEntitiesCmd = &cobra.Command{
 	Short: "Search for entities by prefix",
 	Long:  `Search for users, organizations, and teams by name prefix.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)

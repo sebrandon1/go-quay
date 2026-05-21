@@ -4,7 +4,8 @@ Package lib provides Quay.io API client functionality.
 This file covers HTTP CLIENT and helper methods:
 
 Client Setup:
-  - NewClient(bearerToken string) (*Client, error)   - Create authenticated client
+  - NewClient(bearerToken string) (*Client, error)                - Create authenticated client (default URL)
+  - NewClientWithURL(bearerToken, baseURL string) (*Client, error) - Create authenticated client with custom URL
 
 HTTP Helper Methods:
   - get(req *http.Request, v any) error      - Execute GET requests
@@ -36,12 +37,16 @@ import (
 	"time"
 )
 
+// DefaultQuayURL is the default Quay.io API base URL.
+const DefaultQuayURL = "https://quay.io/api/v1"
+
 type Client struct {
 	BearerToken string
+	BaseURL     string
 	HTTPClient  *http.Client
 }
 
-func NewClient(bearerToken string) (*Client, error) {
+func NewClientWithURL(bearerToken, baseURL string) (*Client, error) {
 	if bearerToken == "" {
 		return nil, errors.New("bearer token is required")
 	}
@@ -55,11 +60,16 @@ func NewClient(bearerToken string) (*Client, error) {
 
 	return &Client{
 		BearerToken: bearerToken,
+		BaseURL:     baseURL,
 		HTTPClient: &http.Client{
 			Timeout:   30 * time.Second,
 			Transport: transport,
 		},
 	}, nil
+}
+
+func NewClient(bearerToken string) (*Client, error) {
+	return NewClientWithURL(bearerToken, DefaultQuayURL)
 }
 
 func (c *Client) get(req *http.Request, v any) error {

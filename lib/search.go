@@ -25,7 +25,7 @@ func (c *Client) SearchRepositories(query string, page int) (*SearchRepositoryRe
 		params.Add("page", fmt.Sprintf("%d", page))
 	}
 
-	req, err := newRequest("GET", fmt.Sprintf("%s/find/repositories?%s", QuayURL, params.Encode()), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/find/repositories?%s", c.BaseURL, params.Encode()), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search repositories request: %w", err)
 	}
@@ -43,7 +43,7 @@ func (c *Client) SearchAll(query string) (*SearchAllResult, error) {
 	params := url.Values{}
 	params.Add("query", query)
 
-	req, err := newRequest("GET", fmt.Sprintf("%s/find/all?%s", QuayURL, params.Encode()), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/find/all?%s", c.BaseURL, params.Encode()), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search all request: %w", err)
 	}

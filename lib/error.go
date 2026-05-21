@@ -17,7 +17,7 @@ import (
 
 // GetErrorType retrieves details about a specific error type
 func (c *Client) GetErrorType(errorType string) (*ErrorType, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/error/%s", QuayURL, errorType), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/error/%s", c.BaseURL, errorType), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create error type request: %w", err)
 	}

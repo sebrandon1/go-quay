@@ -58,13 +58,8 @@ func TestCreateRepository(t *testing.T) {
 	}))
 	defer server.Close()
 
-	// Override QuayURL for testing
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
 	// Create client and test
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -119,11 +114,7 @@ func TestUpdateRepository(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -151,11 +142,7 @@ func TestDeleteRepository(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -218,11 +205,8 @@ func TestGetRepository(t *testing.T) {
 	defer server.Close()
 
 	// Override base URL since GetRepository uses hardcoded URL
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
 
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}

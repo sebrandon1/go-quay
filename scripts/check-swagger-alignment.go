@@ -54,7 +54,7 @@ type ImplementedEndpoint struct {
 func main() {
 	swaggerURL := flag.String("swagger-url", "https://quay.io/api/v1/discovery", "URL to fetch Swagger spec")
 	libPath := flag.String("lib-path", "./lib", "Path to lib directory")
-	baseURLVar := flag.String("base-url-var", "QuayURL", "Variable name for base URL in source")
+	baseURLVar := flag.String("base-url-var", "BaseURL", "Variable name for base URL in source")
 	outputFormat := flag.String("output", "text", "Output format: text, json, markdown")
 	flag.Parse()
 
@@ -147,7 +147,7 @@ func scanSourceEndpoints(libPath, baseURLVar string) ([]ImplementedEndpoint, err
 	var endpoints []ImplementedEndpoint
 
 	// Patterns to match endpoint definitions
-	// Matches: QuayURL + "/path" or fmt.Sprintf("%s/path", QuayURL)
+	// Matches: c.BaseURL + "/path" or fmt.Sprintf("%s/path", c.BaseURL)
 	urlConcatPattern := regexp.MustCompile(baseURLVar + `\s*\+\s*"(/[^"]+)"`)
 	sprintfPattern := regexp.MustCompile(`fmt\.Sprintf\s*\(\s*"%s(/[^"]+)"`)
 	// Match HTTP method from http.NewRequest or newRequest calls

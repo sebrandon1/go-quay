@@ -17,7 +17,7 @@ import (
 
 // GetMessages retrieves system messages for the user
 func (c *Client) GetMessages() (*Messages, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/messages", QuayURL), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/messages", c.BaseURL), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create messages request: %w", err)
 	}
@@ -50,7 +50,7 @@ func (c *Client) CreateMessage(content, severity, mediaType string) (*Message, e
 		},
 	}
 
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/messages", QuayURL), body)
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/messages", c.BaseURL), body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create message request: %w", err)
 	}

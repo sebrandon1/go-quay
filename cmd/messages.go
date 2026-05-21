@@ -24,7 +24,7 @@ var messagesListCmd = &cobra.Command{
 	Short: "Get system messages",
 	Long:  `Get system-wide messages including maintenance notifications and announcements.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -45,7 +45,7 @@ var messagesCreateCmd = &cobra.Command{
 	Short: "Create a system message",
 	Long:  `Create a new system-wide message.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)

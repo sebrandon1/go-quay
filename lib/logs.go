@@ -24,10 +24,6 @@ const (
 	endTimeParam   = "endtime"
 )
 
-var (
-	QuayURL = "https://quay.io/api/v1"
-)
-
 // addQueryParams adds query parameters to a request URL.
 func addQueryParams(req *http.Request, params map[string]string) {
 	q := req.URL.Query()
@@ -57,7 +53,7 @@ func addLogQueryParams(req *http.Request, nextPage, startDate, endDate string) {
 // GetAggregatedLogs returns the aggregated logs for a repository
 func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate string) (*AggregatedLogs, error) {
 	// Get new request
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/aggregatelogs", QuayURL, namespace, repository), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/aggregatelogs", c.BaseURL, namespace, repository), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +74,7 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 
 // GetLogs returns the logs for a repository
 func (c *Client) GetLogs(namespace, repository, nextPage, startDate, endDate string) (*Logs, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/logs", QuayURL, namespace, repository), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/logs", c.BaseURL, namespace, repository), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +91,7 @@ func (c *Client) GetLogs(namespace, repository, nextPage, startDate, endDate str
 
 // GetOrganizationLogs returns the logs for an organization
 func (c *Client) GetOrganizationLogs(orgname, nextPage, startDate, endDate string) (*Logs, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/logs", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/logs", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +108,7 @@ func (c *Client) GetOrganizationLogs(orgname, nextPage, startDate, endDate strin
 
 // GetOrganizationAggregatedLogs returns the aggregated logs for an organization
 func (c *Client) GetOrganizationAggregatedLogs(orgname, startDate, endDate string) (*AggregatedLogs, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/aggregatelogs", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/aggregatelogs", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +128,7 @@ func (c *Client) GetOrganizationAggregatedLogs(orgname, startDate, endDate strin
 
 // ExportOrganizationLogs exports the logs for an organization
 func (c *Client) ExportOrganizationLogs(orgname string, request *ExportLogsRequest) error {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/exportlogs", QuayURL, orgname), request)
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/exportlogs", c.BaseURL, orgname), request)
 	if err != nil {
 		return err
 	}
@@ -146,7 +142,7 @@ func (c *Client) ExportOrganizationLogs(orgname string, request *ExportLogsReque
 
 // GetUserLogs returns the logs for the current user
 func (c *Client) GetUserLogs(nextPage, startDate, endDate string) (*Logs, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/user/logs", QuayURL), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/user/logs", c.BaseURL), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +159,7 @@ func (c *Client) GetUserLogs(nextPage, startDate, endDate string) (*Logs, error)
 
 // GetUserAggregatedLogs returns the aggregated logs for the current user
 func (c *Client) GetUserAggregatedLogs(startDate, endDate string) (*AggregatedLogs, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/user/aggregatelogs", QuayURL), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/user/aggregatelogs", c.BaseURL), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +179,7 @@ func (c *Client) GetUserAggregatedLogs(startDate, endDate string) (*AggregatedLo
 
 // ExportUserLogs exports the logs for the current user
 func (c *Client) ExportUserLogs(request *ExportLogsRequest) error {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/user/exportlogs", QuayURL), request)
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/user/exportlogs", c.BaseURL), request)
 	if err != nil {
 		return err
 	}
@@ -197,7 +193,7 @@ func (c *Client) ExportUserLogs(request *ExportLogsRequest) error {
 
 // ExportRepositoryLogs exports the logs for a repository
 func (c *Client) ExportRepositoryLogs(namespace, repository string, request *ExportLogsRequest) error {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/exportlogs", QuayURL, namespace, repository), request)
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/exportlogs", c.BaseURL, namespace, repository), request)
 	if err != nil {
 		return err
 	}

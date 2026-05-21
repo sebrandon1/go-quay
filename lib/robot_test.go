@@ -43,11 +43,7 @@ func TestGetUserRobotAccounts(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -90,11 +86,7 @@ func TestGetUserRobotAccount(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -145,11 +137,7 @@ func TestCreateUserRobotAccount(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -181,11 +169,7 @@ func TestDeleteUserRobotAccount(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -221,11 +205,7 @@ func TestRegenerateUserRobotToken(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -271,11 +251,7 @@ func TestGetUserRobotPermissions(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -300,11 +276,7 @@ func TestUserRobotErrorHandling(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}

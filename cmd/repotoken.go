@@ -46,7 +46,7 @@ var repotokenListCmd = &cobra.Command{
 	Short: "List all repository tokens",
 	Long:  `List all tokens for a repository. (DEPRECATED - use robot accounts)`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Println("Error creating client:", err)
 			os.Exit(1)
@@ -78,7 +78,7 @@ var repotokenInfoCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Println("Error creating client:", err)
 			os.Exit(1)
@@ -110,7 +110,7 @@ var repotokenCreateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Println("Error creating client:", err)
 			os.Exit(1)
@@ -150,7 +150,7 @@ var repotokenUpdateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Println("Error creating client:", err)
 			os.Exit(1)
@@ -190,7 +190,7 @@ var repotokenDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Println("Error creating client:", err)
 			os.Exit(1)

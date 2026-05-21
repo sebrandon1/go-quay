@@ -41,7 +41,7 @@ var repoInfoCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -68,7 +68,7 @@ var repoCreateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -96,7 +96,7 @@ var repoUpdateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -130,7 +130,7 @@ var repoDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -151,7 +151,7 @@ var repoListCmd = &cobra.Command{
 	Short: "List repositories in a namespace",
 	Long:  `List all repositories in a namespace with optional filters.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -177,7 +177,7 @@ var repoChangeVisibilityCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)

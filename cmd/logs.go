@@ -32,7 +32,7 @@ var repoLogsCmd = &cobra.Command{
 	Short: "Get repository logs",
 	Long:  `Get action logs for a specific repository.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -53,7 +53,7 @@ var repoAggregatedLogsCmd = &cobra.Command{
 	Short: "Get aggregated repository logs",
 	Long:  `Get aggregated action logs for a specific repository.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -74,7 +74,7 @@ var orgLogsCmd = &cobra.Command{
 	Short: "Get organization logs",
 	Long:  `Get action logs for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -95,7 +95,7 @@ var orgAggregatedLogsCmd = &cobra.Command{
 	Short: "Get aggregated organization logs",
 	Long:  `Get aggregated action logs for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -116,7 +116,7 @@ var userLogsCmd = &cobra.Command{
 	Short: "Get user logs",
 	Long:  `Get action logs for the current user.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -137,7 +137,7 @@ var userAggregatedLogsCmd = &cobra.Command{
 	Short: "Get aggregated user logs",
 	Long:  `Get aggregated action logs for the current user.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -158,7 +158,7 @@ var exportOrgLogsCmd = &cobra.Command{
 	Short: "Export organization logs",
 	Long:  `Export action logs for an organization via callback URL or email.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -184,7 +184,7 @@ var exportUserLogsCmd = &cobra.Command{
 	Short: "Export user logs",
 	Long:  `Export action logs for the current user via callback URL or email.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -210,7 +210,7 @@ var exportRepoLogsCmd = &cobra.Command{
 	Short: "Export repository logs",
 	Long:  `Export action logs for a repository via callback URL or email.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)

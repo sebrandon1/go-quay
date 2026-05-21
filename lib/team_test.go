@@ -39,11 +39,7 @@ func TestGetTeams(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -87,11 +83,7 @@ func TestGetTeam(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -133,11 +125,7 @@ func TestCreateTeam(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -176,11 +164,7 @@ func TestUpdateTeam(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -214,11 +198,7 @@ func TestDeleteTeam(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -251,11 +231,7 @@ func TestGetTeamMembers(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -292,11 +268,7 @@ func TestAddTeamMember(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -320,11 +292,7 @@ func TestRemoveTeamMember(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -357,11 +325,7 @@ func TestGetTeamPermissions(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -395,11 +359,7 @@ func TestSetTeamRepositoryPermission(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -423,11 +383,7 @@ func TestRemoveTeamRepositoryPermission(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -444,11 +400,7 @@ func TestGetTeamsError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -465,11 +417,7 @@ func TestGetTeamError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
