@@ -33,7 +33,7 @@ jobs:
           mkdir -p dist
           BINARY_NAME=go-quay
           OUTPUT="dist/${BINARY_NAME}"
-          go build -trimpath -ldflags "-s -w" -o "$OUTPUT" .
+          go build -trimpath -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" -o "$OUTPUT" .
 
       - name: Package
         run: |
