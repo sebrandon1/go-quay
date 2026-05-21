@@ -1,14 +1,14 @@
-name: Release container image
+name: Unstable container image
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
 
 permissions: read-all
 
 jobs:
   build-and-push:
-    name: Build and push container image
+    name: Build and push unstable image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,21 +27,10 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 
-      - name: Extract version tags
-        id: version
-        run: |
-          TAG="${GITHUB_REF_NAME}"
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-          MAJOR=$(echo "$TAG" | grep -oE '^v[0-9]+')
-          echo "major=${MAJOR}" >> "$GITHUB_OUTPUT"
-
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            quay.io/bapalm/go-quay:${{ steps.version.outputs.tag }}
-            quay.io/bapalm/go-quay:${{ steps.version.outputs.major }}
-            quay.io/bapalm/go-quay:latest
+          tags: quay.io/bapalm/go-quay:unstable
