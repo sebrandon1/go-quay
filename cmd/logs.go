@@ -242,8 +242,6 @@ func init() {
 	logsCmd.AddCommand(exportUserLogsCmd)
 	logsCmd.AddCommand(exportRepoLogsCmd)
 
-	logsCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
-
 	// repo-logs flags
 	repoLogsCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Repository namespace")
 	repoLogsCmd.Flags().StringVarP(&repository, "repository", "r", "", "Repository name")

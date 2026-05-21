@@ -208,15 +208,6 @@ func init() {
 	userCmd.AddCommand(starUserRepoCmd)
 	userCmd.AddCommand(unstarUserRepoCmd)
 
-	// Global user flags
-	userCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
-
-	// Mark token as required for all user commands
-	if err := userCmd.MarkPersistentFlagRequired("token"); err != nil {
-		fmt.Printf("Error marking token flag as required: %v\n", err)
-		os.Exit(1)
-	}
-
 	// Star command specific flags (requires repository context)
 	starRepoCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
 	starRepoCmd.Flags().StringVarP(&repository, "repository", "r", "", "Name of the repository")

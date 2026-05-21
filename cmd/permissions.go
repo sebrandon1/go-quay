@@ -314,7 +314,6 @@ func init() {
 	// Global permissions flags (repository context)
 	permissionsCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
 	permissionsCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
-	permissionsCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 
 	// Mark global flags as required
 	if err := permissionsCmd.MarkPersistentFlagRequired("namespace"); err != nil {
@@ -323,10 +322,6 @@ func init() {
 	}
 	if err := permissionsCmd.MarkPersistentFlagRequired("repository"); err != nil {
 		fmt.Printf("Error marking repository flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := permissionsCmd.MarkPersistentFlagRequired("token"); err != nil {
-		fmt.Printf("Error marking token flag as required: %v\n", err)
 		os.Exit(1)
 	}
 

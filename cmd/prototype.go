@@ -231,7 +231,6 @@ func setupPrototypeFlags() {
 	// Common flags
 	for _, cmd := range []*cobra.Command{prototypeListCmd, prototypeInfoCmd, prototypeCreateCmd, prototypeUpdateCmd, prototypeDeleteCmd} {
 		cmd.Flags().StringVarP(&prototypeOrg, "organization", "o", "", "Organization name")
-		cmd.Flags().StringVarP(&token, "token", "t", "", "Quay.io API token")
 	}
 
 	// UUID flags

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 )
 
@@ -19,6 +21,7 @@ var getCmd = &cobra.Command{
 }
 
 func init() {
+	getCmd.PersistentFlags().StringVarP(&token, "token", "t", os.Getenv("QUAY_TOKEN"), "Quay.io API token (default: $QUAY_TOKEN)")
 	rootCmd.AddCommand(getCmd)
 	getCmd.AddCommand(repositoryCmd)
 	getCmd.AddCommand(billingCmd)

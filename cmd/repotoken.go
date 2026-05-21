@@ -211,7 +211,6 @@ func setupRepoTokenFlags() {
 	for _, cmd := range []*cobra.Command{repotokenListCmd, repotokenInfoCmd, repotokenCreateCmd, repotokenUpdateCmd, repotokenDeleteCmd} {
 		cmd.Flags().StringVarP(&repoTokenNamespace, "namespace", "n", "", "Namespace/organization")
 		cmd.Flags().StringVarP(&repoTokenRepository, "repository", "r", "", "Repository name")
-		cmd.Flags().StringVarP(&token, "token", "t", "", "Quay.io API token")
 	}
 
 	// Code flags

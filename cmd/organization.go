@@ -1130,14 +1130,9 @@ func init() {
 
 func initOrgPersistentFlags() {
 	organizationCmd.PersistentFlags().StringVarP(&orgName, "organization", "o", "", "Organization name")
-	organizationCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Authentication token")
 
 	if err := organizationCmd.MarkPersistentFlagRequired("organization"); err != nil {
 		fmt.Printf("Error marking organization flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := organizationCmd.MarkPersistentFlagRequired("token"); err != nil {
-		fmt.Printf("Error marking token flag as required: %v\n", err)
 		os.Exit(1)
 	}
 }

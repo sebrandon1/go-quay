@@ -183,7 +183,6 @@ func init() {
 	tagCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
 	tagCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
 	tagCmd.PersistentFlags().StringVarP(&tagName, "tag", "T", "", "Name of the tag")
-	tagCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Bearer token")
 
 	// Mark global flags as required
 	if err := tagCmd.MarkPersistentFlagRequired("namespace"); err != nil {
@@ -196,10 +195,6 @@ func init() {
 	}
 	if err := tagCmd.MarkPersistentFlagRequired("tag"); err != nil {
 		fmt.Printf("Error marking tag flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := tagCmd.MarkPersistentFlagRequired("token"); err != nil {
-		fmt.Printf("Error marking token flag as required: %v\n", err)
 		os.Exit(1)
 	}
 

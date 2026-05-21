@@ -66,8 +66,6 @@ func init() {
 	messagesCmd.AddCommand(messagesListCmd)
 	messagesCmd.AddCommand(messagesCreateCmd)
 
-	messagesCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Quay.io API token")
-
 	messagesCreateCmd.Flags().StringVar(&messageContent, "content", "", "Message content")
 	messagesCreateCmd.Flags().StringVar(&messageSeverity, "severity", "", "Message severity (info, warning, error)")
 	messagesCreateCmd.Flags().StringVar(&messageMediaType, "media-type", "", "Media type for the message")
