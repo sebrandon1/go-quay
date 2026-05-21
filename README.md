@@ -11,8 +11,44 @@ A Go wrapper around Quay APIs
 
 ### Installation
 
+#### Prebuilt binary
+
+Download the latest release for your platform from [GitHub Releases](https://github.com/sebrandon1/go-quay/releases):
+
 ```bash
-go get github.com/sebrandon1/go-quay
+# Linux (amd64)
+curl -sL https://github.com/sebrandon1/go-quay/releases/latest/download/go-quay_$(curl -sL https://api.github.com/repos/sebrandon1/go-quay/releases/latest | grep tag_name | cut -d '"' -f4)_linux_amd64.tar.gz | tar xz
+sudo mv go-quay /usr/local/bin/
+
+# macOS (Apple Silicon)
+curl -sL https://github.com/sebrandon1/go-quay/releases/latest/download/go-quay_$(curl -sL https://api.github.com/repos/sebrandon1/go-quay/releases/latest | grep tag_name | cut -d '"' -f4)_darwin_arm64.tar.gz | tar xz
+sudo mv go-quay /usr/local/bin/
+```
+
+#### Container image
+
+```bash
+# Using podman
+podman run --rm quay.io/bapalm/go-quay get repository info \
+  -n myorg -r myapp -t "$QUAY_TOKEN"
+
+# Using docker
+docker run --rm quay.io/bapalm/go-quay get repository info \
+  -n myorg -r myapp -t "$QUAY_TOKEN"
+```
+
+#### Go install
+
+```bash
+go install github.com/sebrandon1/go-quay@latest
+```
+
+#### Build from source
+
+```bash
+git clone https://github.com/sebrandon1/go-quay.git
+cd go-quay
+make build
 ```
 
 ### Library Usage
@@ -54,11 +90,12 @@ func main() {
 ### CLI Usage
 
 ```bash
-# Build the CLI
-make build
-
 # Get repository info
-./go-quay get repository info --namespace myorg --repository myapp --token YOUR_TOKEN
+go-quay get repository info --namespace myorg --repository myapp --token YOUR_TOKEN
+
+# Or run via container
+podman run --rm quay.io/bapalm/go-quay get repository info \
+  -n myorg -r myapp -t "$QUAY_TOKEN"
 ```
 
 ## Documentation
