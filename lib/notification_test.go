@@ -35,11 +35,7 @@ func TestGetNotifications(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -80,11 +76,7 @@ func TestGetNotification(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -125,11 +117,7 @@ func TestCreateNotification(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -164,11 +152,7 @@ func TestDeleteNotification(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -192,11 +176,7 @@ func TestTestNotification(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -220,11 +200,7 @@ func TestResetNotification(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -241,11 +217,7 @@ func TestGetNotificationsError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -262,11 +234,7 @@ func TestGetNotificationError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}

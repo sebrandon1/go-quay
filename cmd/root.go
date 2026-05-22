@@ -3,8 +3,11 @@ package cmd
 import (
 	"os"
 
+	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
+
+var quayURL string
 
 var rootCmd = &cobra.Command{
 	Use:   "quay",
@@ -20,8 +23,16 @@ var getCmd = &cobra.Command{
 	Short: "Get objects from Quay.io",
 }
 
+func envOrDefault(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
+
 func init() {
-	getCmd.PersistentFlags().StringVarP(&token, "token", "t", os.Getenv("QUAY_TOKEN"), "Quay.io API token (default: $QUAY_TOKEN)")
+	getCmd.PersistentFlags().StringVarP(&token, "token", "t", envOrDefault("QUAY_TOKEN", ""), "Quay.io API token (default: $QUAY_TOKEN)")
+	getCmd.PersistentFlags().StringVar(&quayURL, "quay-url", envOrDefault("QUAY_URL", lib.DefaultQuayURL), "Quay API base URL (default: $QUAY_URL)")
 	rootCmd.AddCommand(getCmd)
 	getCmd.AddCommand(repositoryCmd)
 	getCmd.AddCommand(billingCmd)

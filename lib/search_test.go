@@ -53,11 +53,7 @@ func TestSearchRepositories(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -102,11 +98,7 @@ func TestSearchRepositoriesWithPage(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -170,11 +162,7 @@ func TestSearchAll(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -211,11 +199,7 @@ func TestSearchErrorHandling(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -250,11 +234,7 @@ func TestSearchEmptyResults(t *testing.T) {
 	}))
 	defer server.Close()
 
-	originalURL := QuayURL
-	QuayURL = server.URL + "/api/v1"
-	defer func() { QuayURL = originalURL }()
-
-	client, err := NewClient("test-token")
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}

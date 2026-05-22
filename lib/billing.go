@@ -26,7 +26,7 @@ import (
 // GetOrganizationBilling returns billing information for an organization
 func (c *Client) GetOrganizationBilling(orgname string) (*BillingInfo, error) {
 	// Get new request
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/plan", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/plan", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (c *Client) GetOrganizationBilling(orgname string) (*BillingInfo, error) {
 // GetUserBilling returns billing information for the current user
 func (c *Client) GetUserBilling() (*BillingInfo, error) {
 	// Get new request
-	req, err := newRequest("GET", QuayURL+"/user/plan", nil)
+	req, err := newRequest("GET", c.BaseURL+"/user/plan", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (c *Client) GetUserBilling() (*BillingInfo, error) {
 // GetOrganizationSubscription returns subscription details for an organization
 func (c *Client) GetOrganizationSubscription(orgname string) (*Subscription, error) {
 	// Get new request
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/plan", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/plan", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (c *Client) GetOrganizationSubscription(orgname string) (*Subscription, err
 // GetUserSubscription returns subscription details for the current user
 func (c *Client) GetUserSubscription() (*Subscription, error) {
 	// Get new request
-	req, err := newRequest("GET", QuayURL+"/user/plan", nil)
+	req, err := newRequest("GET", c.BaseURL+"/user/plan", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (c *Client) GetUserSubscription() (*Subscription, error) {
 // GetOrganizationInvoices returns invoices for an organization
 func (c *Client) GetOrganizationInvoices(orgname string) ([]Invoice, error) {
 	// Get new request
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/invoices", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/invoices", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (c *Client) GetUserInvoices() ([]Invoice, error) {
 // Original implementation commented out due to 404 errors:
 // func (c *Client) GetUserInvoices() ([]Invoice, error) {
 // 	// Get new request
-// 	req, err := newRequest("GET", QuayURL+"/user/invoices", nil)
+// 	req, err := newRequest("GET", c.BaseURL+"/user/invoices", nil)
 // 	if err != nil {
 // 		return nil, err
 // 	}
@@ -144,7 +144,7 @@ func (c *Client) GetUserInvoices() ([]Invoice, error) {
 // GetAvailablePlans returns available subscription plans
 func (c *Client) GetAvailablePlans() ([]Subscription, error) {
 	// Get new request
-	req, err := newRequest("GET", QuayURL+"/plans", nil)
+	req, err := newRequest("GET", c.BaseURL+"/plans", nil)
 	if err != nil {
 		return nil, err
 	}

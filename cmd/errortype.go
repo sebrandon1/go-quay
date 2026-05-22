@@ -32,7 +32,7 @@ This endpoint provides details about error types that can be returned by the Qua
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Println("Error creating client:", err)
 			os.Exit(1)

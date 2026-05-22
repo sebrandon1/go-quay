@@ -38,7 +38,7 @@ var manifestInfoCmd = &cobra.Command{
 	Short: "Get detailed manifest information",
 	Long:  `Get detailed information about a specific manifest including layers, config, and metadata.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -67,7 +67,7 @@ var manifestDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -89,7 +89,7 @@ var manifestLabelsCmd = &cobra.Command{
 	Short: "List manifest labels",
 	Long:  `List all labels associated with a specific manifest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -112,7 +112,7 @@ var manifestLabelCmd = &cobra.Command{
 	Short: "Get a specific manifest label",
 	Long:  `Get detailed information about a specific label on a manifest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -135,7 +135,7 @@ var manifestAddLabelCmd = &cobra.Command{
 	Short: "Add a label to a manifest",
 	Long:  `Add a new label with a key-value pair to a specific manifest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -158,7 +158,7 @@ var manifestRemoveLabelCmd = &cobra.Command{
 	Short: "Remove a label from a manifest",
 	Long:  `Remove a specific label from a manifest by its label ID.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)

@@ -27,7 +27,7 @@ var userInfoCmd = &cobra.Command{
 	Short: "Get current user information",
 	Long:  `Get detailed information about the currently authenticated user account.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -50,7 +50,7 @@ var userStarredCmd = &cobra.Command{
 	Short: "List starred repositories",
 	Long:  `List all repositories starred by the current user.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -73,7 +73,7 @@ var starRepoCmd = &cobra.Command{
 	Short: "Star a repository",
 	Long:  `Add a repository to your starred list for easy discovery.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -95,7 +95,7 @@ var unstarRepoCmd = &cobra.Command{
 	Short: "Unstar a repository",
 	Long:  `Remove a repository from your starred list.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -118,7 +118,7 @@ var userLookupCmd = &cobra.Command{
 	Short: "Look up a user by username",
 	Long:  `Get information about a specific user by their username.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -139,7 +139,7 @@ var userMarketplaceCmd = &cobra.Command{
 	Short: "Get user marketplace information",
 	Long:  `Get marketplace subscription information for the current user.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -160,7 +160,7 @@ var starUserRepoCmd = &cobra.Command{
 	Short: "Star a repository (user endpoint)",
 	Long:  `Add a repository to your starred list using the user star endpoint.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -181,7 +181,7 @@ var unstarUserRepoCmd = &cobra.Command{
 	Short: "Unstar a repository (user endpoint)",
 	Long:  `Remove a repository from your starred list using the user star endpoint.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)

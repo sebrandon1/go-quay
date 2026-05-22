@@ -38,7 +38,7 @@ var robotListCmd = &cobra.Command{
 	Short: "List all robot accounts",
 	Long:  `List all robot accounts associated with your user account.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -61,7 +61,7 @@ var robotInfoCmd = &cobra.Command{
 	Short: "Get robot account details",
 	Long:  `Get detailed information about a specific robot account including its token.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -84,7 +84,7 @@ var robotCreateCmd = &cobra.Command{
 	Short: "Create a new robot account",
 	Long:  `Create a new robot account with the specified name and description.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -114,7 +114,7 @@ var robotDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -136,7 +136,7 @@ var robotRegenerateCmd = &cobra.Command{
 	Short: "Regenerate robot token",
 	Long:  `Regenerate the token for a robot account. The old token will be invalidated.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -160,7 +160,7 @@ var robotPermissionsCmd = &cobra.Command{
 	Short: "Get robot repository permissions",
 	Long:  `Get the repository permissions assigned to a robot account.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)

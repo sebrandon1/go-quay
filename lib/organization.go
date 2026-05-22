@@ -89,7 +89,7 @@ const fieldRole = "role"
 
 // CreateOrganization creates a new organization
 func (c *Client) CreateOrganization(name, email string) (*Organization, error) {
-	req, err := newRequestWithBody("POST", QuayURL+"/organization/", CreateOrganizationRequest{
+	req, err := newRequestWithBody("POST", c.BaseURL+"/organization/", CreateOrganizationRequest{
 		Name:  name,
 		Email: email,
 	})
@@ -107,7 +107,7 @@ func (c *Client) CreateOrganization(name, email string) (*Organization, error) {
 
 // GetOrganization retrieves organization details
 func (c *Client) GetOrganization(orgname string) (*Organization, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func (c *Client) GetOrganization(orgname string) (*Organization, error) {
 
 // DeleteOrganization deletes an organization
 func (c *Client) DeleteOrganization(orgname string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s", QuayURL, orgname), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s", c.BaseURL, orgname), nil)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func (c *Client) DeleteOrganization(orgname string) error {
 
 // UpdateOrganization updates organization settings
 func (c *Client) UpdateOrganization(orgname, email string) (*Organization, error) {
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s", QuayURL, orgname), map[string]interface{}{
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s", c.BaseURL, orgname), map[string]interface{}{
 		"email": email,
 	})
 	if err != nil {
@@ -151,7 +151,7 @@ func (c *Client) UpdateOrganization(orgname, email string) (*Organization, error
 
 // GetOrganizationMembers retrieves organization members
 func (c *Client) GetOrganizationMembers(orgname string) (*OrganizationMembers, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/members", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/members", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func (c *Client) GetOrganizationMembers(orgname string) (*OrganizationMembers, e
 
 // AddOrganizationMember adds a member to an organization
 func (c *Client) AddOrganizationMember(orgname, membername string) error {
-	req, err := newRequest("PUT", fmt.Sprintf("%s/organization/%s/members/%s", QuayURL, orgname, membername), nil)
+	req, err := newRequest("PUT", fmt.Sprintf("%s/organization/%s/members/%s", c.BaseURL, orgname, membername), nil)
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ func (c *Client) AddOrganizationMember(orgname, membername string) error {
 
 // RemoveOrganizationMember removes a member from an organization
 func (c *Client) RemoveOrganizationMember(orgname, membername string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/members/%s", QuayURL, orgname, membername), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/members/%s", c.BaseURL, orgname, membername), nil)
 	if err != nil {
 		return err
 	}
@@ -188,7 +188,7 @@ func (c *Client) RemoveOrganizationMember(orgname, membername string) error {
 
 // GetOrganizationRepositories retrieves repositories for an organization
 func (c *Client) GetOrganizationRepositories(orgname string) (*OrganizationRepositories, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/repositories", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/repositories", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (c *Client) GetOrganizationRepositories(orgname string) (*OrganizationRepos
 
 // GetDefaultPermissions retrieves default permissions for an organization
 func (c *Client) GetDefaultPermissions(orgname string) (*DefaultPermissions, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/prototypes", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/prototypes", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func (c *Client) GetDefaultPermissions(orgname string) (*DefaultPermissions, err
 
 // CreateDefaultPermission creates a default permission for an organization
 func (c *Client) CreateDefaultPermission(orgname, role, delegateType, delegateName string) (*DefaultPermission, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/prototypes", QuayURL, orgname), map[string]interface{}{
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/prototypes", c.BaseURL, orgname), map[string]interface{}{
 		fieldRole: role,
 		"delegate": map[string]interface{}{
 			"kind": delegateType,
@@ -241,7 +241,7 @@ func (c *Client) CreateDefaultPermission(orgname, role, delegateType, delegateNa
 
 // DeleteDefaultPermission deletes a default permission
 func (c *Client) DeleteDefaultPermission(orgname, prototypeid string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/prototypes/%s", QuayURL, orgname, prototypeid), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/prototypes/%s", c.BaseURL, orgname, prototypeid), nil)
 	if err != nil {
 		return err
 	}
@@ -253,7 +253,7 @@ func (c *Client) DeleteDefaultPermission(orgname, prototypeid string) error {
 
 // GetProxyCacheConfig retrieves proxy cache configuration for an organization
 func (c *Client) GetProxyCacheConfig(orgname string) (*ProxyCacheConfig, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/proxycache", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/proxycache", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +268,7 @@ func (c *Client) GetProxyCacheConfig(orgname string) (*ProxyCacheConfig, error) 
 
 // CreateProxyCacheConfig creates proxy cache configuration for an organization
 func (c *Client) CreateProxyCacheConfig(orgname, upstreamRegistry string, insecure bool, expiration int) (*ProxyCacheConfig, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/proxycache", QuayURL, orgname), map[string]interface{}{
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/proxycache", c.BaseURL, orgname), map[string]interface{}{
 		"upstream_registry": upstreamRegistry,
 		"insecure":          insecure,
 		"expiration":        expiration,
@@ -287,7 +287,7 @@ func (c *Client) CreateProxyCacheConfig(orgname, upstreamRegistry string, insecu
 
 // DeleteProxyCacheConfig deletes proxy cache configuration for an organization
 func (c *Client) DeleteProxyCacheConfig(orgname string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/proxycache", QuayURL, orgname), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/proxycache", c.BaseURL, orgname), nil)
 	if err != nil {
 		return err
 	}
@@ -299,7 +299,7 @@ func (c *Client) DeleteProxyCacheConfig(orgname string) error {
 
 // GetTeams retrieves all teams for an organization
 func (c *Client) GetTeams(orgname string) ([]Team, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/teams", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/teams", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +316,7 @@ func (c *Client) GetTeams(orgname string) ([]Team, error) {
 
 // CreateTeam creates a new team in an organization
 func (c *Client) CreateTeam(orgname, teamname, description, role string) (*Team, error) {
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/team/%s", QuayURL, orgname, teamname), CreateTeamRequest{
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/team/%s", c.BaseURL, orgname, teamname), CreateTeamRequest{
 		Name:        teamname,
 		Description: description,
 		Role:        role,
@@ -335,7 +335,7 @@ func (c *Client) CreateTeam(orgname, teamname, description, role string) (*Team,
 
 // GetTeam retrieves details for a specific team
 func (c *Client) GetTeam(orgname, teamname string) (*Team, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/team/%s", QuayURL, orgname, teamname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/team/%s", c.BaseURL, orgname, teamname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -350,7 +350,7 @@ func (c *Client) GetTeam(orgname, teamname string) (*Team, error) {
 
 // DeleteTeam deletes a team from an organization
 func (c *Client) DeleteTeam(orgname, teamname string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/team/%s", QuayURL, orgname, teamname), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/team/%s", c.BaseURL, orgname, teamname), nil)
 	if err != nil {
 		return err
 	}
@@ -360,7 +360,7 @@ func (c *Client) DeleteTeam(orgname, teamname string) error {
 
 // UpdateTeam updates team settings
 func (c *Client) UpdateTeam(orgname, teamname, description, role string) (*Team, error) {
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/team/%s", QuayURL, orgname, teamname), map[string]interface{}{
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/team/%s", c.BaseURL, orgname, teamname), map[string]interface{}{
 		"description": description,
 		fieldRole:     role,
 	})
@@ -380,7 +380,7 @@ func (c *Client) UpdateTeam(orgname, teamname, description, role string) (*Team,
 
 // GetTeamMembers retrieves members of a team
 func (c *Client) GetTeamMembers(orgname, teamname string) (*TeamMembers, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/team/%s/members", QuayURL, orgname, teamname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/team/%s/members", c.BaseURL, orgname, teamname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -395,7 +395,7 @@ func (c *Client) GetTeamMembers(orgname, teamname string) (*TeamMembers, error) 
 
 // AddTeamMember adds a member to a team
 func (c *Client) AddTeamMember(orgname, teamname, membername string) error {
-	req, err := newRequest("PUT", fmt.Sprintf("%s/organization/%s/team/%s/members/%s", QuayURL, orgname, teamname, membername), nil)
+	req, err := newRequest("PUT", fmt.Sprintf("%s/organization/%s/team/%s/members/%s", c.BaseURL, orgname, teamname, membername), nil)
 	if err != nil {
 		return err
 	}
@@ -405,7 +405,7 @@ func (c *Client) AddTeamMember(orgname, teamname, membername string) error {
 
 // RemoveTeamMember removes a member from a team
 func (c *Client) RemoveTeamMember(orgname, teamname, membername string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/team/%s/members/%s", QuayURL, orgname, teamname, membername), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/team/%s/members/%s", c.BaseURL, orgname, teamname, membername), nil)
 	if err != nil {
 		return err
 	}
@@ -417,7 +417,7 @@ func (c *Client) RemoveTeamMember(orgname, teamname, membername string) error {
 
 // GetTeamPermissions retrieves repository permissions for a team
 func (c *Client) GetTeamPermissions(orgname, teamname string) (*TeamPermissions, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/team/%s/permissions", QuayURL, orgname, teamname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/team/%s/permissions", c.BaseURL, orgname, teamname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -432,7 +432,7 @@ func (c *Client) GetTeamPermissions(orgname, teamname string) (*TeamPermissions,
 
 // SetTeamRepositoryPermission sets repository permission for a team
 func (c *Client) SetTeamRepositoryPermission(orgname, teamname, repository, role string) error {
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/team/%s/permissions/%s", QuayURL, orgname, teamname, repository), map[string]interface{}{
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/team/%s/permissions/%s", c.BaseURL, orgname, teamname, repository), map[string]interface{}{
 		fieldRole: role,
 	})
 	if err != nil {
@@ -444,7 +444,7 @@ func (c *Client) SetTeamRepositoryPermission(orgname, teamname, repository, role
 
 // RemoveTeamRepositoryPermission removes repository permission for a team
 func (c *Client) RemoveTeamRepositoryPermission(orgname, teamname, repository string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/team/%s/permissions/%s", QuayURL, orgname, teamname, repository), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/team/%s/permissions/%s", c.BaseURL, orgname, teamname, repository), nil)
 	if err != nil {
 		return err
 	}
@@ -456,7 +456,7 @@ func (c *Client) RemoveTeamRepositoryPermission(orgname, teamname, repository st
 
 // GetRobotAccounts retrieves all robot accounts for an organization
 func (c *Client) GetRobotAccounts(orgname string) (*RobotAccounts, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/robots", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/robots", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -471,7 +471,7 @@ func (c *Client) GetRobotAccounts(orgname string) (*RobotAccounts, error) {
 
 // CreateRobotAccount creates a new robot account in an organization
 func (c *Client) CreateRobotAccount(orgname, robotShortname, description string, unstructured map[string]interface{}) (*RobotAccount, error) {
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/robots/%s", QuayURL, orgname, robotShortname), CreateRobotRequest{
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/robots/%s", c.BaseURL, orgname, robotShortname), CreateRobotRequest{
 		Description:  description,
 		Unstructured: unstructured,
 	})
@@ -489,7 +489,7 @@ func (c *Client) CreateRobotAccount(orgname, robotShortname, description string,
 
 // GetRobotAccount retrieves details for a specific robot account
 func (c *Client) GetRobotAccount(orgname, robotShortname string) (*RobotAccount, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/robots/%s", QuayURL, orgname, robotShortname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/robots/%s", c.BaseURL, orgname, robotShortname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -504,7 +504,7 @@ func (c *Client) GetRobotAccount(orgname, robotShortname string) (*RobotAccount,
 
 // DeleteRobotAccount deletes a robot account from an organization
 func (c *Client) DeleteRobotAccount(orgname, robotShortname string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/robots/%s", QuayURL, orgname, robotShortname), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/robots/%s", c.BaseURL, orgname, robotShortname), nil)
 	if err != nil {
 		return err
 	}
@@ -514,7 +514,7 @@ func (c *Client) DeleteRobotAccount(orgname, robotShortname string) error {
 
 // RegenerateRobotToken regenerates the token for a robot account
 func (c *Client) RegenerateRobotToken(orgname, robotShortname string) (*RobotAccount, error) {
-	req, err := newRequest("POST", fmt.Sprintf("%s/organization/%s/robots/%s/regenerate", QuayURL, orgname, robotShortname), nil)
+	req, err := newRequest("POST", fmt.Sprintf("%s/organization/%s/robots/%s/regenerate", c.BaseURL, orgname, robotShortname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -529,7 +529,7 @@ func (c *Client) RegenerateRobotToken(orgname, robotShortname string) (*RobotAcc
 
 // GetRobotPermissions retrieves repository permissions for a robot account
 func (c *Client) GetRobotPermissions(orgname, robotShortname string) (*RobotPermissions, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/robots/%s/permissions", QuayURL, orgname, robotShortname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/robots/%s/permissions", c.BaseURL, orgname, robotShortname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -544,7 +544,7 @@ func (c *Client) GetRobotPermissions(orgname, robotShortname string) (*RobotPerm
 
 // SetRobotRepositoryPermission sets repository permission for a robot account
 func (c *Client) SetRobotRepositoryPermission(orgname, robotShortname, repository, role string) error {
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/robots/%s/permissions/%s", QuayURL, orgname, robotShortname, repository), map[string]interface{}{
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/robots/%s/permissions/%s", c.BaseURL, orgname, robotShortname, repository), map[string]interface{}{
 		fieldRole: role,
 	})
 	if err != nil {
@@ -556,7 +556,7 @@ func (c *Client) SetRobotRepositoryPermission(orgname, robotShortname, repositor
 
 // RemoveRobotRepositoryPermission removes repository permission for a robot account
 func (c *Client) RemoveRobotRepositoryPermission(orgname, robotShortname, repository string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/robots/%s/permissions/%s", QuayURL, orgname, robotShortname, repository), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/robots/%s/permissions/%s", c.BaseURL, orgname, robotShortname, repository), nil)
 	if err != nil {
 		return err
 	}
@@ -568,7 +568,7 @@ func (c *Client) RemoveRobotRepositoryPermission(orgname, robotShortname, reposi
 
 // GetQuota retrieves quota information for an organization
 func (c *Client) GetQuota(orgname string) (*Quota, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/quota", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/quota", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -583,7 +583,7 @@ func (c *Client) GetQuota(orgname string) (*Quota, error) {
 
 // CreateQuota creates a quota for an organization
 func (c *Client) CreateQuota(orgname string, limitBytes int64) (*Quota, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/quota", QuayURL, orgname), CreateQuotaRequest{
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/quota", c.BaseURL, orgname), CreateQuotaRequest{
 		LimitBytes: limitBytes,
 	})
 	if err != nil {
@@ -600,7 +600,7 @@ func (c *Client) CreateQuota(orgname string, limitBytes int64) (*Quota, error) {
 
 // UpdateQuota updates quota limits for an organization
 func (c *Client) UpdateQuota(orgname string, limitBytes int64) (*Quota, error) {
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/quota", QuayURL, orgname), CreateQuotaRequest{
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/quota", c.BaseURL, orgname), CreateQuotaRequest{
 		LimitBytes: limitBytes,
 	})
 	if err != nil {
@@ -617,7 +617,7 @@ func (c *Client) UpdateQuota(orgname string, limitBytes int64) (*Quota, error) {
 
 // DeleteQuota deletes quota for an organization
 func (c *Client) DeleteQuota(orgname string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/quota", QuayURL, orgname), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/quota", c.BaseURL, orgname), nil)
 	if err != nil {
 		return err
 	}
@@ -629,7 +629,7 @@ func (c *Client) DeleteQuota(orgname string) error {
 
 // GetAutoPrunePolicies retrieves auto-prune policies for an organization
 func (c *Client) GetAutoPrunePolicies(orgname string) (*AutoPrunePolicies, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/autoprunepolicy", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/autoprunepolicy", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -644,7 +644,7 @@ func (c *Client) GetAutoPrunePolicies(orgname string) (*AutoPrunePolicies, error
 
 // CreateAutoPrunePolicy creates an auto-prune policy for an organization
 func (c *Client) CreateAutoPrunePolicy(orgname, method string, value int, tagPattern string) (*AutoPrunePolicy, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/autoprunepolicy", QuayURL, orgname), CreateAutoPruneRequest{
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/autoprunepolicy", c.BaseURL, orgname), CreateAutoPruneRequest{
 		Method:     method,
 		Value:      value,
 		TagPattern: tagPattern,
@@ -663,7 +663,7 @@ func (c *Client) CreateAutoPrunePolicy(orgname, method string, value int, tagPat
 
 // GetAutoPrunePolicy retrieves a specific auto-prune policy
 func (c *Client) GetAutoPrunePolicy(orgname, policyUUID string) (*AutoPrunePolicy, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/autoprunepolicy/%s", QuayURL, orgname, policyUUID), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/autoprunepolicy/%s", c.BaseURL, orgname, policyUUID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -678,7 +678,7 @@ func (c *Client) GetAutoPrunePolicy(orgname, policyUUID string) (*AutoPrunePolic
 
 // UpdateAutoPrunePolicy updates an auto-prune policy
 func (c *Client) UpdateAutoPrunePolicy(orgname, policyUUID, method string, value int, tagPattern string) (*AutoPrunePolicy, error) {
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/autoprunepolicy/%s", QuayURL, orgname, policyUUID), CreateAutoPruneRequest{
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/autoprunepolicy/%s", c.BaseURL, orgname, policyUUID), CreateAutoPruneRequest{
 		Method:     method,
 		Value:      value,
 		TagPattern: tagPattern,
@@ -697,7 +697,7 @@ func (c *Client) UpdateAutoPrunePolicy(orgname, policyUUID, method string, value
 
 // DeleteAutoPrunePolicy deletes an auto-prune policy
 func (c *Client) DeleteAutoPrunePolicy(orgname, policyUUID string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/autoprunepolicy/%s", QuayURL, orgname, policyUUID), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/autoprunepolicy/%s", c.BaseURL, orgname, policyUUID), nil)
 	if err != nil {
 		return err
 	}
@@ -709,7 +709,7 @@ func (c *Client) DeleteAutoPrunePolicy(orgname, policyUUID string) error {
 
 // GetApplications retrieves applications for an organization
 func (c *Client) GetApplications(orgname string) (*Applications, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/applications", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/applications", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -724,7 +724,7 @@ func (c *Client) GetApplications(orgname string) (*Applications, error) {
 
 // CreateApplication creates a new application for an organization
 func (c *Client) CreateApplication(orgname, name, description, applicationURI, redirectURI string) (*Application, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/applications", QuayURL, orgname), CreateApplicationRequest{
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/applications", c.BaseURL, orgname), CreateApplicationRequest{
 		Name:           name,
 		Description:    description,
 		ApplicationURI: applicationURI,
@@ -744,7 +744,7 @@ func (c *Client) CreateApplication(orgname, name, description, applicationURI, r
 
 // GetApplication retrieves details for a specific application
 func (c *Client) GetApplication(orgname, clientID string) (*Application, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/applications/%s", QuayURL, orgname, clientID), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/applications/%s", c.BaseURL, orgname, clientID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -759,7 +759,7 @@ func (c *Client) GetApplication(orgname, clientID string) (*Application, error) 
 
 // UpdateApplication updates an application
 func (c *Client) UpdateApplication(orgname, clientID, name, description, applicationURI, redirectURI string) (*Application, error) {
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/applications/%s", QuayURL, orgname, clientID), CreateApplicationRequest{
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/applications/%s", c.BaseURL, orgname, clientID), CreateApplicationRequest{
 		Name:           name,
 		Description:    description,
 		ApplicationURI: applicationURI,
@@ -779,7 +779,7 @@ func (c *Client) UpdateApplication(orgname, clientID, name, description, applica
 
 // DeleteApplication deletes an application
 func (c *Client) DeleteApplication(orgname, clientID string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/applications/%s", QuayURL, orgname, clientID), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/applications/%s", c.BaseURL, orgname, clientID), nil)
 	if err != nil {
 		return err
 	}
@@ -789,7 +789,7 @@ func (c *Client) DeleteApplication(orgname, clientID string) error {
 
 // ResetApplicationClientSecret resets the client secret for an application
 func (c *Client) ResetApplicationClientSecret(orgname, clientID string) (*Application, error) {
-	req, err := newRequest("POST", fmt.Sprintf("%s/organization/%s/applications/%s/resetclientsecret", QuayURL, orgname, clientID), nil)
+	req, err := newRequest("POST", fmt.Sprintf("%s/organization/%s/applications/%s/resetclientsecret", c.BaseURL, orgname, clientID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -804,7 +804,7 @@ func (c *Client) ResetApplicationClientSecret(orgname, clientID string) (*Applic
 
 // GetOrganizationCollaborators gets the list of collaborators for an organization
 func (c *Client) GetOrganizationCollaborators(orgname string) (*Collaborators, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/collaborators", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/collaborators", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -819,7 +819,7 @@ func (c *Client) GetOrganizationCollaborators(orgname string) (*Collaborators, e
 
 // GetOrganizationMember gets information about a specific organization member
 func (c *Client) GetOrganizationMember(orgname, membername string) (*OrganizationMember, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/members/%s", QuayURL, orgname, membername), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/members/%s", c.BaseURL, orgname, membername), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -834,7 +834,7 @@ func (c *Client) GetOrganizationMember(orgname, membername string) (*Organizatio
 
 // GetOrganizationMarketplace gets marketplace information for an organization
 func (c *Client) GetOrganizationMarketplace(orgname string) (*MarketplaceInfo, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/marketplace", QuayURL, orgname), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/marketplace", c.BaseURL, orgname), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -849,7 +849,7 @@ func (c *Client) GetOrganizationMarketplace(orgname string) (*MarketplaceInfo, e
 
 // CreateOrganizationMarketplaceSubscription creates a marketplace subscription
 func (c *Client) CreateOrganizationMarketplaceSubscription(orgname string, subscription *MarketplaceSubscriptionRequest) error {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/marketplace", QuayURL, orgname), subscription)
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/marketplace", c.BaseURL, orgname), subscription)
 	if err != nil {
 		return err
 	}
@@ -864,7 +864,7 @@ func (c *Client) BatchRemoveOrganizationMarketplaceSubscriptions(orgname string,
 	}{
 		SubscriptionIDs: subscriptionIDs,
 	}
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/marketplace/batchremove", QuayURL, orgname), body)
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/marketplace/batchremove", c.BaseURL, orgname), body)
 	if err != nil {
 		return err
 	}
@@ -874,7 +874,7 @@ func (c *Client) BatchRemoveOrganizationMarketplaceSubscriptions(orgname string,
 
 // DeleteOrganizationMarketplaceSubscription removes a specific marketplace subscription
 func (c *Client) DeleteOrganizationMarketplaceSubscription(orgname, subscriptionID string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/marketplace/%s", QuayURL, orgname, subscriptionID), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/marketplace/%s", c.BaseURL, orgname, subscriptionID), nil)
 	if err != nil {
 		return err
 	}
@@ -884,7 +884,7 @@ func (c *Client) DeleteOrganizationMarketplaceSubscription(orgname, subscription
 
 // InviteTeamMember invites a member to a team via email
 func (c *Client) InviteTeamMember(orgname, teamname, email string) error {
-	req, err := newRequest("PUT", fmt.Sprintf("%s/organization/%s/team/%s/invite/%s", QuayURL, orgname, teamname, email), nil)
+	req, err := newRequest("PUT", fmt.Sprintf("%s/organization/%s/team/%s/invite/%s", c.BaseURL, orgname, teamname, email), nil)
 	if err != nil {
 		return err
 	}
@@ -894,7 +894,7 @@ func (c *Client) InviteTeamMember(orgname, teamname, email string) error {
 
 // DeleteTeamInvite deletes a pending team invitation
 func (c *Client) DeleteTeamInvite(orgname, teamname, email string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/team/%s/invite/%s", QuayURL, orgname, teamname, email), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/team/%s/invite/%s", c.BaseURL, orgname, teamname, email), nil)
 	if err != nil {
 		return err
 	}

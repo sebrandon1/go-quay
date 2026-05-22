@@ -39,7 +39,7 @@ The scan status can be:
   - unsupported: Image type is not supported for scanning
   - failed: Scan failed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)

@@ -23,7 +23,7 @@ import (
 //
 // Deprecated: Use robot accounts instead.
 func (c *Client) GetRepoTokens(namespace, repository string) (*RepoTokens, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/tokens", QuayURL, namespace, repository), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/tokens", c.BaseURL, namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repo tokens request: %w", err)
 	}
@@ -40,7 +40,7 @@ func (c *Client) GetRepoTokens(namespace, repository string) (*RepoTokens, error
 //
 // Deprecated: Use robot accounts instead.
 func (c *Client) CreateRepoToken(namespace, repository string, createReq *CreateRepoTokenRequest) (*RepoToken, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/tokens", QuayURL, namespace, repository), createReq)
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/tokens", c.BaseURL, namespace, repository), createReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create repo token request: %w", err)
 	}
@@ -57,7 +57,7 @@ func (c *Client) CreateRepoToken(namespace, repository string, createReq *Create
 //
 // Deprecated: Use robot accounts instead.
 func (c *Client) GetRepoToken(namespace, repository, code string) (*RepoToken, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/tokens/%s", QuayURL, namespace, repository, code), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/tokens/%s", c.BaseURL, namespace, repository, code), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repo token request: %w", err)
 	}
@@ -74,7 +74,7 @@ func (c *Client) GetRepoToken(namespace, repository, code string) (*RepoToken, e
 //
 // Deprecated: Use robot accounts instead.
 func (c *Client) UpdateRepoToken(namespace, repository, code string, updateReq *UpdateRepoTokenRequest) (*RepoToken, error) {
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/repository/%s/%s/tokens/%s", QuayURL, namespace, repository, code), updateReq)
+	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/repository/%s/%s/tokens/%s", c.BaseURL, namespace, repository, code), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update repo token request: %w", err)
 	}
@@ -91,7 +91,7 @@ func (c *Client) UpdateRepoToken(namespace, repository, code string, updateReq *
 //
 // Deprecated: Use robot accounts instead.
 func (c *Client) DeleteRepoToken(namespace, repository, code string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s/tokens/%s", QuayURL, namespace, repository, code), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s/tokens/%s", c.BaseURL, namespace, repository, code), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete repo token request: %w", err)
 	}

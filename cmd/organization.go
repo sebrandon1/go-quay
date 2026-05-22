@@ -62,7 +62,7 @@ var orgInfoCmd = &cobra.Command{
 	Short: "Get organization information",
 	Long:  `Get detailed information about an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -82,7 +82,7 @@ var orgMembersCmd = &cobra.Command{
 	Short: "Get organization members",
 	Long:  `Get list of all members in an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -102,7 +102,7 @@ var orgTeamsCmd = &cobra.Command{
 	Short: "Get organization teams",
 	Long:  `Get list of all teams in an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -122,7 +122,7 @@ var teamInfoCmd = &cobra.Command{
 	Short: "Get team information",
 	Long:  `Get detailed information about a specific team.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -142,7 +142,7 @@ var teamMembersCmd = &cobra.Command{
 	Short: "Get team members",
 	Long:  `Get list of all members in a specific team.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -162,7 +162,7 @@ var orgRobotsCmd = &cobra.Command{
 	Short: "Get organization robots",
 	Long:  `Get list of all robot accounts in an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -182,7 +182,7 @@ var orgQuotaCmd = &cobra.Command{
 	Short: "Get organization quota",
 	Long:  `Get quota information for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -202,7 +202,7 @@ var autoPruneCmd = &cobra.Command{
 	Short: "Get auto-prune policies",
 	Long:  `Get list of auto-prune policies for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -222,7 +222,7 @@ var orgApplicationsCmd = &cobra.Command{
 	Short: "Get organization applications",
 	Long:  `Get list of OAuth applications for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -242,7 +242,7 @@ var createOrgCmd = &cobra.Command{
 	Short: "Create an organization",
 	Long:  `Create a new organization with the specified name and email.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -262,7 +262,7 @@ var updateOrgCmd = &cobra.Command{
 	Short: "Update an organization",
 	Long:  `Update an organization's email.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -286,7 +286,7 @@ var deleteOrgCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to delete an organization")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -306,7 +306,7 @@ var addMemberCmd = &cobra.Command{
 	Short: "Add a member to an organization",
 	Long:  `Add a member to an organization by member name.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -330,7 +330,7 @@ var removeMemberCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to remove a member")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -350,7 +350,7 @@ var getMemberCmd = &cobra.Command{
 	Short: "Get organization member information",
 	Long:  `Get detailed information about a specific organization member.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -370,7 +370,7 @@ var collaboratorsCmd = &cobra.Command{
 	Short: "Get organization collaborators",
 	Long:  `Get list of collaborators for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -390,7 +390,7 @@ var orgRepositoriesCmd = &cobra.Command{
 	Short: "Get organization repositories",
 	Long:  `Get list of repositories for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -410,7 +410,7 @@ var defaultPermissionsCmd = &cobra.Command{
 	Short: "Get default permissions",
 	Long:  `Get default permissions for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -430,7 +430,7 @@ var createDefaultPermissionCmd = &cobra.Command{
 	Short: "Create a default permission",
 	Long:  `Create a default permission for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -454,7 +454,7 @@ var deleteDefaultPermissionCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to delete a default permission")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -474,7 +474,7 @@ var proxyCacheCmd = &cobra.Command{
 	Short: "Get proxy cache configuration",
 	Long:  `Get proxy cache configuration for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -494,7 +494,7 @@ var createProxyCacheCmd = &cobra.Command{
 	Short: "Create proxy cache configuration",
 	Long:  `Create proxy cache configuration for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -518,7 +518,7 @@ var deleteProxyCacheCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to delete proxy cache config")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -538,7 +538,7 @@ var orgRobotCmd = &cobra.Command{
 	Short: "Get robot account information",
 	Long:  `Get detailed information about a specific robot account.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -558,7 +558,7 @@ var createRobotCmd = &cobra.Command{
 	Short: "Create a robot account",
 	Long:  `Create a new robot account in an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -582,7 +582,7 @@ var deleteRobotCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to delete a robot account")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -602,7 +602,7 @@ var regenerateRobotCmd = &cobra.Command{
 	Short: "Regenerate a robot account token",
 	Long:  `Regenerate the token for a robot account.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -622,7 +622,7 @@ var orgRobotPermissionsCmd = &cobra.Command{
 	Short: "Get robot account permissions",
 	Long:  `Get permissions for a specific robot account.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -642,7 +642,7 @@ var setRobotPermissionCmd = &cobra.Command{
 	Short: "Set robot repository permission",
 	Long:  `Set a robot account's permission on a repository.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -666,7 +666,7 @@ var removeRobotPermissionCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to remove a robot permission")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -686,7 +686,7 @@ var applicationCmd = &cobra.Command{
 	Short: "Get application information",
 	Long:  `Get detailed information about a specific OAuth application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -706,7 +706,7 @@ var createApplicationCmd = &cobra.Command{
 	Short: "Create an OAuth application",
 	Long:  `Create a new OAuth application for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -726,7 +726,7 @@ var updateApplicationCmd = &cobra.Command{
 	Short: "Update an OAuth application",
 	Long:  `Update an existing OAuth application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -750,7 +750,7 @@ var deleteApplicationCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to delete an application")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -770,7 +770,7 @@ var resetApplicationSecretCmd = &cobra.Command{
 	Short: "Reset application client secret",
 	Long:  `Reset the client secret for an OAuth application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -790,7 +790,7 @@ var marketplaceCmd = &cobra.Command{
 	Short: "Get organization marketplace information",
 	Long:  `Get marketplace information for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -810,7 +810,7 @@ var createMarketplaceSubscriptionCmd = &cobra.Command{
 	Short: "Create a marketplace subscription",
 	Long:  `Create a marketplace subscription for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -834,7 +834,7 @@ var deleteMarketplaceSubscriptionCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to delete a marketplace subscription")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -858,7 +858,7 @@ var batchRemoveSubscriptionsCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to batch remove subscriptions")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -878,7 +878,7 @@ var createQuotaCmd = &cobra.Command{
 	Short: "Create organization quota",
 	Long:  `Create a quota for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -898,7 +898,7 @@ var updateQuotaCmd = &cobra.Command{
 	Short: "Update organization quota",
 	Long:  `Update the quota for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -922,7 +922,7 @@ var deleteQuotaCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to delete a quota")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -942,7 +942,7 @@ var autoPrunePolicyCmd = &cobra.Command{
 	Short: "Get a specific auto-prune policy",
 	Long:  `Get detailed information about a specific auto-prune policy.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -962,7 +962,7 @@ var createAutoPruneCmd = &cobra.Command{
 	Short: "Create an auto-prune policy",
 	Long:  `Create an auto-prune policy for an organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -982,7 +982,7 @@ var updateAutoPruneCmd = &cobra.Command{
 	Short: "Update an auto-prune policy",
 	Long:  `Update an existing auto-prune policy.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -1006,7 +1006,7 @@ var deleteAutoPruneCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to delete an auto-prune policy")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -1026,7 +1026,7 @@ var inviteMemberCmd = &cobra.Command{
 	Short: "Invite a member to a team",
 	Long:  `Invite a member to a team by email.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)
@@ -1050,7 +1050,7 @@ var cancelInviteCmd = &cobra.Command{
 			fmt.Println("Error: must pass --confirm to cancel an invite")
 			os.Exit(1)
 		}
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Printf("Error creating client: %v\n", err)
 			os.Exit(1)

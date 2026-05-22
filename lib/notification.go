@@ -38,7 +38,7 @@ import (
 
 // GetNotifications retrieves all notifications for a repository
 func (c *Client) GetNotifications(namespace, repository string) (*RepositoryNotifications, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/notification/", QuayURL, namespace, repository), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/notification/", c.BaseURL, namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get notifications request: %w", err)
 	}
@@ -53,7 +53,7 @@ func (c *Client) GetNotifications(namespace, repository string) (*RepositoryNoti
 
 // GetNotification retrieves a specific notification by UUID
 func (c *Client) GetNotification(namespace, repository, uuid string) (*RepositoryNotification, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/notification/%s", QuayURL, namespace, repository, uuid), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/notification/%s", c.BaseURL, namespace, repository, uuid), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get notification request: %w", err)
 	}
@@ -68,7 +68,7 @@ func (c *Client) GetNotification(namespace, repository, uuid string) (*Repositor
 
 // CreateNotification creates a new notification for a repository
 func (c *Client) CreateNotification(namespace, repository string, notificationReq *CreateNotificationRequest) (*RepositoryNotification, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/notification/", QuayURL, namespace, repository), notificationReq)
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/notification/", c.BaseURL, namespace, repository), notificationReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create notification request: %w", err)
 	}
@@ -83,7 +83,7 @@ func (c *Client) CreateNotification(namespace, repository string, notificationRe
 
 // DeleteNotification deletes a notification from a repository
 func (c *Client) DeleteNotification(namespace, repository, uuid string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s/notification/%s", QuayURL, namespace, repository, uuid), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s/notification/%s", c.BaseURL, namespace, repository, uuid), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete notification request: %w", err)
 	}
@@ -97,7 +97,7 @@ func (c *Client) DeleteNotification(namespace, repository, uuid string) error {
 
 // TestNotification tests a notification by sending a test event
 func (c *Client) TestNotification(namespace, repository, uuid string) error {
-	req, err := newRequest("POST", fmt.Sprintf("%s/repository/%s/%s/notification/%s/test", QuayURL, namespace, repository, uuid), nil)
+	req, err := newRequest("POST", fmt.Sprintf("%s/repository/%s/%s/notification/%s/test", c.BaseURL, namespace, repository, uuid), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create test notification request: %w", err)
 	}
@@ -111,7 +111,7 @@ func (c *Client) TestNotification(namespace, repository, uuid string) error {
 
 // ResetNotification resets failure count for a notification
 func (c *Client) ResetNotification(namespace, repository, uuid string) error {
-	req, err := newRequest("POST", fmt.Sprintf("%s/repository/%s/%s/notification/%s/reset", QuayURL, namespace, repository, uuid), nil)
+	req, err := newRequest("POST", fmt.Sprintf("%s/repository/%s/%s/notification/%s/reset", c.BaseURL, namespace, repository, uuid), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create reset notification request: %w", err)
 	}
@@ -125,7 +125,7 @@ func (c *Client) ResetNotification(namespace, repository, uuid string) error {
 
 // UpdateNotification updates an existing notification
 func (c *Client) UpdateNotification(namespace, repository, uuid string, notificationReq *CreateNotificationRequest) (*RepositoryNotification, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/notification/%s", QuayURL, namespace, repository, uuid), notificationReq)
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/notification/%s", c.BaseURL, namespace, repository, uuid), notificationReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update notification request: %w", err)
 	}

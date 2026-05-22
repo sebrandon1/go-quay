@@ -21,7 +21,7 @@ import (
 
 // GetBuilds retrieves a list of builds for a repository
 func (c *Client) GetBuilds(namespace, repository string, limit int) (*Builds, error) {
-	url := fmt.Sprintf("%s/repository/%s/%s/build/", QuayURL, namespace, repository)
+	url := fmt.Sprintf("%s/repository/%s/%s/build/", c.BaseURL, namespace, repository)
 	if limit > 0 {
 		url = fmt.Sprintf("%s?limit=%d", url, limit)
 	}
@@ -41,7 +41,7 @@ func (c *Client) GetBuilds(namespace, repository string, limit int) (*Builds, er
 
 // GetBuild retrieves a specific build by UUID
 func (c *Client) GetBuild(namespace, repository, buildUUID string) (*Build, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/build/%s", QuayURL, namespace, repository, buildUUID), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/build/%s", c.BaseURL, namespace, repository, buildUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get build request: %w", err)
 	}
@@ -56,7 +56,7 @@ func (c *Client) GetBuild(namespace, repository, buildUUID string) (*Build, erro
 
 // GetBuildLogs retrieves the logs for a specific build
 func (c *Client) GetBuildLogs(namespace, repository, buildUUID string) (*BuildLogs, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/build/%s/logs", QuayURL, namespace, repository, buildUUID), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/build/%s/logs", c.BaseURL, namespace, repository, buildUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get build logs request: %w", err)
 	}
@@ -71,7 +71,7 @@ func (c *Client) GetBuildLogs(namespace, repository, buildUUID string) (*BuildLo
 
 // RequestBuild triggers a new build for a repository
 func (c *Client) RequestBuild(namespace, repository string, buildRequest *RequestBuildRequest) (*Build, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/build/", QuayURL, namespace, repository), buildRequest)
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/build/", c.BaseURL, namespace, repository), buildRequest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request build request: %w", err)
 	}
@@ -86,7 +86,7 @@ func (c *Client) RequestBuild(namespace, repository string, buildRequest *Reques
 
 // CancelBuild cancels an ongoing build
 func (c *Client) CancelBuild(namespace, repository, buildUUID string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s/build/%s", QuayURL, namespace, repository, buildUUID), nil)
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s/build/%s", c.BaseURL, namespace, repository, buildUUID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create cancel build request: %w", err)
 	}
@@ -100,7 +100,7 @@ func (c *Client) CancelBuild(namespace, repository, buildUUID string) error {
 
 // GetBuildStatus gets the status of a build
 func (c *Client) GetBuildStatus(namespace, repository, buildUUID string) (*BuildStatus, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/build/%s/status", QuayURL, namespace, repository, buildUUID), nil)
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/build/%s/status", c.BaseURL, namespace, repository, buildUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get build status request: %w", err)
 	}

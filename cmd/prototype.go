@@ -45,7 +45,7 @@ var prototypeListCmd = &cobra.Command{
 	Short: "List all permission prototypes",
 	Long:  `List all permission prototypes for an organization.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Println("Error creating client:", err)
 			os.Exit(1)
@@ -77,7 +77,7 @@ var prototypeInfoCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Println("Error creating client:", err)
 			os.Exit(1)
@@ -127,7 +127,7 @@ Roles:
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Println("Error creating client:", err)
 			os.Exit(1)
@@ -171,7 +171,7 @@ var prototypeUpdateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Println("Error creating client:", err)
 			os.Exit(1)
@@ -211,7 +211,7 @@ var prototypeDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClient(token)
+		client, err := lib.NewClientWithURL(token, quayURL)
 		if err != nil {
 			fmt.Println("Error creating client:", err)
 			os.Exit(1)
