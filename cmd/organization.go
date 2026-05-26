@@ -680,6 +680,73 @@ var removeRobotPermissionCmd = &cobra.Command{
 	},
 }
 
+// Org Robot Federation Get
+var orgRobotFederationGetCmd = &cobra.Command{
+	Use:   "robot-federation-get",
+	Short: "Get organization robot federation configuration",
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := lib.NewClientWithURL(token, quayURL)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		federation, err := client.GetRobotFederation(orgName, robotShortname)
+		if err != nil {
+			fmt.Printf("Error getting robot federation: %v\n", err)
+			os.Exit(1)
+		}
+
+		printJSON(federation)
+	},
+}
+
+// Org Robot Federation Create
+var orgRobotFederationCreateCmd = &cobra.Command{
+	Use:   "robot-federation-create",
+	Short: "Create or update organization robot federation configuration",
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := lib.NewClientWithURL(token, quayURL)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		configs := []lib.RobotFederationConfig{
+			{Issuer: federationIssuer, Subject: federationSubject},
+		}
+
+		err = client.CreateRobotFederation(orgName, robotShortname, configs)
+		if err != nil {
+			fmt.Printf("Error creating robot federation: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Successfully configured federation for robot %s in org %s\n", robotShortname, orgName)
+	},
+}
+
+// Org Robot Federation Delete
+var orgRobotFederationDeleteCmd = &cobra.Command{
+	Use:   "robot-federation-delete",
+	Short: "Delete organization robot federation configuration",
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := lib.NewClientWithURL(token, quayURL)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		err = client.DeleteRobotFederation(orgName, robotShortname)
+		if err != nil {
+			fmt.Printf("Error deleting robot federation: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Successfully deleted federation for robot %s in org %s\n", robotShortname, orgName)
+	},
+}
+
 // Get Application
 var applicationCmd = &cobra.Command{
 	Use:   "application",
@@ -1096,6 +1163,9 @@ func init() {
 	organizationCmd.AddCommand(orgRobotPermissionsCmd)
 	organizationCmd.AddCommand(setRobotPermissionCmd)
 	organizationCmd.AddCommand(removeRobotPermissionCmd)
+	organizationCmd.AddCommand(orgRobotFederationGetCmd)
+	organizationCmd.AddCommand(orgRobotFederationCreateCmd)
+	organizationCmd.AddCommand(orgRobotFederationDeleteCmd)
 	organizationCmd.AddCommand(applicationCmd)
 	organizationCmd.AddCommand(createApplicationCmd)
 	organizationCmd.AddCommand(updateApplicationCmd)
@@ -1300,6 +1370,22 @@ func initOrgRobotFlags() {
 		os.Exit(1)
 	}
 	removeRobotPermissionCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm removal")
+
+	// robot-federation-get flags
+	orgRobotFederationGetCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
+	markFlagRequired(orgRobotFederationGetCmd.MarkFlagRequired("robot"))
+
+	// robot-federation-create flags
+	orgRobotFederationCreateCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
+	orgRobotFederationCreateCmd.Flags().StringVar(&federationIssuer, "issuer", "", "Federation token issuer")
+	orgRobotFederationCreateCmd.Flags().StringVar(&federationSubject, "subject", "", "Federation token subject")
+	markFlagRequired(orgRobotFederationCreateCmd.MarkFlagRequired("robot"))
+	markFlagRequired(orgRobotFederationCreateCmd.MarkFlagRequired("issuer"))
+	markFlagRequired(orgRobotFederationCreateCmd.MarkFlagRequired("subject"))
+
+	// robot-federation-delete flags
+	orgRobotFederationDeleteCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
+	markFlagRequired(orgRobotFederationDeleteCmd.MarkFlagRequired("robot"))
 }
 
 func initOrgApplicationFlags() {

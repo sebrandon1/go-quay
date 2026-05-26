@@ -46,6 +46,11 @@ Robot Permissions:
   - PUT    /api/v1/organization/{orgname}/robots/{robot_shortname}/permissions/{repository} - SetRobotRepositoryPermission()
   - DELETE /api/v1/organization/{orgname}/robots/{robot_shortname}/permissions/{repository} - RemoveRobotRepositoryPermission()
 
+Robot Federation:
+  - GET    /api/v1/organization/{orgname}/robots/{robot_shortname}/federation  - GetRobotFederation()
+  - POST   /api/v1/organization/{orgname}/robots/{robot_shortname}/federation  - CreateRobotFederation()
+  - DELETE /api/v1/organization/{orgname}/robots/{robot_shortname}/federation  - DeleteRobotFederation()
+
 Quota Management:
   - GET    /api/v1/organization/{orgname}/quota                     - GetQuota()
   - POST   /api/v1/organization/{orgname}/quota                     - CreateQuota()
@@ -562,6 +567,51 @@ func (c *Client) RemoveRobotRepositoryPermission(orgname, robotShortname, reposi
 	}
 
 	return c.delete(req)
+}
+
+// Robot Federation
+
+// GetRobotFederation retrieves the federation configuration for an organization's robot account
+func (c *Client) GetRobotFederation(orgname, robotShortname string) (*RobotFederation, error) {
+	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/robots/%s/federation", c.BaseURL, orgname, robotShortname), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create get robot federation request: %w", err)
+	}
+
+	var federation RobotFederation
+	if err := c.get(req, &federation); err != nil {
+		return nil, fmt.Errorf("failed to get robot federation: %w", err)
+	}
+
+	return &federation, nil
+}
+
+// CreateRobotFederation creates or updates the federation configuration for an organization's robot account
+func (c *Client) CreateRobotFederation(orgname, robotShortname string, configs []RobotFederationConfig) error {
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/robots/%s/federation", c.BaseURL, orgname, robotShortname), configs)
+	if err != nil {
+		return fmt.Errorf("failed to create robot federation request: %w", err)
+	}
+
+	if err := c.post(req, nil); err != nil {
+		return fmt.Errorf("failed to create robot federation: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteRobotFederation deletes the federation configuration for an organization's robot account
+func (c *Client) DeleteRobotFederation(orgname, robotShortname string) error {
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/robots/%s/federation", c.BaseURL, orgname, robotShortname), nil)
+	if err != nil {
+		return fmt.Errorf("failed to create delete robot federation request: %w", err)
+	}
+
+	if err := c.delete(req); err != nil {
+		return fmt.Errorf("failed to delete robot federation: %w", err)
+	}
+
+	return nil
 }
 
 // Quota Management
