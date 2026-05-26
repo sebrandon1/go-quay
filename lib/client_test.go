@@ -314,7 +314,7 @@ func TestPutRequestNoContent(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req, err := newRequestWithBody(httpMethodPut, server.URL+"/api/v1/test", map[string]string{testFieldName: "test"})
+	req, err := newRequestWithBody(httpMethodPut, server.URL+"/api/v1/test", map[string]string{testFieldName: testPlaceholder})
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}

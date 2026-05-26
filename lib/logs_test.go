@@ -437,6 +437,53 @@ func TestGetLogsError(t *testing.T) {
 	}
 }
 
+func TestLogsHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	_, err = client.GetOrganizationLogs(testNamespace, "", "", "")
+	if err == nil {
+		t.Error("Expected error from GetOrganizationLogs, got nil")
+	}
+
+	_, err = client.GetOrganizationAggregatedLogs(testNamespace, testStartDate, testEndDateMay)
+	if err == nil {
+		t.Error("Expected error from GetOrganizationAggregatedLogs, got nil")
+	}
+
+	err = client.ExportOrganizationLogs(testNamespace, &ExportLogsRequest{StartTime: testStartDate, EndTime: testEndDateMay})
+	if err == nil {
+		t.Error("Expected error from ExportOrganizationLogs, got nil")
+	}
+
+	_, err = client.GetUserLogs("", testStartDate, testEndDateMay)
+	if err == nil {
+		t.Error("Expected error from GetUserLogs, got nil")
+	}
+
+	_, err = client.GetUserAggregatedLogs(testStartDate, testEndDateMay)
+	if err == nil {
+		t.Error("Expected error from GetUserAggregatedLogs, got nil")
+	}
+
+	err = client.ExportUserLogs(&ExportLogsRequest{StartTime: testStartDate, EndTime: testEndDateMay})
+	if err == nil {
+		t.Error("Expected error from ExportUserLogs, got nil")
+	}
+
+	err = client.ExportRepositoryLogs(testNamespace, testRepository, &ExportLogsRequest{StartTime: testStartDate, EndTime: testEndDateMay})
+	if err == nil {
+		t.Error("Expected error from ExportRepositoryLogs, got nil")
+	}
+}
+
 func TestOrganizationRepositoryPopularityZero(t *testing.T) {
 	repo := OrganizationRepository{
 		Name:       testRepository,

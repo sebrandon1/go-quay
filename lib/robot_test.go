@@ -410,3 +410,32 @@ func TestDeleteUserRobotFederation(t *testing.T) {
 		t.Fatalf("DeleteUserRobotFederation returned error: %v", err)
 	}
 }
+
+func TestRobotHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	_, err = client.GetUserRobotFederation(testRobotShortname)
+	if err == nil {
+		t.Error("Expected error from GetUserRobotFederation, got nil")
+	}
+
+	err = client.CreateUserRobotFederation(testRobotShortname, []RobotFederationConfig{
+		{Issuer: testFederationIssuer, Subject: testFederationSubject},
+	})
+	if err == nil {
+		t.Error("Expected error from CreateUserRobotFederation, got nil")
+	}
+
+	err = client.DeleteUserRobotFederation(testRobotShortname)
+	if err == nil {
+		t.Error("Expected error from DeleteUserRobotFederation, got nil")
+	}
+}

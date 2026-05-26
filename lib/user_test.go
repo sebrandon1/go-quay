@@ -411,3 +411,35 @@ func TestUserStarRepositoryNotFound(t *testing.T) {
 		t.Error("Expected error for non-existent repository, got nil")
 	}
 }
+
+func TestUserHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.StarUserRepository(testNamespace, testRepository)
+	if err == nil {
+		t.Error("Expected error from StarUserRepository, got nil")
+	}
+
+	err = client.UnstarUserRepository(testNamespace, testRepository)
+	if err == nil {
+		t.Error("Expected error from UnstarUserRepository, got nil")
+	}
+
+	_, err = client.GetUserByUsername(testUserName)
+	if err == nil {
+		t.Error("Expected error from GetUserByUsername, got nil")
+	}
+
+	_, err = client.GetUserMarketplace()
+	if err == nil {
+		t.Error("Expected error from GetUserMarketplace, got nil")
+	}
+}

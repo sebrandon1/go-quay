@@ -1917,3 +1917,324 @@ func TestGetOrganizationMarketplace(t *testing.T) {
 		t.Errorf("Expected subscription ID %s, got %s", testSubscriptionID, marketplace.Subscriptions[0].ID)
 	}
 }
+
+func newOrgErrorClient(t *testing.T) *Client {
+	t.Helper()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	t.Cleanup(server.Close)
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	return client
+}
+
+func TestOrganizationCRUDHTTPErrors(t *testing.T) {
+	client := newOrgErrorClient(t)
+
+	_, err := client.CreateOrganization("testorg", testEmailAddress)
+	if err == nil {
+		t.Error("Expected error from CreateOrganization, got nil")
+	}
+
+	_, err = client.UpdateOrganization(testOrgName, testEmailAddress)
+	if err == nil {
+		t.Error("Expected error from UpdateOrganization, got nil")
+	}
+
+	err = client.DeleteOrganization(testOrgName)
+	if err == nil {
+		t.Error("Expected error from DeleteOrganization, got nil")
+	}
+
+	err = client.AddOrganizationMember(testOrgName, testMemberName)
+	if err == nil {
+		t.Error("Expected error from AddOrganizationMember, got nil")
+	}
+
+	err = client.RemoveOrganizationMember(testOrgName, testMemberName)
+	if err == nil {
+		t.Error("Expected error from RemoveOrganizationMember, got nil")
+	}
+
+	_, err = client.GetOrganizationMember(testOrgName, testMemberName)
+	if err == nil {
+		t.Error("Expected error from GetOrganizationMember, got nil")
+	}
+
+	_, err = client.GetOrganizationRepositories(testOrgName)
+	if err == nil {
+		t.Error("Expected error from GetOrganizationRepositories, got nil")
+	}
+
+	_, err = client.GetOrganizationCollaborators(testOrgName)
+	if err == nil {
+		t.Error("Expected error from GetOrganizationCollaborators, got nil")
+	}
+
+	_, err = client.GetDefaultPermissions(testOrgName)
+	if err == nil {
+		t.Error("Expected error from GetDefaultPermissions, got nil")
+	}
+
+	_, err = client.CreateDefaultPermission(testOrgName, testRoleRead, "user", testMemberName)
+	if err == nil {
+		t.Error("Expected error from CreateDefaultPermission, got nil")
+	}
+
+	err = client.DeleteDefaultPermission(testOrgName, testPrototypeID)
+	if err == nil {
+		t.Error("Expected error from DeleteDefaultPermission, got nil")
+	}
+
+	_, err = client.GetProxyCacheConfig(testOrgName)
+	if err == nil {
+		t.Error("Expected error from GetProxyCacheConfig, got nil")
+	}
+
+	_, err = client.CreateProxyCacheConfig(testOrgName, testUpstreamReg, false, 86400)
+	if err == nil {
+		t.Error("Expected error from CreateProxyCacheConfig, got nil")
+	}
+
+	err = client.DeleteProxyCacheConfig(testOrgName)
+	if err == nil {
+		t.Error("Expected error from DeleteProxyCacheConfig, got nil")
+	}
+}
+
+func TestOrganizationTeamHTTPErrors(t *testing.T) {
+	client := newOrgErrorClient(t)
+
+	_, err := client.GetTeams(testOrgName)
+	if err == nil {
+		t.Error("Expected error from GetTeams, got nil")
+	}
+
+	_, err = client.CreateTeam(testOrgName, testTeamName, testTeamDescDev, roleMember)
+	if err == nil {
+		t.Error("Expected error from CreateTeam, got nil")
+	}
+
+	_, err = client.GetTeam(testOrgName, testTeamName)
+	if err == nil {
+		t.Error("Expected error from GetTeam, got nil")
+	}
+
+	err = client.DeleteTeam(testOrgName, testTeamName)
+	if err == nil {
+		t.Error("Expected error from DeleteTeam, got nil")
+	}
+
+	_, err = client.UpdateTeam(testOrgName, testTeamName, testTeamDescDev, roleMember)
+	if err == nil {
+		t.Error("Expected error from UpdateTeam, got nil")
+	}
+
+	_, err = client.GetTeamMembers(testOrgName, testTeamName)
+	if err == nil {
+		t.Error("Expected error from GetTeamMembers, got nil")
+	}
+
+	err = client.AddTeamMember(testOrgName, testTeamName, testMemberName)
+	if err == nil {
+		t.Error("Expected error from AddTeamMember, got nil")
+	}
+
+	err = client.RemoveTeamMember(testOrgName, testTeamName, testMemberName)
+	if err == nil {
+		t.Error("Expected error from RemoveTeamMember, got nil")
+	}
+
+	_, err = client.GetTeamPermissions(testOrgName, testTeamName)
+	if err == nil {
+		t.Error("Expected error from GetTeamPermissions, got nil")
+	}
+
+	err = client.SetTeamRepositoryPermission(testOrgName, testTeamName, testRepository, testRoleRead)
+	if err == nil {
+		t.Error("Expected error from SetTeamRepositoryPermission, got nil")
+	}
+
+	err = client.RemoveTeamRepositoryPermission(testOrgName, testTeamName, testRepository)
+	if err == nil {
+		t.Error("Expected error from RemoveTeamRepositoryPermission, got nil")
+	}
+
+	err = client.InviteTeamMember(testOrgName, testTeamName, testEmailAddress)
+	if err == nil {
+		t.Error("Expected error from InviteTeamMember, got nil")
+	}
+
+	err = client.DeleteTeamInvite(testOrgName, testTeamName, testEmailAddress)
+	if err == nil {
+		t.Error("Expected error from DeleteTeamInvite, got nil")
+	}
+}
+
+func TestOrganizationRobotHTTPErrors(t *testing.T) {
+	client := newOrgErrorClient(t)
+
+	_, err := client.GetRobotAccounts(testOrgName)
+	if err == nil {
+		t.Error("Expected error from GetRobotAccounts, got nil")
+	}
+
+	_, err = client.CreateRobotAccount(testOrgName, "testbot", testRobotDescValue, nil)
+	if err == nil {
+		t.Error("Expected error from CreateRobotAccount, got nil")
+	}
+
+	_, err = client.GetRobotAccount(testOrgName, "testbot")
+	if err == nil {
+		t.Error("Expected error from GetRobotAccount, got nil")
+	}
+
+	err = client.DeleteRobotAccount(testOrgName, "testbot")
+	if err == nil {
+		t.Error("Expected error from DeleteRobotAccount, got nil")
+	}
+
+	_, err = client.RegenerateRobotToken(testOrgName, "testbot")
+	if err == nil {
+		t.Error("Expected error from RegenerateRobotToken, got nil")
+	}
+
+	_, err = client.GetRobotPermissions(testOrgName, "testbot")
+	if err == nil {
+		t.Error("Expected error from GetRobotPermissions, got nil")
+	}
+
+	err = client.SetRobotRepositoryPermission(testOrgName, "testbot", testRepository, testRoleRead)
+	if err == nil {
+		t.Error("Expected error from SetRobotRepositoryPermission, got nil")
+	}
+
+	err = client.RemoveRobotRepositoryPermission(testOrgName, "testbot", testRepository)
+	if err == nil {
+		t.Error("Expected error from RemoveRobotRepositoryPermission, got nil")
+	}
+
+	_, err = client.GetRobotFederation(testOrgName, "testbot")
+	if err == nil {
+		t.Error("Expected error from GetRobotFederation, got nil")
+	}
+
+	err = client.CreateRobotFederation(testOrgName, "testbot", []RobotFederationConfig{{Issuer: "https://example.com", Subject: testPlaceholder}})
+	if err == nil {
+		t.Error("Expected error from CreateRobotFederation, got nil")
+	}
+
+	err = client.DeleteRobotFederation(testOrgName, "testbot")
+	if err == nil {
+		t.Error("Expected error from DeleteRobotFederation, got nil")
+	}
+}
+
+func TestOrganizationQuotaPolicyHTTPErrors(t *testing.T) {
+	client := newOrgErrorClient(t)
+
+	_, err := client.GetQuota(testOrgName)
+	if err == nil {
+		t.Error("Expected error from GetQuota, got nil")
+	}
+
+	_, err = client.CreateQuota(testOrgName, 1073741824)
+	if err == nil {
+		t.Error("Expected error from CreateQuota, got nil")
+	}
+
+	_, err = client.UpdateQuota(testOrgName, 2147483648)
+	if err == nil {
+		t.Error("Expected error from UpdateQuota, got nil")
+	}
+
+	err = client.DeleteQuota(testOrgName)
+	if err == nil {
+		t.Error("Expected error from DeleteQuota, got nil")
+	}
+
+	_, err = client.GetAutoPrunePolicies(testOrgName)
+	if err == nil {
+		t.Error("Expected error from GetAutoPrunePolicies, got nil")
+	}
+
+	_, err = client.CreateAutoPrunePolicy(testOrgName, testAutoPruneMethodNumberOfTags, 10, "")
+	if err == nil {
+		t.Error("Expected error from CreateAutoPrunePolicy, got nil")
+	}
+
+	_, err = client.GetAutoPrunePolicy(testOrgName, testPolicyUUID)
+	if err == nil {
+		t.Error("Expected error from GetAutoPrunePolicy, got nil")
+	}
+
+	_, err = client.UpdateAutoPrunePolicy(testOrgName, testPolicyUUID, testAutoPruneMethodNumberOfTags, 20, "")
+	if err == nil {
+		t.Error("Expected error from UpdateAutoPrunePolicy, got nil")
+	}
+
+	err = client.DeleteAutoPrunePolicy(testOrgName, testPolicyUUID)
+	if err == nil {
+		t.Error("Expected error from DeleteAutoPrunePolicy, got nil")
+	}
+}
+
+func TestOrganizationAppMarketplaceHTTPErrors(t *testing.T) {
+	client := newOrgErrorClient(t)
+
+	_, err := client.GetApplications(testOrgName)
+	if err == nil {
+		t.Error("Expected error from GetApplications, got nil")
+	}
+
+	_, err = client.CreateApplication(testOrgName, testAppName, "desc", testAppURI, testRedirectURI)
+	if err == nil {
+		t.Error("Expected error from CreateApplication, got nil")
+	}
+
+	_, err = client.GetApplication(testOrgName, testClientID)
+	if err == nil {
+		t.Error("Expected error from GetApplication, got nil")
+	}
+
+	_, err = client.UpdateApplication(testOrgName, testClientID, testAppName, "desc", testAppURI, testRedirectURI)
+	if err == nil {
+		t.Error("Expected error from UpdateApplication, got nil")
+	}
+
+	err = client.DeleteApplication(testOrgName, testClientID)
+	if err == nil {
+		t.Error("Expected error from DeleteApplication, got nil")
+	}
+
+	_, err = client.ResetApplicationClientSecret(testOrgName, testClientID)
+	if err == nil {
+		t.Error("Expected error from ResetApplicationClientSecret, got nil")
+	}
+
+	_, err = client.GetOrganizationMarketplace(testOrgName)
+	if err == nil {
+		t.Error("Expected error from GetOrganizationMarketplace, got nil")
+	}
+
+	err = client.CreateOrganizationMarketplaceSubscription(testOrgName, &MarketplaceSubscriptionRequest{SKU: testPlaceholder})
+	if err == nil {
+		t.Error("Expected error from CreateOrganizationMarketplaceSubscription, got nil")
+	}
+
+	err = client.BatchRemoveOrganizationMarketplaceSubscriptions(testOrgName, []string{testSubscriptionID})
+	if err == nil {
+		t.Error("Expected error from BatchRemoveOrganizationMarketplaceSubscriptions, got nil")
+	}
+
+	err = client.DeleteOrganizationMarketplaceSubscription(testOrgName, testSubscriptionID)
+	if err == nil {
+		t.Error("Expected error from DeleteOrganizationMarketplaceSubscription, got nil")
+	}
+}

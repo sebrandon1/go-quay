@@ -296,3 +296,48 @@ func TestGetNotificationError(t *testing.T) {
 		t.Error("Expected error, got nil")
 	}
 }
+
+func TestNotificationHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	_, err = client.CreateNotification(testNamespace, testRepository, &CreateNotificationRequest{
+		Event:  testNotificationEvent,
+		Method: testNotificationMethod,
+		Title:  "Test",
+	})
+	if err == nil {
+		t.Error("Expected error from CreateNotification, got nil")
+	}
+
+	err = client.DeleteNotification(testNamespace, testRepository, testNotificationUUID)
+	if err == nil {
+		t.Error("Expected error from DeleteNotification, got nil")
+	}
+
+	err = client.TestNotification(testNamespace, testRepository, testNotificationUUID)
+	if err == nil {
+		t.Error("Expected error from TestNotification, got nil")
+	}
+
+	err = client.ResetNotification(testNamespace, testRepository, testNotificationUUID)
+	if err == nil {
+		t.Error("Expected error from ResetNotification, got nil")
+	}
+
+	_, err = client.UpdateNotification(testNamespace, testRepository, testNotificationUUID, &CreateNotificationRequest{
+		Event:  testNotificationEvent,
+		Method: testNotificationMethod,
+		Title:  "Updated",
+	})
+	if err == nil {
+		t.Error("Expected error from UpdateNotification, got nil")
+	}
+}

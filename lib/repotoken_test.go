@@ -200,3 +200,35 @@ func TestGetRepoTokensError(t *testing.T) {
 		t.Error("Expected error, got nil")
 	}
 }
+
+func TestRepoTokenHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	_, err = client.CreateRepoToken(testNamespace, testRepository, &CreateRepoTokenRequest{FriendlyName: testPlaceholder})
+	if err == nil {
+		t.Error("Expected error from CreateRepoToken, got nil")
+	}
+
+	_, err = client.GetRepoToken(testNamespace, testRepository, testTokenCode)
+	if err == nil {
+		t.Error("Expected error from GetRepoToken, got nil")
+	}
+
+	_, err = client.UpdateRepoToken(testNamespace, testRepository, testTokenCode, &UpdateRepoTokenRequest{Role: testRoleWrite})
+	if err == nil {
+		t.Error("Expected error from UpdateRepoToken, got nil")
+	}
+
+	err = client.DeleteRepoToken(testNamespace, testRepository, testTokenCode)
+	if err == nil {
+		t.Error("Expected error from DeleteRepoToken, got nil")
+	}
+}

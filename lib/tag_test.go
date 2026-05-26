@@ -18,7 +18,7 @@ func TestGetTag(t *testing.T) {
 		Size:           1024000,
 		LastModified:   testTimestamp,
 		IsManifestList: false,
-		DockerImageID:  "abc123",
+		DockerImageID:  testHashABC123,
 		ImageID:        "def456",
 		V1Metadata: map[string]string{
 			"architecture": testArchAmd64,
@@ -320,5 +320,11 @@ func TestTagErrorHandling(t *testing.T) {
 	_, err = client.RevertTag(testNamespace, testRepository, "nonexistent", testDigestSHA256)
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
+	}
+
+	// Test RestoreTag error
+	err = client.RestoreTag(testNamespace, testRepository, "nonexistent", testDigestSHA256)
+	if err == nil {
+		t.Error("Expected error from RestoreTag, got nil")
 	}
 }

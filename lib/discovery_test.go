@@ -196,3 +196,30 @@ func TestGetDiscoveryError(t *testing.T) {
 		t.Error("Expected error, got nil")
 	}
 }
+
+func TestDiscoveryHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	_, err = client.GetRegistryCapabilities()
+	if err == nil {
+		t.Error("Expected error from GetRegistryCapabilities, got nil")
+	}
+
+	_, err = client.GetAppInfo(testClientID)
+	if err == nil {
+		t.Error("Expected error from GetAppInfo, got nil")
+	}
+
+	_, err = client.GetEntities("test", true, true)
+	if err == nil {
+		t.Error("Expected error from GetEntities, got nil")
+	}
+}

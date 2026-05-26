@@ -123,7 +123,7 @@ func TestSearchAll(t *testing.T) {
 				Score:       0.95,
 				Avatar: Avatar{
 					Name:  "quay",
-					Hash:  "abc123",
+					Hash:  testHashABC123,
 					Kind:  "org",
 					Color: "#ff0000",
 				},

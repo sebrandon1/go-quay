@@ -419,3 +419,30 @@ func TestGetAvailablePlansError(t *testing.T) {
 		t.Error("Expected nil plans on error")
 	}
 }
+
+func TestBillingHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	_, err = client.GetOrganizationSubscription(testNamespace)
+	if err == nil {
+		t.Error("Expected error from GetOrganizationSubscription, got nil")
+	}
+
+	_, err = client.GetUserSubscription()
+	if err == nil {
+		t.Error("Expected error from GetUserSubscription, got nil")
+	}
+
+	_, err = client.GetOrganizationInvoices(testNamespace)
+	if err == nil {
+		t.Error("Expected error from GetOrganizationInvoices, got nil")
+	}
+}
