@@ -12,6 +12,8 @@ var (
 	robotShortname     string
 	robotDescription   string
 	confirmRobotDelete bool
+	federationIssuer   string
+	federationSubject  string
 )
 
 // robotCmd represents the robot command group
@@ -177,6 +179,73 @@ var robotPermissionsCmd = &cobra.Command{
 	},
 }
 
+// Robot Federation Get
+var robotFederationGetCmd = &cobra.Command{
+	Use:   "federation-get",
+	Short: "Get robot federation configuration",
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := lib.NewClientWithURL(token, quayURL)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		federation, err := client.GetUserRobotFederation(robotShortname)
+		if err != nil {
+			fmt.Printf("Error getting robot federation: %v\n", err)
+			os.Exit(1)
+		}
+
+		printJSON(federation)
+	},
+}
+
+// Robot Federation Create
+var robotFederationCreateCmd = &cobra.Command{
+	Use:   "federation-create",
+	Short: "Create or update robot federation configuration",
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := lib.NewClientWithURL(token, quayURL)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		configs := []lib.RobotFederationConfig{
+			{Issuer: federationIssuer, Subject: federationSubject},
+		}
+
+		err = client.CreateUserRobotFederation(robotShortname, configs)
+		if err != nil {
+			fmt.Printf("Error creating robot federation: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Successfully configured federation for robot: %s\n", robotShortname)
+	},
+}
+
+// Robot Federation Delete
+var robotFederationDeleteCmd = &cobra.Command{
+	Use:   "federation-delete",
+	Short: "Delete robot federation configuration",
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := lib.NewClientWithURL(token, quayURL)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		err = client.DeleteUserRobotFederation(robotShortname)
+		if err != nil {
+			fmt.Printf("Error deleting robot federation: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Successfully deleted federation for robot: %s\n", robotShortname)
+	},
+}
+
 func init() {
 	// Add subcommands to robot command
 	robotCmd.AddCommand(robotListCmd)
@@ -185,6 +254,9 @@ func init() {
 	robotCmd.AddCommand(robotDeleteCmd)
 	robotCmd.AddCommand(robotRegenerateCmd)
 	robotCmd.AddCommand(robotPermissionsCmd)
+	robotCmd.AddCommand(robotFederationGetCmd)
+	robotCmd.AddCommand(robotFederationCreateCmd)
+	robotCmd.AddCommand(robotFederationDeleteCmd)
 
 	// Info command flags
 	robotInfoCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name (without username prefix)")
@@ -222,4 +294,20 @@ func init() {
 		fmt.Printf("Error marking name flag as required: %v\n", err)
 		os.Exit(1)
 	}
+
+	// Federation get command flags
+	robotFederationGetCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name")
+	markFlagRequired(robotFederationGetCmd.MarkFlagRequired("name"))
+
+	// Federation create command flags
+	robotFederationCreateCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name")
+	robotFederationCreateCmd.Flags().StringVar(&federationIssuer, "issuer", "", "Federation token issuer")
+	robotFederationCreateCmd.Flags().StringVar(&federationSubject, "subject", "", "Federation token subject")
+	markFlagRequired(robotFederationCreateCmd.MarkFlagRequired("name"))
+	markFlagRequired(robotFederationCreateCmd.MarkFlagRequired("issuer"))
+	markFlagRequired(robotFederationCreateCmd.MarkFlagRequired("subject"))
+
+	// Federation delete command flags
+	robotFederationDeleteCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name")
+	markFlagRequired(robotFederationDeleteCmd.MarkFlagRequired("name"))
 }

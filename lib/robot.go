@@ -4,15 +4,15 @@ Package lib provides Quay.io API client functionality.
 This file covers USER ROBOT ACCOUNT operations:
 
 Robot Account Management:
-  - GET    /api/v1/user/robots                                  - GetUserRobotAccounts()
-  - GET    /api/v1/user/robots/{robot_shortname}                - GetUserRobotAccount()
-  - PUT    /api/v1/user/robots/{robot_shortname}                - CreateUserRobotAccount()
-  - DELETE /api/v1/user/robots/{robot_shortname}                - DeleteUserRobotAccount()
-  - POST   /api/v1/user/robots/{robot_shortname}/regenerate     - RegenerateUserRobotToken()
-  - GET    /api/v1/user/robots/{robot_shortname}/permissions    - GetUserRobotPermissions()
-
-User robot accounts provide automated access credentials for CI/CD pipelines
-and other automated workflows tied to a user account rather than an organization.
+  - GET    /api/v1/user/robots                                      - GetUserRobotAccounts()
+  - GET    /api/v1/user/robots/{robot_shortname}                    - GetUserRobotAccount()
+  - PUT    /api/v1/user/robots/{robot_shortname}                    - CreateUserRobotAccount()
+  - DELETE /api/v1/user/robots/{robot_shortname}                    - DeleteUserRobotAccount()
+  - POST   /api/v1/user/robots/{robot_shortname}/regenerate         - RegenerateUserRobotToken()
+  - GET    /api/v1/user/robots/{robot_shortname}/permissions        - GetUserRobotPermissions()
+  - GET    /api/v1/user/robots/{robot_shortname}/federation         - GetUserRobotFederation()
+  - POST   /api/v1/user/robots/{robot_shortname}/federation         - CreateUserRobotFederation()
+  - DELETE /api/v1/user/robots/{robot_shortname}/federation         - DeleteUserRobotFederation()
 */
 package lib
 
@@ -112,4 +112,47 @@ func (c *Client) GetUserRobotPermissions(robotShortname string) (*RobotPermissio
 	}
 
 	return &permissions, nil
+}
+
+// GetUserRobotFederation retrieves the federation configuration for a user's robot account
+func (c *Client) GetUserRobotFederation(robotShortname string) (*RobotFederation, error) {
+	req, err := newRequest("GET", fmt.Sprintf("%s/user/robots/%s/federation", c.BaseURL, robotShortname), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create get user robot federation request: %w", err)
+	}
+
+	var federation RobotFederation
+	if err := c.get(req, &federation); err != nil {
+		return nil, fmt.Errorf("failed to get user robot federation: %w", err)
+	}
+
+	return &federation, nil
+}
+
+// CreateUserRobotFederation creates or updates the federation configuration for a user's robot account
+func (c *Client) CreateUserRobotFederation(robotShortname string, configs []RobotFederationConfig) error {
+	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/user/robots/%s/federation", c.BaseURL, robotShortname), configs)
+	if err != nil {
+		return fmt.Errorf("failed to create user robot federation request: %w", err)
+	}
+
+	if err := c.post(req, nil); err != nil {
+		return fmt.Errorf("failed to create user robot federation: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteUserRobotFederation deletes the federation configuration for a user's robot account
+func (c *Client) DeleteUserRobotFederation(robotShortname string) error {
+	req, err := newRequest("DELETE", fmt.Sprintf("%s/user/robots/%s/federation", c.BaseURL, robotShortname), nil)
+	if err != nil {
+		return fmt.Errorf("failed to create delete user robot federation request: %w", err)
+	}
+
+	if err := c.delete(req); err != nil {
+		return fmt.Errorf("failed to delete user robot federation: %w", err)
+	}
+
+	return nil
 }

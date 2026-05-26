@@ -294,6 +294,17 @@ type TeamPermissions struct {
 	Permissions []TeamPermission `json:"permissions,omitempty"`
 }
 
+// RobotFederationConfig represents a federation configuration entry for a robot account
+type RobotFederationConfig struct {
+	Issuer  string `json:"issuer"`
+	Subject string `json:"subject"`
+}
+
+// RobotFederation represents the federation configuration for a robot account
+type RobotFederation struct {
+	Federation []RobotFederationConfig `json:"federation,omitempty"`
+}
+
 // RobotAccount represents a robot account
 type RobotAccount struct {
 	Name         string         `json:"name,omitempty"`

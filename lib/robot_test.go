@@ -8,7 +8,9 @@ import (
 )
 
 const (
-	testRobotShortname = "deploybot"
+	testRobotShortname    = "deploybot"
+	testFederationIssuer  = "https://accounts.google.com"
+	testFederationSubject = "robot@project.iam.gserviceaccount.com"
 )
 
 func TestGetUserRobotAccounts(t *testing.T) {
@@ -315,5 +317,96 @@ func TestUserRobotErrorHandling(t *testing.T) {
 	_, err = client.GetUserRobotPermissions("nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent robot, got nil")
+	}
+}
+
+func TestGetUserRobotFederation(t *testing.T) {
+	mockFederation := RobotFederation{
+		Federation: []RobotFederationConfig{
+			{Issuer: testFederationIssuer, Subject: testFederationSubject},
+		},
+	}
+	mockResponseJSON, _ := json.Marshal(mockFederation)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected GET, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/user/robots/" + testRobotShortname + "/federation"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	federation, err := client.GetUserRobotFederation(testRobotShortname)
+	if err != nil {
+		t.Fatalf("GetUserRobotFederation returned error: %v", err)
+	}
+
+	if len(federation.Federation) != 1 {
+		t.Fatalf("Expected 1 federation config, got %d", len(federation.Federation))
+	}
+	if federation.Federation[0].Issuer != testFederationIssuer {
+		t.Errorf("Expected issuer 'https://accounts.google.com', got '%s'", federation.Federation[0].Issuer)
+	}
+}
+
+func TestCreateUserRobotFederation(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/user/robots/" + testRobotShortname + "/federation"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusCreated)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	configs := []RobotFederationConfig{
+		{Issuer: testFederationIssuer, Subject: testFederationSubject},
+	}
+
+	err = client.CreateUserRobotFederation(testRobotShortname, configs)
+	if err != nil {
+		t.Fatalf("CreateUserRobotFederation returned error: %v", err)
+	}
+}
+
+func TestDeleteUserRobotFederation(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			t.Errorf("Expected DELETE, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/user/robots/" + testRobotShortname + "/federation"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.DeleteUserRobotFederation(testRobotShortname)
+	if err != nil {
+		t.Fatalf("DeleteUserRobotFederation returned error: %v", err)
 	}
 }
