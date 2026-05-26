@@ -208,6 +208,148 @@ func TestUnstarRepository(t *testing.T) {
 	}
 }
 
+func TestStarUserRepository(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/user/starred"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+
+		var req map[string]interface{}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Errorf("Failed to decode request body: %v", err)
+		}
+
+		expectedRepo := testNamespace + "/" + testRepository
+		if req["repository"] != expectedRepo {
+			t.Errorf("Expected repository '%s', got '%v'", expectedRepo, req["repository"])
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.StarUserRepository(testNamespace, testRepository)
+	if err != nil {
+		t.Fatalf("StarUserRepository returned error: %v", err)
+	}
+}
+
+func TestUnstarUserRepository(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodDelete {
+			t.Errorf("Expected DELETE request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/user/starred/" + testNamespace + "/" + testRepository
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.UnstarUserRepository(testNamespace, testRepository)
+	if err != nil {
+		t.Fatalf("UnstarUserRepository returned error: %v", err)
+	}
+}
+
+func TestGetUserByUsername(t *testing.T) {
+	mockUser := UserDetails{
+		Username:      testUserName,
+		Email:         testEmailAddress,
+		Verified:      true,
+		CanCreateRepo: true,
+	}
+	mockResponseJSON, _ := json.Marshal(mockUser)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/users/" + testUserName
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	user, err := client.GetUserByUsername(testUserName)
+	if err != nil {
+		t.Fatalf("GetUserByUsername returned error: %v", err)
+	}
+
+	if user.Username != testUserName {
+		t.Errorf("Expected username %s, got %s", testUserName, user.Username)
+	}
+	if user.Email != testEmailAddress {
+		t.Errorf("Expected email %s, got %s", testEmailAddress, user.Email)
+	}
+}
+
+func TestGetUserMarketplace(t *testing.T) {
+	mockMarketplace := MarketplaceInfo{
+		HasPayment: false,
+		Subscriptions: []MarketplaceSubscription{
+			{ID: "user-sub-123", SKU: "free-plan", Status: "active"},
+		},
+	}
+	mockResponseJSON, _ := json.Marshal(mockMarketplace)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/user/marketplace"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	marketplace, err := client.GetUserMarketplace()
+	if err != nil {
+		t.Fatalf("GetUserMarketplace returned error: %v", err)
+	}
+
+	if marketplace.HasPayment {
+		t.Errorf("Expected HasPayment to be false")
+	}
+	if len(marketplace.Subscriptions) != 1 {
+		t.Errorf("Expected 1 subscription, got %d", len(marketplace.Subscriptions))
+	}
+	if marketplace.Subscriptions[0].ID != "user-sub-123" {
+		t.Errorf("Expected subscription ID 'user-sub-123', got %s", marketplace.Subscriptions[0].ID)
+	}
+}
+
 func TestUserErrorHandling(t *testing.T) {
 	// Test unauthorized error (401)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -1069,7 +1069,7 @@ func TestCreateAutoPrunePolicy(t *testing.T) {
 		UUID:       testPolicyUUID,
 		Method:     testAutoPruneMethodNumberOfTags,
 		Value:      20,
-		TagPattern: "release-*",
+		TagPattern: testTagPatternRelease,
 	}
 	mockResponseJSON, _ := json.Marshal(mockPolicy)
 
@@ -1101,7 +1101,7 @@ func TestCreateAutoPrunePolicy(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	policy, err := client.CreateAutoPrunePolicy(testOrgName, testAutoPruneMethodNumberOfTags, 20, "release-*")
+	policy, err := client.CreateAutoPrunePolicy(testOrgName, testAutoPruneMethodNumberOfTags, 20, testTagPatternRelease)
 	if err != nil {
 		t.Fatalf("CreateAutoPrunePolicy returned error: %v", err)
 	}
@@ -1374,6 +1374,460 @@ func TestGetDefaultPermissions(t *testing.T) {
 	}
 	if perms.Prototypes[0].Role != testRoleRead {
 		t.Errorf("Expected role %s, got %s", testRoleRead, perms.Prototypes[0].Role)
+	}
+}
+
+// --- Default Permissions (Create/Delete) ---
+
+func TestCreateDefaultPermission(t *testing.T) {
+	mockPerm := DefaultPermission{
+		ID:   testPrototypeID,
+		Role: testRoleRead,
+		Delegate: User{
+			Name: testMemberName,
+			Kind: testKindUser,
+		},
+	}
+	mockResponseJSON, _ := json.Marshal(mockPerm)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/prototypes"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	perm, err := client.CreateDefaultPermission(testOrgName, testRoleRead, testKindUser, testMemberName)
+	if err != nil {
+		t.Fatalf("CreateDefaultPermission returned error: %v", err)
+	}
+
+	if perm.ID != testPrototypeID {
+		t.Errorf("Expected prototype ID %s, got %s", testPrototypeID, perm.ID)
+	}
+	if perm.Role != testRoleRead {
+		t.Errorf("Expected role %s, got %s", testRoleRead, perm.Role)
+	}
+}
+
+func TestDeleteDefaultPermission(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodDelete {
+			t.Errorf("Expected DELETE request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/prototypes/" + testPrototypeID
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.DeleteDefaultPermission(testOrgName, testPrototypeID)
+	if err != nil {
+		t.Fatalf("DeleteDefaultPermission returned error: %v", err)
+	}
+}
+
+// --- Quota (Update) ---
+
+func TestUpdateQuota(t *testing.T) {
+	var limitBytes int64 = 4294967296
+	mockQuota := Quota{
+		ID:         "quota-1",
+		LimitBytes: limitBytes,
+	}
+	mockResponseJSON, _ := json.Marshal(mockQuota)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/quota"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	quota, err := client.UpdateQuota(testOrgName, limitBytes)
+	if err != nil {
+		t.Fatalf("UpdateQuota returned error: %v", err)
+	}
+
+	if quota.LimitBytes != limitBytes {
+		t.Errorf("Expected limit bytes %d, got %d", limitBytes, quota.LimitBytes)
+	}
+}
+
+// --- Auto-Prune (Get/Update single policy) ---
+
+func TestGetAutoPrunePolicy(t *testing.T) {
+	mockPolicy := AutoPrunePolicy{
+		UUID:       testPolicyUUID,
+		Method:     testAutoPruneMethodNumberOfTags,
+		Value:      10,
+		TagPattern: "v*",
+	}
+	mockResponseJSON, _ := json.Marshal(mockPolicy)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/autoprunepolicy/" + testPolicyUUID
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	policy, err := client.GetAutoPrunePolicy(testOrgName, testPolicyUUID)
+	if err != nil {
+		t.Fatalf("GetAutoPrunePolicy returned error: %v", err)
+	}
+
+	if policy.UUID != testPolicyUUID {
+		t.Errorf("Expected policy UUID %s, got %s", testPolicyUUID, policy.UUID)
+	}
+	if policy.Value != 10 {
+		t.Errorf("Expected value 10, got %d", policy.Value)
+	}
+}
+
+func TestUpdateAutoPrunePolicy(t *testing.T) {
+	mockPolicy := AutoPrunePolicy{
+		UUID:       testPolicyUUID,
+		Method:     testAutoPruneMethodNumberOfTags,
+		Value:      30,
+		TagPattern: testTagPatternRelease,
+	}
+	mockResponseJSON, _ := json.Marshal(mockPolicy)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/autoprunepolicy/" + testPolicyUUID
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	policy, err := client.UpdateAutoPrunePolicy(testOrgName, testPolicyUUID, testAutoPruneMethodNumberOfTags, 30, testTagPatternRelease)
+	if err != nil {
+		t.Fatalf("UpdateAutoPrunePolicy returned error: %v", err)
+	}
+
+	if policy.Value != 30 {
+		t.Errorf("Expected value 30, got %d", policy.Value)
+	}
+	if policy.TagPattern != testTagPatternRelease {
+		t.Errorf("Expected tag pattern '%s', got %s", testTagPatternRelease, policy.TagPattern)
+	}
+}
+
+// --- Applications (Get/Update/Delete/ResetSecret single app) ---
+
+func TestGetApplication(t *testing.T) {
+	mockApp := Application{
+		ClientID:    testClientID,
+		Name:        testAppName,
+		Description: "A test app",
+	}
+	mockResponseJSON, _ := json.Marshal(mockApp)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/applications/" + testClientID
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	app, err := client.GetApplication(testOrgName, testClientID)
+	if err != nil {
+		t.Fatalf("GetApplication returned error: %v", err)
+	}
+
+	if app.ClientID != testClientID {
+		t.Errorf("Expected client ID %s, got %s", testClientID, app.ClientID)
+	}
+}
+
+func TestUpdateApplication(t *testing.T) {
+	mockApp := Application{
+		ClientID:       testClientID,
+		Name:           "Updated App",
+		Description:    updatedDescription,
+		ApplicationURI: testAppURI,
+		RedirectURI:    testRedirectURI,
+	}
+	mockResponseJSON, _ := json.Marshal(mockApp)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/applications/" + testClientID
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	app, err := client.UpdateApplication(testOrgName, testClientID, "Updated App", updatedDescription, testAppURI, testRedirectURI)
+	if err != nil {
+		t.Fatalf("UpdateApplication returned error: %v", err)
+	}
+
+	if app.Name != "Updated App" {
+		t.Errorf("Expected app name 'Updated App', got %s", app.Name)
+	}
+}
+
+func TestDeleteApplication(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodDelete {
+			t.Errorf("Expected DELETE request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/applications/" + testClientID
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.DeleteApplication(testOrgName, testClientID)
+	if err != nil {
+		t.Fatalf("DeleteApplication returned error: %v", err)
+	}
+}
+
+func TestResetApplicationClientSecret(t *testing.T) {
+	mockApp := Application{
+		ClientID:     testClientID,
+		ClientSecret: "new-secret-456",
+		Name:         testAppName,
+	}
+	mockResponseJSON, _ := json.Marshal(mockApp)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/applications/" + testClientID + "/resetclientsecret"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	app, err := client.ResetApplicationClientSecret(testOrgName, testClientID)
+	if err != nil {
+		t.Fatalf("ResetApplicationClientSecret returned error: %v", err)
+	}
+
+	if app.ClientSecret != "new-secret-456" {
+		t.Errorf("Expected client secret 'new-secret-456', got %s", app.ClientSecret)
+	}
+}
+
+// --- Marketplace (Create/BatchRemove/Delete subscription) ---
+
+func TestCreateOrganizationMarketplaceSubscription(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/marketplace"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	subReq := &MarketplaceSubscriptionRequest{
+		SKU:      "premium-plan",
+		Quantity: 1,
+	}
+
+	err = client.CreateOrganizationMarketplaceSubscription(testOrgName, subReq)
+	if err != nil {
+		t.Fatalf("CreateOrganizationMarketplaceSubscription returned error: %v", err)
+	}
+}
+
+func TestBatchRemoveOrganizationMarketplaceSubscriptions(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/marketplace/batchremove"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.BatchRemoveOrganizationMarketplaceSubscriptions(testOrgName, []string{testSubscriptionID, "sub-456"})
+	if err != nil {
+		t.Fatalf("BatchRemoveOrganizationMarketplaceSubscriptions returned error: %v", err)
+	}
+}
+
+func TestDeleteOrganizationMarketplaceSubscription(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodDelete {
+			t.Errorf("Expected DELETE request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/marketplace/" + testSubscriptionID
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.DeleteOrganizationMarketplaceSubscription(testOrgName, testSubscriptionID)
+	if err != nil {
+		t.Fatalf("DeleteOrganizationMarketplaceSubscription returned error: %v", err)
+	}
+}
+
+// --- Team Invites ---
+
+func TestInviteTeamMember(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/invite/" + testEmailAddress
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.InviteTeamMember(testOrgName, testTeamName, testEmailAddress)
+	if err != nil {
+		t.Fatalf("InviteTeamMember returned error: %v", err)
+	}
+}
+
+func TestDeleteTeamInvite(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodDelete {
+			t.Errorf("Expected DELETE request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/invite/" + testEmailAddress
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.DeleteTeamInvite(testOrgName, testTeamName, testEmailAddress)
+	if err != nil {
+		t.Fatalf("DeleteTeamInvite returned error: %v", err)
 	}
 }
 

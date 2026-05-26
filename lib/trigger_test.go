@@ -249,6 +249,46 @@ func TestActivateTrigger(t *testing.T) {
 	}
 }
 
+func TestGetTriggerBuilds(t *testing.T) {
+	mockResponse := Builds{
+		Builds: []Build{
+			{ID: "build-uuid-100", Phase: testBuildPhase},
+			{ID: "build-uuid-101", Phase: "building"},
+		},
+	}
+	mockResponseJSON, _ := json.Marshal(mockResponse)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/trigger/" + testTriggerUUID + "/builds"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	builds, err := client.GetTriggerBuilds(testNamespace, testRepository, testTriggerUUID, 0)
+	if err != nil {
+		t.Fatalf("GetTriggerBuilds returned error: %v", err)
+	}
+
+	if len(builds.Builds) != 2 {
+		t.Errorf("Expected 2 builds, got %d", len(builds.Builds))
+	}
+	if builds.Builds[0].ID != "build-uuid-100" {
+		t.Errorf("Expected first build ID 'build-uuid-100', got %s", builds.Builds[0].ID)
+	}
+}
+
 func TestGetTriggersError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)

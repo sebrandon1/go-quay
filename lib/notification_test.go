@@ -8,16 +8,20 @@ import (
 )
 
 const (
-	testNotificationUUID   = "notification-uuid-123"
-	testNotificationEvent  = "repo_push"
-	testNotificationMethod = "webhook"
+	testNotificationUUID         = "notification-uuid-123"
+	testNotificationEvent        = "repo_push"
+	testNotificationMethod       = "webhook"
+	testNotificationEventBuild   = "build_success"
+	testNotificationConfigKeyURL = "url"
+	testNotificationTitleUpdated = "Updated Webhook"
+	testNotificationMethodSlack  = "slack"
 )
 
 func TestGetNotifications(t *testing.T) {
 	mockResponse := RepositoryNotifications{
 		Notifications: []RepositoryNotification{
 			{UUID: testNotificationUUID, Event: testNotificationEvent, Method: testNotificationMethod, Title: "Push Webhook"},
-			{UUID: "notification-uuid-456", Event: "build_success", Method: "slack", Title: "Build Slack"},
+			{UUID: "notification-uuid-456", Event: testNotificationEventBuild, Method: testNotificationMethodSlack, Title: "Build Slack"},
 		},
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
@@ -59,7 +63,7 @@ func TestGetNotification(t *testing.T) {
 		Event:  testNotificationEvent,
 		Method: testNotificationMethod,
 		Title:  "Push Webhook",
-		Config: map[string]interface{}{"url": "https://example.com/webhook"},
+		Config: map[string]interface{}{testNotificationConfigKeyURL: "https://example.com/webhook"},
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
 
@@ -125,7 +129,7 @@ func TestCreateNotification(t *testing.T) {
 	notificationReq := &CreateNotificationRequest{
 		Event:  testNotificationEvent,
 		Method: testNotificationMethod,
-		Config: map[string]interface{}{"url": "https://example.com/webhook"},
+		Config: map[string]interface{}{testNotificationConfigKeyURL: "https://example.com/webhook"},
 		Title:  "New Webhook",
 	}
 
@@ -208,6 +212,54 @@ func TestResetNotification(t *testing.T) {
 	err = client.ResetNotification(testNamespace, testRepository, testNotificationUUID)
 	if err != nil {
 		t.Fatalf("ResetNotification returned error: %v", err)
+	}
+}
+
+func TestUpdateNotification(t *testing.T) {
+	mockResponse := RepositoryNotification{
+		UUID:   testNotificationUUID,
+		Event:  testNotificationEventBuild,
+		Method: testNotificationMethodSlack,
+		Title:  testNotificationTitleUpdated,
+	}
+	mockResponseJSON, _ := json.Marshal(mockResponse)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/notification/" + testNotificationUUID
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	notificationReq := &CreateNotificationRequest{
+		Event:  testNotificationEventBuild,
+		Method: testNotificationMethodSlack,
+		Config: map[string]interface{}{testNotificationConfigKeyURL: "https://hooks.slack.com/services/xxx"},
+		Title:  testNotificationTitleUpdated,
+	}
+
+	notification, err := client.UpdateNotification(testNamespace, testRepository, testNotificationUUID, notificationReq)
+	if err != nil {
+		t.Fatalf("UpdateNotification returned error: %v", err)
+	}
+
+	if notification.UUID != testNotificationUUID {
+		t.Errorf("Expected notification UUID %s, got %s", testNotificationUUID, notification.UUID)
+	}
+	if notification.Title != testNotificationTitleUpdated {
+		t.Errorf("Expected title '%s', got %s", testNotificationTitleUpdated, notification.Title)
 	}
 }
 

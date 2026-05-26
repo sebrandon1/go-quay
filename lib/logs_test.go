@@ -223,6 +223,186 @@ func TestGetUserLogsWithDateRange(t *testing.T) {
 	}
 }
 
+func TestGetOrganizationAggregatedLogs(t *testing.T) {
+	mockResponse := AggregatedLogs{
+		Aggregated: []AggregatedLogEntry{
+			{Kind: testKindPullRepo, Count: 25, Datetime: testDatetime},
+		},
+	}
+	mockResponseJSON, _ := json.Marshal(mockResponse)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/testorg/aggregatelogs"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		if r.URL.Query().Get("starttime") != testStartDate {
+			t.Errorf("Expected starttime '%s', got '%s'", testStartDate, r.URL.Query().Get("starttime"))
+		}
+		if r.URL.Query().Get("endtime") != testEndDateMay {
+			t.Errorf("Expected endtime '%s', got '%s'", testEndDateMay, r.URL.Query().Get("endtime"))
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	logs, err := client.GetOrganizationAggregatedLogs(testNamespace, testStartDate, testEndDateMay)
+	if err != nil {
+		t.Fatalf("GetOrganizationAggregatedLogs returned error: %v", err)
+	}
+
+	if len(logs.Aggregated) != 1 {
+		t.Errorf("Expected 1 aggregated entry, got %d", len(logs.Aggregated))
+	}
+	if logs.Aggregated[0].Count != 25 {
+		t.Errorf("Expected count 25, got %d", logs.Aggregated[0].Count)
+	}
+}
+
+func TestExportOrganizationLogs(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/testorg/exportlogs"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	exportReq := &ExportLogsRequest{
+		StartTime:   testStartDate,
+		EndTime:     testEndDateMay,
+		CallbackURL: "https://example.com/callback",
+	}
+
+	err = client.ExportOrganizationLogs(testNamespace, exportReq)
+	if err != nil {
+		t.Fatalf("ExportOrganizationLogs returned error: %v", err)
+	}
+}
+
+func TestGetUserAggregatedLogs(t *testing.T) {
+	mockResponse := AggregatedLogs{
+		Aggregated: []AggregatedLogEntry{
+			{Kind: testKindPullRepo, Count: 15, Datetime: testDatetime},
+		},
+	}
+	mockResponseJSON, _ := json.Marshal(mockResponse)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/user/aggregatelogs"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		if r.URL.Query().Get("starttime") != testStartDate {
+			t.Errorf("Expected starttime '%s', got '%s'", testStartDate, r.URL.Query().Get("starttime"))
+		}
+		if r.URL.Query().Get("endtime") != testEndDateMay {
+			t.Errorf("Expected endtime '%s', got '%s'", testEndDateMay, r.URL.Query().Get("endtime"))
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	logs, err := client.GetUserAggregatedLogs(testStartDate, testEndDateMay)
+	if err != nil {
+		t.Fatalf("GetUserAggregatedLogs returned error: %v", err)
+	}
+
+	if len(logs.Aggregated) != 1 {
+		t.Errorf("Expected 1 aggregated entry, got %d", len(logs.Aggregated))
+	}
+	if logs.Aggregated[0].Count != 15 {
+		t.Errorf("Expected count 15, got %d", logs.Aggregated[0].Count)
+	}
+}
+
+func TestExportUserLogs(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/user/exportlogs"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	exportReq := &ExportLogsRequest{
+		StartTime: testStartDate,
+		EndTime:   testEndDateMay,
+		Email:     testEmailAddress,
+	}
+
+	err = client.ExportUserLogs(exportReq)
+	if err != nil {
+		t.Fatalf("ExportUserLogs returned error: %v", err)
+	}
+}
+
+func TestExportRepositoryLogs(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/testorg/testrepo/exportlogs"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	exportReq := &ExportLogsRequest{
+		StartTime:   testStartDate,
+		EndTime:     testEndDateMay,
+		CallbackURL: "https://example.com/callback",
+	}
+
+	err = client.ExportRepositoryLogs(testNamespace, testRepository, exportReq)
+	if err != nil {
+		t.Fatalf("ExportRepositoryLogs returned error: %v", err)
+	}
+}
+
 func TestGetAggregatedLogsError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -8,9 +8,8 @@ import (
 )
 
 const (
-	testRepoPath       = "/api/v1/repository/testorg/testrepo"
-	testTagPath        = "/api/v1/repository/testorg/testrepo/tag"
-	updatedDescription = "Updated description"
+	testRepoPath = "/api/v1/repository/testorg/testrepo"
+	testTagPath  = "/api/v1/repository/testorg/testrepo/tag"
 )
 
 func TestCreateRepository(t *testing.T) {
@@ -31,8 +30,8 @@ func TestCreateRepository(t *testing.T) {
 		if r.Method != httpMethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
-		if r.URL.Path != "/api/v1/repository" {
-			t.Errorf("Expected path /api/v1/repository, got %s", r.URL.Path)
+		if r.URL.Path != testAPIPathRepository {
+			t.Errorf("Expected path %s, got %s", testAPIPathRepository, r.URL.Path)
 		}
 
 		// Verify request body
@@ -150,6 +149,77 @@ func TestDeleteRepository(t *testing.T) {
 	err = client.DeleteRepository(testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("DeleteRepository failed: %v", err)
+	}
+}
+
+func TestListRepositories(t *testing.T) {
+	mockRepos := RepositoryList{
+		Repositories: []OrganizationRepository{
+			{Name: testRepository, Namespace: testNamespace, IsPublic: true},
+			{Name: "private-repo", Namespace: testNamespace, IsPublic: false},
+		},
+		HasAdditional: false,
+	}
+	mockResponseJSON, _ := json.Marshal(mockRepos)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := testAPIPathRepository
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		if r.URL.Query().Get("namespace") != testNamespace {
+			t.Errorf("Expected namespace query param '%s', got '%s'", testNamespace, r.URL.Query().Get("namespace"))
+		}
+		if r.URL.Query().Get("public") != testQueryValueTrue {
+			t.Errorf("Expected public=true query param")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	repos, err := client.ListRepositories(testNamespace, true, false, 0, 0)
+	if err != nil {
+		t.Fatalf("ListRepositories returned error: %v", err)
+	}
+
+	if len(repos.Repositories) != 2 {
+		t.Errorf("Expected 2 repositories, got %d", len(repos.Repositories))
+	}
+	if repos.Repositories[0].Name != testRepository {
+		t.Errorf("Expected repo name %s, got %s", testRepository, repos.Repositories[0].Name)
+	}
+}
+
+func TestChangeRepositoryVisibility(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/changevisibility"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.ChangeRepositoryVisibility(testNamespace, testRepository, "public")
+	if err != nil {
+		t.Fatalf("ChangeRepositoryVisibility returned error: %v", err)
 	}
 }
 

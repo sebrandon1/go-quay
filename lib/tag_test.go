@@ -245,6 +245,40 @@ func TestRevertTag(t *testing.T) {
 	}
 }
 
+func TestRestoreTag(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/tag/" + testTagNameLatest + "/restore"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+
+		var req map[string]interface{}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Errorf("Failed to decode request body: %v", err)
+		}
+
+		if req["manifest_digest"] != testManifestDigest {
+			t.Errorf("Expected manifest_digest '%s', got '%v'", testManifestDigest, req["manifest_digest"])
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.RestoreTag(testNamespace, testRepository, testTagNameLatest, testManifestDigest)
+	if err != nil {
+		t.Fatalf("RestoreTag returned error: %v", err)
+	}
+}
+
 func TestTagErrorHandling(t *testing.T) {
 	// Test 404 error for non-existent tag
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
