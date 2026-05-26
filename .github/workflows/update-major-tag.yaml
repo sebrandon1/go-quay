@@ -8,6 +8,7 @@ permissions: read-all
 
 jobs:
   update-major-tag:
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     permissions:
       contents: write
