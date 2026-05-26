@@ -88,7 +88,10 @@ import (
 	"fmt"
 )
 
-const fieldRole = "role"
+const (
+	fieldRole = "role"
+	fieldName = "name"
+)
 
 // Organization Management
 
@@ -228,8 +231,8 @@ func (c *Client) CreateDefaultPermission(orgname, role, delegateType, delegateNa
 	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/prototypes", c.BaseURL, orgname), map[string]interface{}{
 		fieldRole: role,
 		"delegate": map[string]interface{}{
-			"kind": delegateType,
-			"name": delegateName,
+			"kind":    delegateType,
+			fieldName: delegateName,
 		},
 	})
 	if err != nil {
