@@ -20,7 +20,7 @@ func TestGetTeams(t *testing.T) {
 		Teams []Team `json:"teams"`
 	}{
 		Teams: []Team{
-			{Name: testTeamName, Description: "Dev team", Role: roleMember, MemberCount: 5},
+			{Name: testTeamName, Description: testTeamDescDev, Role: roleMember, MemberCount: 5},
 			{Name: "admins", Description: "Admin team", Role: roleAdmin, MemberCount: 2},
 		},
 	}
@@ -107,7 +107,7 @@ func TestGetTeam(t *testing.T) {
 func TestCreateTeam(t *testing.T) {
 	mockResponse := Team{
 		Name:        testTeamName,
-		Description: "New team",
+		Description: testTeamDescNew,
 		Role:        roleMember,
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
@@ -130,7 +130,7 @@ func TestCreateTeam(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	team, err := client.CreateTeam(testOrgName, testTeamName, "New team", roleMember)
+	team, err := client.CreateTeam(testOrgName, testTeamName, testTeamDescNew, roleMember)
 	if err != nil {
 		t.Fatalf("CreateTeam returned error: %v", err)
 	}
@@ -138,7 +138,7 @@ func TestCreateTeam(t *testing.T) {
 	if team.Name != testTeamName {
 		t.Errorf("Expected team name %s, got %s", testTeamName, team.Name)
 	}
-	if team.Description != "New team" {
+	if team.Description != testTeamDescNew {
 		t.Errorf("Expected description 'New team', got %s", team.Description)
 	}
 }

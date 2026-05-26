@@ -71,4 +71,23 @@ const (
 
 	// Architecture test values
 	testArchAmd64 = "amd64"
+
+	// Client test values
+	testTokenValue = "test-token"
+
+	// Billing test values
+	testBillingPlanFree          = "free"
+	testBillingPlanTypeFree      = "free"
+	testBillingSubscriptionID    = "sub-123"
+	testBillingInvoiceID         = "inv-123"
+	testBillingInvoiceStatusPaid = "paid"
+	testBillingCurrencyUSD       = "USD"
+	testBillingPeriodMonthly     = "monthly"
+
+	// Team description test values (shared across team_test.go and organization_test.go)
+	testTeamDescDev = "Dev team"
+	testTeamDescNew = "New team"
+
+	// Auto-prune method test values
+	testAutoPruneMethodNumberOfTags = "number_of_tags"
 )
