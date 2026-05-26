@@ -41,6 +41,27 @@ var discoveryAPICmd = &cobra.Command{
 	},
 }
 
+var discoveryCapabilitiesCmd = &cobra.Command{
+	Use:   "capabilities",
+	Short: "Get registry capabilities",
+	Long:  `Get registry capabilities including sparse manifest support and available mirror architectures.`,
+	Run: func(_ *cobra.Command, _ []string) {
+		client, err := lib.NewClientWithURL(token, quayURL)
+		if err != nil {
+			fmt.Printf("Error creating client: %v\n", err)
+			os.Exit(1)
+		}
+
+		capabilities, err := client.GetRegistryCapabilities()
+		if err != nil {
+			fmt.Printf("Error getting registry capabilities: %v\n", err)
+			os.Exit(1)
+		}
+
+		printJSON(capabilities)
+	},
+}
+
 var discoveryAppInfoCmd = &cobra.Command{
 	Use:   "app-info",
 	Short: "Get application information by client ID",
@@ -85,6 +106,7 @@ var discoveryEntitiesCmd = &cobra.Command{
 
 func init() {
 	discoveryCmd.AddCommand(discoveryAPICmd)
+	discoveryCmd.AddCommand(discoveryCapabilitiesCmd)
 	discoveryCmd.AddCommand(discoveryAppInfoCmd)
 	discoveryCmd.AddCommand(discoveryEntitiesCmd)
 

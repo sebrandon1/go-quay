@@ -858,6 +858,21 @@ type QuayError struct {
 	ErrorDetail map[string]any `json:"error_detail,omitempty"`
 }
 
+// Registry Capabilities Structures
+
+// SparseManifests represents sparse manifest support configuration
+type SparseManifests struct {
+	Supported                    bool     `json:"supported"`
+	RequiredArchitectures        []string `json:"required_architectures"`
+	OptionalArchitecturesAllowed bool     `json:"optional_architectures_allowed"`
+}
+
+// RegistryCapabilities represents the registry capabilities response
+type RegistryCapabilities struct {
+	SparseManifests     SparseManifests `json:"sparse_manifests"`
+	MirrorArchitectures []string        `json:"mirror_architectures"`
+}
+
 // Discovery Structures
 
 // Discovery represents API discovery information

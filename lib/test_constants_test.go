@@ -68,4 +68,7 @@ const (
 	// Security scan test values
 	testSecScanStatus    = "scanned"
 	testSecScanImageName = "centos:8"
+
+	// Architecture test values
+	testArchAmd64 = "amd64"
 )

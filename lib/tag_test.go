@@ -21,7 +21,7 @@ func TestGetTag(t *testing.T) {
 		DockerImageID:  "abc123",
 		ImageID:        "def456",
 		V1Metadata: map[string]string{
-			"architecture": "amd64",
+			"architecture": testArchAmd64,
 			"os":           "linux",
 		},
 	}
@@ -61,8 +61,8 @@ func TestGetTag(t *testing.T) {
 	if tag.Size != 1024000 {
 		t.Errorf("Expected size 1024000, got %d", tag.Size)
 	}
-	if tag.V1Metadata["architecture"] != "amd64" {
-		t.Errorf("Expected architecture 'amd64', got '%s'", tag.V1Metadata["architecture"])
+	if tag.V1Metadata["architecture"] != testArchAmd64 {
+		t.Errorf("Expected architecture '%s', got '%s'", testArchAmd64, tag.V1Metadata["architecture"])
 	}
 }
 
