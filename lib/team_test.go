@@ -146,7 +146,7 @@ func TestCreateTeam(t *testing.T) {
 func TestUpdateTeam(t *testing.T) {
 	mockResponse := Team{
 		Name:        testTeamName,
-		Description: "Updated description",
+		Description: updatedDescription,
 		Role:        roleAdmin,
 	}
 	mockResponseJSON, _ := json.Marshal(mockResponse)
@@ -169,7 +169,7 @@ func TestUpdateTeam(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	team, err := client.UpdateTeam(testOrgName, testTeamName, "Updated description", roleAdmin)
+	team, err := client.UpdateTeam(testOrgName, testTeamName, updatedDescription, roleAdmin)
 	if err != nil {
 		t.Fatalf("UpdateTeam returned error: %v", err)
 	}
@@ -177,8 +177,8 @@ func TestUpdateTeam(t *testing.T) {
 	if team.Name != testTeamName {
 		t.Errorf("Expected team name %s, got %s", testTeamName, team.Name)
 	}
-	if team.Description != "Updated description" {
-		t.Errorf("Expected description 'Updated description', got %s", team.Description)
+	if team.Description != updatedDescription {
+		t.Errorf("Expected description '%s', got %s", updatedDescription, team.Description)
 	}
 	if team.Role != roleAdmin {
 		t.Errorf("Expected role %s, got %s", roleAdmin, team.Role)

@@ -90,4 +90,16 @@ const (
 
 	// Auto-prune method test values
 	testAutoPruneMethodNumberOfTags = "number_of_tags"
+
+	// Query parameter values
+	testQueryValueTrue = "true"
+
+	// Shared API path constants
+	testAPIPathRepository = "/api/v1/repository"
+
+	// Shared description values
+	updatedDescription = "Updated description"
+
+	// Auto-prune tag pattern
+	testTagPatternRelease = "release-*"
 )

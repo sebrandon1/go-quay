@@ -137,7 +137,7 @@ func TestSetRepositoryPermissionInvalidRole(t *testing.T) {
 	}
 
 	// Test with valid roles
-	validRoles := []string{testRoleRead, testRoleWrite, "admin"}
+	validRoles := []string{testRoleRead, testRoleWrite, roleAdmin}
 	for _, role := range validRoles {
 		err = client.SetRepositoryPermission(testNamespace, testRepository, testKindUser, role)
 		if err != nil {
@@ -167,6 +167,288 @@ func TestRemoveRepositoryPermission(t *testing.T) {
 	err = client.RemoveRepositoryPermission(testNamespace, testRepository, testPermUserName)
 	if err != nil {
 		t.Fatalf("RemoveRepositoryPermission failed: %v", err)
+	}
+}
+
+func TestListUserPermissions(t *testing.T) {
+	mockPermissions := RepositoryPermissions{
+		Permissions: []RepositoryPermission{
+			{Name: testPermUserName, Kind: testKindUser, Role: testRoleWrite},
+		},
+	}
+	mockResponseJSON, _ := json.Marshal(mockPermissions)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/permissions/user/"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	perms, err := client.ListUserPermissions(testNamespace, testRepository)
+	if err != nil {
+		t.Fatalf("ListUserPermissions returned error: %v", err)
+	}
+
+	if len(perms.Permissions) != 1 {
+		t.Errorf("Expected 1 permission, got %d", len(perms.Permissions))
+	}
+	if perms.Permissions[0].Name != testPermUserName {
+		t.Errorf("Expected user name %s, got %s", testPermUserName, perms.Permissions[0].Name)
+	}
+}
+
+func TestGetUserPermission(t *testing.T) {
+	mockPermission := RepositoryPermission{
+		Name: testPermUserName,
+		Kind: testKindUser,
+		Role: testRoleWrite,
+	}
+	mockResponseJSON, _ := json.Marshal(mockPermission)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/permissions/user/" + testPermUserName
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	perm, err := client.GetUserPermission(testNamespace, testRepository, testPermUserName)
+	if err != nil {
+		t.Fatalf("GetUserPermission returned error: %v", err)
+	}
+
+	if perm.Role != testRoleWrite {
+		t.Errorf("Expected role %s, got %s", testRoleWrite, perm.Role)
+	}
+}
+
+func TestSetUserPermission(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/permissions/user/" + testPermUserName
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.SetUserPermission(testNamespace, testRepository, testPermUserName, testRoleWrite)
+	if err != nil {
+		t.Fatalf("SetUserPermission returned error: %v", err)
+	}
+}
+
+func TestDeleteUserPermission(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodDelete {
+			t.Errorf("Expected DELETE request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/permissions/user/" + testPermUserName
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.DeleteUserPermission(testNamespace, testRepository, testPermUserName)
+	if err != nil {
+		t.Fatalf("DeleteUserPermission returned error: %v", err)
+	}
+}
+
+func TestGetUserTransitivePermission(t *testing.T) {
+	mockPermission := RepositoryPermission{
+		Name: testPermUserName,
+		Kind: testKindUser,
+		Role: roleAdmin,
+	}
+	mockResponseJSON, _ := json.Marshal(mockPermission)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/permissions/user/" + testPermUserName + "/transitive"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	perm, err := client.GetUserTransitivePermission(testNamespace, testRepository, testPermUserName)
+	if err != nil {
+		t.Fatalf("GetUserTransitivePermission returned error: %v", err)
+	}
+
+	if perm.Role != roleAdmin {
+		t.Errorf("Expected role '%s', got %s", roleAdmin, perm.Role)
+	}
+}
+
+func TestListTeamPermissions(t *testing.T) {
+	mockPermissions := RepositoryPermissions{
+		Permissions: []RepositoryPermission{
+			{Name: testPrototypeTeamName, Kind: testKindTeam, Role: testRoleRead},
+		},
+	}
+	mockResponseJSON, _ := json.Marshal(mockPermissions)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/permissions/team/"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	perms, err := client.ListTeamPermissions(testNamespace, testRepository)
+	if err != nil {
+		t.Fatalf("ListTeamPermissions returned error: %v", err)
+	}
+
+	if len(perms.Permissions) != 1 {
+		t.Errorf("Expected 1 permission, got %d", len(perms.Permissions))
+	}
+	if perms.Permissions[0].Name != testPrototypeTeamName {
+		t.Errorf("Expected team name %s, got %s", testPrototypeTeamName, perms.Permissions[0].Name)
+	}
+}
+
+func TestGetTeamPermission(t *testing.T) {
+	mockPermission := RepositoryPermission{
+		Name: testPrototypeTeamName,
+		Kind: testKindTeam,
+		Role: testRoleRead,
+	}
+	mockResponseJSON, _ := json.Marshal(mockPermission)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/permissions/team/" + testPrototypeTeamName
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	perm, err := client.GetTeamPermission(testNamespace, testRepository, testPrototypeTeamName)
+	if err != nil {
+		t.Fatalf("GetTeamPermission returned error: %v", err)
+	}
+
+	if perm.Role != testRoleRead {
+		t.Errorf("Expected role %s, got %s", testRoleRead, perm.Role)
+	}
+}
+
+func TestSetTeamPermission(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/permissions/team/" + testPrototypeTeamName
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.SetTeamPermission(testNamespace, testRepository, testPrototypeTeamName, testRoleWrite)
+	if err != nil {
+		t.Fatalf("SetTeamPermission returned error: %v", err)
+	}
+}
+
+func TestDeleteTeamPermission(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodDelete {
+			t.Errorf("Expected DELETE request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/permissions/team/" + testPrototypeTeamName
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.DeleteTeamPermission(testNamespace, testRepository, testPrototypeTeamName)
+	if err != nil {
+		t.Fatalf("DeleteTeamPermission returned error: %v", err)
 	}
 }
 

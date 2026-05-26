@@ -217,6 +217,50 @@ func TestGetBuildsError(t *testing.T) {
 	}
 }
 
+func TestGetBuildStatus(t *testing.T) {
+	mockResponse := BuildStatus{
+		ID:          testBuildUUID,
+		Phase:       testBuildPhase,
+		Status:      "success",
+		CurrentStep: 5,
+		TotalSteps:  5,
+	}
+	mockResponseJSON, _ := json.Marshal(mockResponse)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/build/" + testBuildUUID + "/status"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	status, err := client.GetBuildStatus(testNamespace, testRepository, testBuildUUID)
+	if err != nil {
+		t.Fatalf("GetBuildStatus returned error: %v", err)
+	}
+
+	if status.ID != testBuildUUID {
+		t.Errorf("Expected build ID %s, got %s", testBuildUUID, status.ID)
+	}
+	if status.Phase != testBuildPhase {
+		t.Errorf("Expected phase %s, got %s", testBuildPhase, status.Phase)
+	}
+	if status.CurrentStep != 5 {
+		t.Errorf("Expected current step 5, got %d", status.CurrentStep)
+	}
+}
+
 func TestGetBuildError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)

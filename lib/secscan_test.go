@@ -61,7 +61,7 @@ func TestGetManifestSecurity(t *testing.T) {
 		}
 
 		// Check for vulnerabilities query parameter
-		if r.URL.Query().Get("vulnerabilities") != "true" {
+		if r.URL.Query().Get("vulnerabilities") != testQueryValueTrue {
 			t.Errorf("Expected vulnerabilities=true query parameter")
 		}
 
@@ -129,7 +129,7 @@ func TestGetManifestSecurityWithoutVulnerabilities(t *testing.T) {
 		}
 
 		// Check that vulnerabilities query parameter is NOT present
-		if r.URL.Query().Get("vulnerabilities") == "true" {
+		if r.URL.Query().Get("vulnerabilities") == testQueryValueTrue {
 			t.Errorf("Did not expect vulnerabilities=true query parameter")
 		}
 
