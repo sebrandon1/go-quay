@@ -482,4 +482,58 @@ func TestPermissionsErrorHandling(t *testing.T) {
 	if err == nil {
 		t.Error("Expected error for non-existent repository, got nil")
 	}
+
+	// Test ListUserPermissions error
+	_, err = client.ListUserPermissions(testNamespace, "nonexistent")
+	if err == nil {
+		t.Error("Expected error from ListUserPermissions, got nil")
+	}
+
+	// Test GetUserPermission error
+	_, err = client.GetUserPermission(testNamespace, "nonexistent", testPermUserName)
+	if err == nil {
+		t.Error("Expected error from GetUserPermission, got nil")
+	}
+
+	// Test SetUserPermission error
+	err = client.SetUserPermission(testNamespace, "nonexistent", testPermUserName, testRoleRead)
+	if err == nil {
+		t.Error("Expected error from SetUserPermission, got nil")
+	}
+
+	// Test DeleteUserPermission error
+	err = client.DeleteUserPermission(testNamespace, "nonexistent", testPermUserName)
+	if err == nil {
+		t.Error("Expected error from DeleteUserPermission, got nil")
+	}
+
+	// Test GetUserTransitivePermission error
+	_, err = client.GetUserTransitivePermission(testNamespace, "nonexistent", testPermUserName)
+	if err == nil {
+		t.Error("Expected error from GetUserTransitivePermission, got nil")
+	}
+
+	// Test ListTeamPermissions error
+	_, err = client.ListTeamPermissions(testNamespace, "nonexistent")
+	if err == nil {
+		t.Error("Expected error from ListTeamPermissions, got nil")
+	}
+
+	// Test GetTeamPermission error
+	_, err = client.GetTeamPermission(testNamespace, "nonexistent", testTeamName)
+	if err == nil {
+		t.Error("Expected error from GetTeamPermission, got nil")
+	}
+
+	// Test SetTeamPermission error
+	err = client.SetTeamPermission(testNamespace, "nonexistent", testTeamName, testRoleRead)
+	if err == nil {
+		t.Error("Expected error from SetTeamPermission, got nil")
+	}
+
+	// Test DeleteTeamPermission error
+	err = client.DeleteTeamPermission(testNamespace, "nonexistent", testTeamName)
+	if err == nil {
+		t.Error("Expected error from DeleteTeamPermission, got nil")
+	}
 }

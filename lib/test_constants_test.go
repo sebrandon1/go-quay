@@ -94,6 +94,10 @@ const (
 	// Query parameter values
 	testQueryValueTrue = "true"
 
+	// Generic test placeholders
+	testPlaceholder = "test"
+	testHashABC123  = "abc123"
+
 	// Shared API path constants
 	testAPIPathRepository = "/api/v1/repository"
 

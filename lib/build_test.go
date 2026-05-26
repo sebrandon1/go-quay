@@ -277,3 +277,35 @@ func TestGetBuildError(t *testing.T) {
 		t.Error("Expected error, got nil")
 	}
 }
+
+func TestBuildHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	_, err = client.GetBuildLogs(testNamespace, testRepository, testBuildUUID)
+	if err == nil {
+		t.Error("Expected error from GetBuildLogs, got nil")
+	}
+
+	_, err = client.GetBuildStatus(testNamespace, testRepository, testBuildUUID)
+	if err == nil {
+		t.Error("Expected error from GetBuildStatus, got nil")
+	}
+
+	_, err = client.RequestBuild(testNamespace, testRepository, &RequestBuildRequest{ArchiveURL: "https://example.com/archive.tar.gz"})
+	if err == nil {
+		t.Error("Expected error from RequestBuild, got nil")
+	}
+
+	err = client.CancelBuild(testNamespace, testRepository, testBuildUUID)
+	if err == nil {
+		t.Error("Expected error from CancelBuild, got nil")
+	}
+}

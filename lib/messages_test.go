@@ -141,3 +141,20 @@ func TestGetMessagesError(t *testing.T) {
 		t.Error("Expected error, got nil")
 	}
 }
+
+func TestMessagesHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	_, err = client.CreateMessage("test content", "info", testMediaTypePlain)
+	if err == nil {
+		t.Error("Expected error from CreateMessage, got nil")
+	}
+}

@@ -215,3 +215,41 @@ func TestGetPrototypesError(t *testing.T) {
 		t.Error("Expected error, got nil")
 	}
 }
+
+func TestPrototypeHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	_, err = client.CreatePrototype(testNamespace, &CreatePrototypeRequest{
+		Role: testRoleRead,
+		Delegate: PrototypeDelegateRequest{
+			Name: testPrototypeTeamName,
+			Kind: testKindTeam,
+		},
+	})
+	if err == nil {
+		t.Error("Expected error from CreatePrototype, got nil")
+	}
+
+	_, err = client.GetPrototype(testNamespace, testPrototypeUUID)
+	if err == nil {
+		t.Error("Expected error from GetPrototype, got nil")
+	}
+
+	_, err = client.UpdatePrototype(testNamespace, testPrototypeUUID, &UpdatePrototypeRequest{Role: testRoleWrite})
+	if err == nil {
+		t.Error("Expected error from UpdatePrototype, got nil")
+	}
+
+	err = client.DeletePrototype(testNamespace, testPrototypeUUID)
+	if err == nil {
+		t.Error("Expected error from DeletePrototype, got nil")
+	}
+}

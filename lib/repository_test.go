@@ -296,3 +296,45 @@ func TestGetRepository(t *testing.T) {
 		t.Errorf("Expected 2 tags, got %d", len(repoWithTags.Tags.Tags))
 	}
 }
+
+func TestRepositoryHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	_, err = client.GetRepository(testNamespace, testRepository)
+	if err == nil {
+		t.Error("Expected error from GetRepository, got nil")
+	}
+
+	_, err = client.CreateRepository(testNamespace, testRepository, "public", testRepoDescription)
+	if err == nil {
+		t.Error("Expected error from CreateRepository, got nil")
+	}
+
+	_, err = client.UpdateRepository(testNamespace, testRepository, updatedDescription, "private")
+	if err == nil {
+		t.Error("Expected error from UpdateRepository, got nil")
+	}
+
+	err = client.DeleteRepository(testNamespace, testRepository)
+	if err == nil {
+		t.Error("Expected error from DeleteRepository, got nil")
+	}
+
+	_, err = client.ListRepositories(testNamespace, false, false, 1, 10)
+	if err == nil {
+		t.Error("Expected error from ListRepositories, got nil")
+	}
+
+	err = client.ChangeRepositoryVisibility(testNamespace, testRepository, "public")
+	if err == nil {
+		t.Error("Expected error from ChangeRepositoryVisibility, got nil")
+	}
+}

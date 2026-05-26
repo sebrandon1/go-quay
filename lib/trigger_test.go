@@ -322,3 +322,40 @@ func TestGetTriggerError(t *testing.T) {
 		t.Error("Expected error, got nil")
 	}
 }
+
+func TestTriggerHTTPErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.DeleteTrigger(testNamespace, testRepository, testTriggerUUID)
+	if err == nil {
+		t.Error("Expected error from DeleteTrigger, got nil")
+	}
+
+	_, err = client.UpdateTrigger(testNamespace, testRepository, testTriggerUUID, true)
+	if err == nil {
+		t.Error("Expected error from UpdateTrigger, got nil")
+	}
+
+	_, err = client.StartTriggerBuild(testNamespace, testRepository, testTriggerUUID, &ManualTriggerRequest{CommitSHA: testHashABC123})
+	if err == nil {
+		t.Error("Expected error from StartTriggerBuild, got nil")
+	}
+
+	_, err = client.ActivateTrigger(testNamespace, testRepository, testTriggerUUID, &ActivateTriggerRequest{})
+	if err == nil {
+		t.Error("Expected error from ActivateTrigger, got nil")
+	}
+
+	_, err = client.GetTriggerBuilds(testNamespace, testRepository, testTriggerUUID, 10)
+	if err == nil {
+		t.Error("Expected error from GetTriggerBuilds, got nil")
+	}
+}
