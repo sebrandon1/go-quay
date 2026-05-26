@@ -1,12 +1,13 @@
 /*
 Package lib provides Quay.io API client functionality.
 
-This file covers DISCOVERY operations:
+This file covers DISCOVERY and CAPABILITIES operations:
 
 API Discovery:
-  - GET /api/v1/discovery - GetDiscovery()
+  - GET /api/v1/discovery              - GetDiscovery()
 
-The Discovery API provides information about available API endpoints and versions.
+Registry Capabilities:
+  - GET /api/v1/registry/capabilities  - GetRegistryCapabilities()
 */
 package lib
 
@@ -27,6 +28,21 @@ func (c *Client) GetDiscovery() (*Discovery, error) {
 	}
 
 	return &discovery, nil
+}
+
+// GetRegistryCapabilities retrieves the registry capabilities including sparse manifest support and mirror architectures
+func (c *Client) GetRegistryCapabilities() (*RegistryCapabilities, error) {
+	req, err := newRequest("GET", fmt.Sprintf("%s/registry/capabilities", c.BaseURL), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create registry capabilities request: %w", err)
+	}
+
+	var capabilities RegistryCapabilities
+	if err := c.get(req, &capabilities); err != nil {
+		return nil, fmt.Errorf("failed to get registry capabilities: %w", err)
+	}
+
+	return &capabilities, nil
 }
 
 // GetAppInfo retrieves public information about an OAuth application by client ID

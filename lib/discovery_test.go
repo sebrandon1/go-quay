@@ -51,6 +51,48 @@ func TestGetDiscovery(t *testing.T) {
 	}
 }
 
+func TestGetRegistryCapabilities(t *testing.T) {
+	mockResponse := RegistryCapabilities{
+		SparseManifests: SparseManifests{
+			Supported:                    false,
+			RequiredArchitectures:        []string{},
+			OptionalArchitecturesAllowed: false,
+		},
+		MirrorArchitectures: []string{testArchAmd64, "arm64", "ppc64le", "s390x"},
+	}
+	mockResponseJSON, _ := json.Marshal(mockResponse)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/registry/capabilities"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	capabilities, err := client.GetRegistryCapabilities()
+	if err != nil {
+		t.Fatalf("GetRegistryCapabilities returned error: %v", err)
+	}
+
+	if len(capabilities.MirrorArchitectures) != 4 {
+		t.Errorf("Expected 4 mirror architectures, got %d", len(capabilities.MirrorArchitectures))
+	}
+	if capabilities.SparseManifests.Supported {
+		t.Error("Expected sparse manifests to be unsupported")
+	}
+}
+
 func TestGetDiscoveryError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
