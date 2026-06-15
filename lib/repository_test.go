@@ -9,7 +9,7 @@ import (
 
 const (
 	testRepoPath = "/api/v1/repository/testorg/testrepo"
-	testTagPath  = "/api/v1/repository/testorg/testrepo/tag"
+	testTagPath  = "/api/v1/repository/testorg/testrepo/tag/"
 )
 
 func TestCreateRepository(t *testing.T) {
@@ -186,7 +186,7 @@ func TestListRepositories(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	repos, err := client.ListRepositories(testNamespace, true, false, 0, 0)
+	repos, err := client.ListRepositories(testNamespace, true, false, false, 0, 0)
 	if err != nil {
 		t.Fatalf("ListRepositories returned error: %v", err)
 	}
@@ -196,6 +196,59 @@ func TestListRepositories(t *testing.T) {
 	}
 	if repos.Repositories[0].Name != testRepository {
 		t.Errorf("Expected repo name %s, got %s", testRepository, repos.Repositories[0].Name)
+	}
+}
+
+func TestListTags(t *testing.T) {
+	mockTags := RepositoryTags{
+		Tags: []Tag{
+			{Name: "latest", StartTs: 1700000000, IsManifestList: true},
+			{Name: "v1.0", StartTs: 1699000000, IsManifestList: false},
+		},
+		HasAdditional: true,
+	}
+	mockResponseJSON, _ := json.Marshal(mockTags)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodGet {
+			t.Errorf("Expected GET request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/tag/"
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		if r.URL.Query().Get("onlyActiveTags") != testQueryValueTrue {
+			t.Error("Expected onlyActiveTags=true query param")
+		}
+		if r.URL.Query().Get("limit") != "5" {
+			t.Errorf("Expected limit=5, got %s", r.URL.Query().Get("limit"))
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mockResponseJSON)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	tags, err := client.ListTags(testNamespace, testRepository, 5, true)
+	if err != nil {
+		t.Fatalf("ListTags returned error: %v", err)
+	}
+
+	if len(tags.Tags) != 2 {
+		t.Errorf("Expected 2 tags, got %d", len(tags.Tags))
+	}
+	if tags.Tags[0].Name != "latest" {
+		t.Errorf("Expected tag name 'latest', got %s", tags.Tags[0].Name)
+	}
+	if !tags.Tags[0].IsManifestList {
+		t.Error("Expected first tag to be a manifest list")
+	}
+	if !tags.HasAdditional {
+		t.Error("Expected HasAdditional to be true")
 	}
 }
 
@@ -233,17 +286,7 @@ func TestGetRepository(t *testing.T) {
 	}
 
 	mockTags := RepositoryTags{
-		Tags: []struct {
-			Name           string `json:"name,omitempty"`
-			Reversion      bool   `json:"reversion,omitempty"`
-			StartTs        int    `json:"start_ts,omitempty"`
-			ManifestDigest string `json:"manifest_digest,omitempty"`
-			IsManifestList bool   `json:"is_manifest_list,omitempty"`
-			Size           any    `json:"size,omitempty"`
-			LastModified   string `json:"last_modified,omitempty"`
-			EndTs          int    `json:"end_ts,omitempty"`
-			Expiration     string `json:"expiration,omitempty"`
-		}{
+		Tags: []Tag{
 			{Name: testTagNameLatest, ManifestDigest: testDigestSHA256},
 			{Name: testTagNameV1, ManifestDigest: "sha256:def456"},
 		},
@@ -328,7 +371,7 @@ func TestRepositoryHTTPErrors(t *testing.T) {
 		t.Error("Expected error from DeleteRepository, got nil")
 	}
 
-	_, err = client.ListRepositories(testNamespace, false, false, 1, 10)
+	_, err = client.ListRepositories(testNamespace, false, false, false, 1, 10)
 	if err == nil {
 		t.Error("Expected error from ListRepositories, got nil")
 	}
