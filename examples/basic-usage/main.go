@@ -69,7 +69,7 @@ func main() {
 	}
 
 	fmt.Printf("3. Listing repositories in namespace '%s'...\n", namespace)
-	repos, err := client.ListRepositories(namespace, false, false, 1, 10)
+	repos, err := client.ListRepositories(namespace, false, false, false, 1, 10)
 	if err != nil {
 		log.Printf("   Could not list repositories: %v\n", err)
 	} else if len(repos.Repositories) == 0 {

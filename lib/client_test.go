@@ -34,12 +34,16 @@ func TestNewClient(t *testing.T) {
 
 func TestNewClientEmptyToken(t *testing.T) {
 	client, err := NewClient("")
-	if err == nil {
-		t.Error("Expected error for empty token, got nil")
+	if err != nil {
+		t.Fatalf("NewClient returned unexpected error: %v", err)
 	}
 
-	if client != nil {
-		t.Error("Expected nil client for empty token")
+	if client == nil {
+		t.Fatal("Expected non-nil client for empty token")
+	}
+
+	if client.BearerToken != "" {
+		t.Errorf("Expected empty bearer token, got %s", client.BearerToken)
 	}
 }
 
@@ -66,12 +70,20 @@ func TestNewClientWithURL(t *testing.T) {
 
 func TestNewClientWithURLEmptyToken(t *testing.T) {
 	client, err := NewClientWithURL("", "https://quay.example.com/api/v1")
-	if err == nil {
-		t.Error("Expected error for empty token, got nil")
+	if err != nil {
+		t.Fatalf("NewClientWithURL returned unexpected error: %v", err)
 	}
 
-	if client != nil {
-		t.Error("Expected nil client for empty token")
+	if client == nil {
+		t.Fatal("Expected non-nil client for empty token")
+	}
+
+	if client.BearerToken != "" {
+		t.Errorf("Expected empty bearer token, got %s", client.BearerToken)
+	}
+
+	if client.BaseURL != "https://quay.example.com/api/v1" {
+		t.Errorf("Expected custom base URL, got %s", client.BaseURL)
 	}
 }
 

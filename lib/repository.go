@@ -5,32 +5,23 @@ This file covers REPOSITORY endpoints:
 
 Repository Management:
   - POST /api/v1/repository                                - CreateRepository()
+  - GET  /api/v1/repository                                - ListRepositories()
   - GET  /api/v1/repository/{namespace}/{repository}       - GetRepository()
   - PUT  /api/v1/repository/{namespace}/{repository}       - UpdateRepository()
   - DELETE /api/v1/repository/{namespace}/{repository}     - DeleteRepository()
-  - GET  /api/v1/repository/{namespace}/{repository}/tag   - GetRepository() (includes tags)
+  - GET  /api/v1/repository/{namespace}/{repository}/tag/  - ListTags()
 
-The GetRepository() function combines repository details with tag information
-for a complete view of the repository.
+GetRepository() combines repository details with tag information via ListTags().
+ListRepositories() supports a popularity flag for pull count data.
 */
 package lib
 
 import "fmt"
 
 type RepositoryTags struct {
-	Tags []struct {
-		Name           string `json:"name,omitempty"`
-		Reversion      bool   `json:"reversion,omitempty"`
-		StartTs        int    `json:"start_ts,omitempty"`
-		ManifestDigest string `json:"manifest_digest,omitempty"`
-		IsManifestList bool   `json:"is_manifest_list,omitempty"`
-		Size           any    `json:"size,omitempty"`
-		LastModified   string `json:"last_modified,omitempty"`
-		EndTs          int    `json:"end_ts,omitempty"`
-		Expiration     string `json:"expiration,omitempty"`
-	} `json:"tags,omitempty"`
-	Page          int  `json:"page,omitempty"`
-	HasAdditional bool `json:"has_additional,omitempty"`
+	Tags          []Tag `json:"tags,omitempty"`
+	Page          int   `json:"page,omitempty"`
+	HasAdditional bool  `json:"has_additional,omitempty"`
 }
 
 type Repository struct {
@@ -57,7 +48,6 @@ type RepositoryWithTags struct {
 
 // GetRepository returns a repository with tags information baked in
 func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags, error) {
-	// Fetch repository details
 	repoURL := fmt.Sprintf("%s/repository/%s/%s", c.BaseURL, namespace, repository)
 	req, err := newRequest("GET", repoURL, nil)
 	if err != nil {
@@ -69,21 +59,14 @@ func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags
 		return RepositoryWithTags{}, fmt.Errorf("failed to fetch repository details: %w", err)
 	}
 
-	// Fetch repository tags
-	tagsURL := fmt.Sprintf("%s/repository/%s/%s/tag", c.BaseURL, namespace, repository)
-	req, err = newRequest("GET", tagsURL, nil)
+	tags, err := c.ListTags(namespace, repository, 0, false)
 	if err != nil {
-		return RepositoryWithTags{}, fmt.Errorf("failed to create request for tags: %w", err)
-	}
-
-	var tags RepositoryTags
-	if err := c.get(req, &tags); err != nil {
 		return RepositoryWithTags{}, fmt.Errorf("failed to fetch repository tags: %w", err)
 	}
 
 	return RepositoryWithTags{
 		Repository: repo,
-		Tags:       tags,
+		Tags:       *tags,
 	}, nil
 }
 
@@ -147,7 +130,7 @@ func (c *Client) DeleteRepository(namespace, repository string) error {
 }
 
 // ListRepositories lists all repositories visible to the user
-func (c *Client) ListRepositories(namespace string, public, starred bool, page, limit int) (*RepositoryList, error) {
+func (c *Client) ListRepositories(namespace string, public, starred, popularity bool, page, limit int) (*RepositoryList, error) {
 	req, err := newRequest("GET", fmt.Sprintf("%s/repository", c.BaseURL), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list repositories request: %w", err)
@@ -162,6 +145,9 @@ func (c *Client) ListRepositories(namespace string, public, starred bool, page, 
 	}
 	if starred {
 		q.Add("starred", "true")
+	}
+	if popularity {
+		q.Add("popularity", "true")
 	}
 	if page > 0 {
 		q.Add("page", fmt.Sprintf("%d", page))
@@ -196,4 +182,28 @@ func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility st
 	}
 
 	return nil
+}
+
+// ListTags lists tags for a repository
+func (c *Client) ListTags(namespace, repository string, limit int, onlyActive bool) (*RepositoryTags, error) {
+	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/tag/", c.BaseURL, namespace, repository), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create list tags request: %w", err)
+	}
+
+	q := req.URL.Query()
+	if limit > 0 {
+		q.Add("limit", fmt.Sprintf("%d", limit))
+	}
+	if onlyActive {
+		q.Add("onlyActiveTags", "true")
+	}
+	req.URL.RawQuery = q.Encode()
+
+	var tags RepositoryTags
+	if err := c.get(req, &tags); err != nil {
+		return nil, fmt.Errorf("failed to list tags: %w", err)
+	}
+
+	return &tags, nil
 }

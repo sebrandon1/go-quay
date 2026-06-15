@@ -29,7 +29,6 @@ package lib
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -47,10 +46,6 @@ type Client struct {
 }
 
 func NewClientWithURL(bearerToken, baseURL string) (*Client, error) {
-	if bearerToken == "" {
-		return nil, errors.New("bearer token is required")
-	}
-
 	transport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout: 10 * time.Second,
@@ -73,7 +68,9 @@ func NewClient(bearerToken string) (*Client, error) {
 }
 
 func (c *Client) get(req *http.Request, v any) error {
-	req.Header.Set("Authorization", "Bearer "+c.BearerToken)
+	if c.BearerToken != "" {
+		req.Header.Set("Authorization", "Bearer "+c.BearerToken)
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.HTTPClient.Do(req)
