@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -27,11 +26,7 @@ var userInfoCmd = &cobra.Command{
 	Short: "Get current user information",
 	Long:  `Get detailed information about the currently authenticated user account.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		user, err := client.GetUser()
 		if err != nil {
@@ -50,11 +45,7 @@ var userStarredCmd = &cobra.Command{
 	Short: "List starred repositories",
 	Long:  `List all repositories starred by the current user.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		starred, err := client.GetStarredRepositories()
 		if err != nil {
@@ -73,13 +64,9 @@ var starRepoCmd = &cobra.Command{
 	Short: "Star a repository",
 	Long:  `Add a repository to your starred list for easy discovery.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.StarRepository(namespace, repository)
+		err := client.StarRepository(namespace, repository)
 		if err != nil {
 			fmt.Printf("Error starring repository: %v\n", err)
 			os.Exit(1)
@@ -95,13 +82,9 @@ var unstarRepoCmd = &cobra.Command{
 	Short: "Unstar a repository",
 	Long:  `Remove a repository from your starred list.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.UnstarRepository(namespace, repository)
+		err := client.UnstarRepository(namespace, repository)
 		if err != nil {
 			fmt.Printf("Error unstarring repository: %v\n", err)
 			os.Exit(1)
@@ -118,11 +101,7 @@ var userLookupCmd = &cobra.Command{
 	Short: "Look up a user by username",
 	Long:  `Get information about a specific user by their username.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		user, err := client.GetUserByUsername(lookupUsername)
 		if err != nil {
@@ -139,11 +118,7 @@ var userMarketplaceCmd = &cobra.Command{
 	Short: "Get user marketplace information",
 	Long:  `Get marketplace subscription information for the current user.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		marketplace, err := client.GetUserMarketplace()
 		if err != nil {
@@ -160,13 +135,9 @@ var starUserRepoCmd = &cobra.Command{
 	Short: "Star a repository (user endpoint)",
 	Long:  `Add a repository to your starred list using the user star endpoint.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.StarUserRepository(namespace, repository)
+		err := client.StarUserRepository(namespace, repository)
 		if err != nil {
 			fmt.Printf("Error starring repository: %v\n", err)
 			os.Exit(1)
@@ -181,13 +152,9 @@ var unstarUserRepoCmd = &cobra.Command{
 	Short: "Unstar a repository (user endpoint)",
 	Long:  `Remove a repository from your starred list using the user star endpoint.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.UnstarUserRepository(namespace, repository)
+		err := client.UnstarUserRepository(namespace, repository)
 		if err != nil {
 			fmt.Printf("Error unstarring repository: %v\n", err)
 			os.Exit(1)

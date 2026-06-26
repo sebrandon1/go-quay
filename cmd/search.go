@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -30,11 +29,7 @@ var searchReposCmd = &cobra.Command{
 	Short: "Search for repositories",
 	Long:  `Search for repositories on Quay.io by name or description.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		result, err := client.SearchRepositories(searchQuery, searchPage)
 		if err != nil {
@@ -60,11 +55,7 @@ Results include a 'kind' field indicating the entity type:
   - team: Team within an organization
   - robot: Robot account`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		result, err := client.SearchAll(searchQuery)
 		if err != nil {

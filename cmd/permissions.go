@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -35,11 +34,7 @@ var permListCmd = &cobra.Command{
 	Short: "List repository permissions",
 	Long:  `List all users and robots that have permissions on this repository.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		permissions, err := client.GetRepositoryPermissions(namespace, repository)
 		if err != nil {
@@ -58,13 +53,9 @@ var permSetCmd = &cobra.Command{
 	Short: "Set permission for a user/robot",
 	Long:  `Set permission level for a user or robot account on this repository.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.SetRepositoryPermission(namespace, repository, permissionUser, permissionRole)
+		err := client.SetRepositoryPermission(namespace, repository, permissionUser, permissionRole)
 		if err != nil {
 			fmt.Printf("Error setting repository permission: %v\n", err)
 			os.Exit(1)
@@ -81,13 +72,9 @@ var permRemoveCmd = &cobra.Command{
 	Short: "Remove permission for a user/robot",
 	Long:  `Remove permission for a user or robot account from this repository.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.RemoveRepositoryPermission(namespace, repository, permissionUser)
+		err := client.RemoveRepositoryPermission(namespace, repository, permissionUser)
 		if err != nil {
 			fmt.Printf("Error removing repository permission: %v\n", err)
 			os.Exit(1)
@@ -102,11 +89,7 @@ var permUserPermissionsCmd = &cobra.Command{
 	Use:   "user-permissions",
 	Short: "List user permissions on repository",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		permissions, err := client.ListUserPermissions(namespace, repository)
 		if err != nil {
@@ -122,11 +105,7 @@ var permUserPermissionCmd = &cobra.Command{
 	Use:   "user-permission",
 	Short: "Get specific user permission on repository",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		permission, err := client.GetUserPermission(namespace, repository, permissionUser)
 		if err != nil {
@@ -142,13 +121,9 @@ var permSetUserPermCmd = &cobra.Command{
 	Use:   "set-user-permission",
 	Short: "Set user permission on repository",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.SetUserPermission(namespace, repository, permissionUser, permissionRole)
+		err := client.SetUserPermission(namespace, repository, permissionUser, permissionRole)
 		if err != nil {
 			fmt.Printf("Error setting user permission: %v\n", err)
 			os.Exit(1)
@@ -170,13 +145,9 @@ var permDeleteUserPermCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteUserPermission(namespace, repository, permissionUser)
+		err := client.DeleteUserPermission(namespace, repository, permissionUser)
 		if err != nil {
 			fmt.Printf("Error deleting user permission: %v\n", err)
 			os.Exit(1)
@@ -191,11 +162,7 @@ var permUserTransitiveCmd = &cobra.Command{
 	Use:   "user-transitive-permission",
 	Short: "Get user transitive permission on repository",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		permission, err := client.GetUserTransitivePermission(namespace, repository, permissionUser)
 		if err != nil {
@@ -211,11 +178,7 @@ var permTeamPermissionsCmd = &cobra.Command{
 	Use:   "team-permissions",
 	Short: "List team permissions on repository",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		permissions, err := client.ListTeamPermissions(namespace, repository)
 		if err != nil {
@@ -231,11 +194,7 @@ var permTeamPermissionCmd = &cobra.Command{
 	Use:   "team-permission",
 	Short: "Get specific team permission on repository",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		permission, err := client.GetTeamPermission(namespace, repository, permissionTeamName)
 		if err != nil {
@@ -251,13 +210,9 @@ var permSetTeamPermCmd = &cobra.Command{
 	Use:   "set-team-permission",
 	Short: "Set team permission on repository",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.SetTeamPermission(namespace, repository, permissionTeamName, permissionRole)
+		err := client.SetTeamPermission(namespace, repository, permissionTeamName, permissionRole)
 		if err != nil {
 			fmt.Printf("Error setting team permission: %v\n", err)
 			os.Exit(1)
@@ -279,13 +234,9 @@ var permDeleteTeamPermCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteTeamPermission(namespace, repository, permissionTeamName)
+		err := client.DeleteTeamPermission(namespace, repository, permissionTeamName)
 		if err != nil {
 			fmt.Printf("Error deleting team permission: %v\n", err)
 			os.Exit(1)

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -38,11 +37,7 @@ var manifestInfoCmd = &cobra.Command{
 	Short: "Get detailed manifest information",
 	Long:  `Get detailed information about a specific manifest including layers, config, and metadata.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		manifest, err := client.GetManifest(namespace, repository, manifestRef)
 		if err != nil {
@@ -67,13 +62,9 @@ var manifestDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteManifest(namespace, repository, manifestRef)
+		err := client.DeleteManifest(namespace, repository, manifestRef)
 		if err != nil {
 			fmt.Printf("Error deleting manifest: %v\n", err)
 			os.Exit(1)
@@ -89,11 +80,7 @@ var manifestLabelsCmd = &cobra.Command{
 	Short: "List manifest labels",
 	Long:  `List all labels associated with a specific manifest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		labels, err := client.GetManifestLabels(namespace, repository, manifestRef)
 		if err != nil {
@@ -112,11 +99,7 @@ var manifestLabelCmd = &cobra.Command{
 	Short: "Get a specific manifest label",
 	Long:  `Get detailed information about a specific label on a manifest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		label, err := client.GetManifestLabel(namespace, repository, manifestRef, labelID)
 		if err != nil {
@@ -135,11 +118,7 @@ var manifestAddLabelCmd = &cobra.Command{
 	Short: "Add a label to a manifest",
 	Long:  `Add a new label with a key-value pair to a specific manifest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		label, err := client.AddManifestLabel(namespace, repository, manifestRef, labelKey, labelValue, labelMediaType)
 		if err != nil {
@@ -158,13 +137,9 @@ var manifestRemoveLabelCmd = &cobra.Command{
 	Short: "Remove a label from a manifest",
 	Long:  `Remove a specific label from a manifest by its label ID.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteManifestLabel(namespace, repository, manifestRef, labelID)
+		err := client.DeleteManifestLabel(namespace, repository, manifestRef, labelID)
 		if err != nil {
 			fmt.Printf("Error removing manifest label: %v\n", err)
 			os.Exit(1)

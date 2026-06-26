@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -25,11 +24,7 @@ var discoveryAPICmd = &cobra.Command{
 	Short: "Get API discovery information",
 	Long:  `Get API discovery information from Quay.io including available endpoints and versions.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		discovery, err := client.GetDiscovery()
 		if err != nil {
@@ -46,11 +41,7 @@ var discoveryCapabilitiesCmd = &cobra.Command{
 	Short: "Get registry capabilities",
 	Long:  `Get registry capabilities including sparse manifest support and available mirror architectures.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		capabilities, err := client.GetRegistryCapabilities()
 		if err != nil {
@@ -67,11 +58,7 @@ var discoveryAppInfoCmd = &cobra.Command{
 	Short: "Get application information by client ID",
 	Long:  `Get detailed information about an OAuth application by its client ID.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		app, err := client.GetAppInfo(discoveryClientID)
 		if err != nil {
@@ -88,11 +75,7 @@ var discoveryEntitiesCmd = &cobra.Command{
 	Short: "Search for entities by prefix",
 	Long:  `Search for users, organizations, and teams by name prefix.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		entities, err := client.GetEntities(entityPrefix, includeOrgs, includeTeams)
 		if err != nil {

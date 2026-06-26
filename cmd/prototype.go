@@ -45,11 +45,7 @@ var prototypeListCmd = &cobra.Command{
 	Short: "List all permission prototypes",
 	Long:  `List all permission prototypes for an organization.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		prototypes, err := client.GetPrototypes(prototypeOrg)
 		if err != nil {
@@ -77,11 +73,7 @@ var prototypeInfoCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		prototype, err := client.GetPrototype(prototypeOrg, prototypeUUID)
 		if err != nil {
@@ -127,11 +119,7 @@ Roles:
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		createReq := &lib.CreatePrototypeRequest{
 			Delegate: lib.PrototypeDelegateRequest{
@@ -171,11 +159,7 @@ var prototypeUpdateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		updateReq := &lib.UpdatePrototypeRequest{
 			Role: prototypeRole,
@@ -211,13 +195,9 @@ var prototypeDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeletePrototype(prototypeOrg, prototypeUUID)
+		err := client.DeletePrototype(prototypeOrg, prototypeUUID)
 		if err != nil {
 			fmt.Println("Error deleting prototype:", err)
 			os.Exit(1)

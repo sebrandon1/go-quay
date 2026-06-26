@@ -43,11 +43,7 @@ var buildListCmd = &cobra.Command{
 	Short: "List builds for a repository",
 	Long:  `List all builds for the specified repository.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		builds, err := client.GetBuilds(buildNamespace, buildRepository, buildLimit)
 		if err != nil {
@@ -66,11 +62,7 @@ var buildInfoCmd = &cobra.Command{
 	Short: "Get build details",
 	Long:  `Get detailed information about a specific build.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		build, err := client.GetBuild(buildNamespace, buildRepository, buildUUID)
 		if err != nil {
@@ -89,11 +81,7 @@ var buildLogsCmd = &cobra.Command{
 	Short: "Get build logs",
 	Long:  `Get the logs for a specific build.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		logs, err := client.GetBuildLogs(buildNamespace, buildRepository, buildUUID)
 		if err != nil {
@@ -114,11 +102,7 @@ var buildRequestCmd = &cobra.Command{
 
 The archive should be a tar.gz file containing a Dockerfile and any necessary build context.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		buildReq := &lib.RequestBuildRequest{
 			ArchiveURL:     buildArchiveURL,
@@ -150,13 +134,9 @@ var buildCancelCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.CancelBuild(buildNamespace, buildRepository, buildUUID)
+		err := client.CancelBuild(buildNamespace, buildRepository, buildUUID)
 		if err != nil {
 			fmt.Printf("Error canceling build: %v\n", err)
 			os.Exit(1)
@@ -171,11 +151,7 @@ var buildStatusCmd = &cobra.Command{
 	Short: "Get build status",
 	Long:  `Get the current status of a specific build.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		status, err := client.GetBuildStatus(buildNamespace, buildRepository, buildUUID)
 		if err != nil {

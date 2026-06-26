@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -24,11 +23,7 @@ var messagesListCmd = &cobra.Command{
 	Short: "Get system messages",
 	Long:  `Get system-wide messages including maintenance notifications and announcements.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		messages, err := client.GetMessages()
 		if err != nil {
@@ -45,11 +40,7 @@ var messagesCreateCmd = &cobra.Command{
 	Short: "Create a system message",
 	Long:  `Create a new system-wide message.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		message, err := client.CreateMessage(messageContent, messageSeverity, messageMediaType)
 		if err != nil {

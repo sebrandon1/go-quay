@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -49,11 +48,7 @@ var teamListCmd = &cobra.Command{
 	Short: "List all teams in an organization",
 	Long:  `List all teams within the specified organization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		teams, err := client.GetTeams(teamCmdOrgname)
 		if err != nil {
@@ -72,11 +67,7 @@ var teamCmdInfoCmd = &cobra.Command{
 	Short: "Get team details",
 	Long:  `Get detailed information about a specific team.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		team, err := client.GetTeam(teamCmdOrgname, teamCmdName)
 		if err != nil {
@@ -100,11 +91,7 @@ Roles:
   - creator: Can create new repositories
   - admin: Full administrative access`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		team, err := client.CreateTeam(teamCmdOrgname, teamCmdName, teamCmdDescription, teamCmdRole)
 		if err != nil {
@@ -123,11 +110,7 @@ var teamUpdateCmd = &cobra.Command{
 	Short: "Update team settings",
 	Long:  `Update team description and role.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		team, err := client.UpdateTeam(teamCmdOrgname, teamCmdName, teamCmdDescription, teamCmdRole)
 		if err != nil {
@@ -152,13 +135,9 @@ var teamDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteTeam(teamCmdOrgname, teamCmdName)
+		err := client.DeleteTeam(teamCmdOrgname, teamCmdName)
 		if err != nil {
 			fmt.Printf("Error deleting team: %v\n", err)
 			os.Exit(1)
@@ -174,11 +153,7 @@ var teamCmdMembersCmd = &cobra.Command{
 	Short: "List team members",
 	Long:  `List all members of a specific team.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		members, err := client.GetTeamMembers(teamCmdOrgname, teamCmdName)
 		if err != nil {
@@ -197,13 +172,9 @@ var teamAddMemberCmd = &cobra.Command{
 	Short: "Add a member to a team",
 	Long:  `Add a user or robot account to a team.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.AddTeamMember(teamCmdOrgname, teamCmdName, teamCmdMemberName)
+		err := client.AddTeamMember(teamCmdOrgname, teamCmdName, teamCmdMemberName)
 		if err != nil {
 			fmt.Printf("Error adding team member: %v\n", err)
 			os.Exit(1)
@@ -225,13 +196,9 @@ var teamRemoveMemberCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.RemoveTeamMember(teamCmdOrgname, teamCmdName, teamCmdMemberName)
+		err := client.RemoveTeamMember(teamCmdOrgname, teamCmdName, teamCmdMemberName)
 		if err != nil {
 			fmt.Printf("Error removing team member: %v\n", err)
 			os.Exit(1)
@@ -247,11 +214,7 @@ var teamPermissionsCmd = &cobra.Command{
 	Short: "List team repository permissions",
 	Long:  `List all repository permissions for a team.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		permissions, err := client.GetTeamPermissions(teamCmdOrgname, teamCmdName)
 		if err != nil {
@@ -275,13 +238,9 @@ Permission roles:
   - write: Pull and push images
   - admin: Full administrative access`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.SetTeamRepositoryPermission(teamCmdOrgname, teamCmdName, teamCmdRepository, teamCmdPermissionRole)
+		err := client.SetTeamRepositoryPermission(teamCmdOrgname, teamCmdName, teamCmdRepository, teamCmdPermissionRole)
 		if err != nil {
 			fmt.Printf("Error setting team permission: %v\n", err)
 			os.Exit(1)
@@ -305,13 +264,9 @@ var teamRemovePermissionCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.RemoveTeamRepositoryPermission(teamCmdOrgname, teamCmdName, teamCmdRepository)
+		err := client.RemoveTeamRepositoryPermission(teamCmdOrgname, teamCmdName, teamCmdRepository)
 		if err != nil {
 			fmt.Printf("Error removing team permission: %v\n", err)
 			os.Exit(1)

@@ -40,11 +40,7 @@ var robotListCmd = &cobra.Command{
 	Short: "List all robot accounts",
 	Long:  `List all robot accounts associated with your user account.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		robots, err := client.GetUserRobotAccounts()
 		if err != nil {
@@ -63,11 +59,7 @@ var robotInfoCmd = &cobra.Command{
 	Short: "Get robot account details",
 	Long:  `Get detailed information about a specific robot account including its token.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		robot, err := client.GetUserRobotAccount(robotShortname)
 		if err != nil {
@@ -86,11 +78,7 @@ var robotCreateCmd = &cobra.Command{
 	Short: "Create a new robot account",
 	Long:  `Create a new robot account with the specified name and description.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		robot, err := client.CreateUserRobotAccount(robotShortname, robotDescription, nil)
 		if err != nil {
@@ -116,13 +104,9 @@ var robotDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteUserRobotAccount(robotShortname)
+		err := client.DeleteUserRobotAccount(robotShortname)
 		if err != nil {
 			fmt.Printf("Error deleting robot account: %v\n", err)
 			os.Exit(1)
@@ -138,11 +122,7 @@ var robotRegenerateCmd = &cobra.Command{
 	Short: "Regenerate robot token",
 	Long:  `Regenerate the token for a robot account. The old token will be invalidated.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		robot, err := client.RegenerateUserRobotToken(robotShortname)
 		if err != nil {
@@ -162,11 +142,7 @@ var robotPermissionsCmd = &cobra.Command{
 	Short: "Get robot repository permissions",
 	Long:  `Get the repository permissions assigned to a robot account.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		permissions, err := client.GetUserRobotPermissions(robotShortname)
 		if err != nil {
@@ -184,11 +160,7 @@ var robotFederationGetCmd = &cobra.Command{
 	Use:   "federation-get",
 	Short: "Get robot federation configuration",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		federation, err := client.GetUserRobotFederation(robotShortname)
 		if err != nil {
@@ -205,17 +177,13 @@ var robotFederationCreateCmd = &cobra.Command{
 	Use:   "federation-create",
 	Short: "Create or update robot federation configuration",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		configs := []lib.RobotFederationConfig{
 			{Issuer: federationIssuer, Subject: federationSubject},
 		}
 
-		err = client.CreateUserRobotFederation(robotShortname, configs)
+		err := client.CreateUserRobotFederation(robotShortname, configs)
 		if err != nil {
 			fmt.Printf("Error creating robot federation: %v\n", err)
 			os.Exit(1)
@@ -230,13 +198,9 @@ var robotFederationDeleteCmd = &cobra.Command{
 	Use:   "federation-delete",
 	Short: "Delete robot federation configuration",
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteUserRobotFederation(robotShortname)
+		err := client.DeleteUserRobotFederation(robotShortname)
 		if err != nil {
 			fmt.Printf("Error deleting robot federation: %v\n", err)
 			os.Exit(1)
