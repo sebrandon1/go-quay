@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -1555,14 +1554,4 @@ func initOrgInviteFlags() {
 		os.Exit(1)
 	}
 	cancelInviteCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm cancellation")
-}
-
-// Helper function to print JSON output
-func printJSON(data interface{}) {
-	output, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		fmt.Printf("Error marshaling JSON: %v\n", err)
-		os.Exit(1)
-	}
-	fmt.Println(string(output))
 }
