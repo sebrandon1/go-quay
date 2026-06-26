@@ -57,11 +57,7 @@ var notificationListCmd = &cobra.Command{
 	Short: "List notifications for a repository",
 	Long:  `List all notifications (webhooks) for the specified repository.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		notifications, err := client.GetNotifications(notificationNamespace, notificationRepository)
 		if err != nil {
@@ -80,11 +76,7 @@ var notificationInfoCmd = &cobra.Command{
 	Short: "Get notification details",
 	Long:  `Get detailed information about a specific notification.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		notification, err := client.GetNotification(notificationNamespace, notificationRepository, notificationUUID)
 		if err != nil {
@@ -107,11 +99,7 @@ For webhook method, provide the --url flag with the webhook endpoint.
 For email method, provide the --url flag with the email address.
 For slack method, provide the --url flag with the Slack webhook URL.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		config := map[string]interface{}{}
 		switch notificationMethod {
@@ -153,13 +141,9 @@ var notificationDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteNotification(notificationNamespace, notificationRepository, notificationUUID)
+		err := client.DeleteNotification(notificationNamespace, notificationRepository, notificationUUID)
 		if err != nil {
 			fmt.Printf("Error deleting notification: %v\n", err)
 			os.Exit(1)
@@ -175,13 +159,9 @@ var notificationTestCmd = &cobra.Command{
 	Short: "Test a notification",
 	Long:  `Send a test event to the notification endpoint.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.TestNotification(notificationNamespace, notificationRepository, notificationUUID)
+		err := client.TestNotification(notificationNamespace, notificationRepository, notificationUUID)
 		if err != nil {
 			fmt.Printf("Error testing notification: %v\n", err)
 			os.Exit(1)
@@ -197,13 +177,9 @@ var notificationResetCmd = &cobra.Command{
 	Short: "Reset notification failure count",
 	Long:  `Reset the failure count for a notification that has failed.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.ResetNotification(notificationNamespace, notificationRepository, notificationUUID)
+		err := client.ResetNotification(notificationNamespace, notificationRepository, notificationUUID)
 		if err != nil {
 			fmt.Printf("Error resetting notification: %v\n", err)
 			os.Exit(1)
@@ -218,11 +194,7 @@ var notificationUpdateCmd = &cobra.Command{
 	Short: "Update a notification",
 	Long:  `Update an existing notification (webhook) configuration.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		config := map[string]interface{}{}
 		switch notificationMethod {

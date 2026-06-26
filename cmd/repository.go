@@ -8,7 +8,6 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -47,11 +46,7 @@ var repoInfoCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		repo, err := client.GetRepository(namespace, repository)
 		if err != nil {
@@ -74,11 +69,7 @@ var repoCreateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		repo, err := client.CreateRepository(namespace, repository, repoVisibility, repoDescription)
 		if err != nil {
@@ -102,11 +93,7 @@ var repoUpdateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		repo, err := client.UpdateRepository(namespace, repository, repoDescription, repoVisibility)
 		if err != nil {
@@ -136,13 +123,9 @@ var repoDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteRepository(namespace, repository)
+		err := client.DeleteRepository(namespace, repository)
 		if err != nil {
 			fmt.Printf("Error deleting repository: %v\n", err)
 			os.Exit(1)
@@ -168,11 +151,7 @@ Use --table with --popularity for an enriched dashboard sorted by pull count:
   certsuite                   774    6             51    unstable    2026-06-15  yes
   collector                   32     4             46    unstable    2026-06-15  no`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		repos, err := client.ListRepositories(namespace, repoPublic, repoStarred, repoPopularity, repoPage, repoLimit)
 		if err != nil {
@@ -250,13 +229,9 @@ var repoChangeVisibilityCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.ChangeRepositoryVisibility(namespace, repository, repoVisibility)
+		err := client.ChangeRepositoryVisibility(namespace, repository, repoVisibility)
 		if err != nil {
 			fmt.Printf("Error changing repository visibility: %v\n", err)
 			os.Exit(1)

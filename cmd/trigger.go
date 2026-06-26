@@ -46,11 +46,7 @@ var triggerListCmd = &cobra.Command{
 	Short: "List all build triggers for a repository",
 	Long:  `List all build triggers configured for a repository.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		triggers, err := client.GetTriggers(triggerNamespace, triggerRepository)
 		if err != nil {
@@ -78,11 +74,7 @@ var triggerInfoCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		trigger, err := client.GetTrigger(triggerNamespace, triggerRepository, triggerUUID)
 		if err != nil {
@@ -110,13 +102,9 @@ var triggerDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteTrigger(triggerNamespace, triggerRepository, triggerUUID)
+		err := client.DeleteTrigger(triggerNamespace, triggerRepository, triggerUUID)
 		if err != nil {
 			fmt.Println("Error deleting trigger:", err)
 			os.Exit(1)
@@ -137,11 +125,7 @@ var triggerEnableCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		trigger, err := client.UpdateTrigger(triggerNamespace, triggerRepository, triggerUUID, true)
 		if err != nil {
@@ -169,11 +153,7 @@ var triggerDisableCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		trigger, err := client.UpdateTrigger(triggerNamespace, triggerRepository, triggerUUID, false)
 		if err != nil {
@@ -201,11 +181,7 @@ var triggerStartCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		var triggerReq *lib.ManualTriggerRequest
 		if triggerCommitSHA != "" {
@@ -240,11 +216,7 @@ var triggerActivateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		activateReq := &lib.ActivateTriggerRequest{}
 		if triggerPullRobot != "" {
@@ -276,11 +248,7 @@ var triggerBuildsCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		builds, err := client.GetTriggerBuilds(triggerNamespace, triggerRepository, triggerUUID, triggerBuildLimit)
 		if err != nil {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -35,11 +34,7 @@ var tagInfoCmd = &cobra.Command{
 	Short: "Get detailed tag information",
 	Long:  `Get detailed information about a specific tag including metadata, manifest digest, and size.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		tag, err := client.GetTag(namespace, repository, tagName)
 		if err != nil {
@@ -58,11 +53,7 @@ var tagUpdateCmd = &cobra.Command{
 	Short: "Update tag metadata",
 	Long:  `Update tag metadata such as expiration date.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		tag, err := client.UpdateTag(namespace, repository, tagName, tagExpiration)
 		if err != nil {
@@ -87,13 +78,9 @@ var tagDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteTag(namespace, repository, tagName)
+		err := client.DeleteTag(namespace, repository, tagName)
 		if err != nil {
 			fmt.Printf("Error deleting tag: %v\n", err)
 			os.Exit(1)
@@ -109,11 +96,7 @@ var tagHistoryCmd = &cobra.Command{
 	Short: "Get tag history",
 	Long:  `Get the history of changes for a specific tag, including previous versions and modifications.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		history, err := client.GetTagHistory(namespace, repository, tagName)
 		if err != nil {
@@ -132,11 +115,7 @@ var tagRevertCmd = &cobra.Command{
 	Short: "Revert tag to a previous state",
 	Long:  `Revert a tag to a previous state using its manifest digest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		tag, err := client.RevertTag(namespace, repository, tagName, manifestDigest)
 		if err != nil {
@@ -154,13 +133,9 @@ var tagRestoreCmd = &cobra.Command{
 	Short: "Restore a tag from a previous state",
 	Long:  `Restore a previously deleted or modified tag using its manifest digest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Printf("Error creating client: %v\n", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.RestoreTag(namespace, repository, tagName, manifestDigest)
+		err := client.RestoreTag(namespace, repository, tagName, manifestDigest)
 		if err != nil {
 			fmt.Printf("Error restoring tag: %v\n", err)
 			os.Exit(1)

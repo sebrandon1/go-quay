@@ -46,11 +46,7 @@ var repotokenListCmd = &cobra.Command{
 	Short: "List all repository tokens",
 	Long:  `List all tokens for a repository. (DEPRECATED - use robot accounts)`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		tokens, err := client.GetRepoTokens(repoTokenNamespace, repoTokenRepository) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
@@ -78,11 +74,7 @@ var repotokenInfoCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		repoToken, err := client.GetRepoToken(repoTokenNamespace, repoTokenRepository, repoTokenCode) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
@@ -110,11 +102,7 @@ var repotokenCreateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		createReq := &lib.CreateRepoTokenRequest{
 			FriendlyName: repoTokenName,
@@ -150,11 +138,7 @@ var repotokenUpdateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
 		updateReq := &lib.UpdateRepoTokenRequest{
 			Role: repoTokenRole,
@@ -190,13 +174,9 @@ var repotokenDeleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		client, err := lib.NewClientWithURL(token, quayURL)
-		if err != nil {
-			fmt.Println("Error creating client:", err)
-			os.Exit(1)
-		}
+		client := mustGetClient()
 
-		err = client.DeleteRepoToken(repoTokenNamespace, repoTokenRepository, repoTokenCode) //nolint:staticcheck // Intentionally using deprecated API
+		err := client.DeleteRepoToken(repoTokenNamespace, repoTokenRepository, repoTokenCode) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
 			fmt.Println("Error deleting token:", err)
 			os.Exit(1)
