@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
@@ -21,6 +22,16 @@ func SetVersion(v string) {
 var getCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get objects from Quay.io",
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// Validate token is provided
+		if token == "" {
+			return fmt.Errorf(`authentication token required
+
+Set QUAY_TOKEN environment variable or use --token/-t flag.
+Get your token at https://quay.io/organization/<org>?tab=applications`)
+		}
+		return nil
+	},
 }
 
 func envOrDefault(key, fallback string) string {
