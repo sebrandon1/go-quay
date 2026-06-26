@@ -64,7 +64,7 @@ err := client.DeleteUserRobot("name")
 
 ```go
 // List repositories
-repos, err := client.ListRepositories(namespace, public, starred, page, limit)
+repos, err := client.ListRepositories(namespace, public, starred, popularity, page, limit)
 
 // CRUD operations
 repo, err := client.CreateRepository(namespace, name, visibility, description)
