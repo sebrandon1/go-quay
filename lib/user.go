@@ -52,7 +52,7 @@ func (c *Client) GetStarredRepositories() (*StarredRepositories, error) {
 
 // StarRepository adds a repository to the user's starred list
 func (c *Client) StarRepository(namespace, repository string) error {
-	req, err := newRequest("PUT", fmt.Sprintf("%s/repository/%s/%s/star", c.BaseURL, namespace, repository), nil)
+	req, err := newRequest("PUT", c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create star repository request: %w", err)
 	}
@@ -66,7 +66,7 @@ func (c *Client) StarRepository(namespace, repository string) error {
 
 // UnstarRepository removes a repository from the user's starred list
 func (c *Client) UnstarRepository(namespace, repository string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s/star", c.BaseURL, namespace, repository), nil)
+	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create unstar repository request: %w", err)
 	}
@@ -85,7 +85,7 @@ func (c *Client) StarUserRepository(namespace, repository string) error {
 	}{
 		Repository: namespace + "/" + repository,
 	}
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/user/starred", c.BaseURL), body)
+	req, err := newRequestWithBody("POST", c.buildURL("/user/starred"), body)
 	if err != nil {
 		return fmt.Errorf("failed to create star user repository request: %w", err)
 	}
@@ -100,7 +100,7 @@ func (c *Client) StarUserRepository(namespace, repository string) error {
 // UnstarUserRepository unstars a repository using the /user/starred endpoint
 func (c *Client) UnstarUserRepository(namespace, repository string) error {
 	// The spec uses {repository} as namespace/repo
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/user/starred/%s/%s", c.BaseURL, namespace, repository), nil)
+	req, err := newRequest("DELETE", c.buildURL("/user/starred/%s/%s", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create unstar user repository request: %w", err)
 	}
@@ -114,7 +114,7 @@ func (c *Client) UnstarUserRepository(namespace, repository string) error {
 
 // GetUserByUsername retrieves information about a specific user
 func (c *Client) GetUserByUsername(username string) (*UserDetails, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/users/%s", c.BaseURL, username), nil)
+	req, err := newRequest("GET", c.buildURL("/users/%s", username), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user by username request: %w", err)
 	}
@@ -129,7 +129,7 @@ func (c *Client) GetUserByUsername(username string) (*UserDetails, error) {
 
 // GetUserMarketplace retrieves marketplace information for the current user
 func (c *Client) GetUserMarketplace() (*MarketplaceInfo, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/user/marketplace", c.BaseURL), nil)
+	req, err := newRequest("GET", c.buildURL("/user/marketplace"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user marketplace request: %w", err)
 	}

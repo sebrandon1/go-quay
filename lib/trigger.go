@@ -28,7 +28,7 @@ import (
 
 // GetTriggers retrieves all build triggers for a repository
 func (c *Client) GetTriggers(namespace, repository string) (*BuildTriggers, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/trigger/", c.BaseURL, namespace, repository), nil)
+	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/trigger/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get triggers request: %w", err)
 	}
@@ -43,7 +43,7 @@ func (c *Client) GetTriggers(namespace, repository string) (*BuildTriggers, erro
 
 // GetTrigger retrieves a specific build trigger by UUID
 func (c *Client) GetTrigger(namespace, repository, triggerUUID string) (*BuildTrigger, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/trigger/%s", c.BaseURL, namespace, repository, triggerUUID), nil)
+	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get trigger request: %w", err)
 	}
@@ -58,7 +58,7 @@ func (c *Client) GetTrigger(namespace, repository, triggerUUID string) (*BuildTr
 
 // DeleteTrigger deletes a build trigger
 func (c *Client) DeleteTrigger(namespace, repository, triggerUUID string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s/trigger/%s", c.BaseURL, namespace, repository, triggerUUID), nil)
+	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete trigger request: %w", err)
 	}
@@ -76,7 +76,7 @@ func (c *Client) UpdateTrigger(namespace, repository, triggerUUID string, enable
 		"enabled": enabled,
 	}
 
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/repository/%s/%s/trigger/%s", c.BaseURL, namespace, repository, triggerUUID), body)
+	req, err := newRequestWithBody("PUT", c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update trigger request: %w", err)
 	}
@@ -96,7 +96,7 @@ func (c *Client) StartTriggerBuild(namespace, repository, triggerUUID string, tr
 		body = triggerReq
 	}
 
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/trigger/%s/start", c.BaseURL, namespace, repository, triggerUUID), body)
+	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/trigger/%s/start", namespace, repository, triggerUUID), body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create start trigger build request: %w", err)
 	}
@@ -111,7 +111,7 @@ func (c *Client) StartTriggerBuild(namespace, repository, triggerUUID string, tr
 
 // ActivateTrigger activates a build trigger with configuration
 func (c *Client) ActivateTrigger(namespace, repository, triggerUUID string, activateReq *ActivateTriggerRequest) (*BuildTrigger, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/trigger/%s/activate", c.BaseURL, namespace, repository, triggerUUID), activateReq)
+	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/trigger/%s/activate", namespace, repository, triggerUUID), activateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create activate trigger request: %w", err)
 	}
@@ -126,7 +126,7 @@ func (c *Client) ActivateTrigger(namespace, repository, triggerUUID string, acti
 
 // GetTriggerBuilds gets the builds started by a specific trigger
 func (c *Client) GetTriggerBuilds(namespace, repository, triggerUUID string, limit int) (*Builds, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/trigger/%s/builds", c.BaseURL, namespace, repository, triggerUUID), nil)
+	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/trigger/%s/builds", namespace, repository, triggerUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get trigger builds request: %w", err)
 	}

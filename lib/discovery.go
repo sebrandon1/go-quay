@@ -17,7 +17,7 @@ import (
 
 // GetDiscovery retrieves API discovery information
 func (c *Client) GetDiscovery() (*Discovery, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/discovery", c.BaseURL), nil)
+	req, err := newRequest("GET", c.buildURL("/discovery"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create discovery request: %w", err)
 	}
@@ -32,7 +32,7 @@ func (c *Client) GetDiscovery() (*Discovery, error) {
 
 // GetRegistryCapabilities retrieves the registry capabilities including sparse manifest support and mirror architectures
 func (c *Client) GetRegistryCapabilities() (*RegistryCapabilities, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/registry/capabilities", c.BaseURL), nil)
+	req, err := newRequest("GET", c.buildURL("/registry/capabilities"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create registry capabilities request: %w", err)
 	}
@@ -47,7 +47,7 @@ func (c *Client) GetRegistryCapabilities() (*RegistryCapabilities, error) {
 
 // GetAppInfo retrieves public information about an OAuth application by client ID
 func (c *Client) GetAppInfo(clientID string) (*Application, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/app/%s", c.BaseURL, clientID), nil)
+	req, err := newRequest("GET", c.buildURL("/app/%s", clientID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get app info request: %w", err)
 	}
@@ -62,7 +62,7 @@ func (c *Client) GetAppInfo(clientID string) (*Application, error) {
 
 // GetEntities searches for entities (users, robots, teams) matching a prefix
 func (c *Client) GetEntities(prefix string, includeOrgs, includeTeams bool) (*Entities, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/entities/%s", c.BaseURL, prefix), nil)
+	req, err := newRequest("GET", c.buildURL("/entities/%s", prefix), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get entities request: %w", err)
 	}

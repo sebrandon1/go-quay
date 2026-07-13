@@ -17,7 +17,7 @@ import (
 
 // GetManifestSecurity retrieves security scan information for a specific manifest
 func (c *Client) GetManifestSecurity(namespace, repository, manifestRef string, vulnerabilities bool) (*SecurityScan, error) {
-	url := fmt.Sprintf("%s/repository/%s/%s/manifest/%s/security", c.BaseURL, namespace, repository, manifestRef)
+	url := c.buildURL("/repository/%s/%s/manifest/%s/security", namespace, repository, manifestRef)
 
 	// Add query parameter to include vulnerabilities
 	if vulnerabilities {

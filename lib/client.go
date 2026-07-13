@@ -33,8 +33,11 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 )
+
+const maxErrorBodySize = 1 << 20 // 1 MB
 
 // DefaultQuayURL is the default Quay.io API base URL.
 const DefaultQuayURL = "https://quay.io/api/v1"
@@ -67,6 +70,18 @@ func NewClient(bearerToken string) (*Client, error) {
 	return NewClientWithURL(bearerToken, DefaultQuayURL)
 }
 
+func (c *Client) buildURL(pathFmt string, args ...any) string {
+	escaped := make([]any, len(args))
+	for i, a := range args {
+		if s, ok := a.(string); ok {
+			escaped[i] = url.PathEscape(s)
+		} else {
+			escaped[i] = a
+		}
+	}
+	return c.BaseURL + fmt.Sprintf(pathFmt, escaped...)
+}
+
 func (c *Client) get(req *http.Request, v any) error {
 	if c.BearerToken != "" {
 		req.Header.Set("Authorization", "Bearer "+c.BearerToken)
@@ -81,7 +96,7 @@ func (c *Client) get(req *http.Request, v any) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodySize))
 		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, string(body))
 	}
 
@@ -102,7 +117,7 @@ func (c *Client) post(req *http.Request, v any) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodySize))
 		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, string(body))
 	}
 
@@ -127,7 +142,7 @@ func (c *Client) put(req *http.Request, v any) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
-		body, _ := io.ReadAll(resp.Body)
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodySize))
 		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, string(body))
 	}
 
@@ -152,7 +167,7 @@ func (c *Client) delete(req *http.Request) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodySize))
 		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, string(body))
 	}
 

@@ -20,7 +20,7 @@ import (
 
 // GetTag retrieves detailed information about a specific tag
 func (c *Client) GetTag(namespace, repository, tag string) (*Tag, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/tag/%s", c.BaseURL, namespace, repository, tag), nil)
+	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get tag request: %w", err)
 	}
@@ -41,7 +41,7 @@ func (c *Client) UpdateTag(namespace, repository, tag, expiration string) (*Tag,
 		updateReq.Expiration = expiration
 	}
 
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/repository/%s/%s/tag/%s", c.BaseURL, namespace, repository, tag), updateReq)
+	req, err := newRequestWithBody("PUT", c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update tag request: %w", err)
 	}
@@ -56,7 +56,7 @@ func (c *Client) UpdateTag(namespace, repository, tag, expiration string) (*Tag,
 
 // DeleteTag deletes a specific tag from a repository
 func (c *Client) DeleteTag(namespace, repository, tag string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s/tag/%s", c.BaseURL, namespace, repository, tag), nil)
+	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete tag request: %w", err)
 	}
@@ -70,7 +70,7 @@ func (c *Client) DeleteTag(namespace, repository, tag string) error {
 
 // GetTagHistory retrieves the history of changes for a specific tag
 func (c *Client) GetTagHistory(namespace, repository, tag string) (*TagHistory, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/tag/%s/history", c.BaseURL, namespace, repository, tag), nil)
+	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/tag/%s/history", namespace, repository, tag), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get tag history request: %w", err)
 	}
@@ -85,7 +85,7 @@ func (c *Client) GetTagHistory(namespace, repository, tag string) (*TagHistory, 
 
 // RevertTag reverts a tag to a previous state by manifest digest
 func (c *Client) RevertTag(namespace, repository, tag, manifestDigest string) (*Tag, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/tag/%s/revert", c.BaseURL, namespace, repository, tag), map[string]interface{}{
+	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/tag/%s/revert", namespace, repository, tag), map[string]interface{}{
 		"manifest_digest": manifestDigest,
 	})
 	if err != nil {
@@ -107,7 +107,7 @@ func (c *Client) RestoreTag(namespace, repository, tag, manifestDigest string) e
 	}{
 		ManifestDigest: manifestDigest,
 	}
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/tag/%s/restore", c.BaseURL, namespace, repository, tag), body)
+	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/tag/%s/restore", namespace, repository, tag), body)
 	if err != nil {
 		return fmt.Errorf("failed to create restore tag request: %w", err)
 	}

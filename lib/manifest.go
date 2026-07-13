@@ -24,7 +24,7 @@ import (
 
 // GetManifest retrieves detailed information about a specific manifest
 func (c *Client) GetManifest(namespace, repository, manifestRef string) (*Manifest, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/manifest/%s", c.BaseURL, namespace, repository, manifestRef), nil)
+	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/manifest/%s", namespace, repository, manifestRef), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get manifest request: %w", err)
 	}
@@ -39,7 +39,7 @@ func (c *Client) GetManifest(namespace, repository, manifestRef string) (*Manife
 
 // DeleteManifest deletes a specific manifest from a repository
 func (c *Client) DeleteManifest(namespace, repository, manifestRef string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s/manifest/%s", c.BaseURL, namespace, repository, manifestRef), nil)
+	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/manifest/%s", namespace, repository, manifestRef), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete manifest request: %w", err)
 	}
@@ -53,7 +53,7 @@ func (c *Client) DeleteManifest(namespace, repository, manifestRef string) error
 
 // GetManifestLabels retrieves all labels for a specific manifest
 func (c *Client) GetManifestLabels(namespace, repository, manifestRef string) (*ManifestLabels, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/manifest/%s/labels", c.BaseURL, namespace, repository, manifestRef), nil)
+	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/manifest/%s/labels", namespace, repository, manifestRef), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get manifest labels request: %w", err)
 	}
@@ -77,7 +77,7 @@ func (c *Client) AddManifestLabel(namespace, repository, manifestRef, key, value
 		addReq.MediaType = mediaType
 	}
 
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/manifest/%s/labels", c.BaseURL, namespace, repository, manifestRef), addReq)
+	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/manifest/%s/labels", namespace, repository, manifestRef), addReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create add manifest label request: %w", err)
 	}
@@ -92,7 +92,7 @@ func (c *Client) AddManifestLabel(namespace, repository, manifestRef, key, value
 
 // GetManifestLabel retrieves a specific label from a manifest
 func (c *Client) GetManifestLabel(namespace, repository, manifestRef, labelID string) (*ManifestLabel, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/manifest/%s/labels/%s", c.BaseURL, namespace, repository, manifestRef, labelID), nil)
+	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/manifest/%s/labels/%s", namespace, repository, manifestRef, labelID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get manifest label request: %w", err)
 	}
@@ -107,7 +107,7 @@ func (c *Client) GetManifestLabel(namespace, repository, manifestRef, labelID st
 
 // DeleteManifestLabel deletes a specific label from a manifest
 func (c *Client) DeleteManifestLabel(namespace, repository, manifestRef, labelID string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s/manifest/%s/labels/%s", c.BaseURL, namespace, repository, manifestRef, labelID), nil)
+	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/manifest/%s/labels/%s", namespace, repository, manifestRef, labelID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete manifest label request: %w", err)
 	}
