@@ -89,7 +89,9 @@ func (c *Client) get(req *http.Request, v any) error {
 }
 
 func (c *Client) post(req *http.Request, v any) error {
-	req.Header.Set("Authorization", "Bearer "+c.BearerToken)
+	if c.BearerToken != "" {
+		req.Header.Set("Authorization", "Bearer "+c.BearerToken)
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.HTTPClient.Do(req)
@@ -112,7 +114,9 @@ func (c *Client) post(req *http.Request, v any) error {
 }
 
 func (c *Client) put(req *http.Request, v any) error {
-	req.Header.Set("Authorization", "Bearer "+c.BearerToken)
+	if c.BearerToken != "" {
+		req.Header.Set("Authorization", "Bearer "+c.BearerToken)
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.HTTPClient.Do(req)
@@ -135,7 +139,9 @@ func (c *Client) put(req *http.Request, v any) error {
 }
 
 func (c *Client) delete(req *http.Request) error {
-	req.Header.Set("Authorization", "Bearer "+c.BearerToken)
+	if c.BearerToken != "" {
+		req.Header.Set("Authorization", "Bearer "+c.BearerToken)
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.HTTPClient.Do(req)
