@@ -27,7 +27,7 @@ import (
 
 // GetPrototypes retrieves all permission prototypes for an organization
 func (c *Client) GetPrototypes(orgname string) (*Prototypes, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/prototypes", c.BaseURL, orgname), nil)
+	req, err := newRequest("GET", c.buildURL("/organization/%s/prototypes", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get prototypes request: %w", err)
 	}
@@ -42,7 +42,7 @@ func (c *Client) GetPrototypes(orgname string) (*Prototypes, error) {
 
 // CreatePrototype creates a new permission prototype for an organization
 func (c *Client) CreatePrototype(orgname string, createReq *CreatePrototypeRequest) (*Prototype, error) {
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/organization/%s/prototypes", c.BaseURL, orgname), createReq)
+	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/prototypes", orgname), createReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prototype request: %w", err)
 	}
@@ -57,7 +57,7 @@ func (c *Client) CreatePrototype(orgname string, createReq *CreatePrototypeReque
 
 // GetPrototype retrieves a specific prototype by UUID
 func (c *Client) GetPrototype(orgname, prototypeUUID string) (*Prototype, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/organization/%s/prototypes/%s", c.BaseURL, orgname, prototypeUUID), nil)
+	req, err := newRequest("GET", c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get prototype request: %w", err)
 	}
@@ -72,7 +72,7 @@ func (c *Client) GetPrototype(orgname, prototypeUUID string) (*Prototype, error)
 
 // UpdatePrototype updates an existing prototype
 func (c *Client) UpdatePrototype(orgname, prototypeUUID string, updateReq *UpdatePrototypeRequest) (*Prototype, error) {
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/organization/%s/prototypes/%s", c.BaseURL, orgname, prototypeUUID), updateReq)
+	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update prototype request: %w", err)
 	}
@@ -87,7 +87,7 @@ func (c *Client) UpdatePrototype(orgname, prototypeUUID string, updateReq *Updat
 
 // DeletePrototype deletes a prototype
 func (c *Client) DeletePrototype(orgname, prototypeUUID string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/organization/%s/prototypes/%s", c.BaseURL, orgname, prototypeUUID), nil)
+	req, err := newRequest("DELETE", c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete prototype request: %w", err)
 	}

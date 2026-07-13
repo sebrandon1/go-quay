@@ -48,7 +48,7 @@ type RepositoryWithTags struct {
 
 // GetRepository returns a repository with tags information baked in
 func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags, error) {
-	repoURL := fmt.Sprintf("%s/repository/%s/%s", c.BaseURL, namespace, repository)
+	repoURL := c.buildURL("/repository/%s/%s", namespace, repository)
 	req, err := newRequest("GET", repoURL, nil)
 	if err != nil {
 		return RepositoryWithTags{}, fmt.Errorf("failed to create request for repository: %w", err)
@@ -102,7 +102,7 @@ func (c *Client) UpdateRepository(namespace, repository, description, visibility
 		updateReq.Visibility = visibility
 	}
 
-	req, err := newRequestWithBody("PUT", fmt.Sprintf("%s/repository/%s/%s", c.BaseURL, namespace, repository), updateReq)
+	req, err := newRequestWithBody("PUT", c.buildURL("/repository/%s/%s", namespace, repository), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update repository request: %w", err)
 	}
@@ -117,7 +117,7 @@ func (c *Client) UpdateRepository(namespace, repository, description, visibility
 
 // DeleteRepository deletes a repository
 func (c *Client) DeleteRepository(namespace, repository string) error {
-	req, err := newRequest("DELETE", fmt.Sprintf("%s/repository/%s/%s", c.BaseURL, namespace, repository), nil)
+	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete repository request: %w", err)
 	}
@@ -131,7 +131,7 @@ func (c *Client) DeleteRepository(namespace, repository string) error {
 
 // ListRepositories lists all repositories visible to the user
 func (c *Client) ListRepositories(namespace string, public, starred, popularity bool, page, limit int) (*RepositoryList, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository", c.BaseURL), nil)
+	req, err := newRequest("GET", c.buildURL("/repository"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list repositories request: %w", err)
 	}
@@ -172,7 +172,7 @@ func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility st
 	}{
 		Visibility: visibility,
 	}
-	req, err := newRequestWithBody("POST", fmt.Sprintf("%s/repository/%s/%s/changevisibility", c.BaseURL, namespace, repository), body)
+	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/changevisibility", namespace, repository), body)
 	if err != nil {
 		return fmt.Errorf("failed to create change visibility request: %w", err)
 	}
@@ -186,7 +186,7 @@ func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility st
 
 // ListTags lists tags for a repository
 func (c *Client) ListTags(namespace, repository string, limit int, onlyActive bool) (*RepositoryTags, error) {
-	req, err := newRequest("GET", fmt.Sprintf("%s/repository/%s/%s/tag/", c.BaseURL, namespace, repository), nil)
+	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list tags request: %w", err)
 	}
