@@ -11,7 +11,6 @@ This file contains the commands for the Prototype API:
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -53,12 +52,7 @@ var prototypeListCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(prototypes, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(prototypes)
 	},
 }
 
@@ -81,12 +75,7 @@ var prototypeInfoCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(prototype, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(prototype)
 	},
 }
 
@@ -135,12 +124,7 @@ Roles:
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(prototype, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(prototype)
 	},
 }
 
@@ -171,12 +155,7 @@ var prototypeUpdateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(prototype, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(prototype)
 	},
 }
 

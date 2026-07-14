@@ -13,7 +13,6 @@ WARNING: Repository tokens are deprecated. Use robot accounts instead.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -54,12 +53,7 @@ var repotokenListCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(tokens, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(tokens)
 	},
 }
 
@@ -82,12 +76,7 @@ var repotokenInfoCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(repoToken, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(repoToken)
 	},
 }
 
@@ -114,12 +103,7 @@ var repotokenCreateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(repoToken, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(repoToken)
 	},
 }
 
@@ -150,12 +134,7 @@ var repotokenUpdateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(repoToken, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(repoToken)
 	},
 }
 

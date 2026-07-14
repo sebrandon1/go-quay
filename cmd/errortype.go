@@ -7,7 +7,6 @@ This file contains the commands for the Error API:
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -39,12 +38,7 @@ This endpoint provides details about error types that can be returned by the Qua
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(errType, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(errType)
 	},
 }
 
