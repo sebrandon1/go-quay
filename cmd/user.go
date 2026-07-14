@@ -14,10 +14,12 @@ var userCmd = &cobra.Command{
 	Long: `Commands for managing user account information and starred repositories.
 
 Available commands:
-  info    - Get current user information
-  starred - List starred repositories
-  star    - Star a repository
-  unstar  - Unstar a repository`,
+  info        - Get current user information
+  starred     - List starred repositories
+  star        - Star a repository
+  unstar      - Unstar a repository
+  lookup      - Look up a user by username
+  marketplace - Get user marketplace information`,
 }
 
 // User Info
@@ -130,40 +132,6 @@ var userMarketplaceCmd = &cobra.Command{
 	},
 }
 
-var starUserRepoCmd = &cobra.Command{
-	Use:   "star-user",
-	Short: "Star a repository (user endpoint)",
-	Long:  `Add a repository to your starred list using the user star endpoint.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.StarUserRepository(namespace, repository)
-		if err != nil {
-			fmt.Printf("Error starring repository: %v\n", err)
-			os.Exit(1)
-		}
-
-		fmt.Printf("Successfully starred repository %s/%s\n", namespace, repository)
-	},
-}
-
-var unstarUserRepoCmd = &cobra.Command{
-	Use:   "unstar-user",
-	Short: "Unstar a repository (user endpoint)",
-	Long:  `Remove a repository from your starred list using the user star endpoint.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.UnstarUserRepository(namespace, repository)
-		if err != nil {
-			fmt.Printf("Error unstarring repository: %v\n", err)
-			os.Exit(1)
-		}
-
-		fmt.Printf("Successfully unstarred repository %s/%s\n", namespace, repository)
-	},
-}
-
 func init() {
 	// Add subcommands to user command
 	userCmd.AddCommand(userInfoCmd)
@@ -172,9 +140,6 @@ func init() {
 	userCmd.AddCommand(unstarRepoCmd)
 	userCmd.AddCommand(userLookupCmd)
 	userCmd.AddCommand(userMarketplaceCmd)
-	userCmd.AddCommand(starUserRepoCmd)
-	userCmd.AddCommand(unstarUserRepoCmd)
-
 	// Star command specific flags (requires repository context)
 	starRepoCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
 	starRepoCmd.Flags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
@@ -206,27 +171,4 @@ func init() {
 		os.Exit(1)
 	}
 
-	// Star-user command flags
-	starUserRepoCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
-	starUserRepoCmd.Flags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
-	if err := starUserRepoCmd.MarkFlagRequired("namespace"); err != nil {
-		fmt.Printf("Error marking namespace flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := starUserRepoCmd.MarkFlagRequired("repository"); err != nil {
-		fmt.Printf("Error marking repository flag as required: %v\n", err)
-		os.Exit(1)
-	}
-
-	// Unstar-user command flags
-	unstarUserRepoCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
-	unstarUserRepoCmd.Flags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
-	if err := unstarUserRepoCmd.MarkFlagRequired("namespace"); err != nil {
-		fmt.Printf("Error marking namespace flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := unstarUserRepoCmd.MarkFlagRequired("repository"); err != nil {
-		fmt.Printf("Error marking repository flag as required: %v\n", err)
-		os.Exit(1)
-	}
 }
