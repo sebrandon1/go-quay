@@ -40,9 +40,6 @@ Quota Types:
 Auto-Prune Types:
   - AutoPrunePolicy, AutoPrunePolicies
 
-Permission Types:
-  - DefaultPermission, DefaultPermissions
-
 Proxy Cache Types:
   - ProxyCacheConfig
 
@@ -375,19 +372,6 @@ type ProxyCacheConfig struct {
 	UpstreamRegistry string `json:"upstream_registry,omitempty"`
 	Insecure         bool   `json:"insecure,omitempty"`
 	Expiration       int    `json:"expiration,omitempty"`
-}
-
-// DefaultPermission represents default repository permissions
-type DefaultPermission struct {
-	Role      string `json:"role,omitempty"`
-	Delegate  User   `json:"delegate,omitempty"`
-	AppliedTo User   `json:"applied_to,omitempty"`
-	ID        string `json:"id,omitempty"`
-}
-
-// DefaultPermissions represents the response for default permissions
-type DefaultPermissions struct {
-	Prototypes []DefaultPermission `json:"prototypes,omitempty"`
 }
 
 // User represents a user account

@@ -72,11 +72,6 @@ Applications Management:
   - DELETE /api/v1/organization/{orgname}/applications/{client_id}  - DeleteApplication()
   - POST   /api/v1/organization/{orgname}/applications/{client_id}/resetclientsecret - ResetApplicationClientSecret()
 
-Default Permissions Management:
-  - GET    /api/v1/organization/{orgname}/prototypes                - GetDefaultPermissions()
-  - POST   /api/v1/organization/{orgname}/prototypes                - CreateDefaultPermission()
-  - DELETE /api/v1/organization/{orgname}/prototypes/{prototypeid}  - DeleteDefaultPermission()
-
 Proxy Cache Configuration:
   - GET    /api/v1/organization/{orgname}/proxycache                - GetProxyCacheConfig()
   - POST   /api/v1/organization/{orgname}/proxycache                - CreateProxyCacheConfig()
@@ -207,54 +202,6 @@ func (c *Client) GetOrganizationRepositories(orgname string) (*OrganizationRepos
 	}
 
 	return &repos, nil
-}
-
-// Default Permissions (Prototypes)
-
-// GetDefaultPermissions retrieves default permissions for an organization
-func (c *Client) GetDefaultPermissions(orgname string) (*DefaultPermissions, error) {
-	req, err := newRequest("GET", c.buildURL("/organization/%s/prototypes", orgname), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var perms DefaultPermissions
-	if err := c.get(req, &perms); err != nil {
-		return nil, err
-	}
-
-	return &perms, nil
-}
-
-// CreateDefaultPermission creates a default permission for an organization
-func (c *Client) CreateDefaultPermission(orgname, role, delegateType, delegateName string) (*DefaultPermission, error) {
-	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/prototypes", orgname), map[string]interface{}{
-		fieldRole: role,
-		"delegate": map[string]interface{}{
-			"kind":    delegateType,
-			fieldName: delegateName,
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	var perm DefaultPermission
-	if err := c.post(req, &perm); err != nil {
-		return nil, err
-	}
-
-	return &perm, nil
-}
-
-// DeleteDefaultPermission deletes a default permission
-func (c *Client) DeleteDefaultPermission(orgname, prototypeid string) error {
-	req, err := newRequest("DELETE", c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeid), nil)
-	if err != nil {
-		return err
-	}
-
-	return c.delete(req)
 }
 
 // Proxy Cache Configuration

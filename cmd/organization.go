@@ -16,9 +16,6 @@ var (
 	confirm          bool
 	description      string
 	role             string
-	delegateType     string
-	delegateName     string
-	prototypeID      string
 	upstreamRegistry string
 	insecure         bool
 	expiration       int
@@ -332,58 +329,6 @@ var orgRepositoriesCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		printJSON(repos)
-	},
-}
-
-// Get Default Permissions
-var defaultPermissionsCmd = &cobra.Command{
-	Use:   "default-permissions",
-	Short: "Get default permissions",
-	Long:  `Get default permissions for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-		perms, err := client.GetDefaultPermissions(orgName)
-		if err != nil {
-			fmt.Printf("Error getting default permissions: %v\n", err)
-			os.Exit(1)
-		}
-		printJSON(perms)
-	},
-}
-
-// Create Default Permission
-var createDefaultPermissionCmd = &cobra.Command{
-	Use:   "create-default-permission",
-	Short: "Create a default permission",
-	Long:  `Create a default permission for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-		perm, err := client.CreateDefaultPermission(orgName, role, delegateType, delegateName)
-		if err != nil {
-			fmt.Printf("Error creating default permission: %v\n", err)
-			os.Exit(1)
-		}
-		printJSON(perm)
-	},
-}
-
-// Delete Default Permission
-var deleteDefaultPermissionCmd = &cobra.Command{
-	Use:   "delete-default-permission",
-	Short: "Delete a default permission",
-	Long:  `Delete a default permission for an organization. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if !confirm {
-			fmt.Println("Error: must pass --confirm to delete a default permission")
-			os.Exit(1)
-		}
-		client := mustGetClient()
-		err := client.DeleteDefaultPermission(orgName, prototypeID)
-		if err != nil {
-			fmt.Printf("Error deleting default permission: %v\n", err)
-			os.Exit(1)
-		}
-		fmt.Println("Default permission deleted successfully")
 	},
 }
 
@@ -945,9 +890,6 @@ func init() {
 	organizationCmd.AddCommand(getMemberCmd)
 	organizationCmd.AddCommand(collaboratorsCmd)
 	organizationCmd.AddCommand(orgRepositoriesCmd)
-	organizationCmd.AddCommand(defaultPermissionsCmd)
-	organizationCmd.AddCommand(createDefaultPermissionCmd)
-	organizationCmd.AddCommand(deleteDefaultPermissionCmd)
 	organizationCmd.AddCommand(proxyCacheCmd)
 	organizationCmd.AddCommand(createProxyCacheCmd)
 	organizationCmd.AddCommand(deleteProxyCacheCmd)
@@ -983,7 +925,6 @@ func init() {
 	// Register persistent and command-specific flags
 	initOrgPersistentFlags()
 	initOrgMemberFlags()
-	initOrgPermissionFlags()
 	initOrgProxyCacheFlags()
 	initOrgRobotFlags()
 	initOrgApplicationFlags()
@@ -1055,33 +996,6 @@ func initOrgMemberFlags() {
 		fmt.Printf("Error marking member flag as required: %v\n", err)
 		os.Exit(1)
 	}
-}
-
-func initOrgPermissionFlags() {
-	// create-default-permission flags
-	createDefaultPermissionCmd.Flags().StringVar(&role, "role", "", "Permission role")
-	if err := createDefaultPermissionCmd.MarkFlagRequired("role"); err != nil {
-		fmt.Printf("Error marking role flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	createDefaultPermissionCmd.Flags().StringVar(&delegateType, "delegate-type", "", "Delegate type")
-	if err := createDefaultPermissionCmd.MarkFlagRequired("delegate-type"); err != nil {
-		fmt.Printf("Error marking delegate-type flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	createDefaultPermissionCmd.Flags().StringVar(&delegateName, "delegate-name", "", "Delegate name")
-	if err := createDefaultPermissionCmd.MarkFlagRequired("delegate-name"); err != nil {
-		fmt.Printf("Error marking delegate-name flag as required: %v\n", err)
-		os.Exit(1)
-	}
-
-	// delete-default-permission flags
-	deleteDefaultPermissionCmd.Flags().StringVar(&prototypeID, "prototype-id", "", "Prototype ID")
-	if err := deleteDefaultPermissionCmd.MarkFlagRequired("prototype-id"); err != nil {
-		fmt.Printf("Error marking prototype-id flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	deleteDefaultPermissionCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm deletion")
 }
 
 func initOrgProxyCacheFlags() {
