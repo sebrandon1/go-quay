@@ -28,12 +28,12 @@ func (c *Client) GetOrganizationBilling(orgname string) (*BillingInfo, error) {
 	// Get new request
 	req, err := newRequest("GET", c.buildURL("/organization/%s/plan", orgname), nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get organization billing request: %w", err)
 	}
 
 	var billing BillingInfo
 	if err := c.get(req, &billing); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get organization billing: %w", err)
 	}
 
 	return &billing, nil
@@ -44,12 +44,12 @@ func (c *Client) GetUserBilling() (*BillingInfo, error) {
 	// Get new request
 	req, err := newRequest("GET", c.BaseURL+"/user/plan", nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get user billing request: %w", err)
 	}
 
 	var billing BillingInfo
 	if err := c.get(req, &billing); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get user billing: %w", err)
 	}
 
 	return &billing, nil
@@ -60,12 +60,12 @@ func (c *Client) GetOrganizationSubscription(orgname string) (*Subscription, err
 	// Get new request
 	req, err := newRequest("GET", c.buildURL("/organization/%s/plan", orgname), nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get organization subscription request: %w", err)
 	}
 
 	var subscription Subscription
 	if err := c.get(req, &subscription); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get organization subscription: %w", err)
 	}
 
 	return &subscription, nil
@@ -76,12 +76,12 @@ func (c *Client) GetUserSubscription() (*Subscription, error) {
 	// Get new request
 	req, err := newRequest("GET", c.BaseURL+"/user/plan", nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get user subscription request: %w", err)
 	}
 
 	var subscription Subscription
 	if err := c.get(req, &subscription); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get user subscription: %w", err)
 	}
 
 	return &subscription, nil
@@ -92,14 +92,14 @@ func (c *Client) GetOrganizationInvoices(orgname string) ([]Invoice, error) {
 	// Get new request
 	req, err := newRequest("GET", c.buildURL("/organization/%s/invoices", orgname), nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get organization invoices request: %w", err)
 	}
 
 	var invoicesResp struct {
 		Invoices []Invoice `json:"invoices"`
 	}
 	if err := c.get(req, &invoicesResp); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get organization invoices: %w", err)
 	}
 
 	return invoicesResp.Invoices, nil
@@ -115,14 +115,14 @@ func (c *Client) GetAvailablePlans() ([]Subscription, error) {
 	// Get new request
 	req, err := newRequest("GET", c.BaseURL+"/plans", nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get available plans request: %w", err)
 	}
 
 	var plansResp struct {
 		Plans []Subscription `json:"plans"`
 	}
 	if err := c.get(req, &plansResp); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get available plans: %w", err)
 	}
 
 	return plansResp.Plans, nil

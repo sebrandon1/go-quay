@@ -15,6 +15,7 @@ All log endpoints support pagination via next_page parameter.
 package lib
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -45,7 +46,7 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 	// Get new request
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/aggregatelogs", namespace, repository), nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get repository aggregate logs request: %w", err)
 	}
 
 	// Set query parameters
@@ -56,7 +57,7 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 
 	var logs AggregatedLogs
 	if err := c.get(req, &logs); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get repository aggregate logs: %w", err)
 	}
 
 	return &logs, nil
@@ -66,14 +67,14 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 func (c *Client) GetLogs(namespace, repository, nextPage, startDate, endDate string) (*Logs, error) {
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/logs", namespace, repository), nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get repository logs request: %w", err)
 	}
 
 	addLogQueryParams(req, nextPage, startDate, endDate)
 
 	var logs Logs
 	if err := c.get(req, &logs); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get repository logs: %w", err)
 	}
 
 	return &logs, nil
@@ -83,14 +84,14 @@ func (c *Client) GetLogs(namespace, repository, nextPage, startDate, endDate str
 func (c *Client) GetOrganizationLogs(orgname, nextPage, startDate, endDate string) (*Logs, error) {
 	req, err := newRequest("GET", c.buildURL("/organization/%s/logs", orgname), nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get organization logs request: %w", err)
 	}
 
 	addLogQueryParams(req, nextPage, startDate, endDate)
 
 	var logs Logs
 	if err := c.get(req, &logs); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get organization logs: %w", err)
 	}
 
 	return &logs, nil
@@ -100,7 +101,7 @@ func (c *Client) GetOrganizationLogs(orgname, nextPage, startDate, endDate strin
 func (c *Client) GetOrganizationAggregatedLogs(orgname, startDate, endDate string) (*AggregatedLogs, error) {
 	req, err := newRequest("GET", c.buildURL("/organization/%s/aggregatelogs", orgname), nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get organization aggregate logs request: %w", err)
 	}
 
 	addQueryParams(req, map[string]string{
@@ -110,7 +111,7 @@ func (c *Client) GetOrganizationAggregatedLogs(orgname, startDate, endDate strin
 
 	var logs AggregatedLogs
 	if err := c.get(req, &logs); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get organization aggregate logs: %w", err)
 	}
 
 	return &logs, nil
@@ -120,11 +121,11 @@ func (c *Client) GetOrganizationAggregatedLogs(orgname, startDate, endDate strin
 func (c *Client) ExportOrganizationLogs(orgname string, request *ExportLogsRequest) error {
 	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/exportlogs", orgname), request)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create export organization logs request: %w", err)
 	}
 
 	if err := c.post(req, nil); err != nil {
-		return err
+		return fmt.Errorf("failed to export organization logs: %w", err)
 	}
 
 	return nil
@@ -134,14 +135,14 @@ func (c *Client) ExportOrganizationLogs(orgname string, request *ExportLogsReque
 func (c *Client) GetUserLogs(nextPage, startDate, endDate string) (*Logs, error) {
 	req, err := newRequest("GET", c.buildURL("/user/logs"), nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get user logs request: %w", err)
 	}
 
 	addLogQueryParams(req, nextPage, startDate, endDate)
 
 	var logs Logs
 	if err := c.get(req, &logs); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get user logs: %w", err)
 	}
 
 	return &logs, nil
@@ -151,7 +152,7 @@ func (c *Client) GetUserLogs(nextPage, startDate, endDate string) (*Logs, error)
 func (c *Client) GetUserAggregatedLogs(startDate, endDate string) (*AggregatedLogs, error) {
 	req, err := newRequest("GET", c.buildURL("/user/aggregatelogs"), nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create get user aggregate logs request: %w", err)
 	}
 
 	addQueryParams(req, map[string]string{
@@ -161,7 +162,7 @@ func (c *Client) GetUserAggregatedLogs(startDate, endDate string) (*AggregatedLo
 
 	var logs AggregatedLogs
 	if err := c.get(req, &logs); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get user aggregate logs: %w", err)
 	}
 
 	return &logs, nil
@@ -171,11 +172,11 @@ func (c *Client) GetUserAggregatedLogs(startDate, endDate string) (*AggregatedLo
 func (c *Client) ExportUserLogs(request *ExportLogsRequest) error {
 	req, err := newRequestWithBody("POST", c.buildURL("/user/exportlogs"), request)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create export user logs request: %w", err)
 	}
 
 	if err := c.post(req, nil); err != nil {
-		return err
+		return fmt.Errorf("failed to export user logs: %w", err)
 	}
 
 	return nil
@@ -185,11 +186,11 @@ func (c *Client) ExportUserLogs(request *ExportLogsRequest) error {
 func (c *Client) ExportRepositoryLogs(namespace, repository string, request *ExportLogsRequest) error {
 	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/exportlogs", namespace, repository), request)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create export repository logs request: %w", err)
 	}
 
 	if err := c.post(req, nil); err != nil {
-		return err
+		return fmt.Errorf("failed to export repository logs: %w", err)
 	}
 
 	return nil
