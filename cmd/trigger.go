@@ -13,7 +13,6 @@ This file contains the commands for the Trigger API:
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -54,12 +53,7 @@ var triggerListCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(triggers, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(triggers)
 	},
 }
 
@@ -82,12 +76,7 @@ var triggerInfoCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(trigger, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(trigger)
 	},
 }
 
@@ -133,12 +122,7 @@ var triggerEnableCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(trigger, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(trigger)
 	},
 }
 
@@ -161,12 +145,7 @@ var triggerDisableCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(trigger, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(trigger)
 	},
 }
 
@@ -196,12 +175,7 @@ var triggerStartCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(build, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(build)
 	},
 }
 
@@ -229,12 +203,7 @@ var triggerActivateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		output, err := json.MarshalIndent(trigger, "", "  ")
-		if err != nil {
-			fmt.Println("Error marshaling response:", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(output))
+		printJSON(trigger)
 	},
 }
 
