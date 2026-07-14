@@ -38,6 +38,7 @@ import (
 )
 
 const maxErrorBodySize = 1 << 20 // 1 MB
+const queryValueTrue = "true"
 
 // DefaultQuayURL is the default Quay.io API base URL.
 const DefaultQuayURL = "https://quay.io/api/v1"
@@ -172,6 +173,14 @@ func (c *Client) delete(req *http.Request) error {
 	}
 
 	return nil
+}
+
+func addQueryParams(req *http.Request, params map[string]string) {
+	q := req.URL.Query()
+	for key, value := range params {
+		q.Add(key, value)
+	}
+	req.URL.RawQuery = q.Encode()
 }
 
 func decodeJSON(r io.Reader, v any) error {

@@ -67,14 +67,14 @@ func (c *Client) GetEntities(prefix string, includeOrgs, includeTeams bool) (*En
 		return nil, fmt.Errorf("failed to create get entities request: %w", err)
 	}
 
-	q := req.URL.Query()
+	params := map[string]string{}
 	if includeOrgs {
-		q.Add("includeOrgs", "true")
+		params["includeOrgs"] = queryValueTrue
 	}
 	if includeTeams {
-		q.Add("includeTeams", "true")
+		params["includeTeams"] = queryValueTrue
 	}
-	req.URL.RawQuery = q.Encode()
+	addQueryParams(req, params)
 
 	var entities Entities
 	if err := c.get(req, &entities); err != nil {

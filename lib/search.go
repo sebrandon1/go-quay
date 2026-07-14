@@ -14,21 +14,20 @@ package lib
 
 import (
 	"fmt"
-	"net/url"
 )
 
 // SearchRepositories searches for repositories matching the query
 func (c *Client) SearchRepositories(query string, page int) (*SearchRepositoryResult, error) {
-	params := url.Values{}
-	params.Add("query", query)
-	if page > 0 {
-		params.Add("page", fmt.Sprintf("%d", page))
-	}
-
-	req, err := newRequest("GET", fmt.Sprintf("%s/find/repositories?%s", c.BaseURL, params.Encode()), nil)
+	req, err := newRequest("GET", c.BaseURL+"/find/repositories", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search repositories request: %w", err)
 	}
+
+	params := map[string]string{"query": query}
+	if page > 0 {
+		params["page"] = fmt.Sprintf("%d", page)
+	}
+	addQueryParams(req, params)
 
 	var result SearchRepositoryResult
 	if err := c.get(req, &result); err != nil {
@@ -40,13 +39,12 @@ func (c *Client) SearchRepositories(query string, page int) (*SearchRepositoryRe
 
 // SearchAll searches for all entity types (repositories, users, organizations, teams, robots)
 func (c *Client) SearchAll(query string) (*SearchAllResult, error) {
-	params := url.Values{}
-	params.Add("query", query)
-
-	req, err := newRequest("GET", fmt.Sprintf("%s/find/all?%s", c.BaseURL, params.Encode()), nil)
+	req, err := newRequest("GET", c.BaseURL+"/find/all", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search all request: %w", err)
 	}
+
+	addQueryParams(req, map[string]string{"query": query})
 
 	var result SearchAllResult
 	if err := c.get(req, &result); err != nil {

@@ -23,15 +23,6 @@ const (
 	endTimeParam   = "endtime"
 )
 
-// addQueryParams adds query parameters to a request URL.
-func addQueryParams(req *http.Request, params map[string]string) {
-	q := req.URL.Query()
-	for key, value := range params {
-		q.Add(key, value)
-	}
-	req.URL.RawQuery = q.Encode()
-}
-
 // addLogQueryParams adds optional pagination and date range params to a log request.
 func addLogQueryParams(req *http.Request, nextPage, startDate, endDate string) {
 	params := map[string]string{}
