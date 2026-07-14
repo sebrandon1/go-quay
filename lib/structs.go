@@ -20,7 +20,7 @@ Log Types:
   - LogEntry, AggregatedLogEntry, Logs, AggregatedLogs - Logging data
 
 Billing Types:
-  - BillingInfo, Subscription, PaymentMethod, Invoice - Billing and subscription data
+  - BillingInfo, Subscription, Invoice - Billing and subscription data
 
 Organization Types:
   - Organization, OrganizationMember, OrganizationMembers, OrganizationRepository, OrganizationRepositories
@@ -181,18 +181,6 @@ type MarketplaceSubscription struct {
 	ExpiresAt     string `json:"expires_at,omitempty"`
 	PlanID        string `json:"plan_id,omitempty"`
 	VendorAccount string `json:"vendor_account,omitempty"`
-}
-
-// PaymentMethod represents a payment method.
-type PaymentMethod struct {
-	ID          string `json:"id,omitempty"`
-	Type        string `json:"type,omitempty"`
-	LastFour    string `json:"last_four,omitempty"`
-	Brand       string `json:"brand,omitempty"`
-	ExpiryMonth int    `json:"expiry_month,omitempty"`
-	ExpiryYear  int    `json:"expiry_year,omitempty"`
-	IsDefault   bool   `json:"is_default,omitempty"`
-	CreatedAt   string `json:"created_at,omitempty"`
 }
 
 // Invoice represents a billing invoice.

@@ -15,7 +15,7 @@ User Billing:
 Plans:
   - GET /api/v1/plans                                - GetAvailablePlans()
 
-Note: User invoice endpoints and payment method endpoints are not available in Quay API.
+Note: User invoice endpoint is not available in Quay API.
 */
 package lib
 
@@ -109,37 +109,6 @@ func (c *Client) GetOrganizationInvoices(orgname string) ([]Invoice, error) {
 func (c *Client) GetUserInvoices() ([]Invoice, error) {
 	return nil, fmt.Errorf("user invoices endpoint not available in Quay API")
 }
-
-// Original implementation commented out due to 404 errors:
-// func (c *Client) GetUserInvoices() ([]Invoice, error) {
-// 	// Get new request
-// 	req, err := newRequest("GET", c.BaseURL+"/user/invoices", nil)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	var invoicesResp struct {
-// 		Invoices []Invoice `json:"invoices"`
-// 	}
-// 	if err := c.get(req, &invoicesResp); err != nil {
-// 		return nil, err
-// 	}
-//
-// 	return invoicesResp.Invoices, nil
-// }
-
-// NOTE: The following endpoints don't exist in the actual Quay API
-// They are commented out to prevent API errors
-
-// GetOrganizationPaymentMethods - NOT AVAILABLE in Quay API
-// func (c *Client) GetOrganizationPaymentMethods(orgname string) ([]PaymentMethod, error) {
-// 	return nil, fmt.Errorf("payment methods endpoint not available in Quay API")
-// }
-
-// GetUserPaymentMethods - NOT AVAILABLE in Quay API
-// func (c *Client) GetUserPaymentMethods() ([]PaymentMethod, error) {
-// 	return nil, fmt.Errorf("payment methods endpoint not available in Quay API")
-// }
 
 // GetAvailablePlans returns available subscription plans
 func (c *Client) GetAvailablePlans() ([]Subscription, error) {
