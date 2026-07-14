@@ -14,7 +14,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -35,7 +34,7 @@ var triggerCmd = &cobra.Command{
 	Short: "Manage repository build triggers",
 	Long: `Manage build triggers for repositories.
 
-Build triggers allow automated image builds when code is pushed to 
+Build triggers allow automated image builds when code is pushed to
 connected source repositories like GitHub, GitLab, or Bitbucket.`,
 }
 
@@ -44,16 +43,18 @@ var triggerListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List all build triggers for a repository",
 	Long:  `List all build triggers configured for a repository.`,
-	Run: func(_ *cobra.Command, _ []string) {
-		client := mustGetClient()
+	RunE: func(_ *cobra.Command, _ []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		triggers, err := client.GetTriggers(triggerNamespace, triggerRepository)
 		if err != nil {
-			fmt.Println("Error getting triggers:", err)
-			os.Exit(1)
+			return fmt.Errorf("getting triggers: %w", err)
 		}
 
-		printJSON(triggers)
+		return printJSON(triggers)
 	},
 }
 
@@ -62,21 +63,22 @@ var triggerInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get details of a specific build trigger",
 	Long:  `Get detailed information about a specific build trigger by its UUID.`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if triggerUUID == "" {
-			fmt.Println("Error: --uuid is required")
-			os.Exit(1)
+			return fmt.Errorf("--uuid is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		trigger, err := client.GetTrigger(triggerNamespace, triggerRepository, triggerUUID)
 		if err != nil {
-			fmt.Println("Error getting trigger:", err)
-			os.Exit(1)
+			return fmt.Errorf("getting trigger: %w", err)
 		}
 
-		printJSON(trigger)
+		return printJSON(trigger)
 	},
 }
 
@@ -85,21 +87,23 @@ var triggerDeleteCmd = &cobra.Command{
 	Use:   subcmdDelete,
 	Short: "Delete a build trigger",
 	Long:  `Delete a build trigger from a repository.`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if triggerUUID == "" {
-			fmt.Println("Error: --uuid is required")
-			os.Exit(1)
+			return fmt.Errorf("--uuid is required")
 		}
 
-		client := mustGetClient()
-
-		err := client.DeleteTrigger(triggerNamespace, triggerRepository, triggerUUID)
+		client, err := getClient()
 		if err != nil {
-			fmt.Println("Error deleting trigger:", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeleteTrigger(triggerNamespace, triggerRepository, triggerUUID)
+		if err != nil {
+			return fmt.Errorf("deleting trigger: %w", err)
 		}
 
 		fmt.Printf("Trigger %s deleted successfully\n", triggerUUID)
+		return nil
 	},
 }
 
@@ -108,21 +112,22 @@ var triggerEnableCmd = &cobra.Command{
 	Use:   "enable",
 	Short: "Enable a build trigger",
 	Long:  `Enable a build trigger for a repository.`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if triggerUUID == "" {
-			fmt.Println("Error: --uuid is required")
-			os.Exit(1)
+			return fmt.Errorf("--uuid is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		trigger, err := client.UpdateTrigger(triggerNamespace, triggerRepository, triggerUUID, true)
 		if err != nil {
-			fmt.Println("Error enabling trigger:", err)
-			os.Exit(1)
+			return fmt.Errorf("enabling trigger: %w", err)
 		}
 
-		printJSON(trigger)
+		return printJSON(trigger)
 	},
 }
 
@@ -131,21 +136,22 @@ var triggerDisableCmd = &cobra.Command{
 	Use:   "disable",
 	Short: "Disable a build trigger",
 	Long:  `Disable a build trigger for a repository.`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if triggerUUID == "" {
-			fmt.Println("Error: --uuid is required")
-			os.Exit(1)
+			return fmt.Errorf("--uuid is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		trigger, err := client.UpdateTrigger(triggerNamespace, triggerRepository, triggerUUID, false)
 		if err != nil {
-			fmt.Println("Error disabling trigger:", err)
-			os.Exit(1)
+			return fmt.Errorf("disabling trigger: %w", err)
 		}
 
-		printJSON(trigger)
+		return printJSON(trigger)
 	},
 }
 
@@ -154,13 +160,15 @@ var triggerStartCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Manually start a build from a trigger",
 	Long:  `Manually start a build using a configured trigger.`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if triggerUUID == "" {
-			fmt.Println("Error: --uuid is required")
-			os.Exit(1)
+			return fmt.Errorf("--uuid is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		var triggerReq *lib.ManualTriggerRequest
 		if triggerCommitSHA != "" {
@@ -171,11 +179,10 @@ var triggerStartCmd = &cobra.Command{
 
 		build, err := client.StartTriggerBuild(triggerNamespace, triggerRepository, triggerUUID, triggerReq)
 		if err != nil {
-			fmt.Println("Error starting trigger build:", err)
-			os.Exit(1)
+			return fmt.Errorf("starting trigger build: %w", err)
 		}
 
-		printJSON(build)
+		return printJSON(build)
 	},
 }
 
@@ -184,13 +191,15 @@ var triggerActivateCmd = &cobra.Command{
 	Use:   "activate",
 	Short: "Activate a build trigger with configuration",
 	Long:  `Activate a build trigger with the specified configuration.`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if triggerUUID == "" {
-			fmt.Println("Error: --uuid is required")
-			os.Exit(1)
+			return fmt.Errorf("--uuid is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		activateReq := &lib.ActivateTriggerRequest{}
 		if triggerPullRobot != "" {
@@ -199,11 +208,10 @@ var triggerActivateCmd = &cobra.Command{
 
 		trigger, err := client.ActivateTrigger(triggerNamespace, triggerRepository, triggerUUID, activateReq)
 		if err != nil {
-			fmt.Println("Error activating trigger:", err)
-			os.Exit(1)
+			return fmt.Errorf("activating trigger: %w", err)
 		}
 
-		printJSON(trigger)
+		return printJSON(trigger)
 	},
 }
 
@@ -211,21 +219,22 @@ var triggerBuildsCmd = &cobra.Command{
 	Use:   "builds",
 	Short: "List builds for a trigger",
 	Long:  `List builds that were started by a specific trigger.`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if triggerUUID == "" {
-			fmt.Println("Error: --uuid is required")
-			os.Exit(1)
+			return fmt.Errorf("--uuid is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		builds, err := client.GetTriggerBuilds(triggerNamespace, triggerRepository, triggerUUID, triggerBuildLimit)
 		if err != nil {
-			fmt.Println("Error getting trigger builds:", err)
-			os.Exit(1)
+			return fmt.Errorf("getting trigger builds: %w", err)
 		}
 
-		printJSON(builds)
+		return printJSON(builds)
 	},
 }
 

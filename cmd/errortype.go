@@ -8,7 +8,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -24,21 +23,22 @@ var errorTypeCmd = &cobra.Command{
 	Long: `Get detailed information about a specific error type.
 
 This endpoint provides details about error types that can be returned by the Quay.io API.`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if errorTypeName == "" {
-			fmt.Println("Error: --type is required")
-			os.Exit(1)
+			return fmt.Errorf("--type is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		errType, err := client.GetErrorType(errorTypeName)
 		if err != nil {
-			fmt.Println("Error getting error type:", err)
-			os.Exit(1)
+			return fmt.Errorf("getting error type: %w", err)
 		}
 
-		printJSON(errType)
+		return printJSON(errType)
 	},
 }
 

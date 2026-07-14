@@ -14,7 +14,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -44,16 +43,18 @@ var repotokenListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List all repository tokens",
 	Long:  `List all tokens for a repository. (DEPRECATED - use robot accounts)`,
-	Run: func(_ *cobra.Command, _ []string) {
-		client := mustGetClient()
+	RunE: func(_ *cobra.Command, _ []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		tokens, err := client.GetRepoTokens(repoTokenNamespace, repoTokenRepository) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
-			fmt.Println("Error getting tokens:", err)
-			os.Exit(1)
+			return fmt.Errorf("getting tokens: %w", err)
 		}
 
-		printJSON(tokens)
+		return printJSON(tokens)
 	},
 }
 
@@ -62,21 +63,22 @@ var repotokenInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get a specific token",
 	Long:  `Get detailed information about a specific repository token. (DEPRECATED - use robot accounts)`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if repoTokenCode == "" {
-			fmt.Println("Error: --code is required")
-			os.Exit(1)
+			return fmt.Errorf("--code is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		repoToken, err := client.GetRepoToken(repoTokenNamespace, repoTokenRepository, repoTokenCode) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
-			fmt.Println("Error getting token:", err)
-			os.Exit(1)
+			return fmt.Errorf("getting token: %w", err)
 		}
 
-		printJSON(repoToken)
+		return printJSON(repoToken)
 	},
 }
 
@@ -85,13 +87,15 @@ var repotokenCreateCmd = &cobra.Command{
 	Use:   subcmdCreate,
 	Short: "Create a new token",
 	Long:  `Create a new repository token. (DEPRECATED - use robot accounts)`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if repoTokenName == "" {
-			fmt.Println("Error: --name is required")
-			os.Exit(1)
+			return fmt.Errorf("--name is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		createReq := &lib.CreateRepoTokenRequest{
 			FriendlyName: repoTokenName,
@@ -99,11 +103,10 @@ var repotokenCreateCmd = &cobra.Command{
 
 		repoToken, err := client.CreateRepoToken(repoTokenNamespace, repoTokenRepository, createReq) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
-			fmt.Println("Error creating token:", err)
-			os.Exit(1)
+			return fmt.Errorf("creating token: %w", err)
 		}
 
-		printJSON(repoToken)
+		return printJSON(repoToken)
 	},
 }
 
@@ -112,17 +115,18 @@ var repotokenUpdateCmd = &cobra.Command{
 	Use:   subcmdUpdate,
 	Short: "Update a token",
 	Long:  `Update a repository token's role. (DEPRECATED - use robot accounts)`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if repoTokenCode == "" {
-			fmt.Println("Error: --code is required")
-			os.Exit(1)
+			return fmt.Errorf("--code is required")
 		}
 		if repoTokenRole == "" {
-			fmt.Println("Error: --role is required")
-			os.Exit(1)
+			return fmt.Errorf("--role is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		updateReq := &lib.UpdateRepoTokenRequest{
 			Role: repoTokenRole,
@@ -130,11 +134,10 @@ var repotokenUpdateCmd = &cobra.Command{
 
 		repoToken, err := client.UpdateRepoToken(repoTokenNamespace, repoTokenRepository, repoTokenCode, updateReq) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
-			fmt.Println("Error updating token:", err)
-			os.Exit(1)
+			return fmt.Errorf("updating token: %w", err)
 		}
 
-		printJSON(repoToken)
+		return printJSON(repoToken)
 	},
 }
 
@@ -143,25 +146,26 @@ var repotokenDeleteCmd = &cobra.Command{
 	Use:   subcmdDelete,
 	Short: "Delete a token",
 	Long:  `Delete a repository token. (DEPRECATED - use robot accounts)`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if repoTokenCode == "" {
-			fmt.Println("Error: --code is required")
-			os.Exit(1)
+			return fmt.Errorf("--code is required")
 		}
 		if !confirmTokenDelete {
-			fmt.Println("Error: --confirm is required to delete a token")
-			os.Exit(1)
+			return fmt.Errorf("--confirm is required to delete a token")
 		}
 
-		client := mustGetClient()
-
-		err := client.DeleteRepoToken(repoTokenNamespace, repoTokenRepository, repoTokenCode) //nolint:staticcheck // Intentionally using deprecated API
+		client, err := getClient()
 		if err != nil {
-			fmt.Println("Error deleting token:", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeleteRepoToken(repoTokenNamespace, repoTokenRepository, repoTokenCode) //nolint:staticcheck // Intentionally using deprecated API
+		if err != nil {
+			return fmt.Errorf("deleting token: %w", err)
 		}
 
 		fmt.Printf("Token %s deleted successfully\n", repoTokenCode)
+		return nil
 	},
 }
 

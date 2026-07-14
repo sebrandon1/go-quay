@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -56,17 +55,19 @@ var notificationListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List notifications for a repository",
 	Long:  `List all notifications (webhooks) for the specified repository.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		notifications, err := client.GetNotifications(notificationNamespace, notificationRepository)
 		if err != nil {
-			fmt.Printf("Error getting notifications: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting notifications: %w", err)
 		}
 
 		fmt.Printf("Notifications for %s/%s:\n", notificationNamespace, notificationRepository)
-		printJSON(notifications)
+		return printJSON(notifications)
 	},
 }
 
@@ -75,17 +76,19 @@ var notificationInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get notification details",
 	Long:  `Get detailed information about a specific notification.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		notification, err := client.GetNotification(notificationNamespace, notificationRepository, notificationUUID)
 		if err != nil {
-			fmt.Printf("Error getting notification: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting notification: %w", err)
 		}
 
 		fmt.Printf("Notification: %s\n", notificationUUID)
-		printJSON(notification)
+		return printJSON(notification)
 	},
 }
 
@@ -98,8 +101,11 @@ var notificationCreateCmd = &cobra.Command{
 For webhook method, provide the --url flag with the webhook endpoint.
 For email method, provide the --url flag with the email address.
 For slack method, provide the --url flag with the Slack webhook URL.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		config := map[string]interface{}{}
 		switch notificationMethod {
@@ -120,12 +126,11 @@ For slack method, provide the --url flag with the Slack webhook URL.`,
 
 		notification, err := client.CreateNotification(notificationNamespace, notificationRepository, notificationReq)
 		if err != nil {
-			fmt.Printf("Error creating notification: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating notification: %w", err)
 		}
 
 		fmt.Printf("Notification created successfully!\n")
-		printJSON(notification)
+		return printJSON(notification)
 	},
 }
 
@@ -134,22 +139,23 @@ var notificationDeleteCmd = &cobra.Command{
 	Use:   subcmdDelete,
 	Short: "Delete a notification",
 	Long:  `Delete a notification from the repository. This action cannot be undone.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirmNotificationDel {
-			fmt.Printf("Are you sure you want to delete notification '%s'? This action cannot be undone.\n", notificationUUID)
-			fmt.Println("Use --confirm to proceed with deletion.")
-			os.Exit(1)
+			return fmt.Errorf("are you sure you want to delete notification '%s'? This action cannot be undone.\nUse --confirm to proceed with deletion", notificationUUID)
 		}
 
-		client := mustGetClient()
-
-		err := client.DeleteNotification(notificationNamespace, notificationRepository, notificationUUID)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting notification: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeleteNotification(notificationNamespace, notificationRepository, notificationUUID)
+		if err != nil {
+			return fmt.Errorf("deleting notification: %w", err)
 		}
 
 		fmt.Printf("Notification '%s' deleted successfully.\n", notificationUUID)
+		return nil
 	},
 }
 
@@ -158,16 +164,19 @@ var notificationTestCmd = &cobra.Command{
 	Use:   "test",
 	Short: "Test a notification",
 	Long:  `Send a test event to the notification endpoint.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.TestNotification(notificationNamespace, notificationRepository, notificationUUID)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error testing notification: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.TestNotification(notificationNamespace, notificationRepository, notificationUUID)
+		if err != nil {
+			return fmt.Errorf("testing notification: %w", err)
 		}
 
 		fmt.Printf("Test event sent to notification '%s'.\n", notificationUUID)
+		return nil
 	},
 }
 
@@ -176,16 +185,19 @@ var notificationResetCmd = &cobra.Command{
 	Use:   "reset",
 	Short: "Reset notification failure count",
 	Long:  `Reset the failure count for a notification that has failed.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.ResetNotification(notificationNamespace, notificationRepository, notificationUUID)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error resetting notification: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.ResetNotification(notificationNamespace, notificationRepository, notificationUUID)
+		if err != nil {
+			return fmt.Errorf("resetting notification: %w", err)
 		}
 
 		fmt.Printf("Notification '%s' failure count reset.\n", notificationUUID)
+		return nil
 	},
 }
 
@@ -193,8 +205,11 @@ var notificationUpdateCmd = &cobra.Command{
 	Use:   subcmdUpdate,
 	Short: "Update a notification",
 	Long:  `Update an existing notification (webhook) configuration.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		config := map[string]interface{}{}
 		switch notificationMethod {
@@ -215,12 +230,11 @@ var notificationUpdateCmd = &cobra.Command{
 
 		notification, err := client.UpdateNotification(notificationNamespace, notificationRepository, notificationUUID, notificationReq)
 		if err != nil {
-			fmt.Printf("Error updating notification: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("updating notification: %w", err)
 		}
 
 		fmt.Printf("Notification '%s' updated successfully!\n", notificationUUID)
-		printJSON(notification)
+		return printJSON(notification)
 	},
 }
 
@@ -237,8 +251,8 @@ func init() {
 	// Global notification flags
 	notificationCmd.PersistentFlags().StringVarP(&notificationNamespace, "namespace", "n", "", "Repository namespace")
 	notificationCmd.PersistentFlags().StringVarP(&notificationRepository, "repository", "r", "", "Repository name")
-	markFlagRequired(notificationCmd.MarkPersistentFlagRequired("namespace"))
-	markFlagRequired(notificationCmd.MarkPersistentFlagRequired("repository"))
+	_ = notificationCmd.MarkPersistentFlagRequired("namespace")
+	_ = notificationCmd.MarkPersistentFlagRequired("repository")
 
 	initNotificationInfoFlags()
 	initNotificationCreateFlags()
@@ -254,12 +268,12 @@ func initNotificationUpdateFlags() {
 	notificationUpdateCmd.Flags().StringVarP(&notificationMethod, "method", "m", "", "Method (webhook, email, slack)")
 	notificationUpdateCmd.Flags().StringVar(&notificationURL, "url", "", "Webhook URL or email address")
 	notificationUpdateCmd.Flags().StringVar(&notificationTitle, "title", "", "Notification title")
-	markFlagRequired(notificationUpdateCmd.MarkFlagRequired("uuid"))
+	_ = notificationUpdateCmd.MarkFlagRequired("uuid")
 }
 
 func initNotificationInfoFlags() {
 	notificationInfoCmd.Flags().StringVarP(&notificationUUID, "uuid", "u", "", "Notification UUID")
-	markFlagRequired(notificationInfoCmd.MarkFlagRequired("uuid"))
+	_ = notificationInfoCmd.MarkFlagRequired("uuid")
 }
 
 func initNotificationCreateFlags() {
@@ -267,23 +281,23 @@ func initNotificationCreateFlags() {
 	notificationCreateCmd.Flags().StringVarP(&notificationMethod, "method", "m", "", "Method (webhook, email, slack)")
 	notificationCreateCmd.Flags().StringVar(&notificationURL, "url", "", "Webhook URL or email address")
 	notificationCreateCmd.Flags().StringVar(&notificationTitle, "title", "", "Notification title")
-	markFlagRequired(notificationCreateCmd.MarkFlagRequired("event"))
-	markFlagRequired(notificationCreateCmd.MarkFlagRequired("method"))
-	markFlagRequired(notificationCreateCmd.MarkFlagRequired("url"))
+	_ = notificationCreateCmd.MarkFlagRequired("event")
+	_ = notificationCreateCmd.MarkFlagRequired("method")
+	_ = notificationCreateCmd.MarkFlagRequired("url")
 }
 
 func initNotificationDeleteFlags() {
 	notificationDeleteCmd.Flags().StringVarP(&notificationUUID, "uuid", "u", "", "Notification UUID")
 	notificationDeleteCmd.Flags().BoolVar(&confirmNotificationDel, "confirm", false, "Confirm notification deletion")
-	markFlagRequired(notificationDeleteCmd.MarkFlagRequired("uuid"))
+	_ = notificationDeleteCmd.MarkFlagRequired("uuid")
 }
 
 func initNotificationTestFlags() {
 	notificationTestCmd.Flags().StringVarP(&notificationUUID, "uuid", "u", "", "Notification UUID")
-	markFlagRequired(notificationTestCmd.MarkFlagRequired("uuid"))
+	_ = notificationTestCmd.MarkFlagRequired("uuid")
 }
 
 func initNotificationResetFlags() {
 	notificationResetCmd.Flags().StringVarP(&notificationUUID, "uuid", "u", "", "Notification UUID")
-	markFlagRequired(notificationResetCmd.MarkFlagRequired("uuid"))
+	_ = notificationResetCmd.MarkFlagRequired("uuid")
 }

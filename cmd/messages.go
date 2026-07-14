@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -22,16 +21,18 @@ var messagesListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "Get system messages",
 	Long:  `Get system-wide messages including maintenance notifications and announcements.`,
-	Run: func(_ *cobra.Command, _ []string) {
-		client := mustGetClient()
+	RunE: func(_ *cobra.Command, _ []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		messages, err := client.GetMessages()
 		if err != nil {
-			fmt.Printf("Error getting messages: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting messages: %w", err)
 		}
 
-		printJSON(messages)
+		return printJSON(messages)
 	},
 }
 
@@ -39,17 +40,19 @@ var messagesCreateCmd = &cobra.Command{
 	Use:   subcmdCreate,
 	Short: "Create a system message",
 	Long:  `Create a new system-wide message.`,
-	Run: func(_ *cobra.Command, _ []string) {
-		client := mustGetClient()
+	RunE: func(_ *cobra.Command, _ []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		message, err := client.CreateMessage(messageContent, messageSeverity, messageMediaType)
 		if err != nil {
-			fmt.Printf("Error creating message: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating message: %w", err)
 		}
 
 		fmt.Println("Message created successfully!")
-		printJSON(message)
+		return printJSON(message)
 	},
 }
 
@@ -60,12 +63,6 @@ func init() {
 	messagesCreateCmd.Flags().StringVar(&messageContent, "content", "", "Message content")
 	messagesCreateCmd.Flags().StringVar(&messageSeverity, "severity", "", "Message severity (info, warning, error)")
 	messagesCreateCmd.Flags().StringVar(&messageMediaType, "media-type", "", "Media type for the message")
-	if err := messagesCreateCmd.MarkFlagRequired("content"); err != nil {
-		fmt.Printf("Error marking content flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := messagesCreateCmd.MarkFlagRequired("severity"); err != nil {
-		fmt.Printf("Error marking severity flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = messagesCreateCmd.MarkFlagRequired("content")
+	_ = messagesCreateCmd.MarkFlagRequired("severity")
 }

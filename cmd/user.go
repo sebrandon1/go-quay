@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -27,17 +26,19 @@ var userInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get current user information",
 	Long:  `Get detailed information about the currently authenticated user account.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		user, err := client.GetUser()
 		if err != nil {
-			fmt.Printf("Error getting user information: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting user information: %w", err)
 		}
 
 		fmt.Printf("User information for %s:\n", user.Username)
-		printJSON(user)
+		return printJSON(user)
 	},
 }
 
@@ -46,17 +47,19 @@ var userStarredCmd = &cobra.Command{
 	Use:   "starred",
 	Short: "List starred repositories",
 	Long:  `List all repositories starred by the current user.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		starred, err := client.GetStarredRepositories()
 		if err != nil {
-			fmt.Printf("Error getting starred repositories: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting starred repositories: %w", err)
 		}
 
 		fmt.Println("Starred repositories:")
-		printJSON(starred)
+		return printJSON(starred)
 	},
 }
 
@@ -65,16 +68,19 @@ var starRepoCmd = &cobra.Command{
 	Use:   "star",
 	Short: "Star a repository",
 	Long:  `Add a repository to your starred list for easy discovery.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.StarRepository(namespace, repository)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error starring repository: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.StarRepository(namespace, repository)
+		if err != nil {
+			return fmt.Errorf("starring repository: %w", err)
 		}
 
 		fmt.Printf("Successfully starred repository %s/%s\n", namespace, repository)
+		return nil
 	},
 }
 
@@ -83,16 +89,19 @@ var unstarRepoCmd = &cobra.Command{
 	Use:   "unstar",
 	Short: "Unstar a repository",
 	Long:  `Remove a repository from your starred list.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.UnstarRepository(namespace, repository)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error unstarring repository: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.UnstarRepository(namespace, repository)
+		if err != nil {
+			return fmt.Errorf("unstarring repository: %w", err)
 		}
 
 		fmt.Printf("Successfully unstarred repository %s/%s\n", namespace, repository)
+		return nil
 	},
 }
 
@@ -102,16 +111,18 @@ var userLookupCmd = &cobra.Command{
 	Use:   "lookup",
 	Short: "Look up a user by username",
 	Long:  `Get information about a specific user by their username.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		user, err := client.GetUserByUsername(lookupUsername)
 		if err != nil {
-			fmt.Printf("Error looking up user: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("looking up user: %w", err)
 		}
 
-		printJSON(user)
+		return printJSON(user)
 	},
 }
 
@@ -119,16 +130,18 @@ var userMarketplaceCmd = &cobra.Command{
 	Use:   "marketplace",
 	Short: "Get user marketplace information",
 	Long:  `Get marketplace subscription information for the current user.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		marketplace, err := client.GetUserMarketplace()
 		if err != nil {
-			fmt.Printf("Error getting user marketplace info: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting user marketplace info: %w", err)
 		}
 
-		printJSON(marketplace)
+		return printJSON(marketplace)
 	},
 }
 
@@ -143,32 +156,16 @@ func init() {
 	// Star command specific flags (requires repository context)
 	starRepoCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
 	starRepoCmd.Flags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
-	if err := starRepoCmd.MarkFlagRequired("namespace"); err != nil {
-		fmt.Printf("Error marking namespace flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := starRepoCmd.MarkFlagRequired("repository"); err != nil {
-		fmt.Printf("Error marking repository flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = starRepoCmd.MarkFlagRequired("namespace")
+	_ = starRepoCmd.MarkFlagRequired("repository")
 
 	// Unstar command specific flags (requires repository context)
 	unstarRepoCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
 	unstarRepoCmd.Flags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
-	if err := unstarRepoCmd.MarkFlagRequired("namespace"); err != nil {
-		fmt.Printf("Error marking namespace flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := unstarRepoCmd.MarkFlagRequired("repository"); err != nil {
-		fmt.Printf("Error marking repository flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = unstarRepoCmd.MarkFlagRequired("namespace")
+	_ = unstarRepoCmd.MarkFlagRequired("repository")
 
 	// Lookup command flags
 	userLookupCmd.Flags().StringVarP(&lookupUsername, "username", "u", "", "Username to look up")
-	if err := userLookupCmd.MarkFlagRequired("username"); err != nil {
-		fmt.Printf("Error marking username flag as required: %v\n", err)
-		os.Exit(1)
-	}
-
+	_ = userLookupCmd.MarkFlagRequired("username")
 }

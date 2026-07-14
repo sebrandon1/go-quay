@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -57,14 +56,16 @@ var orgInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get organization information",
 	Long:  `Get detailed information about an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		org, err := client.GetOrganization(orgName)
 		if err != nil {
-			fmt.Printf("Error getting organization: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting organization: %w", err)
 		}
-		printJSON(org)
+		return printJSON(org)
 	},
 }
 
@@ -73,14 +74,16 @@ var orgMembersCmd = &cobra.Command{
 	Use:   "members",
 	Short: "Get organization members",
 	Long:  `Get list of all members in an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		members, err := client.GetOrganizationMembers(orgName)
 		if err != nil {
-			fmt.Printf("Error getting organization members: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting organization members: %w", err)
 		}
-		printJSON(members)
+		return printJSON(members)
 	},
 }
 
@@ -89,14 +92,16 @@ var orgTeamsCmd = &cobra.Command{
 	Use:   "teams",
 	Short: "Get organization teams",
 	Long:  `Get list of all teams in an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		teams, err := client.GetTeams(orgName)
 		if err != nil {
-			fmt.Printf("Error getting organization teams: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting organization teams: %w", err)
 		}
-		printJSON(teams)
+		return printJSON(teams)
 	},
 }
 
@@ -105,14 +110,16 @@ var teamInfoCmd = &cobra.Command{
 	Use:   "team",
 	Short: "Get team information",
 	Long:  `Get detailed information about a specific team.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		team, err := client.GetTeam(orgName, teamName)
 		if err != nil {
-			fmt.Printf("Error getting team: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting team: %w", err)
 		}
-		printJSON(team)
+		return printJSON(team)
 	},
 }
 
@@ -121,14 +128,16 @@ var teamMembersCmd = &cobra.Command{
 	Use:   "team-members",
 	Short: "Get team members",
 	Long:  `Get list of all members in a specific team.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		members, err := client.GetTeamMembers(orgName, teamName)
 		if err != nil {
-			fmt.Printf("Error getting team members: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting team members: %w", err)
 		}
-		printJSON(members)
+		return printJSON(members)
 	},
 }
 
@@ -137,14 +146,16 @@ var orgRobotsCmd = &cobra.Command{
 	Use:   "robots",
 	Short: "Get organization robots",
 	Long:  `Get list of all robot accounts in an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		robots, err := client.GetRobotAccounts(orgName)
 		if err != nil {
-			fmt.Printf("Error getting organization robots: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting organization robots: %w", err)
 		}
-		printJSON(robots)
+		return printJSON(robots)
 	},
 }
 
@@ -153,14 +164,16 @@ var orgQuotaCmd = &cobra.Command{
 	Use:   "quota",
 	Short: "Get organization quota",
 	Long:  `Get quota information for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		quota, err := client.GetQuota(orgName)
 		if err != nil {
-			fmt.Printf("Error getting organization quota: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting organization quota: %w", err)
 		}
-		printJSON(quota)
+		return printJSON(quota)
 	},
 }
 
@@ -169,14 +182,16 @@ var autoPruneCmd = &cobra.Command{
 	Use:   "auto-prune",
 	Short: "Get auto-prune policies",
 	Long:  `Get list of auto-prune policies for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		policies, err := client.GetAutoPrunePolicies(orgName)
 		if err != nil {
-			fmt.Printf("Error getting auto-prune policies: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting auto-prune policies: %w", err)
 		}
-		printJSON(policies)
+		return printJSON(policies)
 	},
 }
 
@@ -185,14 +200,16 @@ var orgApplicationsCmd = &cobra.Command{
 	Use:   "applications",
 	Short: "Get organization applications",
 	Long:  `Get list of OAuth applications for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		applications, err := client.GetApplications(orgName)
 		if err != nil {
-			fmt.Printf("Error getting organization applications: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting organization applications: %w", err)
 		}
-		printJSON(applications)
+		return printJSON(applications)
 	},
 }
 
@@ -201,14 +218,16 @@ var createOrgCmd = &cobra.Command{
 	Use:   "create-org",
 	Short: "Create an organization",
 	Long:  `Create a new organization with the specified name and email.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		org, err := client.CreateOrganization(orgName, email)
 		if err != nil {
-			fmt.Printf("Error creating organization: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating organization: %w", err)
 		}
-		printJSON(org)
+		return printJSON(org)
 	},
 }
 
@@ -217,14 +236,16 @@ var updateOrgCmd = &cobra.Command{
 	Use:   "update-org",
 	Short: "Update an organization",
 	Long:  `Update an organization's email.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		org, err := client.UpdateOrganization(orgName, email)
 		if err != nil {
-			fmt.Printf("Error updating organization: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("updating organization: %w", err)
 		}
-		printJSON(org)
+		return printJSON(org)
 	},
 }
 
@@ -233,18 +254,20 @@ var deleteOrgCmd = &cobra.Command{
 	Use:   "delete-org",
 	Short: "Delete an organization",
 	Long:  `Delete an organization. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			fmt.Println("Error: must pass --confirm to delete an organization")
-			os.Exit(1)
+			return fmt.Errorf("must pass --confirm to delete an organization")
 		}
-		client := mustGetClient()
-		err := client.DeleteOrganization(orgName)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting organization: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.DeleteOrganization(orgName)
+		if err != nil {
+			return fmt.Errorf("deleting organization: %w", err)
 		}
 		fmt.Println("Organization deleted successfully")
+		return nil
 	},
 }
 
@@ -253,14 +276,17 @@ var addMemberCmd = &cobra.Command{
 	Use:   "add-member",
 	Short: "Add a member to an organization",
 	Long:  `Add a member to an organization by member name.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-		err := client.AddOrganizationMember(orgName, memberName)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error adding organization member: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.AddOrganizationMember(orgName, memberName)
+		if err != nil {
+			return fmt.Errorf("adding organization member: %w", err)
 		}
 		fmt.Println("Member added successfully")
+		return nil
 	},
 }
 
@@ -269,18 +295,20 @@ var removeMemberCmd = &cobra.Command{
 	Use:   "remove-member",
 	Short: "Remove a member from an organization",
 	Long:  `Remove a member from an organization. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			fmt.Println("Error: must pass --confirm to remove a member")
-			os.Exit(1)
+			return fmt.Errorf("must pass --confirm to remove a member")
 		}
-		client := mustGetClient()
-		err := client.RemoveOrganizationMember(orgName, memberName)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error removing organization member: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.RemoveOrganizationMember(orgName, memberName)
+		if err != nil {
+			return fmt.Errorf("removing organization member: %w", err)
 		}
 		fmt.Println("Member removed successfully")
+		return nil
 	},
 }
 
@@ -289,14 +317,16 @@ var getMemberCmd = &cobra.Command{
 	Use:   "member",
 	Short: "Get organization member information",
 	Long:  `Get detailed information about a specific organization member.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		member, err := client.GetOrganizationMember(orgName, memberName)
 		if err != nil {
-			fmt.Printf("Error getting organization member: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting organization member: %w", err)
 		}
-		printJSON(member)
+		return printJSON(member)
 	},
 }
 
@@ -305,14 +335,16 @@ var collaboratorsCmd = &cobra.Command{
 	Use:   "collaborators",
 	Short: "Get organization collaborators",
 	Long:  `Get list of collaborators for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		collaborators, err := client.GetOrganizationCollaborators(orgName)
 		if err != nil {
-			fmt.Printf("Error getting organization collaborators: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting organization collaborators: %w", err)
 		}
-		printJSON(collaborators)
+		return printJSON(collaborators)
 	},
 }
 
@@ -321,14 +353,16 @@ var orgRepositoriesCmd = &cobra.Command{
 	Use:   "repositories",
 	Short: "Get organization repositories",
 	Long:  `Get list of repositories for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		repos, err := client.GetOrganizationRepositories(orgName)
 		if err != nil {
-			fmt.Printf("Error getting organization repositories: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting organization repositories: %w", err)
 		}
-		printJSON(repos)
+		return printJSON(repos)
 	},
 }
 
@@ -337,14 +371,16 @@ var proxyCacheCmd = &cobra.Command{
 	Use:   "proxy-cache",
 	Short: "Get proxy cache configuration",
 	Long:  `Get proxy cache configuration for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		config, err := client.GetProxyCacheConfig(orgName)
 		if err != nil {
-			fmt.Printf("Error getting proxy cache config: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting proxy cache config: %w", err)
 		}
-		printJSON(config)
+		return printJSON(config)
 	},
 }
 
@@ -353,14 +389,16 @@ var createProxyCacheCmd = &cobra.Command{
 	Use:   "create-proxy-cache",
 	Short: "Create proxy cache configuration",
 	Long:  `Create proxy cache configuration for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		config, err := client.CreateProxyCacheConfig(orgName, upstreamRegistry, insecure, expiration)
 		if err != nil {
-			fmt.Printf("Error creating proxy cache config: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating proxy cache config: %w", err)
 		}
-		printJSON(config)
+		return printJSON(config)
 	},
 }
 
@@ -369,18 +407,20 @@ var deleteProxyCacheCmd = &cobra.Command{
 	Use:   "delete-proxy-cache",
 	Short: "Delete proxy cache configuration",
 	Long:  `Delete proxy cache configuration for an organization. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			fmt.Println("Error: must pass --confirm to delete proxy cache config")
-			os.Exit(1)
+			return fmt.Errorf("must pass --confirm to delete proxy cache config")
 		}
-		client := mustGetClient()
-		err := client.DeleteProxyCacheConfig(orgName)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting proxy cache config: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.DeleteProxyCacheConfig(orgName)
+		if err != nil {
+			return fmt.Errorf("deleting proxy cache config: %w", err)
 		}
 		fmt.Println("Proxy cache config deleted successfully")
+		return nil
 	},
 }
 
@@ -389,14 +429,16 @@ var orgRobotCmd = &cobra.Command{
 	Use:   "robot",
 	Short: "Get robot account information",
 	Long:  `Get detailed information about a specific robot account.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		robot, err := client.GetRobotAccount(orgName, robotShortname)
 		if err != nil {
-			fmt.Printf("Error getting robot account: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting robot account: %w", err)
 		}
-		printJSON(robot)
+		return printJSON(robot)
 	},
 }
 
@@ -405,14 +447,16 @@ var createRobotCmd = &cobra.Command{
 	Use:   "create-robot",
 	Short: "Create a robot account",
 	Long:  `Create a new robot account in an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		robot, err := client.CreateRobotAccount(orgName, robotShortname, description, nil)
 		if err != nil {
-			fmt.Printf("Error creating robot account: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating robot account: %w", err)
 		}
-		printJSON(robot)
+		return printJSON(robot)
 	},
 }
 
@@ -421,18 +465,20 @@ var deleteRobotCmd = &cobra.Command{
 	Use:   "delete-robot",
 	Short: "Delete a robot account",
 	Long:  `Delete a robot account from an organization. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			fmt.Println("Error: must pass --confirm to delete a robot account")
-			os.Exit(1)
+			return fmt.Errorf("must pass --confirm to delete a robot account")
 		}
-		client := mustGetClient()
-		err := client.DeleteRobotAccount(orgName, robotShortname)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting robot account: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.DeleteRobotAccount(orgName, robotShortname)
+		if err != nil {
+			return fmt.Errorf("deleting robot account: %w", err)
 		}
 		fmt.Println("Robot account deleted successfully")
+		return nil
 	},
 }
 
@@ -441,14 +487,16 @@ var regenerateRobotCmd = &cobra.Command{
 	Use:   "regenerate-robot",
 	Short: "Regenerate a robot account token",
 	Long:  `Regenerate the token for a robot account.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		robot, err := client.RegenerateRobotToken(orgName, robotShortname)
 		if err != nil {
-			fmt.Printf("Error regenerating robot token: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("regenerating robot token: %w", err)
 		}
-		printJSON(robot)
+		return printJSON(robot)
 	},
 }
 
@@ -457,14 +505,16 @@ var orgRobotPermissionsCmd = &cobra.Command{
 	Use:   "robot-permissions",
 	Short: "Get robot account permissions",
 	Long:  `Get permissions for a specific robot account.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		perms, err := client.GetRobotPermissions(orgName, robotShortname)
 		if err != nil {
-			fmt.Printf("Error getting robot permissions: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting robot permissions: %w", err)
 		}
-		printJSON(perms)
+		return printJSON(perms)
 	},
 }
 
@@ -473,14 +523,17 @@ var setRobotPermissionCmd = &cobra.Command{
 	Use:   "set-robot-permission",
 	Short: "Set robot repository permission",
 	Long:  `Set a robot account's permission on a repository.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-		err := client.SetRobotRepositoryPermission(orgName, robotShortname, repository, role)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error setting robot permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.SetRobotRepositoryPermission(orgName, robotShortname, repository, role)
+		if err != nil {
+			return fmt.Errorf("setting robot permission: %w", err)
 		}
 		fmt.Println("Robot permission set successfully")
+		return nil
 	},
 }
 
@@ -489,18 +542,20 @@ var removeRobotPermissionCmd = &cobra.Command{
 	Use:   "remove-robot-permission",
 	Short: "Remove robot repository permission",
 	Long:  `Remove a robot account's permission on a repository. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			fmt.Println("Error: must pass --confirm to remove a robot permission")
-			os.Exit(1)
+			return fmt.Errorf("must pass --confirm to remove a robot permission")
 		}
-		client := mustGetClient()
-		err := client.RemoveRobotRepositoryPermission(orgName, robotShortname, repository)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error removing robot permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.RemoveRobotRepositoryPermission(orgName, robotShortname, repository)
+		if err != nil {
+			return fmt.Errorf("removing robot permission: %w", err)
 		}
 		fmt.Println("Robot permission removed successfully")
+		return nil
 	},
 }
 
@@ -508,16 +563,18 @@ var removeRobotPermissionCmd = &cobra.Command{
 var orgRobotFederationGetCmd = &cobra.Command{
 	Use:   "robot-federation-get",
 	Short: "Get organization robot federation configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		federation, err := client.GetRobotFederation(orgName, robotShortname)
 		if err != nil {
-			fmt.Printf("Error getting robot federation: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting robot federation: %w", err)
 		}
 
-		printJSON(federation)
+		return printJSON(federation)
 	},
 }
 
@@ -525,20 +582,23 @@ var orgRobotFederationGetCmd = &cobra.Command{
 var orgRobotFederationCreateCmd = &cobra.Command{
 	Use:   "robot-federation-create",
 	Short: "Create or update organization robot federation configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		configs := []lib.RobotFederationConfig{
 			{Issuer: federationIssuer, Subject: federationSubject},
 		}
 
-		err := client.CreateRobotFederation(orgName, robotShortname, configs)
+		err = client.CreateRobotFederation(orgName, robotShortname, configs)
 		if err != nil {
-			fmt.Printf("Error creating robot federation: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating robot federation: %w", err)
 		}
 
 		fmt.Printf("Successfully configured federation for robot %s in org %s\n", robotShortname, orgName)
+		return nil
 	},
 }
 
@@ -546,16 +606,19 @@ var orgRobotFederationCreateCmd = &cobra.Command{
 var orgRobotFederationDeleteCmd = &cobra.Command{
 	Use:   "robot-federation-delete",
 	Short: "Delete organization robot federation configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.DeleteRobotFederation(orgName, robotShortname)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting robot federation: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeleteRobotFederation(orgName, robotShortname)
+		if err != nil {
+			return fmt.Errorf("deleting robot federation: %w", err)
 		}
 
 		fmt.Printf("Successfully deleted federation for robot %s in org %s\n", robotShortname, orgName)
+		return nil
 	},
 }
 
@@ -564,14 +627,16 @@ var applicationCmd = &cobra.Command{
 	Use:   "application",
 	Short: "Get application information",
 	Long:  `Get detailed information about a specific OAuth application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		app, err := client.GetApplication(orgName, clientID)
 		if err != nil {
-			fmt.Printf("Error getting application: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting application: %w", err)
 		}
-		printJSON(app)
+		return printJSON(app)
 	},
 }
 
@@ -580,14 +645,16 @@ var createApplicationCmd = &cobra.Command{
 	Use:   "create-application",
 	Short: "Create an OAuth application",
 	Long:  `Create a new OAuth application for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		app, err := client.CreateApplication(orgName, appName, description, applicationURI, redirectURI)
 		if err != nil {
-			fmt.Printf("Error creating application: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating application: %w", err)
 		}
-		printJSON(app)
+		return printJSON(app)
 	},
 }
 
@@ -596,14 +663,16 @@ var updateApplicationCmd = &cobra.Command{
 	Use:   "update-application",
 	Short: "Update an OAuth application",
 	Long:  `Update an existing OAuth application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		app, err := client.UpdateApplication(orgName, clientID, appName, description, applicationURI, redirectURI)
 		if err != nil {
-			fmt.Printf("Error updating application: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("updating application: %w", err)
 		}
-		printJSON(app)
+		return printJSON(app)
 	},
 }
 
@@ -612,18 +681,20 @@ var deleteApplicationCmd = &cobra.Command{
 	Use:   "delete-application",
 	Short: "Delete an OAuth application",
 	Long:  `Delete an OAuth application. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			fmt.Println("Error: must pass --confirm to delete an application")
-			os.Exit(1)
+			return fmt.Errorf("must pass --confirm to delete an application")
 		}
-		client := mustGetClient()
-		err := client.DeleteApplication(orgName, clientID)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting application: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.DeleteApplication(orgName, clientID)
+		if err != nil {
+			return fmt.Errorf("deleting application: %w", err)
 		}
 		fmt.Println("Application deleted successfully")
+		return nil
 	},
 }
 
@@ -632,14 +703,16 @@ var resetApplicationSecretCmd = &cobra.Command{
 	Use:   "reset-application-secret",
 	Short: "Reset application client secret",
 	Long:  `Reset the client secret for an OAuth application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		app, err := client.ResetApplicationClientSecret(orgName, clientID)
 		if err != nil {
-			fmt.Printf("Error resetting application secret: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("resetting application secret: %w", err)
 		}
-		printJSON(app)
+		return printJSON(app)
 	},
 }
 
@@ -648,14 +721,16 @@ var marketplaceCmd = &cobra.Command{
 	Use:   "marketplace",
 	Short: "Get organization marketplace information",
 	Long:  `Get marketplace information for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		marketplace, err := client.GetOrganizationMarketplace(orgName)
 		if err != nil {
-			fmt.Printf("Error getting marketplace info: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting marketplace info: %w", err)
 		}
-		printJSON(marketplace)
+		return printJSON(marketplace)
 	},
 }
 
@@ -664,14 +739,17 @@ var createMarketplaceSubscriptionCmd = &cobra.Command{
 	Use:   "create-marketplace-subscription",
 	Short: "Create a marketplace subscription",
 	Long:  `Create a marketplace subscription for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-		err := client.CreateOrganizationMarketplaceSubscription(orgName, &lib.MarketplaceSubscriptionRequest{SKU: sku, Quantity: quantity})
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error creating marketplace subscription: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.CreateOrganizationMarketplaceSubscription(orgName, &lib.MarketplaceSubscriptionRequest{SKU: sku, Quantity: quantity})
+		if err != nil {
+			return fmt.Errorf("creating marketplace subscription: %w", err)
 		}
 		fmt.Println("Marketplace subscription created successfully")
+		return nil
 	},
 }
 
@@ -680,18 +758,20 @@ var deleteMarketplaceSubscriptionCmd = &cobra.Command{
 	Use:   "delete-marketplace-subscription",
 	Short: "Delete a marketplace subscription",
 	Long:  `Delete a marketplace subscription. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			fmt.Println("Error: must pass --confirm to delete a marketplace subscription")
-			os.Exit(1)
+			return fmt.Errorf("must pass --confirm to delete a marketplace subscription")
 		}
-		client := mustGetClient()
-		err := client.DeleteOrganizationMarketplaceSubscription(orgName, subscriptionID)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting marketplace subscription: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.DeleteOrganizationMarketplaceSubscription(orgName, subscriptionID)
+		if err != nil {
+			return fmt.Errorf("deleting marketplace subscription: %w", err)
 		}
 		fmt.Println("Marketplace subscription deleted successfully")
+		return nil
 	},
 }
 
@@ -700,18 +780,20 @@ var batchRemoveSubscriptionsCmd = &cobra.Command{
 	Use:   "batch-remove-subscriptions",
 	Short: "Batch remove marketplace subscriptions",
 	Long:  `Remove multiple marketplace subscriptions at once. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			fmt.Println("Error: must pass --confirm to batch remove subscriptions")
-			os.Exit(1)
+			return fmt.Errorf("must pass --confirm to batch remove subscriptions")
 		}
-		client := mustGetClient()
-		err := client.BatchRemoveOrganizationMarketplaceSubscriptions(orgName, subscriptionIDs)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error batch removing subscriptions: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.BatchRemoveOrganizationMarketplaceSubscriptions(orgName, subscriptionIDs)
+		if err != nil {
+			return fmt.Errorf("batch removing subscriptions: %w", err)
 		}
 		fmt.Println("Marketplace subscriptions removed successfully")
+		return nil
 	},
 }
 
@@ -720,14 +802,16 @@ var createQuotaCmd = &cobra.Command{
 	Use:   "create-quota",
 	Short: "Create organization quota",
 	Long:  `Create a quota for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		quota, err := client.CreateQuota(orgName, limitBytes)
 		if err != nil {
-			fmt.Printf("Error creating quota: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating quota: %w", err)
 		}
-		printJSON(quota)
+		return printJSON(quota)
 	},
 }
 
@@ -736,14 +820,16 @@ var updateQuotaCmd = &cobra.Command{
 	Use:   "update-quota",
 	Short: "Update organization quota",
 	Long:  `Update the quota for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		quota, err := client.UpdateQuota(orgName, limitBytes)
 		if err != nil {
-			fmt.Printf("Error updating quota: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("updating quota: %w", err)
 		}
-		printJSON(quota)
+		return printJSON(quota)
 	},
 }
 
@@ -752,18 +838,20 @@ var deleteQuotaCmd = &cobra.Command{
 	Use:   "delete-quota",
 	Short: "Delete organization quota",
 	Long:  `Delete the quota for an organization. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			fmt.Println("Error: must pass --confirm to delete a quota")
-			os.Exit(1)
+			return fmt.Errorf("must pass --confirm to delete a quota")
 		}
-		client := mustGetClient()
-		err := client.DeleteQuota(orgName)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting quota: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.DeleteQuota(orgName)
+		if err != nil {
+			return fmt.Errorf("deleting quota: %w", err)
 		}
 		fmt.Println("Quota deleted successfully")
+		return nil
 	},
 }
 
@@ -772,14 +860,16 @@ var autoPrunePolicyCmd = &cobra.Command{
 	Use:   "auto-prune-policy",
 	Short: "Get a specific auto-prune policy",
 	Long:  `Get detailed information about a specific auto-prune policy.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		policy, err := client.GetAutoPrunePolicy(orgName, policyUUID)
 		if err != nil {
-			fmt.Printf("Error getting auto-prune policy: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting auto-prune policy: %w", err)
 		}
-		printJSON(policy)
+		return printJSON(policy)
 	},
 }
 
@@ -788,14 +878,16 @@ var createAutoPruneCmd = &cobra.Command{
 	Use:   "create-auto-prune",
 	Short: "Create an auto-prune policy",
 	Long:  `Create an auto-prune policy for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		policy, err := client.CreateAutoPrunePolicy(orgName, method, pruneValue, tagPattern)
 		if err != nil {
-			fmt.Printf("Error creating auto-prune policy: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating auto-prune policy: %w", err)
 		}
-		printJSON(policy)
+		return printJSON(policy)
 	},
 }
 
@@ -804,14 +896,16 @@ var updateAutoPruneCmd = &cobra.Command{
 	Use:   "update-auto-prune",
 	Short: "Update an auto-prune policy",
 	Long:  `Update an existing auto-prune policy.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 		policy, err := client.UpdateAutoPrunePolicy(orgName, policyUUID, method, pruneValue, tagPattern)
 		if err != nil {
-			fmt.Printf("Error updating auto-prune policy: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("updating auto-prune policy: %w", err)
 		}
-		printJSON(policy)
+		return printJSON(policy)
 	},
 }
 
@@ -820,18 +914,20 @@ var deleteAutoPruneCmd = &cobra.Command{
 	Use:   "delete-auto-prune",
 	Short: "Delete an auto-prune policy",
 	Long:  `Delete an auto-prune policy. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			fmt.Println("Error: must pass --confirm to delete an auto-prune policy")
-			os.Exit(1)
+			return fmt.Errorf("must pass --confirm to delete an auto-prune policy")
 		}
-		client := mustGetClient()
-		err := client.DeleteAutoPrunePolicy(orgName, policyUUID)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting auto-prune policy: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.DeleteAutoPrunePolicy(orgName, policyUUID)
+		if err != nil {
+			return fmt.Errorf("deleting auto-prune policy: %w", err)
 		}
 		fmt.Println("Auto-prune policy deleted successfully")
+		return nil
 	},
 }
 
@@ -840,14 +936,17 @@ var inviteMemberCmd = &cobra.Command{
 	Use:   "invite-member",
 	Short: "Invite a member to a team",
 	Long:  `Invite a member to a team by email.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-		err := client.InviteTeamMember(orgName, teamName, email)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error inviting team member: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.InviteTeamMember(orgName, teamName, email)
+		if err != nil {
+			return fmt.Errorf("inviting team member: %w", err)
 		}
 		fmt.Println("Team member invited successfully")
+		return nil
 	},
 }
 
@@ -856,18 +955,20 @@ var cancelInviteCmd = &cobra.Command{
 	Use:   "cancel-invite",
 	Short: "Cancel a team member invitation",
 	Long:  `Cancel a pending team member invitation. Requires --confirm flag.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			fmt.Println("Error: must pass --confirm to cancel an invite")
-			os.Exit(1)
+			return fmt.Errorf("must pass --confirm to cancel an invite")
 		}
-		client := mustGetClient()
-		err := client.DeleteTeamInvite(orgName, teamName, email)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error canceling team invite: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+		err = client.DeleteTeamInvite(orgName, teamName, email)
+		if err != nil {
+			return fmt.Errorf("canceling team invite: %w", err)
 		}
 		fmt.Println("Team invite canceled successfully")
+		return nil
 	},
 }
 
@@ -936,332 +1037,171 @@ func init() {
 
 func initOrgPersistentFlags() {
 	organizationCmd.PersistentFlags().StringVarP(&orgName, "organization", "o", "", "Organization name")
-
-	if err := organizationCmd.MarkPersistentFlagRequired("organization"); err != nil {
-		fmt.Printf("Error marking organization flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = organizationCmd.MarkPersistentFlagRequired("organization")
 }
 
 func initOrgMemberFlags() {
-	// team info flags
 	teamInfoCmd.Flags().StringVarP(&teamName, "team", "T", "", "Team name")
-	if err := teamInfoCmd.MarkFlagRequired("team"); err != nil {
-		fmt.Printf("Error marking team flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = teamInfoCmd.MarkFlagRequired("team")
 
-	// team members flags
 	teamMembersCmd.Flags().StringVarP(&teamName, "team", "T", "", "Team name")
-	if err := teamMembersCmd.MarkFlagRequired("team"); err != nil {
-		fmt.Printf("Error marking team flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = teamMembersCmd.MarkFlagRequired("team")
 
-	// create-org flags
 	createOrgCmd.Flags().StringVar(&email, "email", "", "Email address")
-	if err := createOrgCmd.MarkFlagRequired("email"); err != nil {
-		fmt.Printf("Error marking email flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = createOrgCmd.MarkFlagRequired("email")
 
-	// update-org flags
 	updateOrgCmd.Flags().StringVar(&email, "email", "", "Email address")
-	if err := updateOrgCmd.MarkFlagRequired("email"); err != nil {
-		fmt.Printf("Error marking email flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = updateOrgCmd.MarkFlagRequired("email")
 
-	// delete-org flags
 	deleteOrgCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm deletion")
 
-	// add-member flags
 	addMemberCmd.Flags().StringVar(&memberName, "member", "", "Member name")
-	if err := addMemberCmd.MarkFlagRequired("member"); err != nil {
-		fmt.Printf("Error marking member flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = addMemberCmd.MarkFlagRequired("member")
 
-	// remove-member flags
 	removeMemberCmd.Flags().StringVar(&memberName, "member", "", "Member name")
-	if err := removeMemberCmd.MarkFlagRequired("member"); err != nil {
-		fmt.Printf("Error marking member flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = removeMemberCmd.MarkFlagRequired("member")
 	removeMemberCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm removal")
 
-	// member flags
 	getMemberCmd.Flags().StringVar(&memberName, "member", "", "Member name")
-	if err := getMemberCmd.MarkFlagRequired("member"); err != nil {
-		fmt.Printf("Error marking member flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = getMemberCmd.MarkFlagRequired("member")
 }
 
 func initOrgProxyCacheFlags() {
-	// create-proxy-cache flags
 	createProxyCacheCmd.Flags().StringVar(&upstreamRegistry, "upstream-registry", "", "Upstream registry URL")
-	if err := createProxyCacheCmd.MarkFlagRequired("upstream-registry"); err != nil {
-		fmt.Printf("Error marking upstream-registry flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = createProxyCacheCmd.MarkFlagRequired("upstream-registry")
 	createProxyCacheCmd.Flags().BoolVar(&insecure, "insecure", false, "Allow insecure connections")
 	createProxyCacheCmd.Flags().IntVar(&expiration, "expiration", 0, "Cache expiration in seconds")
 
-	// delete-proxy-cache flags
 	deleteProxyCacheCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm deletion")
 }
 
 func initOrgRobotFlags() {
-	// robot flags
 	orgRobotCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
-	if err := orgRobotCmd.MarkFlagRequired("robot"); err != nil {
-		fmt.Printf("Error marking robot flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = orgRobotCmd.MarkFlagRequired("robot")
 
-	// create-robot flags
 	createRobotCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
-	if err := createRobotCmd.MarkFlagRequired("robot"); err != nil {
-		fmt.Printf("Error marking robot flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = createRobotCmd.MarkFlagRequired("robot")
 	createRobotCmd.Flags().StringVar(&description, "description", "", "Robot description")
 
-	// delete-robot flags
 	deleteRobotCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
-	if err := deleteRobotCmd.MarkFlagRequired("robot"); err != nil {
-		fmt.Printf("Error marking robot flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = deleteRobotCmd.MarkFlagRequired("robot")
 	deleteRobotCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm deletion")
 
-	// regenerate-robot flags
 	regenerateRobotCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
-	if err := regenerateRobotCmd.MarkFlagRequired("robot"); err != nil {
-		fmt.Printf("Error marking robot flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = regenerateRobotCmd.MarkFlagRequired("robot")
 
-	// robot-permissions flags
 	orgRobotPermissionsCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
-	if err := orgRobotPermissionsCmd.MarkFlagRequired("robot"); err != nil {
-		fmt.Printf("Error marking robot flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = orgRobotPermissionsCmd.MarkFlagRequired("robot")
 
-	// set-robot-permission flags
 	setRobotPermissionCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
-	if err := setRobotPermissionCmd.MarkFlagRequired("robot"); err != nil {
-		fmt.Printf("Error marking robot flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = setRobotPermissionCmd.MarkFlagRequired("robot")
 	setRobotPermissionCmd.Flags().StringVar(&repository, "repository", "", "Repository name")
-	if err := setRobotPermissionCmd.MarkFlagRequired("repository"); err != nil {
-		fmt.Printf("Error marking repository flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = setRobotPermissionCmd.MarkFlagRequired("repository")
 	setRobotPermissionCmd.Flags().StringVar(&role, "role", "", "Permission role")
-	if err := setRobotPermissionCmd.MarkFlagRequired("role"); err != nil {
-		fmt.Printf("Error marking role flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = setRobotPermissionCmd.MarkFlagRequired("role")
 
-	// remove-robot-permission flags
 	removeRobotPermissionCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
-	if err := removeRobotPermissionCmd.MarkFlagRequired("robot"); err != nil {
-		fmt.Printf("Error marking robot flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = removeRobotPermissionCmd.MarkFlagRequired("robot")
 	removeRobotPermissionCmd.Flags().StringVar(&repository, "repository", "", "Repository name")
-	if err := removeRobotPermissionCmd.MarkFlagRequired("repository"); err != nil {
-		fmt.Printf("Error marking repository flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = removeRobotPermissionCmd.MarkFlagRequired("repository")
 	removeRobotPermissionCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm removal")
 
-	// robot-federation-get flags
 	orgRobotFederationGetCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
-	markFlagRequired(orgRobotFederationGetCmd.MarkFlagRequired("robot"))
+	_ = orgRobotFederationGetCmd.MarkFlagRequired("robot")
 
-	// robot-federation-create flags
 	orgRobotFederationCreateCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
 	orgRobotFederationCreateCmd.Flags().StringVar(&federationIssuer, "issuer", "", "Federation token issuer")
 	orgRobotFederationCreateCmd.Flags().StringVar(&federationSubject, "subject", "", "Federation token subject")
-	markFlagRequired(orgRobotFederationCreateCmd.MarkFlagRequired("robot"))
-	markFlagRequired(orgRobotFederationCreateCmd.MarkFlagRequired("issuer"))
-	markFlagRequired(orgRobotFederationCreateCmd.MarkFlagRequired("subject"))
+	_ = orgRobotFederationCreateCmd.MarkFlagRequired("robot")
+	_ = orgRobotFederationCreateCmd.MarkFlagRequired("issuer")
+	_ = orgRobotFederationCreateCmd.MarkFlagRequired("subject")
 
-	// robot-federation-delete flags
 	orgRobotFederationDeleteCmd.Flags().StringVar(&robotShortname, "robot", "", "Robot short name")
-	markFlagRequired(orgRobotFederationDeleteCmd.MarkFlagRequired("robot"))
+	_ = orgRobotFederationDeleteCmd.MarkFlagRequired("robot")
 }
 
 func initOrgApplicationFlags() {
-	// application flags
 	applicationCmd.Flags().StringVar(&clientID, "client-id", "", "Application client ID")
-	if err := applicationCmd.MarkFlagRequired("client-id"); err != nil {
-		fmt.Printf("Error marking client-id flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = applicationCmd.MarkFlagRequired("client-id")
 
-	// create-application flags
 	createApplicationCmd.Flags().StringVar(&appName, "name", "", "Application name")
-	if err := createApplicationCmd.MarkFlagRequired("name"); err != nil {
-		fmt.Printf("Error marking name flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = createApplicationCmd.MarkFlagRequired("name")
 	createApplicationCmd.Flags().StringVar(&description, "description", "", "Application description")
 	createApplicationCmd.Flags().StringVar(&applicationURI, "application-uri", "", "Application URI")
 	createApplicationCmd.Flags().StringVar(&redirectURI, "redirect-uri", "", "Redirect URI")
 
-	// update-application flags
 	updateApplicationCmd.Flags().StringVar(&clientID, "client-id", "", "Application client ID")
-	if err := updateApplicationCmd.MarkFlagRequired("client-id"); err != nil {
-		fmt.Printf("Error marking client-id flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = updateApplicationCmd.MarkFlagRequired("client-id")
 	updateApplicationCmd.Flags().StringVar(&appName, "name", "", "Application name")
-	if err := updateApplicationCmd.MarkFlagRequired("name"); err != nil {
-		fmt.Printf("Error marking name flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = updateApplicationCmd.MarkFlagRequired("name")
 	updateApplicationCmd.Flags().StringVar(&description, "description", "", "Application description")
 	updateApplicationCmd.Flags().StringVar(&applicationURI, "application-uri", "", "Application URI")
 	updateApplicationCmd.Flags().StringVar(&redirectURI, "redirect-uri", "", "Redirect URI")
 
-	// delete-application flags
 	deleteApplicationCmd.Flags().StringVar(&clientID, "client-id", "", "Application client ID")
-	if err := deleteApplicationCmd.MarkFlagRequired("client-id"); err != nil {
-		fmt.Printf("Error marking client-id flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = deleteApplicationCmd.MarkFlagRequired("client-id")
 	deleteApplicationCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm deletion")
 
-	// reset-application-secret flags
 	resetApplicationSecretCmd.Flags().StringVar(&clientID, "client-id", "", "Application client ID")
-	if err := resetApplicationSecretCmd.MarkFlagRequired("client-id"); err != nil {
-		fmt.Printf("Error marking client-id flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = resetApplicationSecretCmd.MarkFlagRequired("client-id")
 }
 
 func initOrgMarketplaceFlags() {
-	// create-marketplace-subscription flags
 	createMarketplaceSubscriptionCmd.Flags().StringVar(&sku, "sku", "", "Subscription SKU")
-	if err := createMarketplaceSubscriptionCmd.MarkFlagRequired("sku"); err != nil {
-		fmt.Printf("Error marking sku flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = createMarketplaceSubscriptionCmd.MarkFlagRequired("sku")
 	createMarketplaceSubscriptionCmd.Flags().IntVar(&quantity, "quantity", 0, "Subscription quantity")
 
-	// delete-marketplace-subscription flags
 	deleteMarketplaceSubscriptionCmd.Flags().StringVar(&subscriptionID, "subscription-id", "", "Subscription ID")
-	if err := deleteMarketplaceSubscriptionCmd.MarkFlagRequired("subscription-id"); err != nil {
-		fmt.Printf("Error marking subscription-id flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = deleteMarketplaceSubscriptionCmd.MarkFlagRequired("subscription-id")
 	deleteMarketplaceSubscriptionCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm deletion")
 
-	// batch-remove-subscriptions flags
 	batchRemoveSubscriptionsCmd.Flags().StringSliceVar(&subscriptionIDs, "subscription-ids", nil, "Comma-separated subscription IDs")
-	if err := batchRemoveSubscriptionsCmd.MarkFlagRequired("subscription-ids"); err != nil {
-		fmt.Printf("Error marking subscription-ids flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = batchRemoveSubscriptionsCmd.MarkFlagRequired("subscription-ids")
 	batchRemoveSubscriptionsCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm removal")
 }
 
 func initOrgQuotaFlags() {
-	// create-quota flags
 	createQuotaCmd.Flags().Int64Var(&limitBytes, "limit-bytes", 0, "Quota limit in bytes")
-	if err := createQuotaCmd.MarkFlagRequired("limit-bytes"); err != nil {
-		fmt.Printf("Error marking limit-bytes flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = createQuotaCmd.MarkFlagRequired("limit-bytes")
 
-	// update-quota flags
 	updateQuotaCmd.Flags().Int64Var(&limitBytes, "limit-bytes", 0, "Quota limit in bytes")
-	if err := updateQuotaCmd.MarkFlagRequired("limit-bytes"); err != nil {
-		fmt.Printf("Error marking limit-bytes flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = updateQuotaCmd.MarkFlagRequired("limit-bytes")
 
-	// delete-quota flags
 	deleteQuotaCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm deletion")
 }
 
 func initOrgAutoPruneFlags() {
-	// auto-prune-policy flags
 	autoPrunePolicyCmd.Flags().StringVar(&policyUUID, "policy-uuid", "", "Policy UUID")
-	if err := autoPrunePolicyCmd.MarkFlagRequired("policy-uuid"); err != nil {
-		fmt.Printf("Error marking policy-uuid flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = autoPrunePolicyCmd.MarkFlagRequired("policy-uuid")
 
-	// create-auto-prune flags
 	createAutoPruneCmd.Flags().StringVar(&method, "method", "", "Prune method")
-	if err := createAutoPruneCmd.MarkFlagRequired("method"); err != nil {
-		fmt.Printf("Error marking method flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = createAutoPruneCmd.MarkFlagRequired("method")
 	createAutoPruneCmd.Flags().IntVar(&pruneValue, "value", 0, "Prune value")
-	if err := createAutoPruneCmd.MarkFlagRequired("value"); err != nil {
-		fmt.Printf("Error marking value flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = createAutoPruneCmd.MarkFlagRequired("value")
 	createAutoPruneCmd.Flags().StringVar(&tagPattern, "tag-pattern", "", "Tag pattern to match")
 
-	// update-auto-prune flags
 	updateAutoPruneCmd.Flags().StringVar(&policyUUID, "policy-uuid", "", "Policy UUID")
-	if err := updateAutoPruneCmd.MarkFlagRequired("policy-uuid"); err != nil {
-		fmt.Printf("Error marking policy-uuid flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = updateAutoPruneCmd.MarkFlagRequired("policy-uuid")
 	updateAutoPruneCmd.Flags().StringVar(&method, "method", "", "Prune method")
-	if err := updateAutoPruneCmd.MarkFlagRequired("method"); err != nil {
-		fmt.Printf("Error marking method flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = updateAutoPruneCmd.MarkFlagRequired("method")
 	updateAutoPruneCmd.Flags().IntVar(&pruneValue, "value", 0, "Prune value")
-	if err := updateAutoPruneCmd.MarkFlagRequired("value"); err != nil {
-		fmt.Printf("Error marking value flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = updateAutoPruneCmd.MarkFlagRequired("value")
 	updateAutoPruneCmd.Flags().StringVar(&tagPattern, "tag-pattern", "", "Tag pattern to match")
 
-	// delete-auto-prune flags
 	deleteAutoPruneCmd.Flags().StringVar(&policyUUID, "policy-uuid", "", "Policy UUID")
-	if err := deleteAutoPruneCmd.MarkFlagRequired("policy-uuid"); err != nil {
-		fmt.Printf("Error marking policy-uuid flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = deleteAutoPruneCmd.MarkFlagRequired("policy-uuid")
 	deleteAutoPruneCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm deletion")
 }
 
 func initOrgInviteFlags() {
-	// invite-member flags
 	inviteMemberCmd.Flags().StringVarP(&teamName, "team", "T", "", "Team name")
-	if err := inviteMemberCmd.MarkFlagRequired("team"); err != nil {
-		fmt.Printf("Error marking team flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = inviteMemberCmd.MarkFlagRequired("team")
 	inviteMemberCmd.Flags().StringVar(&email, "email", "", "Email address")
-	if err := inviteMemberCmd.MarkFlagRequired("email"); err != nil {
-		fmt.Printf("Error marking email flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = inviteMemberCmd.MarkFlagRequired("email")
 
-	// cancel-invite flags
 	cancelInviteCmd.Flags().StringVarP(&teamName, "team", "T", "", "Team name")
-	if err := cancelInviteCmd.MarkFlagRequired("team"); err != nil {
-		fmt.Printf("Error marking team flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = cancelInviteCmd.MarkFlagRequired("team")
 	cancelInviteCmd.Flags().StringVar(&email, "email", "", "Email address")
-	if err := cancelInviteCmd.MarkFlagRequired("email"); err != nil {
-		fmt.Printf("Error marking email flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = cancelInviteCmd.MarkFlagRequired("email")
 	cancelInviteCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm cancellation")
 }

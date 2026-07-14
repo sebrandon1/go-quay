@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -37,17 +36,19 @@ The scan status can be:
   - scanning: Scan is currently in progress
   - unsupported: Image type is not supported for scanning
   - failed: Scan failed`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		security, err := client.GetManifestSecurity(namespace, repository, secScanManifestRef, includeVulnerabilities)
 		if err != nil {
-			fmt.Printf("Error getting security scan: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting security scan: %w", err)
 		}
 
 		fmt.Printf("Security scan for %s/%s@%s\n", namespace, repository, secScanManifestRef)
-		printJSON(security)
+		return printJSON(security)
 	},
 }
 
@@ -61,18 +62,9 @@ func init() {
 	secscanCmd.PersistentFlags().StringVarP(&secScanManifestRef, "manifest", "m", "", "Manifest reference (digest like sha256:...)")
 
 	// Mark global flags as required
-	if err := secscanCmd.MarkPersistentFlagRequired("namespace"); err != nil {
-		fmt.Printf("Error marking namespace flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := secscanCmd.MarkPersistentFlagRequired("repository"); err != nil {
-		fmt.Printf("Error marking repository flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := secscanCmd.MarkPersistentFlagRequired("manifest"); err != nil {
-		fmt.Printf("Error marking manifest flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = secscanCmd.MarkPersistentFlagRequired("namespace")
+	_ = secscanCmd.MarkPersistentFlagRequired("repository")
+	_ = secscanCmd.MarkPersistentFlagRequired("manifest")
 
 	// Info command specific flags
 	secscanInfoCmd.Flags().BoolVarP(&includeVulnerabilities, "vulnerabilities", "V", true, "Include vulnerability details in the response")

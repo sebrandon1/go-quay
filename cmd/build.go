@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -42,17 +41,19 @@ var buildListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List builds for a repository",
 	Long:  `List all builds for the specified repository.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		builds, err := client.GetBuilds(buildNamespace, buildRepository, buildLimit)
 		if err != nil {
-			fmt.Printf("Error getting builds: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting builds: %w", err)
 		}
 
 		fmt.Printf("Builds for %s/%s:\n", buildNamespace, buildRepository)
-		printJSON(builds)
+		return printJSON(builds)
 	},
 }
 
@@ -61,17 +62,19 @@ var buildInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get build details",
 	Long:  `Get detailed information about a specific build.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		build, err := client.GetBuild(buildNamespace, buildRepository, buildUUID)
 		if err != nil {
-			fmt.Printf("Error getting build: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting build: %w", err)
 		}
 
 		fmt.Printf("Build: %s\n", buildUUID)
-		printJSON(build)
+		return printJSON(build)
 	},
 }
 
@@ -80,17 +83,19 @@ var buildLogsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Get build logs",
 	Long:  `Get the logs for a specific build.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		logs, err := client.GetBuildLogs(buildNamespace, buildRepository, buildUUID)
 		if err != nil {
-			fmt.Printf("Error getting build logs: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting build logs: %w", err)
 		}
 
 		fmt.Printf("Logs for build %s:\n", buildUUID)
-		printJSON(logs)
+		return printJSON(logs)
 	},
 }
 
@@ -101,8 +106,11 @@ var buildRequestCmd = &cobra.Command{
 	Long: `Request a new build from an archive URL.
 
 The archive should be a tar.gz file containing a Dockerfile and any necessary build context.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		buildReq := &lib.RequestBuildRequest{
 			ArchiveURL:     buildArchiveURL,
@@ -113,12 +121,11 @@ The archive should be a tar.gz file containing a Dockerfile and any necessary bu
 
 		build, err := client.RequestBuild(buildNamespace, buildRepository, buildReq)
 		if err != nil {
-			fmt.Printf("Error requesting build: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("requesting build: %w", err)
 		}
 
 		fmt.Printf("Build requested successfully!\n")
-		printJSON(build)
+		return printJSON(build)
 	},
 }
 
@@ -127,22 +134,23 @@ var buildCancelCmd = &cobra.Command{
 	Use:   "cancel",
 	Short: "Cancel an ongoing build",
 	Long:  `Cancel an ongoing build. This action cannot be undone.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirmBuildCancel {
-			fmt.Printf("Are you sure you want to cancel build '%s'? This action cannot be undone.\n", buildUUID)
-			fmt.Println("Use --confirm to proceed with cancellation.")
-			os.Exit(1)
+			return fmt.Errorf("are you sure you want to cancel build '%s'? This action cannot be undone.\nUse --confirm to proceed with cancellation", buildUUID)
 		}
 
-		client := mustGetClient()
-
-		err := client.CancelBuild(buildNamespace, buildRepository, buildUUID)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error canceling build: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.CancelBuild(buildNamespace, buildRepository, buildUUID)
+		if err != nil {
+			return fmt.Errorf("canceling build: %w", err)
 		}
 
 		fmt.Printf("Build '%s' canceled successfully.\n", buildUUID)
+		return nil
 	},
 }
 
@@ -150,17 +158,19 @@ var buildStatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Get build status",
 	Long:  `Get the current status of a specific build.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		status, err := client.GetBuildStatus(buildNamespace, buildRepository, buildUUID)
 		if err != nil {
-			fmt.Printf("Error getting build status: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting build status: %w", err)
 		}
 
 		fmt.Printf("Status for build %s:\n", buildUUID)
-		printJSON(status)
+		return printJSON(status)
 	},
 }
 
@@ -176,8 +186,8 @@ func init() {
 	// Global build flags
 	buildCmd.PersistentFlags().StringVarP(&buildNamespace, "namespace", "n", "", "Repository namespace")
 	buildCmd.PersistentFlags().StringVarP(&buildRepository, "repository", "r", "", "Repository name")
-	markFlagRequired(buildCmd.MarkPersistentFlagRequired("namespace"))
-	markFlagRequired(buildCmd.MarkPersistentFlagRequired("repository"))
+	_ = buildCmd.MarkPersistentFlagRequired("namespace")
+	_ = buildCmd.MarkPersistentFlagRequired("repository")
 
 	initBuildListFlags()
 	initBuildInfoFlags()
@@ -188,7 +198,7 @@ func init() {
 
 func initBuildStatusFlags() {
 	buildStatusCmd.Flags().StringVarP(&buildUUID, "uuid", "u", "", "Build UUID")
-	markFlagRequired(buildStatusCmd.MarkFlagRequired("uuid"))
+	_ = buildStatusCmd.MarkFlagRequired("uuid")
 }
 
 func initBuildListFlags() {
@@ -197,7 +207,7 @@ func initBuildListFlags() {
 
 func initBuildInfoFlags() {
 	buildInfoCmd.Flags().StringVarP(&buildUUID, "uuid", "u", "", "Build UUID")
-	markFlagRequired(buildInfoCmd.MarkFlagRequired("uuid"))
+	_ = buildInfoCmd.MarkFlagRequired("uuid")
 }
 
 func initBuildRequestFlags() {
@@ -205,11 +215,11 @@ func initBuildRequestFlags() {
 	buildRequestCmd.Flags().StringVarP(&buildDockerfile, "dockerfile", "d", "", "Path to Dockerfile within archive")
 	buildRequestCmd.Flags().StringVarP(&buildSubdirectory, "subdirectory", "s", "", "Subdirectory containing build context")
 	buildRequestCmd.Flags().StringSliceVar(&buildTags, "tag", []string{"latest"}, "Tags for the built image")
-	markFlagRequired(buildRequestCmd.MarkFlagRequired("archive-url"))
+	_ = buildRequestCmd.MarkFlagRequired("archive-url")
 }
 
 func initBuildCancelFlags() {
 	buildCancelCmd.Flags().StringVarP(&buildUUID, "uuid", "u", "", "Build UUID")
 	buildCancelCmd.Flags().BoolVar(&confirmBuildCancel, "confirm", false, "Confirm build cancellation")
-	markFlagRequired(buildCancelCmd.MarkFlagRequired("uuid"))
+	_ = buildCancelCmd.MarkFlagRequired("uuid")
 }
