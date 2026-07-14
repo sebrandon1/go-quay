@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -47,17 +46,19 @@ var teamListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List all teams in an organization",
 	Long:  `List all teams within the specified organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		teams, err := client.GetTeams(teamCmdOrgname)
 		if err != nil {
-			fmt.Printf("Error getting teams: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting teams: %w", err)
 		}
 
 		fmt.Printf("Teams in organization '%s':\n", teamCmdOrgname)
-		printJSON(teams)
+		return printJSON(teams)
 	},
 }
 
@@ -66,17 +67,19 @@ var teamCmdInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get team details",
 	Long:  `Get detailed information about a specific team.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		team, err := client.GetTeam(teamCmdOrgname, teamCmdName)
 		if err != nil {
-			fmt.Printf("Error getting team: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting team: %w", err)
 		}
 
 		fmt.Printf("Team: %s/%s\n", teamCmdOrgname, teamCmdName)
-		printJSON(team)
+		return printJSON(team)
 	},
 }
 
@@ -90,17 +93,19 @@ Roles:
   - member: Inherits default permissions
   - creator: Can create new repositories
   - admin: Full administrative access`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		team, err := client.CreateTeam(teamCmdOrgname, teamCmdName, teamCmdDescription, teamCmdRole)
 		if err != nil {
-			fmt.Printf("Error creating team: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating team: %w", err)
 		}
 
 		fmt.Printf("Successfully created team: %s/%s\n", teamCmdOrgname, teamCmdName)
-		printJSON(team)
+		return printJSON(team)
 	},
 }
 
@@ -109,17 +114,19 @@ var teamUpdateCmd = &cobra.Command{
 	Use:   subcmdUpdate,
 	Short: "Update team settings",
 	Long:  `Update team description and role.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		team, err := client.UpdateTeam(teamCmdOrgname, teamCmdName, teamCmdDescription, teamCmdRole)
 		if err != nil {
-			fmt.Printf("Error updating team: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("updating team: %w", err)
 		}
 
 		fmt.Printf("Successfully updated team: %s/%s\n", teamCmdOrgname, teamCmdName)
-		printJSON(team)
+		return printJSON(team)
 	},
 }
 
@@ -128,22 +135,23 @@ var teamDeleteCmd = &cobra.Command{
 	Use:   subcmdDelete,
 	Short: "Delete a team",
 	Long:  `Delete a team from an organization. This action cannot be undone.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirmTeamDelete {
-			fmt.Printf("Are you sure you want to delete team '%s/%s'? This action cannot be undone.\n", teamCmdOrgname, teamCmdName)
-			fmt.Println("Use --confirm to proceed with deletion.")
-			os.Exit(1)
+			return fmt.Errorf("are you sure you want to delete team '%s/%s'? This action cannot be undone.\nUse --confirm to proceed with deletion", teamCmdOrgname, teamCmdName)
 		}
 
-		client := mustGetClient()
-
-		err := client.DeleteTeam(teamCmdOrgname, teamCmdName)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting team: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeleteTeam(teamCmdOrgname, teamCmdName)
+		if err != nil {
+			return fmt.Errorf("deleting team: %w", err)
 		}
 
 		fmt.Printf("Successfully deleted team: %s/%s\n", teamCmdOrgname, teamCmdName)
+		return nil
 	},
 }
 
@@ -152,17 +160,19 @@ var teamCmdMembersCmd = &cobra.Command{
 	Use:   "members",
 	Short: "List team members",
 	Long:  `List all members of a specific team.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		members, err := client.GetTeamMembers(teamCmdOrgname, teamCmdName)
 		if err != nil {
-			fmt.Printf("Error getting team members: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting team members: %w", err)
 		}
 
 		fmt.Printf("Members of team '%s/%s':\n", teamCmdOrgname, teamCmdName)
-		printJSON(members)
+		return printJSON(members)
 	},
 }
 
@@ -171,16 +181,19 @@ var teamAddMemberCmd = &cobra.Command{
 	Use:   "add-member",
 	Short: "Add a member to a team",
 	Long:  `Add a user or robot account to a team.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.AddTeamMember(teamCmdOrgname, teamCmdName, teamCmdMemberName)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error adding team member: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.AddTeamMember(teamCmdOrgname, teamCmdName, teamCmdMemberName)
+		if err != nil {
+			return fmt.Errorf("adding team member: %w", err)
 		}
 
 		fmt.Printf("Successfully added '%s' to team '%s/%s'\n", teamCmdMemberName, teamCmdOrgname, teamCmdName)
+		return nil
 	},
 }
 
@@ -189,22 +202,23 @@ var teamRemoveMemberCmd = &cobra.Command{
 	Use:   "remove-member",
 	Short: "Remove a member from a team",
 	Long:  `Remove a user or robot account from a team.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirmTeamMemberDel {
-			fmt.Printf("Are you sure you want to remove '%s' from team '%s/%s'?\n", teamCmdMemberName, teamCmdOrgname, teamCmdName)
-			fmt.Println("Use --confirm to proceed with removal.")
-			os.Exit(1)
+			return fmt.Errorf("are you sure you want to remove '%s' from team '%s/%s'?\nUse --confirm to proceed with removal", teamCmdMemberName, teamCmdOrgname, teamCmdName)
 		}
 
-		client := mustGetClient()
-
-		err := client.RemoveTeamMember(teamCmdOrgname, teamCmdName, teamCmdMemberName)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error removing team member: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.RemoveTeamMember(teamCmdOrgname, teamCmdName, teamCmdMemberName)
+		if err != nil {
+			return fmt.Errorf("removing team member: %w", err)
 		}
 
 		fmt.Printf("Successfully removed '%s' from team '%s/%s'\n", teamCmdMemberName, teamCmdOrgname, teamCmdName)
+		return nil
 	},
 }
 
@@ -213,17 +227,19 @@ var teamPermissionsCmd = &cobra.Command{
 	Use:   subcmdPermissions,
 	Short: "List team repository permissions",
 	Long:  `List all repository permissions for a team.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		permissions, err := client.GetTeamPermissions(teamCmdOrgname, teamCmdName)
 		if err != nil {
-			fmt.Printf("Error getting team permissions: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting team permissions: %w", err)
 		}
 
 		fmt.Printf("Repository permissions for team '%s/%s':\n", teamCmdOrgname, teamCmdName)
-		printJSON(permissions)
+		return printJSON(permissions)
 	},
 }
 
@@ -237,17 +253,20 @@ Permission roles:
   - read: Pull images
   - write: Pull and push images
   - admin: Full administrative access`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.SetTeamRepositoryPermission(teamCmdOrgname, teamCmdName, teamCmdRepository, teamCmdPermissionRole)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error setting team permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.SetTeamRepositoryPermission(teamCmdOrgname, teamCmdName, teamCmdRepository, teamCmdPermissionRole)
+		if err != nil {
+			return fmt.Errorf("setting team permission: %w", err)
 		}
 
 		fmt.Printf("Successfully set '%s' permission for team '%s/%s' on repository '%s'\n",
 			teamCmdPermissionRole, teamCmdOrgname, teamCmdName, teamCmdRepository)
+		return nil
 	},
 }
 
@@ -256,24 +275,25 @@ var teamRemovePermissionCmd = &cobra.Command{
 	Use:   "remove-permission",
 	Short: "Remove repository permission from team",
 	Long:  `Remove repository permission from a team.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirmTeamPermDel {
-			fmt.Printf("Are you sure you want to remove permissions for team '%s/%s' on repository '%s'?\n",
+			return fmt.Errorf("are you sure you want to remove permissions for team '%s/%s' on repository '%s'?\nUse --confirm to proceed with removal",
 				teamCmdOrgname, teamCmdName, teamCmdRepository)
-			fmt.Println("Use --confirm to proceed with removal.")
-			os.Exit(1)
 		}
 
-		client := mustGetClient()
-
-		err := client.RemoveTeamRepositoryPermission(teamCmdOrgname, teamCmdName, teamCmdRepository)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error removing team permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.RemoveTeamRepositoryPermission(teamCmdOrgname, teamCmdName, teamCmdRepository)
+		if err != nil {
+			return fmt.Errorf("removing team permission: %w", err)
 		}
 
 		fmt.Printf("Successfully removed permissions for team '%s/%s' on repository '%s'\n",
 			teamCmdOrgname, teamCmdName, teamCmdRepository)
+		return nil
 	},
 }
 
@@ -299,68 +319,68 @@ func init() {
 
 func initTeamGlobalFlags() {
 	teamCmd.PersistentFlags().StringVarP(&teamCmdOrgname, "organization", "o", "", "Organization name")
-	markFlagRequired(teamCmd.MarkPersistentFlagRequired("organization"))
+	_ = teamCmd.MarkPersistentFlagRequired("organization")
 }
 
 func initTeamCmdFlags() {
 	// Info command flags
 	teamCmdInfoCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
-	markFlagRequired(teamCmdInfoCmd.MarkFlagRequired("name"))
+	_ = teamCmdInfoCmd.MarkFlagRequired("name")
 
 	// Create command flags
 	teamCreateCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamCreateCmd.Flags().StringVarP(&teamCmdDescription, "description", "d", "", "Team description")
 	teamCreateCmd.Flags().StringVarP(&teamCmdRole, "role", "r", "member", "Team role (member, creator, admin)")
-	markFlagRequired(teamCreateCmd.MarkFlagRequired("name"))
+	_ = teamCreateCmd.MarkFlagRequired("name")
 
 	// Update command flags
 	teamUpdateCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamUpdateCmd.Flags().StringVarP(&teamCmdDescription, "description", "d", "", "Team description")
 	teamUpdateCmd.Flags().StringVarP(&teamCmdRole, "role", "r", "", "Team role (member, creator, admin)")
-	markFlagRequired(teamUpdateCmd.MarkFlagRequired("name"))
+	_ = teamUpdateCmd.MarkFlagRequired("name")
 
 	// Delete command flags
 	teamDeleteCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamDeleteCmd.Flags().BoolVar(&confirmTeamDelete, "confirm", false, "Confirm team deletion")
-	markFlagRequired(teamDeleteCmd.MarkFlagRequired("name"))
+	_ = teamDeleteCmd.MarkFlagRequired("name")
 }
 
 func initTeamMemberCmdFlags() {
 	// Members command flags
 	teamCmdMembersCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
-	markFlagRequired(teamCmdMembersCmd.MarkFlagRequired("name"))
+	_ = teamCmdMembersCmd.MarkFlagRequired("name")
 
 	// Add member command flags
 	teamAddMemberCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamAddMemberCmd.Flags().StringVarP(&teamCmdMemberName, "member", "m", "", "Member name (username or robot)")
-	markFlagRequired(teamAddMemberCmd.MarkFlagRequired("name"))
-	markFlagRequired(teamAddMemberCmd.MarkFlagRequired("member"))
+	_ = teamAddMemberCmd.MarkFlagRequired("name")
+	_ = teamAddMemberCmd.MarkFlagRequired("member")
 
 	// Remove member command flags
 	teamRemoveMemberCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamRemoveMemberCmd.Flags().StringVarP(&teamCmdMemberName, "member", "m", "", "Member name (username or robot)")
 	teamRemoveMemberCmd.Flags().BoolVar(&confirmTeamMemberDel, "confirm", false, "Confirm member removal")
-	markFlagRequired(teamRemoveMemberCmd.MarkFlagRequired("name"))
-	markFlagRequired(teamRemoveMemberCmd.MarkFlagRequired("member"))
+	_ = teamRemoveMemberCmd.MarkFlagRequired("name")
+	_ = teamRemoveMemberCmd.MarkFlagRequired("member")
 }
 
 func initTeamPermissionCmdFlags() {
 	// Permissions command flags
 	teamPermissionsCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
-	markFlagRequired(teamPermissionsCmd.MarkFlagRequired("name"))
+	_ = teamPermissionsCmd.MarkFlagRequired("name")
 
 	// Set permission command flags
 	teamSetPermissionCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamSetPermissionCmd.Flags().StringVarP(&teamCmdRepository, "repository", "R", "", "Repository name")
 	teamSetPermissionCmd.Flags().StringVarP(&teamCmdPermissionRole, "role", "r", "", "Permission role (read, write, admin)")
-	markFlagRequired(teamSetPermissionCmd.MarkFlagRequired("name"))
-	markFlagRequired(teamSetPermissionCmd.MarkFlagRequired("repository"))
-	markFlagRequired(teamSetPermissionCmd.MarkFlagRequired("role"))
+	_ = teamSetPermissionCmd.MarkFlagRequired("name")
+	_ = teamSetPermissionCmd.MarkFlagRequired("repository")
+	_ = teamSetPermissionCmd.MarkFlagRequired("role")
 
 	// Remove permission command flags
 	teamRemovePermissionCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
 	teamRemovePermissionCmd.Flags().StringVarP(&teamCmdRepository, "repository", "R", "", "Repository name")
 	teamRemovePermissionCmd.Flags().BoolVar(&confirmTeamPermDel, "confirm", false, "Confirm permission removal")
-	markFlagRequired(teamRemovePermissionCmd.MarkFlagRequired("name"))
-	markFlagRequired(teamRemovePermissionCmd.MarkFlagRequired("repository"))
+	_ = teamRemovePermissionCmd.MarkFlagRequired("name")
+	_ = teamRemovePermissionCmd.MarkFlagRequired("repository")
 }

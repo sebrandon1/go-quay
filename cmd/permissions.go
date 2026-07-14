@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -33,17 +32,19 @@ var permListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List repository permissions",
 	Long:  `List all users and robots that have permissions on this repository.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		permissions, err := client.GetRepositoryPermissions(namespace, repository)
 		if err != nil {
-			fmt.Printf("Error getting repository permissions: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting repository permissions: %w", err)
 		}
 
 		fmt.Printf("Permissions for repository %s/%s:\n", namespace, repository)
-		printJSON(permissions)
+		return printJSON(permissions)
 	},
 }
 
@@ -52,17 +53,20 @@ var permSetCmd = &cobra.Command{
 	Use:   "set",
 	Short: "Set permission for a user/robot",
 	Long:  `Set permission level for a user or robot account on this repository.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.SetRepositoryPermission(namespace, repository, permissionUser, permissionRole)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error setting repository permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.SetRepositoryPermission(namespace, repository, permissionUser, permissionRole)
+		if err != nil {
+			return fmt.Errorf("setting repository permission: %w", err)
 		}
 
 		fmt.Printf("Successfully set %s permission for %s on repository %s/%s\n",
 			permissionRole, permissionUser, namespace, repository)
+		return nil
 	},
 }
 
@@ -71,179 +75,200 @@ var permRemoveCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "Remove permission for a user/robot",
 	Long:  `Remove permission for a user or robot account from this repository.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.RemoveRepositoryPermission(namespace, repository, permissionUser)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error removing repository permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.RemoveRepositoryPermission(namespace, repository, permissionUser)
+		if err != nil {
+			return fmt.Errorf("removing repository permission: %w", err)
 		}
 
 		fmt.Printf("Successfully removed permissions for %s from repository %s/%s\n",
 			permissionUser, namespace, repository)
+		return nil
 	},
 }
 
 var permUserPermissionsCmd = &cobra.Command{
 	Use:   "user-permissions",
 	Short: "List user permissions on repository",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		permissions, err := client.ListUserPermissions(namespace, repository)
 		if err != nil {
-			fmt.Printf("Error getting user permissions: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting user permissions: %w", err)
 		}
 
-		printJSON(permissions)
+		return printJSON(permissions)
 	},
 }
 
 var permUserPermissionCmd = &cobra.Command{
 	Use:   "user-permission",
 	Short: "Get specific user permission on repository",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		permission, err := client.GetUserPermission(namespace, repository, permissionUser)
 		if err != nil {
-			fmt.Printf("Error getting user permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting user permission: %w", err)
 		}
 
-		printJSON(permission)
+		return printJSON(permission)
 	},
 }
 
 var permSetUserPermCmd = &cobra.Command{
 	Use:   "set-user-permission",
 	Short: "Set user permission on repository",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.SetUserPermission(namespace, repository, permissionUser, permissionRole)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error setting user permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.SetUserPermission(namespace, repository, permissionUser, permissionRole)
+		if err != nil {
+			return fmt.Errorf("setting user permission: %w", err)
 		}
 
 		fmt.Printf("Successfully set %s permission for user %s on %s/%s\n",
 			permissionRole, permissionUser, namespace, repository)
+		return nil
 	},
 }
 
 var permDeleteUserPermCmd = &cobra.Command{
 	Use:   "delete-user-permission",
 	Short: "Delete user permission from repository",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirmPermDeletion {
-			fmt.Printf("Are you sure you want to remove permission for user '%s' from %s/%s?\n",
+			return fmt.Errorf("are you sure you want to remove permission for user '%s' from %s/%s?\nUse --confirm to proceed with removal",
 				permissionUser, namespace, repository)
-			fmt.Println("Use --confirm to proceed with removal.")
-			os.Exit(1)
 		}
 
-		client := mustGetClient()
-
-		err := client.DeleteUserPermission(namespace, repository, permissionUser)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting user permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeleteUserPermission(namespace, repository, permissionUser)
+		if err != nil {
+			return fmt.Errorf("deleting user permission: %w", err)
 		}
 
 		fmt.Printf("Successfully removed permission for user %s from %s/%s\n",
 			permissionUser, namespace, repository)
+		return nil
 	},
 }
 
 var permUserTransitiveCmd = &cobra.Command{
 	Use:   "user-transitive-permission",
 	Short: "Get user transitive permission on repository",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		permission, err := client.GetUserTransitivePermission(namespace, repository, permissionUser)
 		if err != nil {
-			fmt.Printf("Error getting user transitive permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting user transitive permission: %w", err)
 		}
 
-		printJSON(permission)
+		return printJSON(permission)
 	},
 }
 
 var permTeamPermissionsCmd = &cobra.Command{
 	Use:   "team-permissions",
 	Short: "List team permissions on repository",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		permissions, err := client.ListTeamPermissions(namespace, repository)
 		if err != nil {
-			fmt.Printf("Error getting team permissions: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting team permissions: %w", err)
 		}
 
-		printJSON(permissions)
+		return printJSON(permissions)
 	},
 }
 
 var permTeamPermissionCmd = &cobra.Command{
 	Use:   "team-permission",
 	Short: "Get specific team permission on repository",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		permission, err := client.GetTeamPermission(namespace, repository, permissionTeamName)
 		if err != nil {
-			fmt.Printf("Error getting team permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting team permission: %w", err)
 		}
 
-		printJSON(permission)
+		return printJSON(permission)
 	},
 }
 
 var permSetTeamPermCmd = &cobra.Command{
 	Use:   "set-team-permission",
 	Short: "Set team permission on repository",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.SetTeamPermission(namespace, repository, permissionTeamName, permissionRole)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error setting team permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.SetTeamPermission(namespace, repository, permissionTeamName, permissionRole)
+		if err != nil {
+			return fmt.Errorf("setting team permission: %w", err)
 		}
 
 		fmt.Printf("Successfully set %s permission for team %s on %s/%s\n",
 			permissionRole, permissionTeamName, namespace, repository)
+		return nil
 	},
 }
 
 var permDeleteTeamPermCmd = &cobra.Command{
 	Use:   "delete-team-permission",
 	Short: "Delete team permission from repository",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirmPermDeletion {
-			fmt.Printf("Are you sure you want to remove permission for team '%s' from %s/%s?\n",
+			return fmt.Errorf("are you sure you want to remove permission for team '%s' from %s/%s?\nUse --confirm to proceed with removal",
 				permissionTeamName, namespace, repository)
-			fmt.Println("Use --confirm to proceed with removal.")
-			os.Exit(1)
 		}
 
-		client := mustGetClient()
-
-		err := client.DeleteTeamPermission(namespace, repository, permissionTeamName)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting team permission: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeleteTeamPermission(namespace, repository, permissionTeamName)
+		if err != nil {
+			return fmt.Errorf("deleting team permission: %w", err)
 		}
 
 		fmt.Printf("Successfully removed permission for team %s from %s/%s\n",
 			permissionTeamName, namespace, repository)
+		return nil
 	},
 }
 
@@ -267,33 +292,18 @@ func init() {
 	permissionsCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
 
 	// Mark global flags as required
-	if err := permissionsCmd.MarkPersistentFlagRequired("namespace"); err != nil {
-		fmt.Printf("Error marking namespace flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := permissionsCmd.MarkPersistentFlagRequired("repository"); err != nil {
-		fmt.Printf("Error marking repository flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = permissionsCmd.MarkPersistentFlagRequired("namespace")
+	_ = permissionsCmd.MarkPersistentFlagRequired("repository")
 
 	// Set command specific flags
 	permSetCmd.Flags().StringVarP(&permissionUser, "user", "u", "", "Username or robot account")
 	permSetCmd.Flags().StringVarP(&permissionRole, "role", "R", "", "Permission role (read/write/admin)")
-	if err := permSetCmd.MarkFlagRequired("user"); err != nil {
-		fmt.Printf("Error marking user flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := permSetCmd.MarkFlagRequired("role"); err != nil {
-		fmt.Printf("Error marking role flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = permSetCmd.MarkFlagRequired("user")
+	_ = permSetCmd.MarkFlagRequired("role")
 
 	// Remove command specific flags
 	permRemoveCmd.Flags().StringVarP(&permissionUser, "user", "u", "", "Username or robot account")
-	if err := permRemoveCmd.MarkFlagRequired("user"); err != nil {
-		fmt.Printf("Error marking user flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = permRemoveCmd.MarkFlagRequired("user")
 
 	initPermUserFlags()
 	initPermTeamFlags()
@@ -301,31 +311,31 @@ func init() {
 
 func initPermUserFlags() {
 	permUserPermissionCmd.Flags().StringVarP(&permissionUser, "user", "u", "", "Username")
-	markFlagRequired(permUserPermissionCmd.MarkFlagRequired("user"))
+	_ = permUserPermissionCmd.MarkFlagRequired("user")
 
 	permSetUserPermCmd.Flags().StringVarP(&permissionUser, "user", "u", "", "Username")
 	permSetUserPermCmd.Flags().StringVarP(&permissionRole, "role", "R", "", "Permission role (read/write/admin)")
-	markFlagRequired(permSetUserPermCmd.MarkFlagRequired("user"))
-	markFlagRequired(permSetUserPermCmd.MarkFlagRequired("role"))
+	_ = permSetUserPermCmd.MarkFlagRequired("user")
+	_ = permSetUserPermCmd.MarkFlagRequired("role")
 
 	permDeleteUserPermCmd.Flags().StringVarP(&permissionUser, "user", "u", "", "Username")
 	permDeleteUserPermCmd.Flags().BoolVar(&confirmPermDeletion, "confirm", false, "Confirm permission removal")
-	markFlagRequired(permDeleteUserPermCmd.MarkFlagRequired("user"))
+	_ = permDeleteUserPermCmd.MarkFlagRequired("user")
 
 	permUserTransitiveCmd.Flags().StringVarP(&permissionUser, "user", "u", "", "Username")
-	markFlagRequired(permUserTransitiveCmd.MarkFlagRequired("user"))
+	_ = permUserTransitiveCmd.MarkFlagRequired("user")
 }
 
 func initPermTeamFlags() {
 	permTeamPermissionCmd.Flags().StringVar(&permissionTeamName, "team", "", "Team name")
-	markFlagRequired(permTeamPermissionCmd.MarkFlagRequired("team"))
+	_ = permTeamPermissionCmd.MarkFlagRequired("team")
 
 	permSetTeamPermCmd.Flags().StringVar(&permissionTeamName, "team", "", "Team name")
 	permSetTeamPermCmd.Flags().StringVarP(&permissionRole, "role", "R", "", "Permission role (read/write/admin)")
-	markFlagRequired(permSetTeamPermCmd.MarkFlagRequired("team"))
-	markFlagRequired(permSetTeamPermCmd.MarkFlagRequired("role"))
+	_ = permSetTeamPermCmd.MarkFlagRequired("team")
+	_ = permSetTeamPermCmd.MarkFlagRequired("role")
 
 	permDeleteTeamPermCmd.Flags().StringVar(&permissionTeamName, "team", "", "Team name")
 	permDeleteTeamPermCmd.Flags().BoolVar(&confirmPermDeletion, "confirm", false, "Confirm permission removal")
-	markFlagRequired(permDeleteTeamPermCmd.MarkFlagRequired("team"))
+	_ = permDeleteTeamPermCmd.MarkFlagRequired("team")
 }

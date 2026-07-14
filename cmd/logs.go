@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -31,16 +30,18 @@ var repoLogsCmd = &cobra.Command{
 	Use:   "repo-logs",
 	Short: "Get repository logs",
 	Long:  `Get action logs for a specific repository.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		logs, err := client.GetLogs(namespace, repository, nextPage, startdate, enddate)
 		if err != nil {
-			fmt.Printf("Error getting repository logs: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting repository logs: %w", err)
 		}
 
-		printJSON(logs)
+		return printJSON(logs)
 	},
 }
 
@@ -48,16 +49,18 @@ var repoAggregatedLogsCmd = &cobra.Command{
 	Use:   "repo-aggregated-logs",
 	Short: "Get aggregated repository logs",
 	Long:  `Get aggregated action logs for a specific repository.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		logs, err := client.GetAggregatedLogs(namespace, repository, startdate, enddate)
 		if err != nil {
-			fmt.Printf("Error getting repository aggregated logs: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting repository aggregated logs: %w", err)
 		}
 
-		printJSON(logs)
+		return printJSON(logs)
 	},
 }
 
@@ -65,16 +68,18 @@ var orgLogsCmd = &cobra.Command{
 	Use:   "org-logs",
 	Short: "Get organization logs",
 	Long:  `Get action logs for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		logs, err := client.GetOrganizationLogs(orgName, nextPage, startdate, enddate)
 		if err != nil {
-			fmt.Printf("Error getting organization logs: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting organization logs: %w", err)
 		}
 
-		printJSON(logs)
+		return printJSON(logs)
 	},
 }
 
@@ -82,16 +87,18 @@ var orgAggregatedLogsCmd = &cobra.Command{
 	Use:   "org-aggregated-logs",
 	Short: "Get aggregated organization logs",
 	Long:  `Get aggregated action logs for an organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		logs, err := client.GetOrganizationAggregatedLogs(orgName, startdate, enddate)
 		if err != nil {
-			fmt.Printf("Error getting organization aggregated logs: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting organization aggregated logs: %w", err)
 		}
 
-		printJSON(logs)
+		return printJSON(logs)
 	},
 }
 
@@ -99,16 +106,18 @@ var userLogsCmd = &cobra.Command{
 	Use:   "user-logs",
 	Short: "Get user logs",
 	Long:  `Get action logs for the current user.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		logs, err := client.GetUserLogs(nextPage, startdate, enddate)
 		if err != nil {
-			fmt.Printf("Error getting user logs: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting user logs: %w", err)
 		}
 
-		printJSON(logs)
+		return printJSON(logs)
 	},
 }
 
@@ -116,16 +125,18 @@ var userAggregatedLogsCmd = &cobra.Command{
 	Use:   "user-aggregated-logs",
 	Short: "Get aggregated user logs",
 	Long:  `Get aggregated action logs for the current user.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		logs, err := client.GetUserAggregatedLogs(startdate, enddate)
 		if err != nil {
-			fmt.Printf("Error getting user aggregated logs: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting user aggregated logs: %w", err)
 		}
 
-		printJSON(logs)
+		return printJSON(logs)
 	},
 }
 
@@ -133,21 +144,24 @@ var exportOrgLogsCmd = &cobra.Command{
 	Use:   "export-org-logs",
 	Short: "Export organization logs",
 	Long:  `Export action logs for an organization via callback URL or email.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
-		err := client.ExportOrganizationLogs(orgName, &lib.ExportLogsRequest{
+		err = client.ExportOrganizationLogs(orgName, &lib.ExportLogsRequest{
 			StartTime:   starttime,
 			EndTime:     endtime,
 			CallbackURL: callbackURL,
 			Email:       callbackEmail,
 		})
 		if err != nil {
-			fmt.Printf("Error exporting organization logs: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("exporting organization logs: %w", err)
 		}
 
 		fmt.Println("Organization logs export initiated successfully.")
+		return nil
 	},
 }
 
@@ -155,21 +169,24 @@ var exportUserLogsCmd = &cobra.Command{
 	Use:   "export-user-logs",
 	Short: "Export user logs",
 	Long:  `Export action logs for the current user via callback URL or email.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
-		err := client.ExportUserLogs(&lib.ExportLogsRequest{
+		err = client.ExportUserLogs(&lib.ExportLogsRequest{
 			StartTime:   starttime,
 			EndTime:     endtime,
 			CallbackURL: callbackURL,
 			Email:       callbackEmail,
 		})
 		if err != nil {
-			fmt.Printf("Error exporting user logs: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("exporting user logs: %w", err)
 		}
 
 		fmt.Println("User logs export initiated successfully.")
+		return nil
 	},
 }
 
@@ -177,21 +194,24 @@ var exportRepoLogsCmd = &cobra.Command{
 	Use:   "export-repo-logs",
 	Short: "Export repository logs",
 	Long:  `Export action logs for a repository via callback URL or email.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
-		err := client.ExportRepositoryLogs(namespace, repository, &lib.ExportLogsRequest{
+		err = client.ExportRepositoryLogs(namespace, repository, &lib.ExportLogsRequest{
 			StartTime:   starttime,
 			EndTime:     endtime,
 			CallbackURL: callbackURL,
 			Email:       callbackEmail,
 		})
 		if err != nil {
-			fmt.Printf("Error exporting repository logs: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("exporting repository logs: %w", err)
 		}
 
 		fmt.Println("Repository logs export initiated successfully.")
+		return nil
 	},
 }
 

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -28,17 +27,19 @@ var searchReposCmd = &cobra.Command{
 	Use:   "repositories",
 	Short: "Search for repositories",
 	Long:  `Search for repositories on Quay.io by name or description.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		result, err := client.SearchRepositories(searchQuery, searchPage)
 		if err != nil {
-			fmt.Printf("Error searching repositories: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("searching repositories: %w", err)
 		}
 
 		fmt.Printf("Repository search results for: %s\n", searchQuery)
-		printJSON(result)
+		return printJSON(result)
 	},
 }
 
@@ -54,17 +55,19 @@ Results include a 'kind' field indicating the entity type:
   - organization: Organization
   - team: Team within an organization
   - robot: Robot account`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		result, err := client.SearchAll(searchQuery)
 		if err != nil {
-			fmt.Printf("Error searching: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("searching: %w", err)
 		}
 
 		fmt.Printf("Search results for: %s\n", searchQuery)
-		printJSON(result)
+		return printJSON(result)
 	},
 }
 
@@ -75,10 +78,7 @@ func init() {
 
 	// Global search flags
 	searchCmd.PersistentFlags().StringVarP(&searchQuery, "query", "q", "", "Search query")
-	if err := searchCmd.MarkPersistentFlagRequired("query"); err != nil {
-		fmt.Printf("Error marking query flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = searchCmd.MarkPersistentFlagRequired("query")
 
 	// Repositories command specific flags
 	searchReposCmd.Flags().IntVarP(&searchPage, "page", "p", 0, "Page number for pagination (starts at 1)")

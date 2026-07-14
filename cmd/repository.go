@@ -40,21 +40,22 @@ Available commands:
 var repoInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get repository information from Quay.io",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if repository == "" {
-			fmt.Println("Error: --repository is required")
-			os.Exit(1)
+			return fmt.Errorf("--repository is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		repo, err := client.GetRepository(namespace, repository)
 		if err != nil {
-			fmt.Printf("Error getting repository: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting repository: %w", err)
 		}
 
-		printJSON(repo)
+		return printJSON(repo)
 	},
 }
 
@@ -63,22 +64,23 @@ var repoCreateCmd = &cobra.Command{
 	Use:   subcmdCreate,
 	Short: "Create a new repository",
 	Long:  `Create a new repository in the specified namespace with optional description and visibility settings.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if repository == "" {
-			fmt.Println("Error: --repository is required")
-			os.Exit(1)
+			return fmt.Errorf("--repository is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		repo, err := client.CreateRepository(namespace, repository, repoVisibility, repoDescription)
 		if err != nil {
-			fmt.Printf("Error creating repository: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating repository: %w", err)
 		}
 
 		fmt.Printf("Successfully created repository %s/%s\n", namespace, repository)
-		printJSON(repo)
+		return printJSON(repo)
 	},
 }
 
@@ -87,22 +89,23 @@ var repoUpdateCmd = &cobra.Command{
 	Use:   subcmdUpdate,
 	Short: "Update repository settings",
 	Long:  `Update repository description and/or visibility settings.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if repository == "" {
-			fmt.Println("Error: --repository is required")
-			os.Exit(1)
+			return fmt.Errorf("--repository is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		repo, err := client.UpdateRepository(namespace, repository, repoDescription, repoVisibility)
 		if err != nil {
-			fmt.Printf("Error updating repository: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("updating repository: %w", err)
 		}
 
 		fmt.Printf("Successfully updated repository %s/%s\n", namespace, repository)
-		printJSON(repo)
+		return printJSON(repo)
 	},
 }
 
@@ -111,27 +114,27 @@ var repoDeleteCmd = &cobra.Command{
 	Use:   subcmdDelete,
 	Short: "Delete a repository",
 	Long:  `Delete a repository. This action is irreversible and will remove all images and tags.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if repository == "" {
-			fmt.Println("Error: --repository is required")
-			os.Exit(1)
+			return fmt.Errorf("--repository is required")
 		}
 
 		if !confirmDeletion {
-			fmt.Printf("Are you sure you want to delete repository %s/%s? This action cannot be undone.\n", namespace, repository)
-			fmt.Print("Use --confirm to proceed with deletion.\n")
-			os.Exit(1)
+			return fmt.Errorf("are you sure you want to delete repository %s/%s? This action cannot be undone.\nUse --confirm to proceed with deletion", namespace, repository)
 		}
 
-		client := mustGetClient()
-
-		err := client.DeleteRepository(namespace, repository)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting repository: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeleteRepository(namespace, repository)
+		if err != nil {
+			return fmt.Errorf("deleting repository: %w", err)
 		}
 
 		fmt.Printf("Successfully deleted repository %s/%s\n", namespace, repository)
+		return nil
 	},
 }
 
@@ -150,18 +153,19 @@ Use --table with --popularity for an enriched dashboard sorted by pull count:
   kube-rbac-proxy             4052   0             1     v0.13.1     2026-03-13  no
   certsuite                   774    6             51    unstable    2026-06-15  yes
   collector                   32     4             46    unstable    2026-06-15  no`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		repos, err := client.ListRepositories(namespace, repoPublic, repoStarred, repoPopularity, repoPage, repoLimit)
 		if err != nil {
-			fmt.Printf("Error listing repositories: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("listing repositories: %w", err)
 		}
 
 		if !repoTable {
-			printJSON(repos)
-			return
+			return printJSON(repos)
 		}
 
 		sort.Slice(repos.Repositories, func(i, j int) bool {
@@ -213,9 +217,9 @@ Use --table with --popularity for an enriched dashboard sorted by pull count:
 		}
 
 		if err := w.Flush(); err != nil {
-			fmt.Printf("Error flushing table output: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("flushing table output: %w", err)
 		}
+		return nil
 	},
 }
 
@@ -223,21 +227,23 @@ var repoChangeVisibilityCmd = &cobra.Command{
 	Use:   "change-visibility",
 	Short: "Change repository visibility",
 	Long:  `Change a repository's visibility between public and private.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if repository == "" {
-			fmt.Println("Error: --repository is required")
-			os.Exit(1)
+			return fmt.Errorf("--repository is required")
 		}
 
-		client := mustGetClient()
-
-		err := client.ChangeRepositoryVisibility(namespace, repository, repoVisibility)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error changing repository visibility: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.ChangeRepositoryVisibility(namespace, repository, repoVisibility)
+		if err != nil {
+			return fmt.Errorf("changing repository visibility: %w", err)
 		}
 
 		fmt.Printf("Successfully changed visibility of %s/%s to %s\n", namespace, repository, repoVisibility)
+		return nil
 	},
 }
 
@@ -255,10 +261,7 @@ func init() {
 	repositoryCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
 
 	// Mark global flags as required
-	if err := repositoryCmd.MarkPersistentFlagRequired("namespace"); err != nil {
-		fmt.Printf("Error marking namespace flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = repositoryCmd.MarkPersistentFlagRequired("namespace")
 
 	// Create command specific flags
 	repoCreateCmd.Flags().StringVarP(&repoVisibility, "visibility", "v", "private", "Repository visibility (private/public)")
@@ -281,8 +284,5 @@ func init() {
 
 	// Change-visibility command specific flags
 	repoChangeVisibilityCmd.Flags().StringVarP(&repoVisibility, "visibility", "v", "", "New visibility (private/public)")
-	if err := repoChangeVisibilityCmd.MarkFlagRequired("visibility"); err != nil {
-		fmt.Printf("Error marking visibility flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = repoChangeVisibilityCmd.MarkFlagRequired("visibility")
 }

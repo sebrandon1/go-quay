@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -33,17 +32,19 @@ var tagInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get detailed tag information",
 	Long:  `Get detailed information about a specific tag including metadata, manifest digest, and size.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		tag, err := client.GetTag(namespace, repository, tagName)
 		if err != nil {
-			fmt.Printf("Error getting tag information: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting tag information: %w", err)
 		}
 
 		fmt.Printf("Tag information for %s/%s:%s\n", namespace, repository, tagName)
-		printJSON(tag)
+		return printJSON(tag)
 	},
 }
 
@@ -52,17 +53,19 @@ var tagUpdateCmd = &cobra.Command{
 	Use:   subcmdUpdate,
 	Short: "Update tag metadata",
 	Long:  `Update tag metadata such as expiration date.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		tag, err := client.UpdateTag(namespace, repository, tagName, tagExpiration)
 		if err != nil {
-			fmt.Printf("Error updating tag: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("updating tag: %w", err)
 		}
 
 		fmt.Printf("Successfully updated tag %s/%s:%s\n", namespace, repository, tagName)
-		printJSON(tag)
+		return printJSON(tag)
 	},
 }
 
@@ -71,22 +74,23 @@ var tagDeleteCmd = &cobra.Command{
 	Use:   subcmdDelete,
 	Short: "Delete a tag",
 	Long:  `Delete a specific tag from the repository. This action cannot be undone.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirmTagDeletion {
-			fmt.Printf("Are you sure you want to delete tag %s/%s:%s? This action cannot be undone.\n", namespace, repository, tagName)
-			fmt.Print("Use --confirm to proceed with deletion.\n")
-			os.Exit(1)
+			return fmt.Errorf("are you sure you want to delete tag %s/%s:%s? This action cannot be undone.\nUse --confirm to proceed with deletion", namespace, repository, tagName)
 		}
 
-		client := mustGetClient()
-
-		err := client.DeleteTag(namespace, repository, tagName)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting tag: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeleteTag(namespace, repository, tagName)
+		if err != nil {
+			return fmt.Errorf("deleting tag: %w", err)
 		}
 
 		fmt.Printf("Successfully deleted tag %s/%s:%s\n", namespace, repository, tagName)
+		return nil
 	},
 }
 
@@ -95,17 +99,19 @@ var tagHistoryCmd = &cobra.Command{
 	Use:   "history",
 	Short: "Get tag history",
 	Long:  `Get the history of changes for a specific tag, including previous versions and modifications.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		history, err := client.GetTagHistory(namespace, repository, tagName)
 		if err != nil {
-			fmt.Printf("Error getting tag history: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting tag history: %w", err)
 		}
 
 		fmt.Printf("History for tag %s/%s:%s\n", namespace, repository, tagName)
-		printJSON(history)
+		return printJSON(history)
 	},
 }
 
@@ -114,17 +120,19 @@ var tagRevertCmd = &cobra.Command{
 	Use:   "revert",
 	Short: "Revert tag to a previous state",
 	Long:  `Revert a tag to a previous state using its manifest digest.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		tag, err := client.RevertTag(namespace, repository, tagName, manifestDigest)
 		if err != nil {
-			fmt.Printf("Error reverting tag: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("reverting tag: %w", err)
 		}
 
 		fmt.Printf("Successfully reverted tag %s/%s:%s to manifest %s\n", namespace, repository, tagName, manifestDigest)
-		printJSON(tag)
+		return printJSON(tag)
 	},
 }
 
@@ -132,16 +140,19 @@ var tagRestoreCmd = &cobra.Command{
 	Use:   "restore",
 	Short: "Restore a tag from a previous state",
 	Long:  `Restore a previously deleted or modified tag using its manifest digest.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.RestoreTag(namespace, repository, tagName, manifestDigest)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error restoring tag: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.RestoreTag(namespace, repository, tagName, manifestDigest)
+		if err != nil {
+			return fmt.Errorf("restoring tag: %w", err)
 		}
 
 		fmt.Printf("Successfully restored tag %s/%s:%s from manifest %s\n", namespace, repository, tagName, manifestDigest)
+		return nil
 	},
 }
 
@@ -160,18 +171,9 @@ func init() {
 	tagCmd.PersistentFlags().StringVarP(&tagName, "tag", "T", "", "Name of the tag")
 
 	// Mark global flags as required
-	if err := tagCmd.MarkPersistentFlagRequired("namespace"); err != nil {
-		fmt.Printf("Error marking namespace flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := tagCmd.MarkPersistentFlagRequired("repository"); err != nil {
-		fmt.Printf("Error marking repository flag as required: %v\n", err)
-		os.Exit(1)
-	}
-	if err := tagCmd.MarkPersistentFlagRequired("tag"); err != nil {
-		fmt.Printf("Error marking tag flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = tagCmd.MarkPersistentFlagRequired("namespace")
+	_ = tagCmd.MarkPersistentFlagRequired("repository")
+	_ = tagCmd.MarkPersistentFlagRequired("tag")
 
 	// Update command specific flags
 	tagUpdateCmd.Flags().StringVarP(&tagExpiration, "expiration", "e", "", "Tag expiration date (ISO format)")
@@ -181,15 +183,9 @@ func init() {
 
 	// Revert command specific flags
 	tagRevertCmd.Flags().StringVarP(&manifestDigest, "manifest", "m", "", "Manifest digest to revert to")
-	if err := tagRevertCmd.MarkFlagRequired("manifest"); err != nil {
-		fmt.Printf("Error marking manifest flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = tagRevertCmd.MarkFlagRequired("manifest")
 
 	// Restore command specific flags
 	tagRestoreCmd.Flags().StringVarP(&manifestDigest, "manifest", "m", "", "Manifest digest to restore")
-	if err := tagRestoreCmd.MarkFlagRequired("manifest"); err != nil {
-		fmt.Printf("Error marking manifest flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = tagRestoreCmd.MarkFlagRequired("manifest")
 }

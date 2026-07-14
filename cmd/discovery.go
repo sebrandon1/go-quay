@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -23,16 +22,18 @@ var discoveryAPICmd = &cobra.Command{
 	Use:   "api",
 	Short: "Get API discovery information",
 	Long:  `Get API discovery information from Quay.io including available endpoints and versions.`,
-	Run: func(_ *cobra.Command, _ []string) {
-		client := mustGetClient()
+	RunE: func(_ *cobra.Command, _ []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		discovery, err := client.GetDiscovery()
 		if err != nil {
-			fmt.Printf("Error getting discovery: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting discovery: %w", err)
 		}
 
-		printJSON(discovery)
+		return printJSON(discovery)
 	},
 }
 
@@ -40,16 +41,18 @@ var discoveryCapabilitiesCmd = &cobra.Command{
 	Use:   "capabilities",
 	Short: "Get registry capabilities",
 	Long:  `Get registry capabilities including sparse manifest support and available mirror architectures.`,
-	Run: func(_ *cobra.Command, _ []string) {
-		client := mustGetClient()
+	RunE: func(_ *cobra.Command, _ []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		capabilities, err := client.GetRegistryCapabilities()
 		if err != nil {
-			fmt.Printf("Error getting registry capabilities: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting registry capabilities: %w", err)
 		}
 
-		printJSON(capabilities)
+		return printJSON(capabilities)
 	},
 }
 
@@ -57,16 +60,18 @@ var discoveryAppInfoCmd = &cobra.Command{
 	Use:   "app-info",
 	Short: "Get application information by client ID",
 	Long:  `Get detailed information about an OAuth application by its client ID.`,
-	Run: func(_ *cobra.Command, _ []string) {
-		client := mustGetClient()
+	RunE: func(_ *cobra.Command, _ []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		app, err := client.GetAppInfo(discoveryClientID)
 		if err != nil {
-			fmt.Printf("Error getting app info: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting app info: %w", err)
 		}
 
-		printJSON(app)
+		return printJSON(app)
 	},
 }
 
@@ -74,16 +79,18 @@ var discoveryEntitiesCmd = &cobra.Command{
 	Use:   "entities",
 	Short: "Search for entities by prefix",
 	Long:  `Search for users, organizations, and teams by name prefix.`,
-	Run: func(_ *cobra.Command, _ []string) {
-		client := mustGetClient()
+	RunE: func(_ *cobra.Command, _ []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		entities, err := client.GetEntities(entityPrefix, includeOrgs, includeTeams)
 		if err != nil {
-			fmt.Printf("Error getting entities: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting entities: %w", err)
 		}
 
-		printJSON(entities)
+		return printJSON(entities)
 	},
 }
 
@@ -94,16 +101,10 @@ func init() {
 	discoveryCmd.AddCommand(discoveryEntitiesCmd)
 
 	discoveryAppInfoCmd.Flags().StringVar(&discoveryClientID, "client-id", "", "OAuth application client ID")
-	if err := discoveryAppInfoCmd.MarkFlagRequired("client-id"); err != nil {
-		fmt.Printf("Error marking client-id flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = discoveryAppInfoCmd.MarkFlagRequired("client-id")
 
 	discoveryEntitiesCmd.Flags().StringVar(&entityPrefix, "prefix", "", "Entity name prefix to search")
 	discoveryEntitiesCmd.Flags().BoolVar(&includeOrgs, "include-orgs", false, "Include organizations in results")
 	discoveryEntitiesCmd.Flags().BoolVar(&includeTeams, "include-teams", false, "Include teams in results")
-	if err := discoveryEntitiesCmd.MarkFlagRequired("prefix"); err != nil {
-		fmt.Printf("Error marking prefix flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = discoveryEntitiesCmd.MarkFlagRequired("prefix")
 }

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -39,17 +38,19 @@ var robotListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List all robot accounts",
 	Long:  `List all robot accounts associated with your user account.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		robots, err := client.GetUserRobotAccounts()
 		if err != nil {
-			fmt.Printf("Error getting robot accounts: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting robot accounts: %w", err)
 		}
 
 		fmt.Println("User robot accounts:")
-		printJSON(robots)
+		return printJSON(robots)
 	},
 }
 
@@ -58,17 +59,19 @@ var robotInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get robot account details",
 	Long:  `Get detailed information about a specific robot account including its token.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		robot, err := client.GetUserRobotAccount(robotShortname)
 		if err != nil {
-			fmt.Printf("Error getting robot account: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting robot account: %w", err)
 		}
 
 		fmt.Printf("Robot account: %s\n", robotShortname)
-		printJSON(robot)
+		return printJSON(robot)
 	},
 }
 
@@ -77,18 +80,20 @@ var robotCreateCmd = &cobra.Command{
 	Use:   subcmdCreate,
 	Short: "Create a new robot account",
 	Long:  `Create a new robot account with the specified name and description.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		robot, err := client.CreateUserRobotAccount(robotShortname, robotDescription, nil)
 		if err != nil {
-			fmt.Printf("Error creating robot account: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating robot account: %w", err)
 		}
 
 		fmt.Printf("Successfully created robot account: %s\n", robotShortname)
 		fmt.Println("IMPORTANT: Save the token below - it will not be shown again!")
-		printJSON(robot)
+		return printJSON(robot)
 	},
 }
 
@@ -97,22 +102,23 @@ var robotDeleteCmd = &cobra.Command{
 	Use:   subcmdDelete,
 	Short: "Delete a robot account",
 	Long:  `Delete a robot account. This action cannot be undone.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirmRobotDelete {
-			fmt.Printf("Are you sure you want to delete robot account '%s'? This action cannot be undone.\n", robotShortname)
-			fmt.Println("Use --confirm to proceed with deletion.")
-			os.Exit(1)
+			return fmt.Errorf("are you sure you want to delete robot account '%s'? This action cannot be undone.\nUse --confirm to proceed with deletion", robotShortname)
 		}
 
-		client := mustGetClient()
-
-		err := client.DeleteUserRobotAccount(robotShortname)
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting robot account: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeleteUserRobotAccount(robotShortname)
+		if err != nil {
+			return fmt.Errorf("deleting robot account: %w", err)
 		}
 
 		fmt.Printf("Successfully deleted robot account: %s\n", robotShortname)
+		return nil
 	},
 }
 
@@ -121,18 +127,20 @@ var robotRegenerateCmd = &cobra.Command{
 	Use:   "regenerate",
 	Short: "Regenerate robot token",
 	Long:  `Regenerate the token for a robot account. The old token will be invalidated.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		robot, err := client.RegenerateUserRobotToken(robotShortname)
 		if err != nil {
-			fmt.Printf("Error regenerating robot token: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("regenerating robot token: %w", err)
 		}
 
 		fmt.Printf("Successfully regenerated token for robot: %s\n", robotShortname)
 		fmt.Println("IMPORTANT: Save the new token below - it will not be shown again!")
-		printJSON(robot)
+		return printJSON(robot)
 	},
 }
 
@@ -141,17 +149,19 @@ var robotPermissionsCmd = &cobra.Command{
 	Use:   subcmdPermissions,
 	Short: "Get robot repository permissions",
 	Long:  `Get the repository permissions assigned to a robot account.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		permissions, err := client.GetUserRobotPermissions(robotShortname)
 		if err != nil {
-			fmt.Printf("Error getting robot permissions: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting robot permissions: %w", err)
 		}
 
 		fmt.Printf("Permissions for robot: %s\n", robotShortname)
-		printJSON(permissions)
+		return printJSON(permissions)
 	},
 }
 
@@ -159,16 +169,18 @@ var robotPermissionsCmd = &cobra.Command{
 var robotFederationGetCmd = &cobra.Command{
 	Use:   "federation-get",
 	Short: "Get robot federation configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		federation, err := client.GetUserRobotFederation(robotShortname)
 		if err != nil {
-			fmt.Printf("Error getting robot federation: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("getting robot federation: %w", err)
 		}
 
-		printJSON(federation)
+		return printJSON(federation)
 	},
 }
 
@@ -176,20 +188,23 @@ var robotFederationGetCmd = &cobra.Command{
 var robotFederationCreateCmd = &cobra.Command{
 	Use:   "federation-create",
 	Short: "Create or update robot federation configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		configs := []lib.RobotFederationConfig{
 			{Issuer: federationIssuer, Subject: federationSubject},
 		}
 
-		err := client.CreateUserRobotFederation(robotShortname, configs)
+		err = client.CreateUserRobotFederation(robotShortname, configs)
 		if err != nil {
-			fmt.Printf("Error creating robot federation: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating robot federation: %w", err)
 		}
 
 		fmt.Printf("Successfully configured federation for robot: %s\n", robotShortname)
+		return nil
 	},
 }
 
@@ -197,16 +212,19 @@ var robotFederationCreateCmd = &cobra.Command{
 var robotFederationDeleteCmd = &cobra.Command{
 	Use:   "federation-delete",
 	Short: "Delete robot federation configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := mustGetClient()
-
-		err := client.DeleteUserRobotFederation(robotShortname)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
 		if err != nil {
-			fmt.Printf("Error deleting robot federation: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeleteUserRobotFederation(robotShortname)
+		if err != nil {
+			return fmt.Errorf("deleting robot federation: %w", err)
 		}
 
 		fmt.Printf("Successfully deleted federation for robot: %s\n", robotShortname)
+		return nil
 	},
 }
 
@@ -224,54 +242,39 @@ func init() {
 
 	// Info command flags
 	robotInfoCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name (without username prefix)")
-	if err := robotInfoCmd.MarkFlagRequired("name"); err != nil {
-		fmt.Printf("Error marking name flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = robotInfoCmd.MarkFlagRequired("name")
 
 	// Create command flags
 	robotCreateCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name (without username prefix)")
 	robotCreateCmd.Flags().StringVarP(&robotDescription, "description", "d", "", "Robot description")
-	if err := robotCreateCmd.MarkFlagRequired("name"); err != nil {
-		fmt.Printf("Error marking name flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = robotCreateCmd.MarkFlagRequired("name")
 
 	// Delete command flags
 	robotDeleteCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name (without username prefix)")
 	robotDeleteCmd.Flags().BoolVar(&confirmRobotDelete, "confirm", false, "Confirm robot deletion")
-	if err := robotDeleteCmd.MarkFlagRequired("name"); err != nil {
-		fmt.Printf("Error marking name flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = robotDeleteCmd.MarkFlagRequired("name")
 
 	// Regenerate command flags
 	robotRegenerateCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name (without username prefix)")
-	if err := robotRegenerateCmd.MarkFlagRequired("name"); err != nil {
-		fmt.Printf("Error marking name flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = robotRegenerateCmd.MarkFlagRequired("name")
 
 	// Permissions command flags
 	robotPermissionsCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name (without username prefix)")
-	if err := robotPermissionsCmd.MarkFlagRequired("name"); err != nil {
-		fmt.Printf("Error marking name flag as required: %v\n", err)
-		os.Exit(1)
-	}
+	_ = robotPermissionsCmd.MarkFlagRequired("name")
 
 	// Federation get command flags
 	robotFederationGetCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name")
-	markFlagRequired(robotFederationGetCmd.MarkFlagRequired("name"))
+	_ = robotFederationGetCmd.MarkFlagRequired("name")
 
 	// Federation create command flags
 	robotFederationCreateCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name")
 	robotFederationCreateCmd.Flags().StringVar(&federationIssuer, "issuer", "", "Federation token issuer")
 	robotFederationCreateCmd.Flags().StringVar(&federationSubject, "subject", "", "Federation token subject")
-	markFlagRequired(robotFederationCreateCmd.MarkFlagRequired("name"))
-	markFlagRequired(robotFederationCreateCmd.MarkFlagRequired("issuer"))
-	markFlagRequired(robotFederationCreateCmd.MarkFlagRequired("subject"))
+	_ = robotFederationCreateCmd.MarkFlagRequired("name")
+	_ = robotFederationCreateCmd.MarkFlagRequired("issuer")
+	_ = robotFederationCreateCmd.MarkFlagRequired("subject")
 
 	// Federation delete command flags
 	robotFederationDeleteCmd.Flags().StringVarP(&robotShortname, "name", "n", "", "Robot short name")
-	markFlagRequired(robotFederationDeleteCmd.MarkFlagRequired("name"))
+	_ = robotFederationDeleteCmd.MarkFlagRequired("name")
 }

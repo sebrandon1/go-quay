@@ -12,7 +12,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -43,16 +42,18 @@ var prototypeListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List all permission prototypes",
 	Long:  `List all permission prototypes for an organization.`,
-	Run: func(_ *cobra.Command, _ []string) {
-		client := mustGetClient()
+	RunE: func(_ *cobra.Command, _ []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		prototypes, err := client.GetPrototypes(prototypeOrg)
 		if err != nil {
-			fmt.Println("Error getting prototypes:", err)
-			os.Exit(1)
+			return fmt.Errorf("getting prototypes: %w", err)
 		}
 
-		printJSON(prototypes)
+		return printJSON(prototypes)
 	},
 }
 
@@ -61,21 +62,22 @@ var prototypeInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get a specific prototype",
 	Long:  `Get detailed information about a specific permission prototype.`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if prototypeUUID == "" {
-			fmt.Println("Error: --uuid is required")
-			os.Exit(1)
+			return fmt.Errorf("--uuid is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		prototype, err := client.GetPrototype(prototypeOrg, prototypeUUID)
 		if err != nil {
-			fmt.Println("Error getting prototype:", err)
-			os.Exit(1)
+			return fmt.Errorf("getting prototype: %w", err)
 		}
 
-		printJSON(prototype)
+		return printJSON(prototype)
 	},
 }
 
@@ -87,28 +89,28 @@ var prototypeCreateCmd = &cobra.Command{
 
 Delegate kinds:
   - user: A specific user account
-  - team: A team within the organization  
+  - team: A team within the organization
   - robot: A robot account
 
 Roles:
   - read: Pull images
   - write: Pull and push images
   - admin: Full administrative access`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if prototypeDelegateName == "" {
-			fmt.Println("Error: --delegate-name is required")
-			os.Exit(1)
+			return fmt.Errorf("--delegate-name is required")
 		}
 		if prototypeDelegateKind == "" {
-			fmt.Println("Error: --delegate-kind is required")
-			os.Exit(1)
+			return fmt.Errorf("--delegate-kind is required")
 		}
 		if prototypeRole == "" {
-			fmt.Println("Error: --role is required")
-			os.Exit(1)
+			return fmt.Errorf("--role is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		createReq := &lib.CreatePrototypeRequest{
 			Delegate: lib.PrototypeDelegateRequest{
@@ -120,11 +122,10 @@ Roles:
 
 		prototype, err := client.CreatePrototype(prototypeOrg, createReq)
 		if err != nil {
-			fmt.Println("Error creating prototype:", err)
-			os.Exit(1)
+			return fmt.Errorf("creating prototype: %w", err)
 		}
 
-		printJSON(prototype)
+		return printJSON(prototype)
 	},
 }
 
@@ -133,17 +134,18 @@ var prototypeUpdateCmd = &cobra.Command{
 	Use:   subcmdUpdate,
 	Short: "Update a prototype",
 	Long:  `Update an existing permission prototype's role.`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if prototypeUUID == "" {
-			fmt.Println("Error: --uuid is required")
-			os.Exit(1)
+			return fmt.Errorf("--uuid is required")
 		}
 		if prototypeRole == "" {
-			fmt.Println("Error: --role is required")
-			os.Exit(1)
+			return fmt.Errorf("--role is required")
 		}
 
-		client := mustGetClient()
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
 
 		updateReq := &lib.UpdatePrototypeRequest{
 			Role: prototypeRole,
@@ -151,11 +153,10 @@ var prototypeUpdateCmd = &cobra.Command{
 
 		prototype, err := client.UpdatePrototype(prototypeOrg, prototypeUUID, updateReq)
 		if err != nil {
-			fmt.Println("Error updating prototype:", err)
-			os.Exit(1)
+			return fmt.Errorf("updating prototype: %w", err)
 		}
 
-		printJSON(prototype)
+		return printJSON(prototype)
 	},
 }
 
@@ -164,25 +165,26 @@ var prototypeDeleteCmd = &cobra.Command{
 	Use:   subcmdDelete,
 	Short: "Delete a prototype",
 	Long:  `Delete a permission prototype from an organization.`,
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if prototypeUUID == "" {
-			fmt.Println("Error: --uuid is required")
-			os.Exit(1)
+			return fmt.Errorf("--uuid is required")
 		}
 		if !confirmProtoDelete {
-			fmt.Println("Error: --confirm is required to delete a prototype")
-			os.Exit(1)
+			return fmt.Errorf("--confirm is required to delete a prototype")
 		}
 
-		client := mustGetClient()
-
-		err := client.DeletePrototype(prototypeOrg, prototypeUUID)
+		client, err := getClient()
 		if err != nil {
-			fmt.Println("Error deleting prototype:", err)
-			os.Exit(1)
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.DeletePrototype(prototypeOrg, prototypeUUID)
+		if err != nil {
+			return fmt.Errorf("deleting prototype: %w", err)
 		}
 
 		fmt.Printf("Prototype %s deleted successfully\n", prototypeUUID)
+		return nil
 	},
 }
 
