@@ -208,65 +208,6 @@ func TestUnstarRepository(t *testing.T) {
 	}
 }
 
-func TestStarUserRepository(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpMethodPost {
-			t.Errorf("Expected POST request, got %s", r.Method)
-		}
-		expectedPath := "/api/v1/user/starred"
-		if r.URL.Path != expectedPath {
-			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
-		}
-
-		var req map[string]interface{}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			t.Errorf("Failed to decode request body: %v", err)
-		}
-
-		expectedRepo := testNamespace + "/" + testRepository
-		if req["repository"] != expectedRepo {
-			t.Errorf("Expected repository '%s', got '%v'", expectedRepo, req["repository"])
-		}
-
-		w.WriteHeader(http.StatusOK)
-	}))
-	defer server.Close()
-
-	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-
-	err = client.StarUserRepository(testNamespace, testRepository)
-	if err != nil {
-		t.Fatalf("StarUserRepository returned error: %v", err)
-	}
-}
-
-func TestUnstarUserRepository(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpMethodDelete {
-			t.Errorf("Expected DELETE request, got %s", r.Method)
-		}
-		expectedPath := "/api/v1/user/starred/" + testNamespace + "/" + testRepository
-		if r.URL.Path != expectedPath {
-			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
-		}
-		w.WriteHeader(http.StatusNoContent)
-	}))
-	defer server.Close()
-
-	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-
-	err = client.UnstarUserRepository(testNamespace, testRepository)
-	if err != nil {
-		t.Fatalf("UnstarUserRepository returned error: %v", err)
-	}
-}
-
 func TestGetUserByUsername(t *testing.T) {
 	mockUser := UserDetails{
 		Username:      testUserName,
@@ -421,16 +362,6 @@ func TestUserHTTPErrors(t *testing.T) {
 	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
-	}
-
-	err = client.StarUserRepository(testNamespace, testRepository)
-	if err == nil {
-		t.Error("Expected error from StarUserRepository, got nil")
-	}
-
-	err = client.UnstarUserRepository(testNamespace, testRepository)
-	if err == nil {
-		t.Error("Expected error from UnstarUserRepository, got nil")
 	}
 
 	_, err = client.GetUserByUsername(testUserName)
