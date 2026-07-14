@@ -8,10 +8,8 @@ Client Setup:
   - NewClientWithURL(bearerToken, baseURL string) (*Client, error) - Create authenticated client with custom URL
 
 HTTP Helper Methods:
-  - get(req *http.Request, v any) error      - Execute GET requests
-  - post(req *http.Request, v any) error     - Execute POST requests
-  - put(req *http.Request, v any) error      - Execute PUT requests
-  - delete(req *http.Request) error                  - Execute DELETE requests
+  - do(req, v, acceptedStatuses...)          - Core HTTP executor (auth, headers, status check, decode)
+  - get(req, v) / post(req, v) / put(req, v) / delete(req) - Thin wrappers with preset accepted statuses
 
 Request Helpers:
   - newRequest(method, url string, body io.Reader) (*http.Request, error)
@@ -83,7 +81,7 @@ func (c *Client) buildURL(pathFmt string, args ...any) string {
 	return c.BaseURL + fmt.Sprintf(pathFmt, escaped...)
 }
 
-func (c *Client) get(req *http.Request, v any) error {
+func (c *Client) do(req *http.Request, v any, acceptedStatuses ...int) error {
 	if c.BearerToken != "" {
 		req.Header.Set("Authorization", "Bearer "+c.BearerToken)
 	}
@@ -93,56 +91,16 @@ func (c *Client) get(req *http.Request, v any) error {
 	if err != nil {
 		return err
 	}
-
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodySize))
-		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, string(body))
+	accepted := false
+	for _, s := range acceptedStatuses {
+		if resp.StatusCode == s {
+			accepted = true
+			break
+		}
 	}
-
-	return decodeJSON(resp.Body, v)
-}
-
-func (c *Client) post(req *http.Request, v any) error {
-	if c.BearerToken != "" {
-		req.Header.Set("Authorization", "Bearer "+c.BearerToken)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodySize))
-		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, string(body))
-	}
-
-	if v != nil {
-		return decodeJSON(resp.Body, v)
-	}
-
-	return nil
-}
-
-func (c *Client) put(req *http.Request, v any) error {
-	if c.BearerToken != "" {
-		req.Header.Set("Authorization", "Bearer "+c.BearerToken)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
+	if !accepted {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodySize))
 		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, string(body))
 	}
@@ -154,25 +112,20 @@ func (c *Client) put(req *http.Request, v any) error {
 	return nil
 }
 
+func (c *Client) get(req *http.Request, v any) error {
+	return c.do(req, v, http.StatusOK)
+}
+
+func (c *Client) post(req *http.Request, v any) error {
+	return c.do(req, v, http.StatusOK, http.StatusCreated)
+}
+
+func (c *Client) put(req *http.Request, v any) error {
+	return c.do(req, v, http.StatusOK, http.StatusCreated, http.StatusNoContent)
+}
+
 func (c *Client) delete(req *http.Request) error {
-	if c.BearerToken != "" {
-		req.Header.Set("Authorization", "Bearer "+c.BearerToken)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodySize))
-		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, string(body))
-	}
-
-	return nil
+	return c.do(req, nil, http.StatusOK, http.StatusNoContent)
 }
 
 func addQueryParams(req *http.Request, params map[string]string) {
