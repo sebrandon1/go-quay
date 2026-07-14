@@ -136,26 +136,26 @@ func (c *Client) ListRepositories(namespace string, public, starred, popularity 
 		return nil, fmt.Errorf("failed to create list repositories request: %w", err)
 	}
 
-	q := req.URL.Query()
+	params := map[string]string{}
 	if namespace != "" {
-		q.Add("namespace", namespace)
+		params["namespace"] = namespace
 	}
 	if public {
-		q.Add("public", "true")
+		params["public"] = queryValueTrue
 	}
 	if starred {
-		q.Add("starred", "true")
+		params["starred"] = queryValueTrue
 	}
 	if popularity {
-		q.Add("popularity", "true")
+		params["popularity"] = queryValueTrue
 	}
 	if page > 0 {
-		q.Add("page", fmt.Sprintf("%d", page))
+		params["page"] = fmt.Sprintf("%d", page)
 	}
 	if limit > 0 {
-		q.Add("limit", fmt.Sprintf("%d", limit))
+		params["limit"] = fmt.Sprintf("%d", limit)
 	}
-	req.URL.RawQuery = q.Encode()
+	addQueryParams(req, params)
 
 	var repos RepositoryList
 	if err := c.get(req, &repos); err != nil {
@@ -191,14 +191,14 @@ func (c *Client) ListTags(namespace, repository string, limit int, onlyActive bo
 		return nil, fmt.Errorf("failed to create list tags request: %w", err)
 	}
 
-	q := req.URL.Query()
+	params := map[string]string{}
 	if limit > 0 {
-		q.Add("limit", fmt.Sprintf("%d", limit))
+		params["limit"] = fmt.Sprintf("%d", limit)
 	}
 	if onlyActive {
-		q.Add("onlyActiveTags", "true")
+		params["onlyActiveTags"] = queryValueTrue
 	}
-	req.URL.RawQuery = q.Encode()
+	addQueryParams(req, params)
 
 	var tags RepositoryTags
 	if err := c.get(req, &tags); err != nil {

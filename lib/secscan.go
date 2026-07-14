@@ -17,16 +17,13 @@ import (
 
 // GetManifestSecurity retrieves security scan information for a specific manifest
 func (c *Client) GetManifestSecurity(namespace, repository, manifestRef string, vulnerabilities bool) (*SecurityScan, error) {
-	url := c.buildURL("/repository/%s/%s/manifest/%s/security", namespace, repository, manifestRef)
-
-	// Add query parameter to include vulnerabilities
-	if vulnerabilities {
-		url += "?vulnerabilities=true"
-	}
-
-	req, err := newRequest("GET", url, nil)
+	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/manifest/%s/security", namespace, repository, manifestRef), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get manifest security request: %w", err)
+	}
+
+	if vulnerabilities {
+		addQueryParams(req, map[string]string{"vulnerabilities": queryValueTrue})
 	}
 
 	var securityScan SecurityScan

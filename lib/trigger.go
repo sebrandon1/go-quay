@@ -132,9 +132,7 @@ func (c *Client) GetTriggerBuilds(namespace, repository, triggerUUID string, lim
 	}
 
 	if limit > 0 {
-		q := req.URL.Query()
-		q.Add("limit", fmt.Sprintf("%d", limit))
-		req.URL.RawQuery = q.Encode()
+		addQueryParams(req, map[string]string{"limit": fmt.Sprintf("%d", limit)})
 	}
 
 	var builds Builds
