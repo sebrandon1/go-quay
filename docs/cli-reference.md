@@ -64,6 +64,15 @@ go-quay get build request \
   --token YOUR_TOKEN
 ```
 
+### Get build status
+```bash
+go-quay get build status \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid BUILD_UUID \
+  --token YOUR_TOKEN
+```
+
 ### Cancel a build
 ```bash
 go-quay get build cancel \
@@ -153,6 +162,17 @@ go-quay get trigger activate \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid TRIGGER_UUID \
+  --pull-robot ROBOT_NAME \
+  --token YOUR_TOKEN
+```
+
+### List builds from a trigger
+```bash
+go-quay get trigger builds \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid TRIGGER_UUID \
+  --limit 10 \
   --token YOUR_TOKEN
 ```
 
@@ -225,6 +245,19 @@ go-quay get notification reset \
   --token YOUR_TOKEN
 ```
 
+### Update a notification
+```bash
+go-quay get notification update \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --uuid NOTIFICATION_UUID \
+  --event repo_push \
+  --method webhook \
+  --url "https://example.com/new-webhook" \
+  --title "Updated Webhook" \
+  --token YOUR_TOKEN
+```
+
 ### Delete a notification
 ```bash
 go-quay get notification delete \
@@ -288,6 +321,33 @@ go-quay get logs user-logs -t YOUR_TOKEN
 go-quay get logs user-aggregated-logs -s "2024-01-01" -e "2024-01-31" -t YOUR_TOKEN
 ```
 
+### Export logs
+```bash
+# Export repository logs
+go-quay get logs export-repo-logs \
+  -n NAMESPACE \
+  -r REPOSITORY \
+  --start-time "2024-01-01T00:00:00Z" \
+  --end-time "2024-01-31T23:59:59Z" \
+  --callback-email "user@example.com" \
+  -t YOUR_TOKEN
+
+# Export organization logs
+go-quay get logs export-org-logs \
+  -o ORG_NAME \
+  --start-time "2024-01-01T00:00:00Z" \
+  --end-time "2024-01-31T23:59:59Z" \
+  --callback-email "user@example.com" \
+  -t YOUR_TOKEN
+
+# Export user logs
+go-quay get logs export-user-logs \
+  --start-time "2024-01-01T00:00:00Z" \
+  --end-time "2024-01-31T23:59:59Z" \
+  --callback-email "user@example.com" \
+  -t YOUR_TOKEN
+```
+
 ## Repository API
 
 Full CRUD operations for repository management.
@@ -328,6 +388,33 @@ go-quay get repository delete \
   --token YOUR_TOKEN
 ```
 
+### List repositories
+```bash
+go-quay get repository list \
+  --namespace myorg \
+  --token YOUR_TOKEN
+
+# With filters
+go-quay get repository list \
+  --namespace myorg \
+  --public \
+  --starred \
+  --popularity \
+  --page 1 \
+  --limit 50 \
+  --table \
+  --token YOUR_TOKEN
+```
+
+### Change repository visibility
+```bash
+go-quay get repository change-visibility \
+  --namespace myorg \
+  --repository myrepo \
+  --visibility public \
+  --token YOUR_TOKEN
+```
+
 ## Repository Permissions API
 
 Manage who can access your repositories and what level of access they have.
@@ -356,6 +443,77 @@ go-quay get permissions remove \
   --namespace myorg \
   --repository myrepo \
   --user john.doe \
+  --token YOUR_TOKEN
+```
+
+### User permissions
+```bash
+# List user permissions
+go-quay get permissions user-permissions \
+  --namespace myorg \
+  --repository myrepo \
+  --token YOUR_TOKEN
+
+# Get specific user permission
+go-quay get permissions user-permission \
+  --namespace myorg \
+  --repository myrepo \
+  --user john.doe \
+  --token YOUR_TOKEN
+
+# Set user permission
+go-quay get permissions set-user-permission \
+  --namespace myorg \
+  --repository myrepo \
+  --user john.doe \
+  --role write \
+  --token YOUR_TOKEN
+
+# Delete user permission
+go-quay get permissions delete-user-permission \
+  --namespace myorg \
+  --repository myrepo \
+  --user john.doe \
+  --confirm \
+  --token YOUR_TOKEN
+
+# Get user transitive permission
+go-quay get permissions user-transitive-permission \
+  --namespace myorg \
+  --repository myrepo \
+  --user john.doe \
+  --token YOUR_TOKEN
+```
+
+### Team permissions
+```bash
+# List team permissions
+go-quay get permissions team-permissions \
+  --namespace myorg \
+  --repository myrepo \
+  --token YOUR_TOKEN
+
+# Get specific team permission
+go-quay get permissions team-permission \
+  --namespace myorg \
+  --repository myrepo \
+  --team developers \
+  --token YOUR_TOKEN
+
+# Set team permission
+go-quay get permissions set-team-permission \
+  --namespace myorg \
+  --repository myrepo \
+  --team developers \
+  --role write \
+  --token YOUR_TOKEN
+
+# Delete team permission
+go-quay get permissions delete-team-permission \
+  --namespace myorg \
+  --repository myrepo \
+  --team developers \
+  --confirm \
   --token YOUR_TOKEN
 ```
 
@@ -412,6 +570,16 @@ go-quay get tag revert \
   --namespace myorg \
   --repository myrepo \
   --tag latest \
+  --manifest sha256:abc123... \
+  --token YOUR_TOKEN
+```
+
+### Restore a deleted tag
+```bash
+go-quay get tag restore \
+  --namespace myorg \
+  --repository myrepo \
+  --tag deleted-tag \
   --manifest sha256:abc123... \
   --token YOUR_TOKEN
 ```
@@ -552,6 +720,25 @@ go-quay get robot regenerate --name deploybot --token YOUR_TOKEN
 go-quay get robot permissions --name deploybot --token YOUR_TOKEN
 ```
 
+### Get robot federation config
+```bash
+go-quay get robot federation-get --name deploybot --token YOUR_TOKEN
+```
+
+### Create robot federation config
+```bash
+go-quay get robot federation-create \
+  --name deploybot \
+  --issuer "https://token.actions.githubusercontent.com" \
+  --subject "repo:org/repo:ref:refs/heads/main" \
+  --token YOUR_TOKEN
+```
+
+### Delete robot federation config
+```bash
+go-quay get robot federation-delete --name deploybot --token YOUR_TOKEN
+```
+
 ## Search API
 
 Search for repositories, users, organizations, and other entities.
@@ -664,6 +851,16 @@ go-quay get user star --namespace quay --repository quay --token YOUR_TOKEN
 go-quay get user unstar --namespace quay --repository quay --token YOUR_TOKEN
 ```
 
+### Look up a user by username
+```bash
+go-quay get user lookup --username johndoe --token YOUR_TOKEN
+```
+
+### Get user marketplace info
+```bash
+go-quay get user marketplace --token YOUR_TOKEN
+```
+
 ## Organization API
 
 Comprehensive management of organizations, teams, members, robots, and settings.
@@ -694,19 +891,204 @@ go-quay get organization team-members -o myorg --team TEAM_NAME -t YOUR_TOKEN
 go-quay get organization robots -o myorg -t YOUR_TOKEN
 ```
 
-### Get organization quota and policies
+### Create, update, delete organization
 ```bash
-go-quay get organization quota -o myorg -t YOUR_TOKEN
-go-quay get organization auto-prune -o myorg -t YOUR_TOKEN
+# Create
+go-quay get organization create-org -o neworg --email admin@example.com -t YOUR_TOKEN
+
+# Update
+go-quay get organization update-org -o myorg --email newemail@example.com -t YOUR_TOKEN
+
+# Delete
+go-quay get organization delete-org -o myorg --confirm -t YOUR_TOKEN
+```
+
+### Manage members
+```bash
+# Get specific member
+go-quay get organization member -o myorg --member johndoe -t YOUR_TOKEN
+
+# Add member
+go-quay get organization add-member -o myorg --member johndoe -t YOUR_TOKEN
+
+# Remove member
+go-quay get organization remove-member -o myorg --member johndoe --confirm -t YOUR_TOKEN
+
+# List collaborators
+go-quay get organization collaborators -o myorg -t YOUR_TOKEN
+```
+
+### List organization repositories
+```bash
+go-quay get organization repositories -o myorg -t YOUR_TOKEN
+```
+
+### Organization robot accounts
+```bash
+# Get specific robot
+go-quay get organization robot -o myorg --robot deploybot -t YOUR_TOKEN
+
+# Create robot
+go-quay get organization create-robot -o myorg --robot deploybot --description "CI bot" -t YOUR_TOKEN
+
+# Delete robot
+go-quay get organization delete-robot -o myorg --robot deploybot --confirm -t YOUR_TOKEN
+
+# Regenerate robot token
+go-quay get organization regenerate-robot -o myorg --robot deploybot -t YOUR_TOKEN
+
+# Get robot permissions
+go-quay get organization robot-permissions -o myorg --robot deploybot -t YOUR_TOKEN
+
+# Set robot repository permission
+go-quay get organization set-robot-permission \
+  -o myorg --robot deploybot --repository myrepo --role write -t YOUR_TOKEN
+
+# Remove robot repository permission
+go-quay get organization remove-robot-permission \
+  -o myorg --robot deploybot --repository myrepo --confirm -t YOUR_TOKEN
+```
+
+### Organization robot federation
+```bash
+# Get federation config
+go-quay get organization robot-federation-get -o myorg --robot deploybot -t YOUR_TOKEN
+
+# Create federation config
+go-quay get organization robot-federation-create \
+  -o myorg --robot deploybot \
+  --issuer "https://token.actions.githubusercontent.com" \
+  --subject "repo:org/repo:ref:refs/heads/main" \
+  -t YOUR_TOKEN
+
+# Delete federation config
+go-quay get organization robot-federation-delete -o myorg --robot deploybot -t YOUR_TOKEN
+```
+
+### Organization applications
+```bash
+# List applications
 go-quay get organization applications -o myorg -t YOUR_TOKEN
+
+# Get specific application
+go-quay get organization application -o myorg --client-id CLIENT_ID -t YOUR_TOKEN
+
+# Create application
+go-quay get organization create-application \
+  -o myorg --name "My App" --description "Description" \
+  --application-uri "https://example.com" \
+  --redirect-uri "https://example.com/callback" \
+  -t YOUR_TOKEN
+
+# Update application
+go-quay get organization update-application \
+  -o myorg --client-id CLIENT_ID --name "Updated App" \
+  -t YOUR_TOKEN
+
+# Delete application
+go-quay get organization delete-application -o myorg --client-id CLIENT_ID --confirm -t YOUR_TOKEN
+
+# Reset client secret
+go-quay get organization reset-application-secret -o myorg --client-id CLIENT_ID -t YOUR_TOKEN
+```
+
+### Organization marketplace
+```bash
+# Get marketplace info
+go-quay get organization marketplace -o myorg -t YOUR_TOKEN
+
+# Create subscription
+go-quay get organization create-marketplace-subscription -o myorg --sku SKU_ID -t YOUR_TOKEN
+
+# Delete subscription
+go-quay get organization delete-marketplace-subscription \
+  -o myorg --subscription-id SUB_ID --confirm -t YOUR_TOKEN
+
+# Batch remove subscriptions
+go-quay get organization batch-remove-subscriptions \
+  -o myorg --subscription-ids "id1,id2,id3" --confirm -t YOUR_TOKEN
+```
+
+### Organization proxy cache
+```bash
+# Get proxy cache config
+go-quay get organization proxy-cache -o myorg -t YOUR_TOKEN
+
+# Create proxy cache config
+go-quay get organization create-proxy-cache \
+  -o myorg --upstream-registry "docker.io" --expiration 86400 -t YOUR_TOKEN
+
+# Delete proxy cache config
+go-quay get organization delete-proxy-cache -o myorg --confirm -t YOUR_TOKEN
+```
+
+### Organization quota and auto-prune
+```bash
+# Get quota
+go-quay get organization quota -o myorg -t YOUR_TOKEN
+
+# Create quota
+go-quay get organization create-quota -o myorg --limit-bytes 10737418240 -t YOUR_TOKEN
+
+# Update quota
+go-quay get organization update-quota -o myorg --limit-bytes 21474836480 -t YOUR_TOKEN
+
+# Delete quota
+go-quay get organization delete-quota -o myorg --confirm -t YOUR_TOKEN
+
+# Get auto-prune policies
+go-quay get organization auto-prune -o myorg -t YOUR_TOKEN
+
+# Get specific auto-prune policy
+go-quay get organization auto-prune-policy -o myorg --policy-uuid POLICY_UUID -t YOUR_TOKEN
+
+# Create auto-prune policy
+go-quay get organization create-auto-prune \
+  -o myorg --method "number_of_tags" --value 10 --tag-pattern "dev-*" -t YOUR_TOKEN
+
+# Update auto-prune policy
+go-quay get organization update-auto-prune \
+  -o myorg --policy-uuid POLICY_UUID --method "number_of_tags" --value 20 -t YOUR_TOKEN
+
+# Delete auto-prune policy
+go-quay get organization delete-auto-prune -o myorg --policy-uuid POLICY_UUID --confirm -t YOUR_TOKEN
+```
+
+### Team invitations
+```bash
+# Invite member to team via email
+go-quay get organization invite-member -o myorg --team developers --email user@example.com -t YOUR_TOKEN
+
+# Cancel team invitation
+go-quay get organization cancel-invite -o myorg --team developers --email user@example.com --confirm -t YOUR_TOKEN
 ```
 
 ## Discovery API
 
-Get information about available API endpoints and versions.
+Get information about available API endpoints, versions, and entities.
 
+### Get API discovery information
 ```bash
-go-quay get discovery --token YOUR_TOKEN
+go-quay get discovery api --token YOUR_TOKEN
+```
+
+### Get registry capabilities
+```bash
+go-quay get discovery capabilities --token YOUR_TOKEN
+```
+
+### Get application info
+```bash
+go-quay get discovery app-info --client-id CLIENT_ID --token YOUR_TOKEN
+```
+
+### Search entities
+```bash
+go-quay get discovery entities \
+  --prefix "user" \
+  --include-orgs \
+  --include-teams \
+  --token YOUR_TOKEN
 ```
 
 ## Error API
@@ -719,10 +1101,20 @@ go-quay get error --type invalid_token --token YOUR_TOKEN
 
 ## Messages API
 
-Get system-wide messages for the authenticated user.
+Manage system-wide messages.
 
+### List messages
 ```bash
-go-quay get messages --token YOUR_TOKEN
+go-quay get messages list --token YOUR_TOKEN
+```
+
+### Create a message
+```bash
+go-quay get messages create \
+  --content "System maintenance scheduled" \
+  --severity warning \
+  --media-type text/plain \
+  --token YOUR_TOKEN
 ```
 
 ## Prototype API
