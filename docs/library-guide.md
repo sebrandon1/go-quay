@@ -53,11 +53,20 @@ err := client.StarRepository("namespace", "repo")
 err := client.UnstarRepository("namespace", "repo")
 
 // User robots
-robots, err := client.GetUserRobots()
-robot, err := client.CreateUserRobot("name", "description")
-robot, err := client.GetUserRobot("name")
+robots, err := client.GetUserRobotAccounts()
+robot, err := client.CreateUserRobotAccount("name", "description", nil)
+robot, err := client.GetUserRobotAccount("name")
 robot, err := client.RegenerateUserRobotToken("name")
-err := client.DeleteUserRobot("name")
+err := client.DeleteUserRobotAccount("name")
+perms, err := client.GetUserRobotPermissions("name")
+
+// User robot federation
+federation, err := client.GetUserRobotFederation("name")
+err := client.CreateUserRobotFederation("name", []lib.RobotFederationConfig{{Issuer: "issuer", Subject: "subject"}})
+err := client.DeleteUserRobotFederation("name")
+
+// User marketplace
+marketplace, err := client.GetUserMarketplace()
 ```
 
 ### Repository Operations
@@ -142,23 +151,36 @@ err := client.DeleteOrganization(name)
 // Members
 members, err := client.GetOrganizationMembers(orgname)
 member, err := client.GetOrganizationMember(orgname, membername)
+err := client.AddOrganizationMember(orgname, membername)
+err := client.RemoveOrganizationMember(orgname, membername)
 
 // Collaborators
 collaborators, err := client.GetOrganizationCollaborators(orgname)
 
+// Repositories
+repos, err := client.GetOrganizationRepositories(orgname)
+
 // Robots
-robots, err := client.GetOrganizationRobots(orgname)
-robot, err := client.CreateOrganizationRobot(orgname, name, description, metadata)
-robot, err := client.GetOrganizationRobot(orgname, name)
-robot, err := client.RegenerateOrganizationRobotToken(orgname, name)
-err := client.DeleteOrganizationRobot(orgname, name)
+robots, err := client.GetRobotAccounts(orgname)
+robot, err := client.CreateRobotAccount(orgname, name, description, nil)
+robot, err := client.GetRobotAccount(orgname, name)
+robot, err := client.RegenerateRobotToken(orgname, name)
+err := client.DeleteRobotAccount(orgname, name)
+perms, err := client.GetRobotPermissions(orgname, name)
+err := client.SetRobotRepositoryPermission(orgname, name, repository, role)
+err := client.RemoveRobotRepositoryPermission(orgname, name, repository)
+
+// Robot federation
+federation, err := client.GetRobotFederation(orgname, name)
+err := client.CreateRobotFederation(orgname, name, []lib.RobotFederationConfig{{Issuer: "issuer", Subject: "subject"}})
+err := client.DeleteRobotFederation(orgname, name)
 ```
 
 ### Team Operations
 
 ```go
 // CRUD
-teams, err := client.GetOrganizationTeams(orgname)
+teams, err := client.GetTeams(orgname)
 team, err := client.CreateTeam(orgname, teamname, description, role)
 team, err := client.GetTeam(orgname, teamname)
 team, err := client.UpdateTeam(orgname, teamname, description, role)
@@ -168,6 +190,10 @@ err := client.DeleteTeam(orgname, teamname)
 members, err := client.GetTeamMembers(orgname, teamname)
 err := client.AddTeamMember(orgname, teamname, membername)
 err := client.RemoveTeamMember(orgname, teamname, membername)
+
+// Invitations
+err := client.InviteTeamMember(orgname, teamname, email)
+err := client.DeleteTeamInvite(orgname, teamname, email)
 
 // Permissions
 perms, err := client.GetTeamPermissions(orgname, teamname)
@@ -195,7 +221,7 @@ err := client.DeleteTeamPermission(namespace, repo, teamname)
 
 ```go
 // List builds
-builds, err := client.GetRepositoryBuilds(namespace, repo, limit, page)
+builds, err := client.GetBuilds(namespace, repo, limit)
 
 // Get build
 build, err := client.GetBuild(namespace, repo, buildUUID)
@@ -207,7 +233,7 @@ logs, err := client.GetBuildLogs(namespace, repo, buildUUID)
 status, err := client.GetBuildStatus(namespace, repo, buildUUID)
 
 // Request new build
-build, err := client.RequestBuild(namespace, repo, request)
+build, err := client.RequestBuild(namespace, repo, &lib.RequestBuildRequest{...})
 
 // Cancel build
 err := client.CancelBuild(namespace, repo, buildUUID)
@@ -217,36 +243,39 @@ err := client.CancelBuild(namespace, repo, buildUUID)
 
 ```go
 // List triggers
-triggers, err := client.ListBuildTriggers(namespace, repo)
+triggers, err := client.GetTriggers(namespace, repo)
 
 // Get trigger
-trigger, err := client.GetBuildTrigger(namespace, repo, triggerUUID)
+trigger, err := client.GetTrigger(namespace, repo, triggerUUID)
 
 // Activate trigger
-err := client.ActivateBuildTrigger(namespace, repo, triggerUUID, config)
+trigger, err := client.ActivateTrigger(namespace, repo, triggerUUID, &lib.ActivateTriggerRequest{...})
 
 // Start build from trigger
-build, err := client.StartBuildTrigger(namespace, repo, triggerUUID, commitSHA)
+build, err := client.StartTriggerBuild(namespace, repo, triggerUUID, &lib.ManualTriggerRequest{...})
 
 // Enable/disable trigger
-err := client.EnableBuildTrigger(namespace, repo, triggerUUID)
-err := client.DisableBuildTrigger(namespace, repo, triggerUUID)
+trigger, err := client.UpdateTrigger(namespace, repo, triggerUUID, true)
+trigger, err := client.UpdateTrigger(namespace, repo, triggerUUID, false)
+
+// List builds from a specific trigger
+builds, err := client.GetTriggerBuilds(namespace, repo, triggerUUID, limit)
 
 // Delete trigger
-err := client.DeleteBuildTrigger(namespace, repo, triggerUUID)
+err := client.DeleteTrigger(namespace, repo, triggerUUID)
 ```
 
 ### Notification Operations
 
 ```go
 // List notifications
-notifications, err := client.ListNotifications(namespace, repo)
+notifications, err := client.GetNotifications(namespace, repo)
 
 // Get notification
 notification, err := client.GetNotification(namespace, repo, uuid)
 
 // Create notification
-notification, err := client.CreateNotification(namespace, repo, lib.CreateNotificationRequest{
+notification, err := client.CreateNotification(namespace, repo, &lib.CreateNotificationRequest{
     Event:  "repo_push",
     Method: "webhook",
     Title:  "My Notification",
@@ -270,56 +299,56 @@ err := client.DeleteNotification(namespace, repo, uuid)
 
 ```go
 // Get quota
-quotas, err := client.GetOrganizationQuota(orgname)
+quota, err := client.GetQuota(orgname)
 
 // Create quota
-quota, err := client.CreateOrganizationQuota(orgname, limitBytes)
+quota, err := client.CreateQuota(orgname, limitBytes)
 
 // Update quota
-quota, err := client.UpdateOrganizationQuota(orgname, quotaID, limitBytes)
+quota, err := client.UpdateQuota(orgname, limitBytes)
 
 // Delete quota
-err := client.DeleteOrganizationQuota(orgname, quotaID)
+err := client.DeleteQuota(orgname)
 ```
 
 ### Auto-Prune Operations
 
 ```go
 // Get policies
-policies, err := client.GetOrganizationAutoPrunePolicies(orgname)
+policies, err := client.GetAutoPrunePolicies(orgname)
 
 // Create policy
-policy, err := client.CreateOrganizationAutoPrunePolicy(orgname, method, value, tagPattern)
+policy, err := client.CreateAutoPrunePolicy(orgname, method, value, tagPattern)
 
 // Get specific policy
-policy, err := client.GetOrganizationAutoPrunePolicy(orgname, policyUUID)
+policy, err := client.GetAutoPrunePolicy(orgname, policyUUID)
 
 // Update policy
-policy, err := client.UpdateOrganizationAutoPrunePolicy(orgname, policyUUID, method, value, tagPattern)
+policy, err := client.UpdateAutoPrunePolicy(orgname, policyUUID, method, value, tagPattern)
 
 // Delete policy
-err := client.DeleteOrganizationAutoPrunePolicy(orgname, policyUUID)
+err := client.DeleteAutoPrunePolicy(orgname, policyUUID)
 ```
 
 ### Logs Operations
 
 ```go
 // Repository logs
-logs, err := client.GetRepositoryLogs(namespace, repo, nextPage)
+logs, err := client.GetLogs(namespace, repo, nextPage, startDate, endDate)
 aggLogs, err := client.GetAggregatedLogs(namespace, repo, startDate, endDate)
 
 // Organization logs
-logs, err := client.GetOrganizationLogs(orgname, nextPage)
+logs, err := client.GetOrganizationLogs(orgname, nextPage, startDate, endDate)
 aggLogs, err := client.GetOrganizationAggregatedLogs(orgname, startDate, endDate)
 
 // User logs
-logs, err := client.GetUserLogs(nextPage)
+logs, err := client.GetUserLogs(nextPage, startDate, endDate)
 aggLogs, err := client.GetUserAggregatedLogs(startDate, endDate)
 
 // Export logs
-err := client.ExportRepositoryLogs(namespace, repo, startDate, endDate, email)
-err := client.ExportOrganizationLogs(orgname, startDate, endDate, email)
-err := client.ExportUserLogs(startDate, endDate, email)
+err := client.ExportRepositoryLogs(namespace, repo, &lib.ExportLogsRequest{...})
+err := client.ExportOrganizationLogs(orgname, &lib.ExportLogsRequest{...})
+err := client.ExportUserLogs(&lib.ExportLogsRequest{...})
 ```
 
 ### Search Operations
@@ -329,7 +358,7 @@ err := client.ExportUserLogs(startDate, endDate, email)
 results, err := client.SearchRepositories(query, page)
 
 // Search all (repos, users, teams, etc.)
-results, err := client.SearchAll(query, page)
+results, err := client.SearchAll(query)
 ```
 
 ### Billing Operations
@@ -342,10 +371,142 @@ plans, err := client.GetAvailablePlans()
 billing, err := client.GetUserBilling()
 subscription, err := client.GetUserSubscription()
 
+// User invoices
+invoices, err := client.GetUserInvoices()
+
 // Organization billing
 billing, err := client.GetOrganizationBilling(orgname)
 subscription, err := client.GetOrganizationSubscription(orgname)
 invoices, err := client.GetOrganizationInvoices(orgname)
+```
+
+### Discovery Operations
+
+```go
+// Get API discovery information
+discovery, err := client.GetDiscovery()
+
+// Get registry capabilities
+capabilities, err := client.GetRegistryCapabilities()
+
+// Get application info by client ID
+app, err := client.GetAppInfo(clientID)
+
+// Search entities by prefix
+entities, err := client.GetEntities(prefix, includeOrgs, includeTeams)
+```
+
+### Messages Operations
+
+```go
+// Get system messages
+messages, err := client.GetMessages()
+
+// Create a message
+message, err := client.CreateMessage(content, severity, mediaType)
+```
+
+### Prototype Operations
+
+```go
+// List default permission prototypes
+prototypes, err := client.GetPrototypes(orgname)
+
+// Create prototype
+prototype, err := client.CreatePrototype(orgname, &lib.CreatePrototypeRequest{...})
+
+// Get specific prototype
+prototype, err := client.GetPrototype(orgname, prototypeUUID)
+
+// Update prototype
+prototype, err := client.UpdatePrototype(orgname, prototypeUUID, &lib.UpdatePrototypeRequest{...})
+
+// Delete prototype
+err := client.DeletePrototype(orgname, prototypeUUID)
+```
+
+### RepoToken Operations (Deprecated)
+
+```go
+// List repository tokens
+tokens, err := client.GetRepoTokens(namespace, repo)
+
+// Create token
+token, err := client.CreateRepoToken(namespace, repo, &lib.CreateRepoTokenRequest{...})
+
+// Get specific token
+token, err := client.GetRepoToken(namespace, repo, code)
+
+// Update token
+token, err := client.UpdateRepoToken(namespace, repo, code, &lib.UpdateRepoTokenRequest{...})
+
+// Delete token
+err := client.DeleteRepoToken(namespace, repo, code)
+```
+
+### Application Operations
+
+```go
+// List applications
+apps, err := client.GetApplications(orgname)
+
+// Create application
+app, err := client.CreateApplication(orgname, name, description, applicationURI, redirectURI)
+
+// Get application
+app, err := client.GetApplication(orgname, clientID)
+
+// Update application
+app, err := client.UpdateApplication(orgname, clientID, name, description, applicationURI, redirectURI)
+
+// Delete application
+err := client.DeleteApplication(orgname, clientID)
+
+// Reset client secret
+app, err := client.ResetApplicationClientSecret(orgname, clientID)
+```
+
+### Marketplace Operations
+
+```go
+// Get organization marketplace info
+marketplace, err := client.GetOrganizationMarketplace(orgname)
+
+// Create subscription
+err := client.CreateOrganizationMarketplaceSubscription(orgname, &lib.MarketplaceSubscriptionRequest{...})
+
+// Delete subscription
+err := client.DeleteOrganizationMarketplaceSubscription(orgname, subscriptionID)
+
+// Batch remove subscriptions
+err := client.BatchRemoveOrganizationMarketplaceSubscriptions(orgname, subscriptionIDs)
+```
+
+### Proxy Cache Operations
+
+```go
+// Get proxy cache config
+config, err := client.GetProxyCacheConfig(orgname)
+
+// Create proxy cache config
+config, err := client.CreateProxyCacheConfig(orgname, upstreamRegistry, insecure, expiration)
+
+// Delete proxy cache config
+err := client.DeleteProxyCacheConfig(orgname)
+```
+
+### Error Operations
+
+```go
+// Get error type details
+errorType, err := client.GetErrorType(errorType)
+```
+
+### Repository Tag Listing
+
+```go
+// List tags for a repository
+tags, err := client.ListTags(namespace, repo, limit, onlyActive)
 ```
 
 ## Error Handling
