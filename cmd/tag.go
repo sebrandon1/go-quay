@@ -16,7 +16,7 @@ var (
 
 // tagCmd represents the tag command group
 var tagCmd = &cobra.Command{
-	Use:   "tag",
+	Use:   cmdTag,
 	Short: "Repository tag management commands",
 	Long: `Commands for managing repository tags including detailed information, updates, deletion, and history.
 
