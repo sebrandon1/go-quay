@@ -14,4 +14,9 @@ const (
 	cmdOrganization = "organization"
 	cmdTag          = "tag"
 	cmdMembers      = "members"
+
+	// Output format constants
+	outputJSON  = "json"
+	outputYAML  = "yaml"
+	outputTable = "table"
 )

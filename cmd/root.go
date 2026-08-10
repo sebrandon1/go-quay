@@ -30,6 +30,15 @@ var getCmd = &cobra.Command{
 Set QUAY_TOKEN environment variable or use --token/-t flag.
 Get your token at https://quay.io/organization/<org>?tab=applications`)
 		}
+
+		// Validate output format
+		switch outputFormat {
+		case outputJSON, outputYAML, outputTable:
+			// valid
+		default:
+			return fmt.Errorf("invalid output format %q: must be json, yaml, or table", outputFormat)
+		}
+
 		return nil
 	},
 }
@@ -44,6 +53,7 @@ func envOrDefault(key, fallback string) string {
 func init() {
 	getCmd.PersistentFlags().StringVarP(&token, "token", "t", envOrDefault("QUAY_TOKEN", ""), "Quay.io API token (default: $QUAY_TOKEN)")
 	getCmd.PersistentFlags().StringVar(&quayURL, "quay-url", envOrDefault("QUAY_URL", lib.DefaultQuayURL), "Quay API base URL (default: $QUAY_URL)")
+	getCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, or table")
 	rootCmd.AddCommand(getCmd)
 	getCmd.AddCommand(repositoryCmd)
 	getCmd.AddCommand(billingCmd)
