@@ -1,5 +1,11 @@
 package lib
 
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
 // Shared test constants used across all test files in the lib package.
 // Organized by category to avoid duplication and satisfy goconst linter.
 
@@ -106,4 +112,40 @@ const (
 
 	// Auto-prune tag pattern
 	testTagPatternRelease = "release-*"
+
+	// Organization test values
+	testOrgName  = "test-org"
+	testTeamName = "developers"
+	testRepoName = "test-repo"
+	roleAdmin    = "admin"
+	roleMember   = "member"
+
+	// Organization-specific test values (moved from organization_test.go)
+	testClientID       = "client-abc123"
+	testPolicyUUID     = "policy-uuid-456"
+	testAppName        = "Test Application"
+	testAppURI         = "https://app.example.com"
+	testRedirectURI    = "https://app.example.com/callback"
+	testUpstreamReg    = "docker.io"
+	testPrototypeID    = "proto-123"
+	testSubscriptionID = "sub-789"
+	testMemberName     = "johndoe"
 )
+
+// newOrgErrorClient creates a test client backed by a server that always returns 500.
+// Shared across multiple domain test files.
+func newOrgErrorClient(t *testing.T) *Client {
+	t.Helper()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	t.Cleanup(server.Close)
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	return client
+}
