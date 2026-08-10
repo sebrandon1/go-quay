@@ -148,7 +148,7 @@ Use --table with --popularity for an enriched dashboard sorted by pull count:
 			return fmt.Errorf("listing repositories: %w", err)
 		}
 
-		if !repoTable {
+		if !repoTable && outputFormat != outputTable {
 			return printJSON(repos)
 		}
 
