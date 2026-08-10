@@ -63,10 +63,6 @@ var prototypeInfoCmd = &cobra.Command{
 	Short: "Get a specific prototype",
 	Long:  `Get detailed information about a specific permission prototype.`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if prototypeUUID == "" {
-			return fmt.Errorf("--uuid is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -97,16 +93,6 @@ Roles:
   - write: Pull and push images
   - admin: Full administrative access`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if prototypeDelegateName == "" {
-			return fmt.Errorf("--delegate-name is required")
-		}
-		if prototypeDelegateKind == "" {
-			return fmt.Errorf("--delegate-kind is required")
-		}
-		if prototypeRole == "" {
-			return fmt.Errorf("--role is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -135,13 +121,6 @@ var prototypeUpdateCmd = &cobra.Command{
 	Short: "Update a prototype",
 	Long:  `Update an existing permission prototype's role.`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if prototypeUUID == "" {
-			return fmt.Errorf("--uuid is required")
-		}
-		if prototypeRole == "" {
-			return fmt.Errorf("--role is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -166,9 +145,6 @@ var prototypeDeleteCmd = &cobra.Command{
 	Short: "Delete a prototype",
 	Long:  `Delete a permission prototype from an organization.`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if prototypeUUID == "" {
-			return fmt.Errorf("--uuid is required")
-		}
 		if !confirmProtoDelete {
 			return fmt.Errorf("--confirm is required to delete a prototype")
 		}
@@ -197,15 +173,20 @@ func setupPrototypeFlags() {
 	// UUID flags
 	for _, cmd := range []*cobra.Command{prototypeInfoCmd, prototypeUpdateCmd, prototypeDeleteCmd} {
 		cmd.Flags().StringVar(&prototypeUUID, "uuid", "", "Prototype UUID")
+		_ = cmd.MarkFlagRequired("uuid")
 	}
 
 	// Create flags
 	prototypeCreateCmd.Flags().StringVar(&prototypeDelegateName, "delegate-name", "", "Name of the delegate (user/team/robot)")
+	_ = prototypeCreateCmd.MarkFlagRequired("delegate-name")
 	prototypeCreateCmd.Flags().StringVar(&prototypeDelegateKind, "delegate-kind", "", "Kind of delegate (user, team, robot)")
+	_ = prototypeCreateCmd.MarkFlagRequired("delegate-kind")
 	prototypeCreateCmd.Flags().StringVar(&prototypeRole, "role", "", "Permission role (read, write, admin)")
+	_ = prototypeCreateCmd.MarkFlagRequired("role")
 
 	// Update flags
 	prototypeUpdateCmd.Flags().StringVar(&prototypeRole, "role", "", "New permission role (read, write, admin)")
+	_ = prototypeUpdateCmd.MarkFlagRequired("role")
 
 	// Delete flags
 	prototypeDeleteCmd.Flags().BoolVar(&confirmProtoDelete, "confirm", false, "Confirm deletion")

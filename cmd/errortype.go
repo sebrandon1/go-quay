@@ -24,10 +24,6 @@ var errorTypeCmd = &cobra.Command{
 
 This endpoint provides details about error types that can be returned by the Quay.io API.`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if errorTypeName == "" {
-			return fmt.Errorf("--type is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -44,4 +40,5 @@ This endpoint provides details about error types that can be returned by the Qua
 
 func init() {
 	errorTypeCmd.Flags().StringVar(&errorTypeName, "type", "", "Error type to look up (e.g., 'invalid_token')")
+	_ = errorTypeCmd.MarkFlagRequired("type")
 }

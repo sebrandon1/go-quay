@@ -64,10 +64,6 @@ var repotokenInfoCmd = &cobra.Command{
 	Short: "Get a specific token",
 	Long:  `Get detailed information about a specific repository token. (DEPRECATED - use robot accounts)`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if repoTokenCode == "" {
-			return fmt.Errorf("--code is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -88,10 +84,6 @@ var repotokenCreateCmd = &cobra.Command{
 	Short: "Create a new token",
 	Long:  `Create a new repository token. (DEPRECATED - use robot accounts)`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if repoTokenName == "" {
-			return fmt.Errorf("--name is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -116,13 +108,6 @@ var repotokenUpdateCmd = &cobra.Command{
 	Short: "Update a token",
 	Long:  `Update a repository token's role. (DEPRECATED - use robot accounts)`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if repoTokenCode == "" {
-			return fmt.Errorf("--code is required")
-		}
-		if repoTokenRole == "" {
-			return fmt.Errorf("--role is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -147,9 +132,6 @@ var repotokenDeleteCmd = &cobra.Command{
 	Short: "Delete a token",
 	Long:  `Delete a repository token. (DEPRECATED - use robot accounts)`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if repoTokenCode == "" {
-			return fmt.Errorf("--code is required")
-		}
 		if !confirmTokenDelete {
 			return fmt.Errorf("--confirm is required to delete a token")
 		}
@@ -179,13 +161,16 @@ func setupRepoTokenFlags() {
 	// Code flags
 	for _, cmd := range []*cobra.Command{repotokenInfoCmd, repotokenUpdateCmd, repotokenDeleteCmd} {
 		cmd.Flags().StringVar(&repoTokenCode, "code", "", "Token code")
+		_ = cmd.MarkFlagRequired("code")
 	}
 
 	// Create flags
 	repotokenCreateCmd.Flags().StringVar(&repoTokenName, "name", "", "Friendly name for the token")
+	_ = repotokenCreateCmd.MarkFlagRequired("name")
 
 	// Update flags
 	repotokenUpdateCmd.Flags().StringVar(&repoTokenRole, "role", "", "New role (read, write, admin)")
+	_ = repotokenUpdateCmd.MarkFlagRequired("role")
 
 	// Delete flags
 	repotokenDeleteCmd.Flags().BoolVar(&confirmTokenDelete, "confirm", false, "Confirm deletion")
