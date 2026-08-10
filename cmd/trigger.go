@@ -14,6 +14,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -94,7 +95,7 @@ var triggerDeleteCmd = &cobra.Command{
 			return fmt.Errorf("deleting trigger: %w", err)
 		}
 
-		fmt.Printf("Trigger %s deleted successfully\n", triggerUUID)
+		fmt.Fprintf(os.Stderr, "Trigger %s deleted successfully\n", triggerUUID)
 		return nil
 	},
 }

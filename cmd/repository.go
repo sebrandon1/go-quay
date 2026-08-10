@@ -71,7 +71,7 @@ var repoCreateCmd = &cobra.Command{
 			return fmt.Errorf("creating repository: %w", err)
 		}
 
-		fmt.Printf("Successfully created repository %s/%s\n", namespace, repository)
+		fmt.Fprintf(os.Stderr, "Successfully created repository %s/%s\n", namespace, repository)
 		return printJSON(repo)
 	},
 }
@@ -92,7 +92,7 @@ var repoUpdateCmd = &cobra.Command{
 			return fmt.Errorf("updating repository: %w", err)
 		}
 
-		fmt.Printf("Successfully updated repository %s/%s\n", namespace, repository)
+		fmt.Fprintf(os.Stderr, "Successfully updated repository %s/%s\n", namespace, repository)
 		return printJSON(repo)
 	},
 }
@@ -117,7 +117,7 @@ var repoDeleteCmd = &cobra.Command{
 			return fmt.Errorf("deleting repository: %w", err)
 		}
 
-		fmt.Printf("Successfully deleted repository %s/%s\n", namespace, repository)
+		fmt.Fprintf(os.Stderr, "Successfully deleted repository %s/%s\n", namespace, repository)
 		return nil
 	},
 }
@@ -222,7 +222,7 @@ var repoChangeVisibilityCmd = &cobra.Command{
 			return fmt.Errorf("changing repository visibility: %w", err)
 		}
 
-		fmt.Printf("Successfully changed visibility of %s/%s to %s\n", namespace, repository, repoVisibility)
+		fmt.Fprintf(os.Stderr, "Successfully changed visibility of %s/%s to %s\n", namespace, repository, repoVisibility)
 		return nil
 	},
 }

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -47,7 +48,7 @@ The scan status can be:
 			return fmt.Errorf("getting security scan: %w", err)
 		}
 
-		fmt.Printf("Security scan for %s/%s@%s\n", namespace, repository, secScanManifestRef)
+		fmt.Fprintf(os.Stderr, "Security scan for %s/%s@%s\n", namespace, repository, secScanManifestRef)
 		return printJSON(security)
 	},
 }

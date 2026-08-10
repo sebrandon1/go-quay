@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -37,7 +38,7 @@ var userInfoCmd = &cobra.Command{
 			return fmt.Errorf("getting user information: %w", err)
 		}
 
-		fmt.Printf("User information for %s:\n", user.Username)
+		fmt.Fprintf(os.Stderr, "User information for %s:\n", user.Username)
 		return printJSON(user)
 	},
 }
@@ -58,7 +59,7 @@ var userStarredCmd = &cobra.Command{
 			return fmt.Errorf("getting starred repositories: %w", err)
 		}
 
-		fmt.Println("Starred repositories:")
+		fmt.Fprintln(os.Stderr, "Starred repositories:")
 		return printJSON(starred)
 	},
 }
@@ -79,7 +80,7 @@ var starRepoCmd = &cobra.Command{
 			return fmt.Errorf("starring repository: %w", err)
 		}
 
-		fmt.Printf("Successfully starred repository %s/%s\n", namespace, repository)
+		fmt.Fprintf(os.Stderr, "Successfully starred repository %s/%s\n", namespace, repository)
 		return nil
 	},
 }
@@ -100,7 +101,7 @@ var unstarRepoCmd = &cobra.Command{
 			return fmt.Errorf("unstarring repository: %w", err)
 		}
 
-		fmt.Printf("Successfully unstarred repository %s/%s\n", namespace, repository)
+		fmt.Fprintf(os.Stderr, "Successfully unstarred repository %s/%s\n", namespace, repository)
 		return nil
 	},
 }

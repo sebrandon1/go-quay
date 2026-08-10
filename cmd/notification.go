@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -66,7 +67,7 @@ var notificationListCmd = &cobra.Command{
 			return fmt.Errorf("getting notifications: %w", err)
 		}
 
-		fmt.Printf("Notifications for %s/%s:\n", notificationNamespace, notificationRepository)
+		fmt.Fprintf(os.Stderr, "Notifications for %s/%s:\n", notificationNamespace, notificationRepository)
 		return printJSON(notifications)
 	},
 }
@@ -87,7 +88,7 @@ var notificationInfoCmd = &cobra.Command{
 			return fmt.Errorf("getting notification: %w", err)
 		}
 
-		fmt.Printf("Notification: %s\n", notificationUUID)
+		fmt.Fprintf(os.Stderr, "Notification: %s\n", notificationUUID)
 		return printJSON(notification)
 	},
 }
@@ -129,7 +130,7 @@ For slack method, provide the --url flag with the Slack webhook URL.`,
 			return fmt.Errorf("creating notification: %w", err)
 		}
 
-		fmt.Printf("Notification created successfully!\n")
+		fmt.Fprintf(os.Stderr, "Notification created successfully!\n")
 		return printJSON(notification)
 	},
 }
@@ -154,7 +155,7 @@ var notificationDeleteCmd = &cobra.Command{
 			return fmt.Errorf("deleting notification: %w", err)
 		}
 
-		fmt.Printf("Notification '%s' deleted successfully.\n", notificationUUID)
+		fmt.Fprintf(os.Stderr, "Notification '%s' deleted successfully.\n", notificationUUID)
 		return nil
 	},
 }
@@ -175,7 +176,7 @@ var notificationTestCmd = &cobra.Command{
 			return fmt.Errorf("testing notification: %w", err)
 		}
 
-		fmt.Printf("Test event sent to notification '%s'.\n", notificationUUID)
+		fmt.Fprintf(os.Stderr, "Test event sent to notification '%s'.\n", notificationUUID)
 		return nil
 	},
 }
@@ -196,7 +197,7 @@ var notificationResetCmd = &cobra.Command{
 			return fmt.Errorf("resetting notification: %w", err)
 		}
 
-		fmt.Printf("Notification '%s' failure count reset.\n", notificationUUID)
+		fmt.Fprintf(os.Stderr, "Notification '%s' failure count reset.\n", notificationUUID)
 		return nil
 	},
 }
@@ -233,7 +234,7 @@ var notificationUpdateCmd = &cobra.Command{
 			return fmt.Errorf("updating notification: %w", err)
 		}
 
-		fmt.Printf("Notification '%s' updated successfully!\n", notificationUUID)
+		fmt.Fprintf(os.Stderr, "Notification '%s' updated successfully!\n", notificationUUID)
 		return printJSON(notification)
 	},
 }

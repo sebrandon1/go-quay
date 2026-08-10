@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -43,7 +44,7 @@ var tagInfoCmd = &cobra.Command{
 			return fmt.Errorf("getting tag information: %w", err)
 		}
 
-		fmt.Printf("Tag information for %s/%s:%s\n", namespace, repository, tagName)
+		fmt.Fprintf(os.Stderr, "Tag information for %s/%s:%s\n", namespace, repository, tagName)
 		return printJSON(tag)
 	},
 }
@@ -64,7 +65,7 @@ var tagUpdateCmd = &cobra.Command{
 			return fmt.Errorf("updating tag: %w", err)
 		}
 
-		fmt.Printf("Successfully updated tag %s/%s:%s\n", namespace, repository, tagName)
+		fmt.Fprintf(os.Stderr, "Successfully updated tag %s/%s:%s\n", namespace, repository, tagName)
 		return printJSON(tag)
 	},
 }
@@ -89,7 +90,7 @@ var tagDeleteCmd = &cobra.Command{
 			return fmt.Errorf("deleting tag: %w", err)
 		}
 
-		fmt.Printf("Successfully deleted tag %s/%s:%s\n", namespace, repository, tagName)
+		fmt.Fprintf(os.Stderr, "Successfully deleted tag %s/%s:%s\n", namespace, repository, tagName)
 		return nil
 	},
 }
@@ -110,7 +111,7 @@ var tagHistoryCmd = &cobra.Command{
 			return fmt.Errorf("getting tag history: %w", err)
 		}
 
-		fmt.Printf("History for tag %s/%s:%s\n", namespace, repository, tagName)
+		fmt.Fprintf(os.Stderr, "History for tag %s/%s:%s\n", namespace, repository, tagName)
 		return printJSON(history)
 	},
 }
@@ -131,7 +132,7 @@ var tagRevertCmd = &cobra.Command{
 			return fmt.Errorf("reverting tag: %w", err)
 		}
 
-		fmt.Printf("Successfully reverted tag %s/%s:%s to manifest %s\n", namespace, repository, tagName, manifestDigest)
+		fmt.Fprintf(os.Stderr, "Successfully reverted tag %s/%s:%s to manifest %s\n", namespace, repository, tagName, manifestDigest)
 		return printJSON(tag)
 	},
 }
@@ -152,7 +153,7 @@ var tagChangeCmd = &cobra.Command{
 			return fmt.Errorf("changing tag: %w", err)
 		}
 
-		fmt.Printf("Successfully changed tag %s/%s:%s to manifest %s\n", namespace, repository, tagName, manifestDigest)
+		fmt.Fprintf(os.Stderr, "Successfully changed tag %s/%s:%s to manifest %s\n", namespace, repository, tagName, manifestDigest)
 		return nil
 	},
 }
@@ -172,7 +173,7 @@ var tagRestoreCmd = &cobra.Command{
 			return fmt.Errorf("restoring tag: %w", err)
 		}
 
-		fmt.Printf("Successfully restored tag %s/%s:%s from manifest %s\n", namespace, repository, tagName, manifestDigest)
+		fmt.Fprintf(os.Stderr, "Successfully restored tag %s/%s:%s from manifest %s\n", namespace, repository, tagName, manifestDigest)
 		return nil
 	},
 }
