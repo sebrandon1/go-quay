@@ -6,7 +6,9 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
+	"time"
 )
 
 const (
@@ -505,5 +507,191 @@ func TestDeleteRequestError(t *testing.T) {
 	err = client.delete(req)
 	if err == nil {
 		t.Error("Expected error for 500 response, got nil")
+	}
+}
+
+func TestRetryOn429(t *testing.T) {
+	var attempts atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		n := attempts.Add(1)
+		if n <= 2 {
+			w.Header().Set("Retry-After", "0")
+			w.WriteHeader(http.StatusTooManyRequests)
+			w.Write([]byte(`{"error":"rate_limited"}`))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"name":"success"}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	client.Retry = &RetryConfig{
+		MaxRetries:     3,
+		InitialBackoff: 1 * time.Millisecond,
+		MaxBackoff:     10 * time.Millisecond,
+	}
+
+	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	var result map[string]string
+	err = client.get(req, &result)
+	if err != nil {
+		t.Fatalf("Expected success after retries, got error: %v", err)
+	}
+
+	if result["name"] != "success" {
+		t.Errorf("Expected name 'success', got '%s'", result["name"])
+	}
+
+	if attempts.Load() != 3 {
+		t.Errorf("Expected 3 attempts, got %d", attempts.Load())
+	}
+}
+
+func TestRetryOn500(t *testing.T) {
+	var attempts atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		n := attempts.Add(1)
+		if n == 1 {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error":"internal"}`))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"ok":true}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	client.Retry = &RetryConfig{
+		MaxRetries:     2,
+		InitialBackoff: 1 * time.Millisecond,
+		MaxBackoff:     10 * time.Millisecond,
+	}
+
+	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	var result map[string]any
+	err = client.get(req, &result)
+	if err != nil {
+		t.Fatalf("Expected success after retry, got error: %v", err)
+	}
+
+	if attempts.Load() != 2 {
+		t.Errorf("Expected 2 attempts, got %d", attempts.Load())
+	}
+}
+
+func TestRetryExhausted(t *testing.T) {
+	var attempts atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		attempts.Add(1)
+		w.WriteHeader(http.StatusTooManyRequests)
+		w.Write([]byte(`{"error":"rate_limited"}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	client.Retry = &RetryConfig{
+		MaxRetries:     2,
+		InitialBackoff: 1 * time.Millisecond,
+		MaxBackoff:     10 * time.Millisecond,
+	}
+
+	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	var result map[string]string
+	err = client.get(req, &result)
+	if err == nil {
+		t.Fatal("Expected error after exhausted retries, got nil")
+	}
+
+	if attempts.Load() != 3 {
+		t.Errorf("Expected 3 attempts (1 + 2 retries), got %d", attempts.Load())
+	}
+}
+
+func TestNoRetryOn4xx(t *testing.T) {
+	var attempts atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		attempts.Add(1)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(`{"error":"not_found"}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	client.Retry = &RetryConfig{
+		MaxRetries:     3,
+		InitialBackoff: 1 * time.Millisecond,
+	}
+
+	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	var result map[string]string
+	err = client.get(req, &result)
+	if err == nil {
+		t.Fatal("Expected error for 404, got nil")
+	}
+
+	if attempts.Load() != 1 {
+		t.Errorf("Expected 1 attempt (no retry on 404), got %d", attempts.Load())
+	}
+}
+
+func TestNoRetryWithoutConfig(t *testing.T) {
+	var attempts atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		attempts.Add(1)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"error":"internal"}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	var result map[string]string
+	err = client.get(req, &result)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+
+	if attempts.Load() != 1 {
+		t.Errorf("Expected 1 attempt (no retry config), got %d", attempts.Load())
 	}
 }
