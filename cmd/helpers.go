@@ -9,7 +9,12 @@ import (
 
 // getClient creates a Quay client with the configured token and URL.
 func getClient() (*lib.Client, error) {
-	return lib.NewClientWithURL(token, quayURL)
+	client, err := lib.NewClientWithURL(token, quayURL)
+	if err != nil {
+		return nil, err
+	}
+	client.Version = rootCmd.Version
+	return client, nil
 }
 
 // printJSON marshals and prints data as formatted JSON
