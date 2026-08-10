@@ -75,6 +75,7 @@ func init() {
 	getCmd.AddCommand(prototypeCmd)
 	getCmd.AddCommand(repotokenCmd)
 	getCmd.AddCommand(logsCmd)
+	getCmd.AddCommand(mirrorCmd)
 }
 
 // Execute executes the root command.
