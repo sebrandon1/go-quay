@@ -6,6 +6,7 @@ This file covers ENHANCED TAG operations:
 Tag Management:
   - GET    /api/v1/repository/{namespace}/{repository}/tag/{tag}                 - GetTag()
   - PUT    /api/v1/repository/{namespace}/{repository}/tag/{tag}                 - UpdateTag()
+  - PUT    /api/v1/repository/{namespace}/{repository}/tag/{tag}                 - ChangeTag()
   - DELETE /api/v1/repository/{namespace}/{repository}/tag/{tag}                 - DeleteTag()
   - GET    /api/v1/repository/{namespace}/{repository}/tag/{tag}/history         - GetTagHistory()
 
@@ -98,6 +99,25 @@ func (c *Client) RevertTag(namespace, repository, tag, manifestDigest string) (*
 	}
 
 	return &tagInfo, nil
+}
+
+// ChangeTag creates or moves a tag to point at a specific manifest digest
+func (c *Client) ChangeTag(namespace, repository, tag, manifestDigest string) error {
+	body := struct {
+		ManifestDigest string `json:"manifest_digest"`
+	}{
+		ManifestDigest: manifestDigest,
+	}
+	req, err := newRequestWithBody("PUT", c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), body)
+	if err != nil {
+		return fmt.Errorf("failed to create change tag request: %w", err)
+	}
+
+	if err := c.put(req, nil); err != nil {
+		return fmt.Errorf("failed to change tag: %w", err)
+	}
+
+	return nil
 }
 
 // RestoreTag restores a tag to a previous image
