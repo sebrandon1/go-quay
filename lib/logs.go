@@ -43,6 +43,13 @@ func addLogQueryParams(req *http.Request, nextPage, startDate, endDate string) {
 
 // GetAggregatedLogs returns the aggregated logs for a repository
 func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate string) (*AggregatedLogs, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+
 	// Get new request
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/aggregatelogs", namespace, repository), nil)
 	if err != nil {
@@ -65,6 +72,13 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 
 // GetLogs returns the logs for a repository
 func (c *Client) GetLogs(namespace, repository, nextPage, startDate, endDate string) (*Logs, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/logs", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repository logs request: %w", err)
@@ -82,6 +96,10 @@ func (c *Client) GetLogs(namespace, repository, nextPage, startDate, endDate str
 
 // GetOrganizationLogs returns the logs for an organization
 func (c *Client) GetOrganizationLogs(orgname, nextPage, startDate, endDate string) (*Logs, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/logs", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization logs request: %w", err)
@@ -99,6 +117,10 @@ func (c *Client) GetOrganizationLogs(orgname, nextPage, startDate, endDate strin
 
 // GetOrganizationAggregatedLogs returns the aggregated logs for an organization
 func (c *Client) GetOrganizationAggregatedLogs(orgname, startDate, endDate string) (*AggregatedLogs, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/aggregatelogs", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization aggregate logs request: %w", err)
@@ -119,6 +141,10 @@ func (c *Client) GetOrganizationAggregatedLogs(orgname, startDate, endDate strin
 
 // ExportOrganizationLogs exports the logs for an organization
 func (c *Client) ExportOrganizationLogs(orgname string, request *ExportLogsRequest) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/exportlogs", orgname), request)
 	if err != nil {
 		return fmt.Errorf("failed to create export organization logs request: %w", err)
@@ -184,6 +210,13 @@ func (c *Client) ExportUserLogs(request *ExportLogsRequest) error {
 
 // ExportRepositoryLogs exports the logs for a repository
 func (c *Client) ExportRepositoryLogs(namespace, repository string, request *ExportLogsRequest) error {
+	if namespace == "" {
+		return fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/exportlogs", namespace, repository), request)
 	if err != nil {
 		return fmt.Errorf("failed to create export repository logs request: %w", err)

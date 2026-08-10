@@ -47,6 +47,10 @@ func (c *Client) GetRegistryCapabilities() (*RegistryCapabilities, error) {
 
 // GetAppInfo retrieves public information about an OAuth application by client ID
 func (c *Client) GetAppInfo(clientID string) (*Application, error) {
+	if clientID == "" {
+		return nil, fmt.Errorf("clientID is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/app/%s", clientID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get app info request: %w", err)
@@ -62,6 +66,10 @@ func (c *Client) GetAppInfo(clientID string) (*Application, error) {
 
 // GetEntities searches for entities (users, robots, teams) matching a prefix
 func (c *Client) GetEntities(prefix string, includeOrgs, includeTeams bool) (*Entities, error) {
+	if prefix == "" {
+		return nil, fmt.Errorf("prefix is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/entities/%s", prefix), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get entities request: %w", err)

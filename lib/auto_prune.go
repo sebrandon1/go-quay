@@ -18,6 +18,10 @@ import (
 
 // GetAutoPrunePolicies retrieves auto-prune policies for an organization
 func (c *Client) GetAutoPrunePolicies(orgname string) (*AutoPrunePolicies, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/autoprunepolicy", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get auto-prune policies request: %w", err)
@@ -33,6 +37,13 @@ func (c *Client) GetAutoPrunePolicies(orgname string) (*AutoPrunePolicies, error
 
 // CreateAutoPrunePolicy creates an auto-prune policy for an organization
 func (c *Client) CreateAutoPrunePolicy(orgname, method string, value int, tagPattern string) (*AutoPrunePolicy, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if method == "" {
+		return nil, fmt.Errorf("method is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/autoprunepolicy", orgname), CreateAutoPruneRequest{
 		Method:     method,
 		Value:      value,
@@ -52,6 +63,13 @@ func (c *Client) CreateAutoPrunePolicy(orgname, method string, value int, tagPat
 
 // GetAutoPrunePolicy retrieves a specific auto-prune policy
 func (c *Client) GetAutoPrunePolicy(orgname, policyUUID string) (*AutoPrunePolicy, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if policyUUID == "" {
+		return nil, fmt.Errorf("policyUUID is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get auto-prune policy request: %w", err)
@@ -67,6 +85,16 @@ func (c *Client) GetAutoPrunePolicy(orgname, policyUUID string) (*AutoPrunePolic
 
 // UpdateAutoPrunePolicy updates an auto-prune policy
 func (c *Client) UpdateAutoPrunePolicy(orgname, policyUUID, method string, value int, tagPattern string) (*AutoPrunePolicy, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if policyUUID == "" {
+		return nil, fmt.Errorf("policyUUID is required")
+	}
+	if method == "" {
+		return nil, fmt.Errorf("method is required")
+	}
+
 	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID), CreateAutoPruneRequest{
 		Method:     method,
 		Value:      value,
@@ -86,6 +114,13 @@ func (c *Client) UpdateAutoPrunePolicy(orgname, policyUUID, method string, value
 
 // DeleteAutoPrunePolicy deletes an auto-prune policy
 func (c *Client) DeleteAutoPrunePolicy(orgname, policyUUID string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+	if policyUUID == "" {
+		return fmt.Errorf("policyUUID is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete auto-prune policy request: %w", err)

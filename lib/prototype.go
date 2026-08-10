@@ -27,6 +27,10 @@ import (
 
 // GetPrototypes retrieves all permission prototypes for an organization
 func (c *Client) GetPrototypes(orgname string) (*Prototypes, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/prototypes", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get prototypes request: %w", err)
@@ -42,6 +46,10 @@ func (c *Client) GetPrototypes(orgname string) (*Prototypes, error) {
 
 // CreatePrototype creates a new permission prototype for an organization
 func (c *Client) CreatePrototype(orgname string, createReq *CreatePrototypeRequest) (*Prototype, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/prototypes", orgname), createReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prototype request: %w", err)
@@ -57,6 +65,13 @@ func (c *Client) CreatePrototype(orgname string, createReq *CreatePrototypeReque
 
 // GetPrototype retrieves a specific prototype by UUID
 func (c *Client) GetPrototype(orgname, prototypeUUID string) (*Prototype, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if prototypeUUID == "" {
+		return nil, fmt.Errorf("prototypeUUID is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get prototype request: %w", err)
@@ -72,6 +87,13 @@ func (c *Client) GetPrototype(orgname, prototypeUUID string) (*Prototype, error)
 
 // UpdatePrototype updates an existing prototype
 func (c *Client) UpdatePrototype(orgname, prototypeUUID string, updateReq *UpdatePrototypeRequest) (*Prototype, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if prototypeUUID == "" {
+		return nil, fmt.Errorf("prototypeUUID is required")
+	}
+
 	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update prototype request: %w", err)
@@ -87,6 +109,13 @@ func (c *Client) UpdatePrototype(orgname, prototypeUUID string, updateReq *Updat
 
 // DeletePrototype deletes a prototype
 func (c *Client) DeletePrototype(orgname, prototypeUUID string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+	if prototypeUUID == "" {
+		return fmt.Errorf("prototypeUUID is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete prototype request: %w", err)

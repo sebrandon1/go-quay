@@ -48,6 +48,13 @@ type RepositoryWithTags struct {
 
 // GetRepository returns a repository with tags information baked in
 func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags, error) {
+	if namespace == "" {
+		return RepositoryWithTags{}, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return RepositoryWithTags{}, fmt.Errorf("repository is required")
+	}
+
 	repoURL := c.buildURL("/repository/%s/%s", namespace, repository)
 	req, err := newRequest("GET", repoURL, nil)
 	if err != nil {
@@ -72,6 +79,16 @@ func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags
 
 // CreateRepository creates a new repository
 func (c *Client) CreateRepository(namespace, repository, visibility, description string) (*Repository, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if visibility == "" {
+		return nil, fmt.Errorf("visibility is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.BaseURL+"/repository", CreateRepositoryRequest{
 		Repository:  repository,
 		Namespace:   namespace,
@@ -92,6 +109,13 @@ func (c *Client) CreateRepository(namespace, repository, visibility, description
 
 // UpdateRepository updates an existing repository
 func (c *Client) UpdateRepository(namespace, repository, description, visibility string) (*Repository, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+
 	updateReq := UpdateRepositoryRequest{}
 
 	// Only include fields that are not empty
@@ -117,6 +141,13 @@ func (c *Client) UpdateRepository(namespace, repository, description, visibility
 
 // DeleteRepository deletes a repository
 func (c *Client) DeleteRepository(namespace, repository string) error {
+	if namespace == "" {
+		return fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete repository request: %w", err)
@@ -167,6 +198,16 @@ func (c *Client) ListRepositories(namespace string, public, starred, popularity 
 
 // ChangeRepositoryVisibility changes the visibility (public/private) of a repository
 func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility string) error {
+	if namespace == "" {
+		return fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+	if visibility == "" {
+		return fmt.Errorf("visibility is required")
+	}
+
 	body := struct {
 		Visibility string `json:"visibility"`
 	}{
@@ -186,6 +227,13 @@ func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility st
 
 // ListTags lists tags for a repository
 func (c *Client) ListTags(namespace, repository string, limit int, onlyActive bool) (*RepositoryTags, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list tags request: %w", err)

@@ -18,6 +18,10 @@ import (
 
 // SearchRepositories searches for repositories matching the query
 func (c *Client) SearchRepositories(query string, page int) (*SearchRepositoryResult, error) {
+	if query == "" {
+		return nil, fmt.Errorf("query is required")
+	}
+
 	req, err := newRequest("GET", c.BaseURL+"/find/repositories", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search repositories request: %w", err)
@@ -39,6 +43,10 @@ func (c *Client) SearchRepositories(query string, page int) (*SearchRepositoryRe
 
 // SearchAll searches for all entity types (repositories, users, organizations, teams, robots)
 func (c *Client) SearchAll(query string) (*SearchAllResult, error) {
+	if query == "" {
+		return nil, fmt.Errorf("query is required")
+	}
+
 	req, err := newRequest("GET", c.BaseURL+"/find/all", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search all request: %w", err)
