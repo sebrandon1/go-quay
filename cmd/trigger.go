@@ -64,10 +64,6 @@ var triggerInfoCmd = &cobra.Command{
 	Short: "Get details of a specific build trigger",
 	Long:  `Get detailed information about a specific build trigger by its UUID.`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if triggerUUID == "" {
-			return fmt.Errorf("--uuid is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -88,10 +84,6 @@ var triggerDeleteCmd = &cobra.Command{
 	Short: "Delete a build trigger",
 	Long:  `Delete a build trigger from a repository.`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if triggerUUID == "" {
-			return fmt.Errorf("--uuid is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -113,10 +105,6 @@ var triggerEnableCmd = &cobra.Command{
 	Short: "Enable a build trigger",
 	Long:  `Enable a build trigger for a repository.`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if triggerUUID == "" {
-			return fmt.Errorf("--uuid is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -137,10 +125,6 @@ var triggerDisableCmd = &cobra.Command{
 	Short: "Disable a build trigger",
 	Long:  `Disable a build trigger for a repository.`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if triggerUUID == "" {
-			return fmt.Errorf("--uuid is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -161,10 +145,6 @@ var triggerStartCmd = &cobra.Command{
 	Short: "Manually start a build from a trigger",
 	Long:  `Manually start a build using a configured trigger.`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if triggerUUID == "" {
-			return fmt.Errorf("--uuid is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -192,10 +172,6 @@ var triggerActivateCmd = &cobra.Command{
 	Short: "Activate a build trigger with configuration",
 	Long:  `Activate a build trigger with the specified configuration.`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if triggerUUID == "" {
-			return fmt.Errorf("--uuid is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -220,10 +196,6 @@ var triggerBuildsCmd = &cobra.Command{
 	Short: "List builds for a trigger",
 	Long:  `List builds that were started by a specific trigger.`,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		if triggerUUID == "" {
-			return fmt.Errorf("--uuid is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -248,6 +220,7 @@ func setupTriggerFlags() {
 	// UUID flags for subcommands that need it
 	for _, cmd := range []*cobra.Command{triggerInfoCmd, triggerDeleteCmd, triggerEnableCmd, triggerDisableCmd, triggerStartCmd, triggerActivateCmd, triggerBuildsCmd} {
 		cmd.Flags().StringVar(&triggerUUID, "uuid", "", "UUID of the build trigger")
+		_ = cmd.MarkFlagRequired("uuid")
 	}
 
 	// Start command specific flags

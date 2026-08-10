@@ -41,10 +41,6 @@ var repoInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get repository information from Quay.io",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if repository == "" {
-			return fmt.Errorf("--repository is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -65,10 +61,6 @@ var repoCreateCmd = &cobra.Command{
 	Short: "Create a new repository",
 	Long:  `Create a new repository in the specified namespace with optional description and visibility settings.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if repository == "" {
-			return fmt.Errorf("--repository is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -90,10 +82,6 @@ var repoUpdateCmd = &cobra.Command{
 	Short: "Update repository settings",
 	Long:  `Update repository description and/or visibility settings.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if repository == "" {
-			return fmt.Errorf("--repository is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -115,10 +103,6 @@ var repoDeleteCmd = &cobra.Command{
 	Short: "Delete a repository",
 	Long:  `Delete a repository. This action is irreversible and will remove all images and tags.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if repository == "" {
-			return fmt.Errorf("--repository is required")
-		}
-
 		if !confirmDeletion {
 			return fmt.Errorf("are you sure you want to delete repository %s/%s? This action cannot be undone.\nUse --confirm to proceed with deletion", namespace, repository)
 		}
@@ -228,10 +212,6 @@ var repoChangeVisibilityCmd = &cobra.Command{
 	Short: "Change repository visibility",
 	Long:  `Change a repository's visibility between public and private.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if repository == "" {
-			return fmt.Errorf("--repository is required")
-		}
-
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -262,6 +242,9 @@ func init() {
 
 	// Mark global flags as required
 	_ = repositoryCmd.MarkPersistentFlagRequired("namespace")
+	for _, cmd := range []*cobra.Command{repoInfoCmd, repoCreateCmd, repoUpdateCmd, repoDeleteCmd, repoChangeVisibilityCmd} {
+		_ = cmd.MarkFlagRequired("repository")
+	}
 
 	// Create command specific flags
 	repoCreateCmd.Flags().StringVarP(&repoVisibility, "visibility", "v", "private", "Repository visibility (private/public)")
