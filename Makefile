@@ -25,6 +25,19 @@ integration-test: build
 clean:
 	rm -f $(APP_NAME)
 
+coverage:
+	go test ./... -coverprofile=coverage.out
+	go tool cover -func=coverage.out
+
+govulncheck:
+	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+fmt:
+	gofmt -s -w .
+	goimports -w .
+
+ci: lint vet test build
+
 check-swagger-alignment:
 	@echo "Checking API alignment with Quay.io Swagger spec..."
 	@go run ./scripts/check-swagger-alignment.go \
@@ -32,4 +45,4 @@ check-swagger-alignment:
 		--lib-path="./lib" \
 		--base-url-var="QuayURL"
 
-.PHONY: vet build lint test integration-test clean check-swagger-alignment
+.PHONY: vet build lint test integration-test clean coverage govulncheck fmt ci check-swagger-alignment
