@@ -136,6 +136,27 @@ var tagRevertCmd = &cobra.Command{
 	},
 }
 
+// Tag Change (create/move)
+var tagChangeCmd = &cobra.Command{
+	Use:   "change",
+	Short: "Create or move a tag to a manifest",
+	Long:  `Create a new tag or move an existing tag to point at a specific manifest digest.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		err = client.ChangeTag(namespace, repository, tagName, manifestDigest)
+		if err != nil {
+			return fmt.Errorf("changing tag: %w", err)
+		}
+
+		fmt.Printf("Successfully changed tag %s/%s:%s to manifest %s\n", namespace, repository, tagName, manifestDigest)
+		return nil
+	},
+}
+
 var tagRestoreCmd = &cobra.Command{
 	Use:   "restore",
 	Short: "Restore a tag from a previous state",
@@ -164,6 +185,7 @@ func init() {
 	tagCmd.AddCommand(tagHistoryCmd)
 	tagCmd.AddCommand(tagRevertCmd)
 	tagCmd.AddCommand(tagRestoreCmd)
+	tagCmd.AddCommand(tagChangeCmd)
 
 	// Global tag flags (repository context)
 	tagCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
@@ -188,4 +210,8 @@ func init() {
 	// Restore command specific flags
 	tagRestoreCmd.Flags().StringVarP(&manifestDigest, "manifest", "m", "", "Manifest digest to restore")
 	_ = tagRestoreCmd.MarkFlagRequired("manifest")
+
+	// Change command specific flags
+	tagChangeCmd.Flags().StringVarP(&manifestDigest, "manifest", "m", "", "Manifest digest to assign to the tag")
+	_ = tagChangeCmd.MarkFlagRequired("manifest")
 }

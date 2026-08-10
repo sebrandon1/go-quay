@@ -245,6 +245,40 @@ func TestRevertTag(t *testing.T) {
 	}
 }
 
+func TestChangeTag(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/repository/" + testNamespace + "/" + testRepository + "/tag/" + testTagNameLatest
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+
+		var req map[string]interface{}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Errorf("Failed to decode request body: %v", err)
+		}
+
+		if req["manifest_digest"] != testManifestDigest {
+			t.Errorf("Expected manifest_digest '%s', got '%v'", testManifestDigest, req["manifest_digest"])
+		}
+
+		w.WriteHeader(http.StatusCreated)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.ChangeTag(testNamespace, testRepository, testTagNameLatest, testManifestDigest)
+	if err != nil {
+		t.Fatalf("ChangeTag returned error: %v", err)
+	}
+}
+
 func TestRestoreTag(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -320,6 +354,12 @@ func TestTagErrorHandling(t *testing.T) {
 	_, err = client.RevertTag(testNamespace, testRepository, "nonexistent", testDigestSHA256)
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
+	}
+
+	// Test ChangeTag error
+	err = client.ChangeTag(testNamespace, testRepository, "nonexistent", testDigestSHA256)
+	if err == nil {
+		t.Error("Expected error from ChangeTag, got nil")
 	}
 
 	// Test RestoreTag error
