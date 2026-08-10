@@ -44,6 +44,7 @@ const DefaultQuayURL = "https://quay.io/api/v1"
 type Client struct {
 	BearerToken string
 	BaseURL     string
+	Version     string
 	HTTPClient  *http.Client
 }
 
@@ -58,6 +59,7 @@ func NewClientWithURL(bearerToken, baseURL string) (*Client, error) {
 	return &Client{
 		BearerToken: bearerToken,
 		BaseURL:     baseURL,
+		Version:     "dev",
 		HTTPClient: &http.Client{
 			Timeout:   30 * time.Second,
 			Transport: transport,
@@ -86,6 +88,7 @@ func (c *Client) do(req *http.Request, v any, acceptedStatuses ...int) error {
 		req.Header.Set("Authorization", "Bearer "+c.BearerToken)
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "go-quay/"+c.Version)
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {

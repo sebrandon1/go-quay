@@ -27,6 +27,10 @@ func TestNewClient(t *testing.T) {
 		t.Errorf("Expected base URL %s, got %s", DefaultQuayURL, client.BaseURL)
 	}
 
+	if client.Version != "dev" {
+		t.Errorf("Expected default version 'dev', got %s", client.Version)
+	}
+
 	if client.HTTPClient == nil {
 		t.Error("Expected HTTP client to be set, got nil")
 	}
@@ -84,6 +88,37 @@ func TestNewClientWithURLEmptyToken(t *testing.T) {
 
 	if client.BaseURL != "https://quay.example.com/api/v1" {
 		t.Errorf("Expected custom base URL, got %s", client.BaseURL)
+	}
+}
+
+func TestUserAgentHeader(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ua := r.Header.Get("User-Agent")
+		if ua != "go-quay/1.2.3" {
+			t.Errorf("Expected User-Agent 'go-quay/1.2.3', got '%s'", ua)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL)
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	client.Version = "1.2.3"
+
+	req, err := newRequest(httpMethodGet, server.URL+"/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	var result map[string]any
+	err = client.get(req, &result)
+	if err != nil {
+		t.Fatalf("get returned error: %v", err)
 	}
 }
 
