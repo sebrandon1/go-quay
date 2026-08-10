@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -49,7 +50,7 @@ var robotListCmd = &cobra.Command{
 			return fmt.Errorf("getting robot accounts: %w", err)
 		}
 
-		fmt.Println("User robot accounts:")
+		fmt.Fprintln(os.Stderr, "User robot accounts:")
 		return printJSON(robots)
 	},
 }
@@ -70,7 +71,7 @@ var robotInfoCmd = &cobra.Command{
 			return fmt.Errorf("getting robot account: %w", err)
 		}
 
-		fmt.Printf("Robot account: %s\n", robotShortname)
+		fmt.Fprintf(os.Stderr, "Robot account: %s\n", robotShortname)
 		return printJSON(robot)
 	},
 }
@@ -91,8 +92,8 @@ var robotCreateCmd = &cobra.Command{
 			return fmt.Errorf("creating robot account: %w", err)
 		}
 
-		fmt.Printf("Successfully created robot account: %s\n", robotShortname)
-		fmt.Println("IMPORTANT: Save the token below - it will not be shown again!")
+		fmt.Fprintf(os.Stderr, "Successfully created robot account: %s\n", robotShortname)
+		fmt.Fprintln(os.Stderr, "IMPORTANT: Save the token below - it will not be shown again!")
 		return printJSON(robot)
 	},
 }
@@ -117,7 +118,7 @@ var robotDeleteCmd = &cobra.Command{
 			return fmt.Errorf("deleting robot account: %w", err)
 		}
 
-		fmt.Printf("Successfully deleted robot account: %s\n", robotShortname)
+		fmt.Fprintf(os.Stderr, "Successfully deleted robot account: %s\n", robotShortname)
 		return nil
 	},
 }
@@ -138,8 +139,8 @@ var robotRegenerateCmd = &cobra.Command{
 			return fmt.Errorf("regenerating robot token: %w", err)
 		}
 
-		fmt.Printf("Successfully regenerated token for robot: %s\n", robotShortname)
-		fmt.Println("IMPORTANT: Save the new token below - it will not be shown again!")
+		fmt.Fprintf(os.Stderr, "Successfully regenerated token for robot: %s\n", robotShortname)
+		fmt.Fprintln(os.Stderr, "IMPORTANT: Save the new token below - it will not be shown again!")
 		return printJSON(robot)
 	},
 }
@@ -160,7 +161,7 @@ var robotPermissionsCmd = &cobra.Command{
 			return fmt.Errorf("getting robot permissions: %w", err)
 		}
 
-		fmt.Printf("Permissions for robot: %s\n", robotShortname)
+		fmt.Fprintf(os.Stderr, "Permissions for robot: %s\n", robotShortname)
 		return printJSON(permissions)
 	},
 }
@@ -203,7 +204,7 @@ var robotFederationCreateCmd = &cobra.Command{
 			return fmt.Errorf("creating robot federation: %w", err)
 		}
 
-		fmt.Printf("Successfully configured federation for robot: %s\n", robotShortname)
+		fmt.Fprintf(os.Stderr, "Successfully configured federation for robot: %s\n", robotShortname)
 		return nil
 	},
 }
@@ -223,7 +224,7 @@ var robotFederationDeleteCmd = &cobra.Command{
 			return fmt.Errorf("deleting robot federation: %w", err)
 		}
 
-		fmt.Printf("Successfully deleted federation for robot: %s\n", robotShortname)
+		fmt.Fprintf(os.Stderr, "Successfully deleted federation for robot: %s\n", robotShortname)
 		return nil
 	},
 }

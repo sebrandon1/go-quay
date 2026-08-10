@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -57,7 +58,7 @@ var teamListCmd = &cobra.Command{
 			return fmt.Errorf("getting teams: %w", err)
 		}
 
-		fmt.Printf("Teams in organization '%s':\n", teamCmdOrgname)
+		fmt.Fprintf(os.Stderr, "Teams in organization '%s':\n", teamCmdOrgname)
 		return printJSON(teams)
 	},
 }
@@ -78,7 +79,7 @@ var teamCmdInfoCmd = &cobra.Command{
 			return fmt.Errorf("getting team: %w", err)
 		}
 
-		fmt.Printf("Team: %s/%s\n", teamCmdOrgname, teamCmdName)
+		fmt.Fprintf(os.Stderr, "Team: %s/%s\n", teamCmdOrgname, teamCmdName)
 		return printJSON(team)
 	},
 }
@@ -104,7 +105,7 @@ Roles:
 			return fmt.Errorf("creating team: %w", err)
 		}
 
-		fmt.Printf("Successfully created team: %s/%s\n", teamCmdOrgname, teamCmdName)
+		fmt.Fprintf(os.Stderr, "Successfully created team: %s/%s\n", teamCmdOrgname, teamCmdName)
 		return printJSON(team)
 	},
 }
@@ -125,7 +126,7 @@ var teamUpdateCmd = &cobra.Command{
 			return fmt.Errorf("updating team: %w", err)
 		}
 
-		fmt.Printf("Successfully updated team: %s/%s\n", teamCmdOrgname, teamCmdName)
+		fmt.Fprintf(os.Stderr, "Successfully updated team: %s/%s\n", teamCmdOrgname, teamCmdName)
 		return printJSON(team)
 	},
 }
@@ -150,7 +151,7 @@ var teamDeleteCmd = &cobra.Command{
 			return fmt.Errorf("deleting team: %w", err)
 		}
 
-		fmt.Printf("Successfully deleted team: %s/%s\n", teamCmdOrgname, teamCmdName)
+		fmt.Fprintf(os.Stderr, "Successfully deleted team: %s/%s\n", teamCmdOrgname, teamCmdName)
 		return nil
 	},
 }
@@ -171,7 +172,7 @@ var teamCmdMembersCmd = &cobra.Command{
 			return fmt.Errorf("getting team members: %w", err)
 		}
 
-		fmt.Printf("Members of team '%s/%s':\n", teamCmdOrgname, teamCmdName)
+		fmt.Fprintf(os.Stderr, "Members of team '%s/%s':\n", teamCmdOrgname, teamCmdName)
 		return printJSON(members)
 	},
 }
@@ -192,7 +193,7 @@ var teamAddMemberCmd = &cobra.Command{
 			return fmt.Errorf("adding team member: %w", err)
 		}
 
-		fmt.Printf("Successfully added '%s' to team '%s/%s'\n", teamCmdMemberName, teamCmdOrgname, teamCmdName)
+		fmt.Fprintf(os.Stderr, "Successfully added '%s' to team '%s/%s'\n", teamCmdMemberName, teamCmdOrgname, teamCmdName)
 		return nil
 	},
 }
@@ -217,7 +218,7 @@ var teamRemoveMemberCmd = &cobra.Command{
 			return fmt.Errorf("removing team member: %w", err)
 		}
 
-		fmt.Printf("Successfully removed '%s' from team '%s/%s'\n", teamCmdMemberName, teamCmdOrgname, teamCmdName)
+		fmt.Fprintf(os.Stderr, "Successfully removed '%s' from team '%s/%s'\n", teamCmdMemberName, teamCmdOrgname, teamCmdName)
 		return nil
 	},
 }
@@ -238,7 +239,7 @@ var teamPermissionsCmd = &cobra.Command{
 			return fmt.Errorf("getting team permissions: %w", err)
 		}
 
-		fmt.Printf("Repository permissions for team '%s/%s':\n", teamCmdOrgname, teamCmdName)
+		fmt.Fprintf(os.Stderr, "Repository permissions for team '%s/%s':\n", teamCmdOrgname, teamCmdName)
 		return printJSON(permissions)
 	},
 }
@@ -264,7 +265,7 @@ Permission roles:
 			return fmt.Errorf("setting team permission: %w", err)
 		}
 
-		fmt.Printf("Successfully set '%s' permission for team '%s/%s' on repository '%s'\n",
+		fmt.Fprintf(os.Stderr, "Successfully set '%s' permission for team '%s/%s' on repository '%s'\n",
 			teamCmdPermissionRole, teamCmdOrgname, teamCmdName, teamCmdRepository)
 		return nil
 	},
@@ -291,7 +292,7 @@ var teamRemovePermissionCmd = &cobra.Command{
 			return fmt.Errorf("removing team permission: %w", err)
 		}
 
-		fmt.Printf("Successfully removed permissions for team '%s/%s' on repository '%s'\n",
+		fmt.Fprintf(os.Stderr, "Successfully removed permissions for team '%s/%s' on repository '%s'\n",
 			teamCmdOrgname, teamCmdName, teamCmdRepository)
 		return nil
 	},

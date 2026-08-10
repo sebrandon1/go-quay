@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -38,7 +39,7 @@ var searchReposCmd = &cobra.Command{
 			return fmt.Errorf("searching repositories: %w", err)
 		}
 
-		fmt.Printf("Repository search results for: %s\n", searchQuery)
+		fmt.Fprintf(os.Stderr, "Repository search results for: %s\n", searchQuery)
 		return printJSON(result)
 	},
 }
@@ -66,7 +67,7 @@ Results include a 'kind' field indicating the entity type:
 			return fmt.Errorf("searching: %w", err)
 		}
 
-		fmt.Printf("Search results for: %s\n", searchQuery)
+		fmt.Fprintf(os.Stderr, "Search results for: %s\n", searchQuery)
 		return printJSON(result)
 	},
 }

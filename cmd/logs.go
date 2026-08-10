@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -160,7 +161,7 @@ var exportOrgLogsCmd = &cobra.Command{
 			return fmt.Errorf("exporting organization logs: %w", err)
 		}
 
-		fmt.Println("Organization logs export initiated successfully.")
+		fmt.Fprintln(os.Stderr, "Organization logs export initiated successfully.")
 		return nil
 	},
 }
@@ -185,7 +186,7 @@ var exportUserLogsCmd = &cobra.Command{
 			return fmt.Errorf("exporting user logs: %w", err)
 		}
 
-		fmt.Println("User logs export initiated successfully.")
+		fmt.Fprintln(os.Stderr, "User logs export initiated successfully.")
 		return nil
 	},
 }
@@ -210,7 +211,7 @@ var exportRepoLogsCmd = &cobra.Command{
 			return fmt.Errorf("exporting repository logs: %w", err)
 		}
 
-		fmt.Println("Repository logs export initiated successfully.")
+		fmt.Fprintln(os.Stderr, "Repository logs export initiated successfully.")
 		return nil
 	},
 }

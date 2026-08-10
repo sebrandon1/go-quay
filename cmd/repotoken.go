@@ -14,6 +14,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -146,7 +147,7 @@ var repotokenDeleteCmd = &cobra.Command{
 			return fmt.Errorf("deleting token: %w", err)
 		}
 
-		fmt.Printf("Token %s deleted successfully\n", repoTokenCode)
+		fmt.Fprintf(os.Stderr, "Token %s deleted successfully\n", repoTokenCode)
 		return nil
 	},
 }

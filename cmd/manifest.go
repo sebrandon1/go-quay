@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -46,7 +47,7 @@ var manifestInfoCmd = &cobra.Command{
 			return fmt.Errorf("getting manifest information: %w", err)
 		}
 
-		fmt.Printf("Manifest information for %s/%s@%s\n", namespace, repository, manifestRef)
+		fmt.Fprintf(os.Stderr, "Manifest information for %s/%s@%s\n", namespace, repository, manifestRef)
 		return printJSON(manifest)
 	},
 }
@@ -71,7 +72,7 @@ var manifestDeleteCmd = &cobra.Command{
 			return fmt.Errorf("deleting manifest: %w", err)
 		}
 
-		fmt.Printf("Successfully deleted manifest %s/%s@%s\n", namespace, repository, manifestRef)
+		fmt.Fprintf(os.Stderr, "Successfully deleted manifest %s/%s@%s\n", namespace, repository, manifestRef)
 		return nil
 	},
 }
@@ -92,7 +93,7 @@ var manifestLabelsCmd = &cobra.Command{
 			return fmt.Errorf("getting manifest labels: %w", err)
 		}
 
-		fmt.Printf("Labels for manifest %s/%s@%s\n", namespace, repository, manifestRef)
+		fmt.Fprintf(os.Stderr, "Labels for manifest %s/%s@%s\n", namespace, repository, manifestRef)
 		return printJSON(labels)
 	},
 }
@@ -113,7 +114,7 @@ var manifestLabelCmd = &cobra.Command{
 			return fmt.Errorf("getting manifest label: %w", err)
 		}
 
-		fmt.Printf("Label %s for manifest %s/%s@%s\n", labelID, namespace, repository, manifestRef)
+		fmt.Fprintf(os.Stderr, "Label %s for manifest %s/%s@%s\n", labelID, namespace, repository, manifestRef)
 		return printJSON(label)
 	},
 }
@@ -134,7 +135,7 @@ var manifestAddLabelCmd = &cobra.Command{
 			return fmt.Errorf("adding manifest label: %w", err)
 		}
 
-		fmt.Printf("Successfully added label to manifest %s/%s@%s\n", namespace, repository, manifestRef)
+		fmt.Fprintf(os.Stderr, "Successfully added label to manifest %s/%s@%s\n", namespace, repository, manifestRef)
 		return printJSON(label)
 	},
 }
@@ -155,7 +156,7 @@ var manifestRemoveLabelCmd = &cobra.Command{
 			return fmt.Errorf("removing manifest label: %w", err)
 		}
 
-		fmt.Printf("Successfully removed label %s from manifest %s/%s@%s\n", labelID, namespace, repository, manifestRef)
+		fmt.Fprintf(os.Stderr, "Successfully removed label %s from manifest %s/%s@%s\n", labelID, namespace, repository, manifestRef)
 		return nil
 	},
 }

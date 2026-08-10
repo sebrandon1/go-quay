@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -43,7 +44,7 @@ var permListCmd = &cobra.Command{
 			return fmt.Errorf("getting repository permissions: %w", err)
 		}
 
-		fmt.Printf("Permissions for repository %s/%s:\n", namespace, repository)
+		fmt.Fprintf(os.Stderr, "Permissions for repository %s/%s:\n", namespace, repository)
 		return printJSON(permissions)
 	},
 }
@@ -64,7 +65,7 @@ var permSetCmd = &cobra.Command{
 			return fmt.Errorf("setting repository permission: %w", err)
 		}
 
-		fmt.Printf("Successfully set %s permission for %s on repository %s/%s\n",
+		fmt.Fprintf(os.Stderr, "Successfully set %s permission for %s on repository %s/%s\n",
 			permissionRole, permissionUser, namespace, repository)
 		return nil
 	},
@@ -86,7 +87,7 @@ var permRemoveCmd = &cobra.Command{
 			return fmt.Errorf("removing repository permission: %w", err)
 		}
 
-		fmt.Printf("Successfully removed permissions for %s from repository %s/%s\n",
+		fmt.Fprintf(os.Stderr, "Successfully removed permissions for %s from repository %s/%s\n",
 			permissionUser, namespace, repository)
 		return nil
 	},
@@ -142,7 +143,7 @@ var permSetUserPermCmd = &cobra.Command{
 			return fmt.Errorf("setting user permission: %w", err)
 		}
 
-		fmt.Printf("Successfully set %s permission for user %s on %s/%s\n",
+		fmt.Fprintf(os.Stderr, "Successfully set %s permission for user %s on %s/%s\n",
 			permissionRole, permissionUser, namespace, repository)
 		return nil
 	},
@@ -167,7 +168,7 @@ var permDeleteUserPermCmd = &cobra.Command{
 			return fmt.Errorf("deleting user permission: %w", err)
 		}
 
-		fmt.Printf("Successfully removed permission for user %s from %s/%s\n",
+		fmt.Fprintf(os.Stderr, "Successfully removed permission for user %s from %s/%s\n",
 			permissionUser, namespace, repository)
 		return nil
 	},
@@ -241,7 +242,7 @@ var permSetTeamPermCmd = &cobra.Command{
 			return fmt.Errorf("setting team permission: %w", err)
 		}
 
-		fmt.Printf("Successfully set %s permission for team %s on %s/%s\n",
+		fmt.Fprintf(os.Stderr, "Successfully set %s permission for team %s on %s/%s\n",
 			permissionRole, permissionTeamName, namespace, repository)
 		return nil
 	},
@@ -266,7 +267,7 @@ var permDeleteTeamPermCmd = &cobra.Command{
 			return fmt.Errorf("deleting team permission: %w", err)
 		}
 
-		fmt.Printf("Successfully removed permission for team %s from %s/%s\n",
+		fmt.Fprintf(os.Stderr, "Successfully removed permission for team %s from %s/%s\n",
 			permissionTeamName, namespace, repository)
 		return nil
 	},

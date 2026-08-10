@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -266,7 +267,7 @@ var deleteOrgCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("deleting organization: %w", err)
 		}
-		fmt.Println("Organization deleted successfully")
+		fmt.Fprintln(os.Stderr, "Organization deleted successfully")
 		return nil
 	},
 }
@@ -285,7 +286,7 @@ var addMemberCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("adding organization member: %w", err)
 		}
-		fmt.Println("Member added successfully")
+		fmt.Fprintln(os.Stderr, "Member added successfully")
 		return nil
 	},
 }
@@ -307,7 +308,7 @@ var removeMemberCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("removing organization member: %w", err)
 		}
-		fmt.Println("Member removed successfully")
+		fmt.Fprintln(os.Stderr, "Member removed successfully")
 		return nil
 	},
 }
@@ -419,7 +420,7 @@ var deleteProxyCacheCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("deleting proxy cache config: %w", err)
 		}
-		fmt.Println("Proxy cache config deleted successfully")
+		fmt.Fprintln(os.Stderr, "Proxy cache config deleted successfully")
 		return nil
 	},
 }
@@ -477,7 +478,7 @@ var deleteRobotCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("deleting robot account: %w", err)
 		}
-		fmt.Println("Robot account deleted successfully")
+		fmt.Fprintln(os.Stderr, "Robot account deleted successfully")
 		return nil
 	},
 }
@@ -532,7 +533,7 @@ var setRobotPermissionCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("setting robot permission: %w", err)
 		}
-		fmt.Println("Robot permission set successfully")
+		fmt.Fprintln(os.Stderr, "Robot permission set successfully")
 		return nil
 	},
 }
@@ -554,7 +555,7 @@ var removeRobotPermissionCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("removing robot permission: %w", err)
 		}
-		fmt.Println("Robot permission removed successfully")
+		fmt.Fprintln(os.Stderr, "Robot permission removed successfully")
 		return nil
 	},
 }
@@ -597,7 +598,7 @@ var orgRobotFederationCreateCmd = &cobra.Command{
 			return fmt.Errorf("creating robot federation: %w", err)
 		}
 
-		fmt.Printf("Successfully configured federation for robot %s in org %s\n", robotShortname, orgName)
+		fmt.Fprintf(os.Stderr, "Successfully configured federation for robot %s in org %s\n", robotShortname, orgName)
 		return nil
 	},
 }
@@ -617,7 +618,7 @@ var orgRobotFederationDeleteCmd = &cobra.Command{
 			return fmt.Errorf("deleting robot federation: %w", err)
 		}
 
-		fmt.Printf("Successfully deleted federation for robot %s in org %s\n", robotShortname, orgName)
+		fmt.Fprintf(os.Stderr, "Successfully deleted federation for robot %s in org %s\n", robotShortname, orgName)
 		return nil
 	},
 }
@@ -693,7 +694,7 @@ var deleteApplicationCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("deleting application: %w", err)
 		}
-		fmt.Println("Application deleted successfully")
+		fmt.Fprintln(os.Stderr, "Application deleted successfully")
 		return nil
 	},
 }
@@ -748,7 +749,7 @@ var createMarketplaceSubscriptionCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating marketplace subscription: %w", err)
 		}
-		fmt.Println("Marketplace subscription created successfully")
+		fmt.Fprintln(os.Stderr, "Marketplace subscription created successfully")
 		return nil
 	},
 }
@@ -770,7 +771,7 @@ var deleteMarketplaceSubscriptionCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("deleting marketplace subscription: %w", err)
 		}
-		fmt.Println("Marketplace subscription deleted successfully")
+		fmt.Fprintln(os.Stderr, "Marketplace subscription deleted successfully")
 		return nil
 	},
 }
@@ -792,7 +793,7 @@ var batchRemoveSubscriptionsCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("batch removing subscriptions: %w", err)
 		}
-		fmt.Println("Marketplace subscriptions removed successfully")
+		fmt.Fprintln(os.Stderr, "Marketplace subscriptions removed successfully")
 		return nil
 	},
 }
@@ -850,7 +851,7 @@ var deleteQuotaCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("deleting quota: %w", err)
 		}
-		fmt.Println("Quota deleted successfully")
+		fmt.Fprintln(os.Stderr, "Quota deleted successfully")
 		return nil
 	},
 }
@@ -926,7 +927,7 @@ var deleteAutoPruneCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("deleting auto-prune policy: %w", err)
 		}
-		fmt.Println("Auto-prune policy deleted successfully")
+		fmt.Fprintln(os.Stderr, "Auto-prune policy deleted successfully")
 		return nil
 	},
 }
@@ -945,7 +946,7 @@ var inviteMemberCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("inviting team member: %w", err)
 		}
-		fmt.Println("Team member invited successfully")
+		fmt.Fprintln(os.Stderr, "Team member invited successfully")
 		return nil
 	},
 }
@@ -967,7 +968,7 @@ var cancelInviteCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("canceling team invite: %w", err)
 		}
-		fmt.Println("Team invite canceled successfully")
+		fmt.Fprintln(os.Stderr, "Team invite canceled successfully")
 		return nil
 	},
 }

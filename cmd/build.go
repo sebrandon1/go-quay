@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -52,7 +53,7 @@ var buildListCmd = &cobra.Command{
 			return fmt.Errorf("getting builds: %w", err)
 		}
 
-		fmt.Printf("Builds for %s/%s:\n", buildNamespace, buildRepository)
+		fmt.Fprintf(os.Stderr, "Builds for %s/%s:\n", buildNamespace, buildRepository)
 		return printJSON(builds)
 	},
 }
@@ -73,7 +74,7 @@ var buildInfoCmd = &cobra.Command{
 			return fmt.Errorf("getting build: %w", err)
 		}
 
-		fmt.Printf("Build: %s\n", buildUUID)
+		fmt.Fprintf(os.Stderr, "Build: %s\n", buildUUID)
 		return printJSON(build)
 	},
 }
@@ -94,7 +95,7 @@ var buildLogsCmd = &cobra.Command{
 			return fmt.Errorf("getting build logs: %w", err)
 		}
 
-		fmt.Printf("Logs for build %s:\n", buildUUID)
+		fmt.Fprintf(os.Stderr, "Logs for build %s:\n", buildUUID)
 		return printJSON(logs)
 	},
 }
@@ -124,7 +125,7 @@ The archive should be a tar.gz file containing a Dockerfile and any necessary bu
 			return fmt.Errorf("requesting build: %w", err)
 		}
 
-		fmt.Printf("Build requested successfully!\n")
+		fmt.Fprintf(os.Stderr, "Build requested successfully!\n")
 		return printJSON(build)
 	},
 }
@@ -149,7 +150,7 @@ var buildCancelCmd = &cobra.Command{
 			return fmt.Errorf("canceling build: %w", err)
 		}
 
-		fmt.Printf("Build '%s' canceled successfully.\n", buildUUID)
+		fmt.Fprintf(os.Stderr, "Build '%s' canceled successfully.\n", buildUUID)
 		return nil
 	},
 }
@@ -169,7 +170,7 @@ var buildStatusCmd = &cobra.Command{
 			return fmt.Errorf("getting build status: %w", err)
 		}
 
-		fmt.Printf("Status for build %s:\n", buildUUID)
+		fmt.Fprintf(os.Stderr, "Status for build %s:\n", buildUUID)
 		return printJSON(status)
 	},
 }

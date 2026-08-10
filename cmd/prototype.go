@@ -12,6 +12,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -159,7 +160,7 @@ var prototypeDeleteCmd = &cobra.Command{
 			return fmt.Errorf("deleting prototype: %w", err)
 		}
 
-		fmt.Printf("Prototype %s deleted successfully\n", prototypeUUID)
+		fmt.Fprintf(os.Stderr, "Prototype %s deleted successfully\n", prototypeUUID)
 		return nil
 	},
 }

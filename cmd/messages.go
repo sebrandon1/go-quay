@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -51,7 +52,7 @@ var messagesCreateCmd = &cobra.Command{
 			return fmt.Errorf("creating message: %w", err)
 		}
 
-		fmt.Println("Message created successfully!")
+		fmt.Fprintln(os.Stderr, "Message created successfully!")
 		return printJSON(message)
 	},
 }
