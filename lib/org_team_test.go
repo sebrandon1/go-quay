@@ -7,13 +7,7 @@ import (
 	"testing"
 )
 
-const (
-	testOrgName  = "test-org"
-	testTeamName = "developers"
-	testRepoName = "test-repo"
-	roleAdmin    = "admin"
-	roleMember   = "member"
-)
+// --- Teams (org-level) ---
 
 func TestGetTeams(t *testing.T) {
 	mockResponse := struct {
@@ -209,6 +203,8 @@ func TestDeleteTeam(t *testing.T) {
 	}
 }
 
+// --- Team Members ---
+
 func TestGetTeamMembers(t *testing.T) {
 	mockResponse := TeamMembers{
 		Members: []TeamMember{
@@ -303,6 +299,8 @@ func TestRemoveTeamMember(t *testing.T) {
 	}
 }
 
+// --- Team Permissions ---
+
 func TestGetTeamPermissions(t *testing.T) {
 	mockResponse := TeamPermissions{
 		Permissions: []TeamPermission{
@@ -394,6 +392,58 @@ func TestRemoveTeamRepositoryPermission(t *testing.T) {
 	}
 }
 
+// --- Team Invites ---
+
+func TestInviteTeamMember(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodPut {
+			t.Errorf("Expected PUT request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/invite/" + testEmailAddress
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.InviteTeamMember(testOrgName, testTeamName, testEmailAddress)
+	if err != nil {
+		t.Fatalf("InviteTeamMember returned error: %v", err)
+	}
+}
+
+func TestDeleteTeamInvite(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != httpMethodDelete {
+			t.Errorf("Expected DELETE request, got %s", r.Method)
+		}
+		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/invite/" + testEmailAddress
+		if r.URL.Path != expectedPath {
+			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	err = client.DeleteTeamInvite(testOrgName, testTeamName, testEmailAddress)
+	if err != nil {
+		t.Fatalf("DeleteTeamInvite returned error: %v", err)
+	}
+}
+
+// --- Error tests ---
+
 func TestGetTeamsError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -425,5 +475,74 @@ func TestGetTeamError(t *testing.T) {
 	_, err = client.GetTeam(testOrgName, "nonexistent-team")
 	if err == nil {
 		t.Error("Expected error, got nil")
+	}
+}
+
+func TestOrganizationTeamHTTPErrors(t *testing.T) {
+	client := newOrgErrorClient(t)
+
+	_, err := client.GetTeams(testOrgName)
+	if err == nil {
+		t.Error("Expected error from GetTeams, got nil")
+	}
+
+	_, err = client.CreateTeam(testOrgName, testTeamName, testTeamDescDev, roleMember)
+	if err == nil {
+		t.Error("Expected error from CreateTeam, got nil")
+	}
+
+	_, err = client.GetTeam(testOrgName, testTeamName)
+	if err == nil {
+		t.Error("Expected error from GetTeam, got nil")
+	}
+
+	err = client.DeleteTeam(testOrgName, testTeamName)
+	if err == nil {
+		t.Error("Expected error from DeleteTeam, got nil")
+	}
+
+	_, err = client.UpdateTeam(testOrgName, testTeamName, testTeamDescDev, roleMember)
+	if err == nil {
+		t.Error("Expected error from UpdateTeam, got nil")
+	}
+
+	_, err = client.GetTeamMembers(testOrgName, testTeamName)
+	if err == nil {
+		t.Error("Expected error from GetTeamMembers, got nil")
+	}
+
+	err = client.AddTeamMember(testOrgName, testTeamName, testMemberName)
+	if err == nil {
+		t.Error("Expected error from AddTeamMember, got nil")
+	}
+
+	err = client.RemoveTeamMember(testOrgName, testTeamName, testMemberName)
+	if err == nil {
+		t.Error("Expected error from RemoveTeamMember, got nil")
+	}
+
+	_, err = client.GetTeamPermissions(testOrgName, testTeamName)
+	if err == nil {
+		t.Error("Expected error from GetTeamPermissions, got nil")
+	}
+
+	err = client.SetTeamRepositoryPermission(testOrgName, testTeamName, testRepository, testRoleRead)
+	if err == nil {
+		t.Error("Expected error from SetTeamRepositoryPermission, got nil")
+	}
+
+	err = client.RemoveTeamRepositoryPermission(testOrgName, testTeamName, testRepository)
+	if err == nil {
+		t.Error("Expected error from RemoveTeamRepositoryPermission, got nil")
+	}
+
+	err = client.InviteTeamMember(testOrgName, testTeamName, testEmailAddress)
+	if err == nil {
+		t.Error("Expected error from InviteTeamMember, got nil")
+	}
+
+	err = client.DeleteTeamInvite(testOrgName, testTeamName, testEmailAddress)
+	if err == nil {
+		t.Error("Expected error from DeleteTeamInvite, got nil")
 	}
 }
