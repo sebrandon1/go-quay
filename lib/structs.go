@@ -821,6 +821,49 @@ type TestNotificationResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
+// Mirror Configuration Structures
+
+// MirrorConfig represents the mirror configuration for a repository
+type MirrorConfig struct {
+	IsEnabled       bool   `json:"is_enabled,omitempty"`
+	MirrorType      string `json:"mirror_type,omitempty"`
+	ExternalRef     string `json:"external_reference,omitempty"`
+	ExternalRefType string `json:"external_reference_type,omitempty"`
+	SyncInterval    int    `json:"sync_interval,omitempty"`
+	SyncStartDate   string `json:"sync_start_date,omitempty"`
+	RobotUsername   string `json:"robot_username,omitempty"`
+	RootRule        struct {
+		Rule     string `json:"rule,omitempty"`
+		RuleKind string `json:"rule_kind,omitempty"`
+	} `json:"root_rule,omitempty"`
+	ExternalRegistryUsername string `json:"external_registry_username,omitempty"`
+}
+
+// CreateMirrorConfigRequest represents the request to create a mirror configuration
+type CreateMirrorConfigRequest struct {
+	ExternalRef   string `json:"external_reference"`
+	SyncInterval  int    `json:"sync_interval"`
+	SyncStartDate string `json:"sync_start_date"`
+	RobotUsername string `json:"robot_username"`
+	RootRule      struct {
+		Rule     string `json:"rule"`
+		RuleKind string `json:"rule_kind"`
+	} `json:"root_rule"`
+	ExternalRegistryUsername string `json:"external_registry_username,omitempty"`
+	ExternalRegistryPassword string `json:"external_registry_password,omitempty"`
+}
+
+// UpdateMirrorConfigRequest represents the request to update a mirror configuration
+type UpdateMirrorConfigRequest struct {
+	IsEnabled                *bool  `json:"is_enabled,omitempty"`
+	ExternalRef              string `json:"external_reference,omitempty"`
+	SyncInterval             *int   `json:"sync_interval,omitempty"`
+	SyncStartDate            string `json:"sync_start_date,omitempty"`
+	RobotUsername            string `json:"robot_username,omitempty"`
+	ExternalRegistryUsername string `json:"external_registry_username,omitempty"`
+	ExternalRegistryPassword string `json:"external_registry_password,omitempty"`
+}
+
 // Error Response Structure
 
 // QuayError represents a Quay API error response and implements the error interface.
