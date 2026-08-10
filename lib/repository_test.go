@@ -2,6 +2,7 @@ package lib
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -379,5 +380,70 @@ func TestRepositoryHTTPErrors(t *testing.T) {
 	err = client.ChangeRepositoryVisibility(testNamespace, testRepository, "public")
 	if err == nil {
 		t.Error("Expected error from ChangeRepositoryVisibility, got nil")
+	}
+}
+
+func TestListAllRepositories(t *testing.T) {
+	page := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		page++
+		hasMore := page < 3
+		repos := RepositoryList{
+			Repositories: []OrganizationRepository{
+				{Name: fmt.Sprintf("repo-%d", page)},
+			},
+			HasAdditional: hasMore,
+		}
+		data, _ := json.Marshal(repos)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	repos, err := client.ListAllRepositories(testNamespace, true, false, false)
+	if err != nil {
+		t.Fatalf("ListAllRepositories returned error: %v", err)
+	}
+
+	if len(repos) != 3 {
+		t.Errorf("Expected 3 repos across 3 pages, got %d", len(repos))
+	}
+}
+
+func TestListAllTags(t *testing.T) {
+	page := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		page++
+		hasMore := page < 2
+		tags := RepositoryTags{
+			Tags:          []Tag{{Name: fmt.Sprintf("v%d", page)}},
+			Page:          page,
+			HasAdditional: hasMore,
+		}
+		data, _ := json.Marshal(tags)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	tags, err := client.ListAllTags(testNamespace, testRepository, true)
+	if err != nil {
+		t.Fatalf("ListAllTags returned error: %v", err)
+	}
+
+	if len(tags) != 2 {
+		t.Errorf("Expected 2 tags across 2 pages, got %d", len(tags))
 	}
 }
