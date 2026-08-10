@@ -105,6 +105,13 @@ func (c *Client) do(req *http.Request, v any, acceptedStatuses ...int) error {
 	}
 	if !accepted {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodySize))
+
+		var quayErr QuayError
+		if json.Unmarshal(body, &quayErr) == nil && quayErr.Message != "" {
+			quayErr.Status = resp.StatusCode
+			return &quayErr
+		}
+
 		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, string(body))
 	}
 

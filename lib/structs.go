@@ -60,6 +60,8 @@ All structs include appropriate JSON tags for API serialization/deserialization.
 */
 package lib
 
+import "fmt"
+
 // ResolvedIP represents resolved IP details.
 type ResolvedIP struct {
 	Provider       string `json:"provider,omitempty"`
@@ -821,13 +823,24 @@ type TestNotificationResponse struct {
 
 // Error Response Structure
 
-// QuayError represents a Quay API error response
+// QuayError represents a Quay API error response and implements the error interface.
 type QuayError struct {
 	Status      int            `json:"status,omitempty"`
-	Error       string         `json:"error,omitempty"`
+	Message     string         `json:"error,omitempty"`
 	ErrorType   string         `json:"error_type,omitempty"`
 	Detail      string         `json:"detail,omitempty"`
 	ErrorDetail map[string]any `json:"error_detail,omitempty"`
+}
+
+func (e *QuayError) Error() string {
+	if e.Detail != "" {
+		return fmt.Sprintf("quay API error (status %d): %s — %s", e.Status, e.Message, e.Detail)
+	}
+	return fmt.Sprintf("quay API error (status %d): %s", e.Status, e.Message)
+}
+
+func (e *QuayError) StatusCode() int {
+	return e.Status
 }
 
 // Registry Capabilities Structures
