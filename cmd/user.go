@@ -155,15 +155,19 @@ func init() {
 	userCmd.AddCommand(userLookupCmd)
 	userCmd.AddCommand(userMarketplaceCmd)
 	// Star command specific flags (requires repository context)
-	starRepoCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
+	starRepoCmd.Flags().StringVarP(&namespace, "namespace", "n", appCfg.Namespace, "Name of the namespace (default: config file)")
 	starRepoCmd.Flags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
-	_ = starRepoCmd.MarkFlagRequired("namespace")
+	if appCfg.Namespace == "" {
+		_ = starRepoCmd.MarkFlagRequired("namespace")
+	}
 	_ = starRepoCmd.MarkFlagRequired("repository")
 
 	// Unstar command specific flags (requires repository context)
-	unstarRepoCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
+	unstarRepoCmd.Flags().StringVarP(&namespace, "namespace", "n", appCfg.Namespace, "Name of the namespace (default: config file)")
 	unstarRepoCmd.Flags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
-	_ = unstarRepoCmd.MarkFlagRequired("namespace")
+	if appCfg.Namespace == "" {
+		_ = unstarRepoCmd.MarkFlagRequired("namespace")
+	}
 	_ = unstarRepoCmd.MarkFlagRequired("repository")
 
 	// Lookup command flags

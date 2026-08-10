@@ -237,11 +237,13 @@ func init() {
 	repositoryCmd.AddCommand(repoChangeVisibilityCmd)
 
 	// Global repository flags
-	repositoryCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
+	repositoryCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", appCfg.Namespace, "Name of the namespace (default: config file)")
 	repositoryCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
 
-	// Mark global flags as required
-	_ = repositoryCmd.MarkPersistentFlagRequired("namespace")
+	// Mark namespace as required only when no config default is available
+	if appCfg.Namespace == "" {
+		_ = repositoryCmd.MarkPersistentFlagRequired("namespace")
+	}
 	for _, cmd := range []*cobra.Command{repoInfoCmd, repoCreateCmd, repoUpdateCmd, repoDeleteCmd, repoChangeVisibilityCmd} {
 		_ = cmd.MarkFlagRequired("repository")
 	}

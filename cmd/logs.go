@@ -228,14 +228,14 @@ func init() {
 	logsCmd.AddCommand(exportRepoLogsCmd)
 
 	// repo-logs flags
-	repoLogsCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Repository namespace")
+	repoLogsCmd.Flags().StringVarP(&namespace, "namespace", "n", appCfg.Namespace, "Repository namespace (default: config file)")
 	repoLogsCmd.Flags().StringVarP(&repository, "repository", "r", "", "Repository name")
 	repoLogsCmd.Flags().StringVar(&nextPage, "next-page", "", "Next page token for pagination")
 	repoLogsCmd.Flags().StringVarP(&startdate, "startdate", "s", "", "Start date for the logs")
 	repoLogsCmd.Flags().StringVarP(&enddate, "enddate", "e", "", "End date for the logs")
 
 	// repo-aggregated-logs flags
-	repoAggregatedLogsCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Repository namespace")
+	repoAggregatedLogsCmd.Flags().StringVarP(&namespace, "namespace", "n", appCfg.Namespace, "Repository namespace (default: config file)")
 	repoAggregatedLogsCmd.Flags().StringVarP(&repository, "repository", "r", "", "Repository name")
 	repoAggregatedLogsCmd.Flags().StringVarP(&startdate, "startdate", "s", "", "Start date")
 	repoAggregatedLogsCmd.Flags().StringVarP(&enddate, "enddate", "e", "", "End date")
@@ -274,7 +274,7 @@ func init() {
 	exportUserLogsCmd.Flags().StringVar(&callbackEmail, "callback-email", "", "Email for export results")
 
 	// export-repo-logs flags
-	exportRepoLogsCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Repository namespace")
+	exportRepoLogsCmd.Flags().StringVarP(&namespace, "namespace", "n", appCfg.Namespace, "Repository namespace (default: config file)")
 	exportRepoLogsCmd.Flags().StringVarP(&repository, "repository", "r", "", "Repository name")
 	exportRepoLogsCmd.Flags().StringVar(&starttime, "start-time", "", "Start time for export")
 	exportRepoLogsCmd.Flags().StringVar(&endtime, "end-time", "", "End time for export")

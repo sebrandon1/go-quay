@@ -117,9 +117,11 @@ func init() {
 	mirrorCmd.AddCommand(mirrorCreateCmd)
 	mirrorCmd.AddCommand(mirrorUpdateCmd)
 
-	mirrorCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
+	mirrorCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", appCfg.Namespace, "Name of the namespace (default: config file)")
 	mirrorCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
-	_ = mirrorCmd.MarkPersistentFlagRequired("namespace")
+	if appCfg.Namespace == "" {
+		_ = mirrorCmd.MarkPersistentFlagRequired("namespace")
+	}
 	_ = mirrorCmd.MarkPersistentFlagRequired("repository")
 
 	mirrorCreateCmd.Flags().StringVar(&mirrorExternalRef, "external-ref", "", "External registry reference (e.g. docker.io/library/nginx)")

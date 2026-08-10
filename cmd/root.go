@@ -27,8 +27,8 @@ var getCmd = &cobra.Command{
 		if token == "" {
 			return fmt.Errorf(`authentication token required
 
-Set QUAY_TOKEN environment variable or use --token/-t flag.
-Get your token at https://quay.io/organization/<org>?tab=applications`)
+Set QUAY_TOKEN environment variable, use --token/-t flag, or add to config file (%s).
+Get your token at https://quay.io/organization/<org>?tab=applications`, configFilePath())
 		}
 
 		// Validate output format
@@ -50,9 +50,19 @@ func envOrDefault(key, fallback string) string {
 	return fallback
 }
 
+// firstNonEmpty returns the first non-empty string from the given values.
+func firstNonEmpty(values ...string) string {
+	for _, v := range values {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
 func init() {
-	getCmd.PersistentFlags().StringVarP(&token, "token", "t", envOrDefault("QUAY_TOKEN", ""), "Quay.io API token (default: $QUAY_TOKEN)")
-	getCmd.PersistentFlags().StringVar(&quayURL, "quay-url", envOrDefault("QUAY_URL", lib.DefaultQuayURL), "Quay API base URL (default: $QUAY_URL)")
+	getCmd.PersistentFlags().StringVarP(&token, "token", "t", envOrDefault("QUAY_TOKEN", appCfg.Token), "Quay.io API token (default: $QUAY_TOKEN or config file)")
+	getCmd.PersistentFlags().StringVar(&quayURL, "quay-url", envOrDefault("QUAY_URL", firstNonEmpty(appCfg.QuayURL, lib.DefaultQuayURL)), "Quay API base URL (default: $QUAY_URL or config file)")
 	getCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, or table")
 	rootCmd.AddCommand(getCmd)
 	getCmd.AddCommand(repositoryCmd)
