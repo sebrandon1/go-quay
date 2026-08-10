@@ -196,6 +196,59 @@ func (c *Client) ListRepositories(namespace string, public, starred, popularity 
 	return &repos, nil
 }
 
+// ListAllRepositories fetches all repositories by following pagination automatically.
+func (c *Client) ListAllRepositories(namespace string, public, starred, popularity bool) ([]OrganizationRepository, error) {
+	var all []OrganizationRepository
+	page := 1
+	const pageSize = 100
+
+	for {
+		repos, err := c.ListRepositories(namespace, public, starred, popularity, page, pageSize)
+		if err != nil {
+			return nil, err
+		}
+
+		all = append(all, repos.Repositories...)
+
+		if !repos.HasAdditional {
+			break
+		}
+		page++
+	}
+
+	return all, nil
+}
+
+// ListAllTags fetches all tags for a repository by following pagination automatically.
+func (c *Client) ListAllTags(namespace, repository string, onlyActive bool) ([]Tag, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+
+	var all []Tag
+	page := 1
+	const pageSize = 100
+
+	for {
+		tags, err := c.ListTagsPage(namespace, repository, pageSize, page, onlyActive)
+		if err != nil {
+			return nil, err
+		}
+
+		all = append(all, tags.Tags...)
+
+		if !tags.HasAdditional {
+			break
+		}
+		page++
+	}
+
+	return all, nil
+}
+
 // ChangeRepositoryVisibility changes the visibility (public/private) of a repository
 func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility string) error {
 	if namespace == "" {
@@ -223,6 +276,40 @@ func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility st
 	}
 
 	return nil
+}
+
+// ListTagsPage lists tags for a repository with pagination support.
+func (c *Client) ListTagsPage(namespace, repository string, limit, page int, onlyActive bool) (*RepositoryTags, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+
+	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create list tags request: %w", err)
+	}
+
+	params := map[string]string{}
+	if limit > 0 {
+		params["limit"] = fmt.Sprintf("%d", limit)
+	}
+	if page > 0 {
+		params["page"] = fmt.Sprintf("%d", page)
+	}
+	if onlyActive {
+		params["onlyActiveTags"] = queryValueTrue
+	}
+	addQueryParams(req, params)
+
+	var tags RepositoryTags
+	if err := c.get(req, &tags); err != nil {
+		return nil, fmt.Errorf("failed to list tags: %w", err)
+	}
+
+	return &tags, nil
 }
 
 // ListTags lists tags for a repository
