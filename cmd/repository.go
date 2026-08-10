@@ -25,7 +25,7 @@ var (
 
 // repositoryCmd represents the repository command group
 var repositoryCmd = &cobra.Command{
-	Use:   "repository",
+	Use:   cmdRepository,
 	Short: "Repository management commands",
 	Long: `Commands for managing repositories including creation, updates, deletion, and information retrieval.
 

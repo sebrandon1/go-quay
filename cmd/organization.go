@@ -36,7 +36,7 @@ var (
 
 // organizationCmd represents the organization command
 var organizationCmd = &cobra.Command{
-	Use:   "organization",
+	Use:   cmdOrganization,
 	Short: "Organization management commands",
 	Long: `Commands for managing organizations, teams, members, robots, and other organization-related operations.
 
@@ -72,7 +72,7 @@ var orgInfoCmd = &cobra.Command{
 
 // Organization Members
 var orgMembersCmd = &cobra.Command{
-	Use:   "members",
+	Use:   cmdMembers,
 	Short: "Get organization members",
 	Long:  `Get list of all members in an organization.`,
 	RunE: func(cmd *cobra.Command, args []string) error {

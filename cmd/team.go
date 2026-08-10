@@ -158,7 +158,7 @@ var teamDeleteCmd = &cobra.Command{
 
 // Team Members
 var teamCmdMembersCmd = &cobra.Command{
-	Use:   "members",
+	Use:   cmdMembers,
 	Short: "List team members",
 	Long:  `List all members of a specific team.`,
 	RunE: func(cmd *cobra.Command, args []string) error {

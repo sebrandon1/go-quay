@@ -20,7 +20,7 @@ func SetVersion(v string) {
 }
 
 var getCmd = &cobra.Command{
-	Use:   "get",
+	Use:   cmdGet,
 	Short: "Get objects from Quay.io",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// Validate token is provided
