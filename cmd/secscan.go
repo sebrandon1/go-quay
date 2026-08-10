@@ -58,12 +58,14 @@ func init() {
 	secscanCmd.AddCommand(secscanInfoCmd)
 
 	// Global secscan flags (repository context)
-	secscanCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
+	secscanCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", appCfg.Namespace, "Name of the namespace (default: config file)")
 	secscanCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
 	secscanCmd.PersistentFlags().StringVarP(&secScanManifestRef, "manifest", "m", "", "Manifest reference (digest like sha256:...)")
 
-	// Mark global flags as required
-	_ = secscanCmd.MarkPersistentFlagRequired("namespace")
+	// Mark namespace as required only when no config default is available
+	if appCfg.Namespace == "" {
+		_ = secscanCmd.MarkPersistentFlagRequired("namespace")
+	}
 	_ = secscanCmd.MarkPersistentFlagRequired("repository")
 	_ = secscanCmd.MarkPersistentFlagRequired("manifest")
 

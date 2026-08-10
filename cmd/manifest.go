@@ -171,12 +171,14 @@ func init() {
 	manifestCmd.AddCommand(manifestRemoveLabelCmd)
 
 	// Global manifest flags (repository context)
-	manifestCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
+	manifestCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", appCfg.Namespace, "Name of the namespace (default: config file)")
 	manifestCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
 	manifestCmd.PersistentFlags().StringVarP(&manifestRef, "manifest", "m", "", "Manifest reference (digest like sha256:...)")
 
-	// Mark global flags as required
-	_ = manifestCmd.MarkPersistentFlagRequired("namespace")
+	// Mark namespace as required only when no config default is available
+	if appCfg.Namespace == "" {
+		_ = manifestCmd.MarkPersistentFlagRequired("namespace")
+	}
 	_ = manifestCmd.MarkPersistentFlagRequired("repository")
 	_ = manifestCmd.MarkPersistentFlagRequired("manifest")
 

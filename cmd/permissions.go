@@ -289,11 +289,13 @@ func init() {
 	permissionsCmd.AddCommand(permDeleteTeamPermCmd)
 
 	// Global permissions flags (repository context)
-	permissionsCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
+	permissionsCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", appCfg.Namespace, "Name of the namespace (default: config file)")
 	permissionsCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
 
-	// Mark global flags as required
-	_ = permissionsCmd.MarkPersistentFlagRequired("namespace")
+	// Mark namespace as required only when no config default is available
+	if appCfg.Namespace == "" {
+		_ = permissionsCmd.MarkPersistentFlagRequired("namespace")
+	}
 	_ = permissionsCmd.MarkPersistentFlagRequired("repository")
 
 	// Set command specific flags

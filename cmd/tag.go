@@ -189,12 +189,14 @@ func init() {
 	tagCmd.AddCommand(tagChangeCmd)
 
 	// Global tag flags (repository context)
-	tagCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Name of the namespace")
+	tagCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", appCfg.Namespace, "Name of the namespace (default: config file)")
 	tagCmd.PersistentFlags().StringVarP(&repository, "repository", "r", "", "Name of the repository")
 	tagCmd.PersistentFlags().StringVarP(&tagName, "tag", "T", "", "Name of the tag")
 
-	// Mark global flags as required
-	_ = tagCmd.MarkPersistentFlagRequired("namespace")
+	// Mark namespace as required only when no config default is available
+	if appCfg.Namespace == "" {
+		_ = tagCmd.MarkPersistentFlagRequired("namespace")
+	}
 	_ = tagCmd.MarkPersistentFlagRequired("repository")
 	_ = tagCmd.MarkPersistentFlagRequired("tag")
 
