@@ -17,6 +17,10 @@ import (
 
 // GetOrganizationMarketplace gets marketplace information for an organization
 func (c *Client) GetOrganizationMarketplace(orgname string) (*MarketplaceInfo, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/marketplace", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization marketplace request: %w", err)
@@ -32,6 +36,10 @@ func (c *Client) GetOrganizationMarketplace(orgname string) (*MarketplaceInfo, e
 
 // CreateOrganizationMarketplaceSubscription creates a marketplace subscription
 func (c *Client) CreateOrganizationMarketplaceSubscription(orgname string, subscription *MarketplaceSubscriptionRequest) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/marketplace", orgname), subscription)
 	if err != nil {
 		return fmt.Errorf("failed to create marketplace subscription request: %w", err)
@@ -46,6 +54,10 @@ func (c *Client) CreateOrganizationMarketplaceSubscription(orgname string, subsc
 
 // BatchRemoveOrganizationMarketplaceSubscriptions removes multiple marketplace subscriptions
 func (c *Client) BatchRemoveOrganizationMarketplaceSubscriptions(orgname string, subscriptionIDs []string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+
 	body := struct {
 		SubscriptionIDs []string `json:"subscription_ids"`
 	}{
@@ -65,6 +77,13 @@ func (c *Client) BatchRemoveOrganizationMarketplaceSubscriptions(orgname string,
 
 // DeleteOrganizationMarketplaceSubscription removes a specific marketplace subscription
 func (c *Client) DeleteOrganizationMarketplaceSubscription(orgname, subscriptionID string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+	if subscriptionID == "" {
+		return fmt.Errorf("subscriptionID is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/organization/%s/marketplace/%s", orgname, subscriptionID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete marketplace subscription request: %w", err)

@@ -31,6 +31,13 @@ import (
 
 // CreateOrganization creates a new organization
 func (c *Client) CreateOrganization(name, email string) (*Organization, error) {
+	if name == "" {
+		return nil, fmt.Errorf("name is required")
+	}
+	if email == "" {
+		return nil, fmt.Errorf("email is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.BaseURL+"/organization/", CreateOrganizationRequest{
 		Name:  name,
 		Email: email,
@@ -49,6 +56,10 @@ func (c *Client) CreateOrganization(name, email string) (*Organization, error) {
 
 // GetOrganization retrieves organization details
 func (c *Client) GetOrganization(orgname string) (*Organization, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization request: %w", err)
@@ -64,6 +75,10 @@ func (c *Client) GetOrganization(orgname string) (*Organization, error) {
 
 // DeleteOrganization deletes an organization
 func (c *Client) DeleteOrganization(orgname string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/organization/%s", orgname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete organization request: %w", err)
@@ -78,6 +93,13 @@ func (c *Client) DeleteOrganization(orgname string) error {
 
 // UpdateOrganization updates organization settings
 func (c *Client) UpdateOrganization(orgname, email string) (*Organization, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if email == "" {
+		return nil, fmt.Errorf("email is required")
+	}
+
 	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s", orgname), map[string]interface{}{
 		"email": email,
 	})
@@ -97,6 +119,10 @@ func (c *Client) UpdateOrganization(orgname, email string) (*Organization, error
 
 // GetOrganizationMembers retrieves organization members
 func (c *Client) GetOrganizationMembers(orgname string) (*OrganizationMembers, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/members", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization members request: %w", err)
@@ -112,6 +138,13 @@ func (c *Client) GetOrganizationMembers(orgname string) (*OrganizationMembers, e
 
 // GetOrganizationMember gets information about a specific organization member
 func (c *Client) GetOrganizationMember(orgname, membername string) (*OrganizationMember, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if membername == "" {
+		return nil, fmt.Errorf("membername is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization member request: %w", err)
@@ -127,6 +160,13 @@ func (c *Client) GetOrganizationMember(orgname, membername string) (*Organizatio
 
 // AddOrganizationMember adds a member to an organization
 func (c *Client) AddOrganizationMember(orgname, membername string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+	if membername == "" {
+		return fmt.Errorf("membername is required")
+	}
+
 	req, err := newRequest("PUT", c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create add organization member request: %w", err)
@@ -141,6 +181,13 @@ func (c *Client) AddOrganizationMember(orgname, membername string) error {
 
 // RemoveOrganizationMember removes a member from an organization
 func (c *Client) RemoveOrganizationMember(orgname, membername string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+	if membername == "" {
+		return fmt.Errorf("membername is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create remove organization member request: %w", err)
@@ -157,6 +204,10 @@ func (c *Client) RemoveOrganizationMember(orgname, membername string) error {
 
 // GetOrganizationRepositories retrieves repositories for an organization
 func (c *Client) GetOrganizationRepositories(orgname string) (*OrganizationRepositories, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/repositories", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization repositories request: %w", err)
@@ -174,6 +225,10 @@ func (c *Client) GetOrganizationRepositories(orgname string) (*OrganizationRepos
 
 // GetOrganizationCollaborators gets the list of collaborators for an organization
 func (c *Client) GetOrganizationCollaborators(orgname string) (*Collaborators, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/collaborators", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization collaborators request: %w", err)

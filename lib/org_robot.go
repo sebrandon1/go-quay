@@ -30,6 +30,10 @@ import (
 
 // GetRobotAccounts retrieves all robot accounts for an organization
 func (c *Client) GetRobotAccounts(orgname string) (*RobotAccounts, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/robots", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get robot accounts request: %w", err)
@@ -45,6 +49,13 @@ func (c *Client) GetRobotAccounts(orgname string) (*RobotAccounts, error) {
 
 // CreateRobotAccount creates a new robot account in an organization
 func (c *Client) CreateRobotAccount(orgname, robotShortname, description string, unstructured map[string]interface{}) (*RobotAccount, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if robotShortname == "" {
+		return nil, fmt.Errorf("robotShortname is required")
+	}
+
 	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s/robots/%s", orgname, robotShortname), CreateRobotRequest{
 		Description:  description,
 		Unstructured: unstructured,
@@ -63,6 +74,13 @@ func (c *Client) CreateRobotAccount(orgname, robotShortname, description string,
 
 // GetRobotAccount retrieves details for a specific robot account
 func (c *Client) GetRobotAccount(orgname, robotShortname string) (*RobotAccount, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if robotShortname == "" {
+		return nil, fmt.Errorf("robotShortname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/robots/%s", orgname, robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get robot account request: %w", err)
@@ -78,6 +96,13 @@ func (c *Client) GetRobotAccount(orgname, robotShortname string) (*RobotAccount,
 
 // DeleteRobotAccount deletes a robot account from an organization
 func (c *Client) DeleteRobotAccount(orgname, robotShortname string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+	if robotShortname == "" {
+		return fmt.Errorf("robotShortname is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/organization/%s/robots/%s", orgname, robotShortname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete robot account request: %w", err)
@@ -92,6 +117,13 @@ func (c *Client) DeleteRobotAccount(orgname, robotShortname string) error {
 
 // RegenerateRobotToken regenerates the token for a robot account
 func (c *Client) RegenerateRobotToken(orgname, robotShortname string) (*RobotAccount, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if robotShortname == "" {
+		return nil, fmt.Errorf("robotShortname is required")
+	}
+
 	req, err := newRequest("POST", c.buildURL("/organization/%s/robots/%s/regenerate", orgname, robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create regenerate robot token request: %w", err)
@@ -109,6 +141,13 @@ func (c *Client) RegenerateRobotToken(orgname, robotShortname string) (*RobotAcc
 
 // GetRobotPermissions retrieves repository permissions for a robot account
 func (c *Client) GetRobotPermissions(orgname, robotShortname string) (*RobotPermissions, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if robotShortname == "" {
+		return nil, fmt.Errorf("robotShortname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/robots/%s/permissions", orgname, robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get robot permissions request: %w", err)
@@ -124,6 +163,19 @@ func (c *Client) GetRobotPermissions(orgname, robotShortname string) (*RobotPerm
 
 // SetRobotRepositoryPermission sets repository permission for a robot account
 func (c *Client) SetRobotRepositoryPermission(orgname, robotShortname, repository, role string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+	if robotShortname == "" {
+		return fmt.Errorf("robotShortname is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+	if role == "" {
+		return fmt.Errorf("role is required")
+	}
+
 	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s/robots/%s/permissions/%s", orgname, robotShortname, repository), map[string]interface{}{
 		fieldRole: role,
 	})
@@ -140,6 +192,16 @@ func (c *Client) SetRobotRepositoryPermission(orgname, robotShortname, repositor
 
 // RemoveRobotRepositoryPermission removes repository permission for a robot account
 func (c *Client) RemoveRobotRepositoryPermission(orgname, robotShortname, repository string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+	if robotShortname == "" {
+		return fmt.Errorf("robotShortname is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/organization/%s/robots/%s/permissions/%s", orgname, robotShortname, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create remove robot repository permission request: %w", err)
@@ -156,6 +218,13 @@ func (c *Client) RemoveRobotRepositoryPermission(orgname, robotShortname, reposi
 
 // GetRobotFederation retrieves the federation configuration for an organization's robot account
 func (c *Client) GetRobotFederation(orgname, robotShortname string) (*RobotFederation, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if robotShortname == "" {
+		return nil, fmt.Errorf("robotShortname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/robots/%s/federation", orgname, robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get robot federation request: %w", err)
@@ -171,6 +240,13 @@ func (c *Client) GetRobotFederation(orgname, robotShortname string) (*RobotFeder
 
 // CreateRobotFederation creates or updates the federation configuration for an organization's robot account
 func (c *Client) CreateRobotFederation(orgname, robotShortname string, configs []RobotFederationConfig) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+	if robotShortname == "" {
+		return fmt.Errorf("robotShortname is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/robots/%s/federation", orgname, robotShortname), configs)
 	if err != nil {
 		return fmt.Errorf("failed to create robot federation request: %w", err)
@@ -185,6 +261,13 @@ func (c *Client) CreateRobotFederation(orgname, robotShortname string, configs [
 
 // DeleteRobotFederation deletes the federation configuration for an organization's robot account
 func (c *Client) DeleteRobotFederation(orgname, robotShortname string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+	if robotShortname == "" {
+		return fmt.Errorf("robotShortname is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/organization/%s/robots/%s/federation", orgname, robotShortname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete robot federation request: %w", err)

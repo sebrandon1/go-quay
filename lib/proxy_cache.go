@@ -16,6 +16,10 @@ import (
 
 // GetProxyCacheConfig retrieves proxy cache configuration for an organization
 func (c *Client) GetProxyCacheConfig(orgname string) (*ProxyCacheConfig, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/organization/%s/proxycache", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get proxy cache config request: %w", err)
@@ -31,6 +35,13 @@ func (c *Client) GetProxyCacheConfig(orgname string) (*ProxyCacheConfig, error) 
 
 // CreateProxyCacheConfig creates proxy cache configuration for an organization
 func (c *Client) CreateProxyCacheConfig(orgname, upstreamRegistry string, insecure bool, expiration int) (*ProxyCacheConfig, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+	if upstreamRegistry == "" {
+		return nil, fmt.Errorf("upstreamRegistry is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/proxycache", orgname), map[string]interface{}{
 		"upstream_registry": upstreamRegistry,
 		"insecure":          insecure,
@@ -50,6 +61,10 @@ func (c *Client) CreateProxyCacheConfig(orgname, upstreamRegistry string, insecu
 
 // DeleteProxyCacheConfig deletes proxy cache configuration for an organization
 func (c *Client) DeleteProxyCacheConfig(orgname string) error {
+	if orgname == "" {
+		return fmt.Errorf("orgname is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/organization/%s/proxycache", orgname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete proxy cache config request: %w", err)

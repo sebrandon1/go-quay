@@ -25,6 +25,10 @@ import (
 
 // GetOrganizationBilling returns billing information for an organization
 func (c *Client) GetOrganizationBilling(orgname string) (*BillingInfo, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	// Get new request
 	req, err := newRequest("GET", c.buildURL("/organization/%s/plan", orgname), nil)
 	if err != nil {
@@ -57,6 +61,10 @@ func (c *Client) GetUserBilling() (*BillingInfo, error) {
 
 // GetOrganizationSubscription returns subscription details for an organization
 func (c *Client) GetOrganizationSubscription(orgname string) (*Subscription, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	// Get new request
 	req, err := newRequest("GET", c.buildURL("/organization/%s/plan", orgname), nil)
 	if err != nil {
@@ -89,6 +97,10 @@ func (c *Client) GetUserSubscription() (*Subscription, error) {
 
 // GetOrganizationInvoices returns invoices for an organization
 func (c *Client) GetOrganizationInvoices(orgname string) ([]Invoice, error) {
+	if orgname == "" {
+		return nil, fmt.Errorf("orgname is required")
+	}
+
 	// Get new request
 	req, err := newRequest("GET", c.buildURL("/organization/%s/invoices", orgname), nil)
 	if err != nil {

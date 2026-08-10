@@ -23,6 +23,13 @@ import (
 //
 // Deprecated: Use robot accounts instead.
 func (c *Client) GetRepoTokens(namespace, repository string) (*RepoTokens, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/tokens", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repo tokens request: %w", err)
@@ -40,6 +47,13 @@ func (c *Client) GetRepoTokens(namespace, repository string) (*RepoTokens, error
 //
 // Deprecated: Use robot accounts instead.
 func (c *Client) CreateRepoToken(namespace, repository string, createReq *CreateRepoTokenRequest) (*RepoToken, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/tokens", namespace, repository), createReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create repo token request: %w", err)
@@ -57,6 +71,16 @@ func (c *Client) CreateRepoToken(namespace, repository string, createReq *Create
 //
 // Deprecated: Use robot accounts instead.
 func (c *Client) GetRepoToken(namespace, repository, code string) (*RepoToken, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if code == "" {
+		return nil, fmt.Errorf("code is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repo token request: %w", err)
@@ -74,6 +98,16 @@ func (c *Client) GetRepoToken(namespace, repository, code string) (*RepoToken, e
 //
 // Deprecated: Use robot accounts instead.
 func (c *Client) UpdateRepoToken(namespace, repository, code string, updateReq *UpdateRepoTokenRequest) (*RepoToken, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if code == "" {
+		return nil, fmt.Errorf("code is required")
+	}
+
 	req, err := newRequestWithBody("PUT", c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update repo token request: %w", err)
@@ -91,6 +125,16 @@ func (c *Client) UpdateRepoToken(namespace, repository, code string, updateReq *
 //
 // Deprecated: Use robot accounts instead.
 func (c *Client) DeleteRepoToken(namespace, repository, code string) error {
+	if namespace == "" {
+		return fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+	if code == "" {
+		return fmt.Errorf("code is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete repo token request: %w", err)

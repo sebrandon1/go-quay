@@ -32,6 +32,13 @@ func (c *Client) GetMessages() (*Messages, error) {
 
 // CreateMessage creates a new global message (admin only)
 func (c *Client) CreateMessage(content, severity, mediaType string) (*Message, error) {
+	if content == "" {
+		return nil, fmt.Errorf("content is required")
+	}
+	if severity == "" {
+		return nil, fmt.Errorf("severity is required")
+	}
+
 	body := struct {
 		Message struct {
 			Content   string `json:"content"`

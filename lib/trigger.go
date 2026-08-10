@@ -28,6 +28,13 @@ import (
 
 // GetTriggers retrieves all build triggers for a repository
 func (c *Client) GetTriggers(namespace, repository string) (*BuildTriggers, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/trigger/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get triggers request: %w", err)
@@ -43,6 +50,16 @@ func (c *Client) GetTriggers(namespace, repository string) (*BuildTriggers, erro
 
 // GetTrigger retrieves a specific build trigger by UUID
 func (c *Client) GetTrigger(namespace, repository, triggerUUID string) (*BuildTrigger, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if triggerUUID == "" {
+		return nil, fmt.Errorf("triggerUUID is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get trigger request: %w", err)
@@ -58,6 +75,16 @@ func (c *Client) GetTrigger(namespace, repository, triggerUUID string) (*BuildTr
 
 // DeleteTrigger deletes a build trigger
 func (c *Client) DeleteTrigger(namespace, repository, triggerUUID string) error {
+	if namespace == "" {
+		return fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+	if triggerUUID == "" {
+		return fmt.Errorf("triggerUUID is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete trigger request: %w", err)
@@ -72,6 +99,16 @@ func (c *Client) DeleteTrigger(namespace, repository, triggerUUID string) error 
 
 // UpdateTrigger updates a build trigger (enable/disable)
 func (c *Client) UpdateTrigger(namespace, repository, triggerUUID string, enabled bool) (*BuildTrigger, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if triggerUUID == "" {
+		return nil, fmt.Errorf("triggerUUID is required")
+	}
+
 	body := map[string]interface{}{
 		"enabled": enabled,
 	}
@@ -91,6 +128,16 @@ func (c *Client) UpdateTrigger(namespace, repository, triggerUUID string, enable
 
 // StartTriggerBuild manually starts a build from a trigger
 func (c *Client) StartTriggerBuild(namespace, repository, triggerUUID string, triggerReq *ManualTriggerRequest) (*Build, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if triggerUUID == "" {
+		return nil, fmt.Errorf("triggerUUID is required")
+	}
+
 	var body interface{}
 	if triggerReq != nil {
 		body = triggerReq
@@ -111,6 +158,16 @@ func (c *Client) StartTriggerBuild(namespace, repository, triggerUUID string, tr
 
 // ActivateTrigger activates a build trigger with configuration
 func (c *Client) ActivateTrigger(namespace, repository, triggerUUID string, activateReq *ActivateTriggerRequest) (*BuildTrigger, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if triggerUUID == "" {
+		return nil, fmt.Errorf("triggerUUID is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/trigger/%s/activate", namespace, repository, triggerUUID), activateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create activate trigger request: %w", err)
@@ -126,6 +183,16 @@ func (c *Client) ActivateTrigger(namespace, repository, triggerUUID string, acti
 
 // GetTriggerBuilds gets the builds started by a specific trigger
 func (c *Client) GetTriggerBuilds(namespace, repository, triggerUUID string, limit int) (*Builds, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if triggerUUID == "" {
+		return nil, fmt.Errorf("triggerUUID is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/trigger/%s/builds", namespace, repository, triggerUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get trigger builds request: %w", err)

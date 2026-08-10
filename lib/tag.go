@@ -21,6 +21,16 @@ import (
 
 // GetTag retrieves detailed information about a specific tag
 func (c *Client) GetTag(namespace, repository, tag string) (*Tag, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if tag == "" {
+		return nil, fmt.Errorf("tag is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get tag request: %w", err)
@@ -36,6 +46,16 @@ func (c *Client) GetTag(namespace, repository, tag string) (*Tag, error) {
 
 // UpdateTag updates tag metadata (currently supports expiration)
 func (c *Client) UpdateTag(namespace, repository, tag, expiration string) (*Tag, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if tag == "" {
+		return nil, fmt.Errorf("tag is required")
+	}
+
 	updateReq := UpdateTagRequest{}
 
 	if expiration != "" {
@@ -57,6 +77,16 @@ func (c *Client) UpdateTag(namespace, repository, tag, expiration string) (*Tag,
 
 // DeleteTag deletes a specific tag from a repository
 func (c *Client) DeleteTag(namespace, repository, tag string) error {
+	if namespace == "" {
+		return fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+	if tag == "" {
+		return fmt.Errorf("tag is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete tag request: %w", err)
@@ -71,6 +101,16 @@ func (c *Client) DeleteTag(namespace, repository, tag string) error {
 
 // GetTagHistory retrieves the history of changes for a specific tag
 func (c *Client) GetTagHistory(namespace, repository, tag string) (*TagHistory, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if tag == "" {
+		return nil, fmt.Errorf("tag is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/tag/%s/history", namespace, repository, tag), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get tag history request: %w", err)
@@ -86,6 +126,19 @@ func (c *Client) GetTagHistory(namespace, repository, tag string) (*TagHistory, 
 
 // RevertTag reverts a tag to a previous state by manifest digest
 func (c *Client) RevertTag(namespace, repository, tag, manifestDigest string) (*Tag, error) {
+	if namespace == "" {
+		return nil, fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return nil, fmt.Errorf("repository is required")
+	}
+	if tag == "" {
+		return nil, fmt.Errorf("tag is required")
+	}
+	if manifestDigest == "" {
+		return nil, fmt.Errorf("manifestDigest is required")
+	}
+
 	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/tag/%s/revert", namespace, repository, tag), map[string]interface{}{
 		"manifest_digest": manifestDigest,
 	})
@@ -103,6 +156,19 @@ func (c *Client) RevertTag(namespace, repository, tag, manifestDigest string) (*
 
 // ChangeTag creates or moves a tag to point at a specific manifest digest
 func (c *Client) ChangeTag(namespace, repository, tag, manifestDigest string) error {
+	if namespace == "" {
+		return fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+	if tag == "" {
+		return fmt.Errorf("tag is required")
+	}
+	if manifestDigest == "" {
+		return fmt.Errorf("manifestDigest is required")
+	}
+
 	body := struct {
 		ManifestDigest string `json:"manifest_digest"`
 	}{
@@ -122,6 +188,19 @@ func (c *Client) ChangeTag(namespace, repository, tag, manifestDigest string) er
 
 // RestoreTag restores a tag to a previous image
 func (c *Client) RestoreTag(namespace, repository, tag, manifestDigest string) error {
+	if namespace == "" {
+		return fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+	if tag == "" {
+		return fmt.Errorf("tag is required")
+	}
+	if manifestDigest == "" {
+		return fmt.Errorf("manifestDigest is required")
+	}
+
 	body := struct {
 		ManifestDigest string `json:"manifest_digest"`
 	}{

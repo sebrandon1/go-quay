@@ -52,6 +52,13 @@ func (c *Client) GetStarredRepositories() (*StarredRepositories, error) {
 
 // StarRepository adds a repository to the user's starred list
 func (c *Client) StarRepository(namespace, repository string) error {
+	if namespace == "" {
+		return fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+
 	req, err := newRequest("PUT", c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create star repository request: %w", err)
@@ -66,6 +73,13 @@ func (c *Client) StarRepository(namespace, repository string) error {
 
 // UnstarRepository removes a repository from the user's starred list
 func (c *Client) UnstarRepository(namespace, repository string) error {
+	if namespace == "" {
+		return fmt.Errorf("namespace is required")
+	}
+	if repository == "" {
+		return fmt.Errorf("repository is required")
+	}
+
 	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create unstar repository request: %w", err)
@@ -80,6 +94,10 @@ func (c *Client) UnstarRepository(namespace, repository string) error {
 
 // GetUserByUsername retrieves information about a specific user
 func (c *Client) GetUserByUsername(username string) (*UserDetails, error) {
+	if username == "" {
+		return nil, fmt.Errorf("username is required")
+	}
+
 	req, err := newRequest("GET", c.buildURL("/users/%s", username), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user by username request: %w", err)
