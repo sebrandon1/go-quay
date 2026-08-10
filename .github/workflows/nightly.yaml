@@ -58,6 +58,25 @@ jobs:
         name: api-coverage-report
         path: api-coverage-report.md
 
+  govulncheck:
+    name: Govulncheck
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v7
+
+    - name: Set up Go
+      uses: actions/setup-go@v7
+      with:
+        go-version-file: 'go.mod'
+
+    - name: Install govulncheck
+      run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+    - name: Run govulncheck
+      run: govulncheck ./...
+
   benchmark-tests:
     name: Performance Benchmarks
     runs-on: ubuntu-latest
