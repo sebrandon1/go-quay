@@ -2,6 +2,7 @@ package lib
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -174,6 +175,82 @@ func TestGetRequest(t *testing.T) {
 
 	if result.Value != 42 {
 		t.Errorf("Expected value 42, got %d", result.Value)
+	}
+}
+
+func TestQuayErrorParsing(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(`{"status":404,"error":"not_found","detail":"Repository not found","error_type":"not_found"}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	var result map[string]string
+	err = client.get(req, &result)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+
+	var quayErr *QuayError
+	if !errors.As(err, &quayErr) {
+		t.Fatalf("Expected QuayError, got %T: %v", err, err)
+	}
+
+	if quayErr.StatusCode() != http.StatusNotFound {
+		t.Errorf("Expected status 404, got %d", quayErr.StatusCode())
+	}
+
+	if quayErr.Message != "not_found" {
+		t.Errorf("Expected message 'not_found', got '%s'", quayErr.Message)
+	}
+
+	if quayErr.Detail != "Repository not found" {
+		t.Errorf("Expected detail 'Repository not found', got '%s'", quayErr.Detail)
+	}
+
+	expectedErrStr := "quay API error (status 404): not_found — Repository not found"
+	if quayErr.Error() != expectedErrStr {
+		t.Errorf("Expected error string '%s', got '%s'", expectedErrStr, quayErr.Error())
+	}
+}
+
+func TestQuayErrorFallbackToRawError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`not json at all`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	var result map[string]string
+	err = client.get(req, &result)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+
+	var quayErr *QuayError
+	if errors.As(err, &quayErr) {
+		t.Error("Expected raw error for non-JSON response, got QuayError")
 	}
 }
 
