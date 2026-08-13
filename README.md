@@ -72,7 +72,7 @@ func main() {
     }
     fmt.Printf("Logged in as: %s\n", user.Username)
 
-    repos, err := client.ListRepositories("my-namespace", false, false, 1, 10)
+    repos, err := client.ListRepositories("my-namespace", false, false, false, 1, 10)
     if err != nil {
         log.Fatal(err)
     }
