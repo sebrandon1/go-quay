@@ -38,7 +38,7 @@ func (c *Client) CreateOrganization(name, email string) (*Organization, error) {
 		return nil, fmt.Errorf("email is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.BaseURL+"/organization/", CreateOrganizationRequest{
+	req, err := newRequestWithBody("POST", c.buildURL("/organization/"), CreateOrganizationRequest{
 		Name:  name,
 		Email: email,
 	})

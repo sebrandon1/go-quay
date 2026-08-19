@@ -89,7 +89,7 @@ func (c *Client) CreateRepository(namespace, repository, visibility, description
 		return nil, fmt.Errorf("visibility is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.BaseURL+"/repository", CreateRepositoryRequest{
+	req, err := newRequestWithBody("POST", c.buildURL("/repository"), CreateRepositoryRequest{
 		Repository:  repository,
 		Namespace:   namespace,
 		Visibility:  visibility,

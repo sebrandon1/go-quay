@@ -22,7 +22,7 @@ func (c *Client) SearchRepositories(query string, page int) (*SearchRepositoryRe
 		return nil, fmt.Errorf("query is required")
 	}
 
-	req, err := newRequest("GET", c.BaseURL+"/find/repositories", nil)
+	req, err := newRequest("GET", c.buildURL("/find/repositories"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search repositories request: %w", err)
 	}
@@ -47,7 +47,7 @@ func (c *Client) SearchAll(query string) (*SearchAllResult, error) {
 		return nil, fmt.Errorf("query is required")
 	}
 
-	req, err := newRequest("GET", c.BaseURL+"/find/all", nil)
+	req, err := newRequest("GET", c.buildURL("/find/all"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search all request: %w", err)
 	}

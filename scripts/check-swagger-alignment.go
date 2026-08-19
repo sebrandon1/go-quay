@@ -147,9 +147,10 @@ func scanSourceEndpoints(libPath, baseURLVar string) ([]ImplementedEndpoint, err
 	var endpoints []ImplementedEndpoint
 
 	// Patterns to match endpoint definitions
-	// Matches: c.BaseURL + "/path" or fmt.Sprintf("%s/path", c.BaseURL)
+	// Matches: c.BaseURL + "/path", fmt.Sprintf("%s/path", c.BaseURL), or c.buildURL("/path", ...)
 	urlConcatPattern := regexp.MustCompile(baseURLVar + `\s*\+\s*"(/[^"]+)"`)
 	sprintfPattern := regexp.MustCompile(`fmt\.Sprintf\s*\(\s*"%s(/[^"]+)"`)
+	buildURLPattern := regexp.MustCompile(`buildURL\s*\(\s*"(/[^"]+)"`)
 	// Match HTTP method from http.NewRequest or newRequest calls
 	methodPattern := regexp.MustCompile(`(?:http\.NewRequest|newRequest|newRequestWithBody)\s*\(\s*"(GET|POST|PUT|DELETE|PATCH)"`)
 
@@ -191,6 +192,8 @@ func scanSourceEndpoints(libPath, baseURLVar string) ([]ImplementedEndpoint, err
 			if matches := urlConcatPattern.FindStringSubmatch(line); len(matches) > 1 {
 				urlPath = matches[1]
 			} else if matches := sprintfPattern.FindStringSubmatch(line); len(matches) > 1 {
+				urlPath = matches[1]
+			} else if matches := buildURLPattern.FindStringSubmatch(line); len(matches) > 1 {
 				urlPath = matches[1]
 			}
 
