@@ -5,11 +5,14 @@
 
 set -e
 
-BINARY="./go-quay"
+BINARY="./bin/go-quay"
+if [ ! -f "$BINARY" ]; then
+	BINARY="./go-quay"
+fi
 
 # Check if binary exists
 if [ ! -f "$BINARY" ]; then
-    echo "Error: Binary $BINARY not found. Please build the project first (make build)."
+    echo "Error: Binary not found at ./bin/go-quay or ./go-quay. Please build the project first (make build)."
     exit 1
 fi
 

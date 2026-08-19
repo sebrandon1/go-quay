@@ -9,6 +9,7 @@ const (
 	subcmdPermissions = "permissions"
 
 	// Command name constants
+	cliName         = "go-quay"
 	cmdGet          = "get"
 	cmdRepository   = "repository"
 	cmdOrganization = "organization"

@@ -43,8 +43,8 @@ func TestSetVersion(t *testing.T) {
 }
 
 func TestRootCommandUse(t *testing.T) {
-	if rootCmd.Use != "go-quay" {
-		t.Errorf("Expected root command Use 'go-quay', got %q", rootCmd.Use)
+	if rootCmd.Use != cliName {
+		t.Errorf("Expected root command Use %q, got %q", cliName, rootCmd.Use)
 	}
 }
 

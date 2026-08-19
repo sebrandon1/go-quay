@@ -22,7 +22,7 @@ func TestLoadConfigMissingFile(t *testing.T) {
 func TestLoadConfigFromFile(t *testing.T) {
 	// Create a temp config dir
 	tmpDir := t.TempDir()
-	configDir := filepath.Join(tmpDir, "go-quay")
+	configDir := filepath.Join(tmpDir, cliName)
 	if err := os.MkdirAll(configDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -95,8 +95,8 @@ func TestConfigFilePath(t *testing.T) {
 	if filepath.Base(path) != "config.yaml" {
 		t.Errorf("Expected config file named 'config.yaml', got %q", filepath.Base(path))
 	}
-	if filepath.Base(filepath.Dir(path)) != "go-quay" {
-		t.Errorf("Expected config dir named 'go-quay', got %q", filepath.Base(filepath.Dir(path)))
+	if filepath.Base(filepath.Dir(path)) != cliName {
+		t.Errorf("Expected config dir named %q, got %q", cliName, filepath.Base(filepath.Dir(path)))
 	}
 }
 

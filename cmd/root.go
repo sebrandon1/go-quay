@@ -11,7 +11,7 @@ import (
 var quayURL string
 
 var rootCmd = &cobra.Command{
-	Use:   "go-quay",
+	Use:   cliName,
 	Short: "Quay CLI interacts with Quay.io API",
 }
 
