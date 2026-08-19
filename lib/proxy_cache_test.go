@@ -64,6 +64,19 @@ func TestCreateProxyCacheConfig(t *testing.T) {
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
+		var req CreateProxyCacheConfigRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Errorf("Failed to decode request body: %v", err)
+		}
+		if req.UpstreamRegistry != testUpstreamReg {
+			t.Errorf("Expected upstream registry %s, got %s", testUpstreamReg, req.UpstreamRegistry)
+		}
+		if !req.Insecure {
+			t.Errorf("Expected Insecure to be true")
+		}
+		if req.Expiration != 3600 {
+			t.Errorf("Expected expiration 3600, got %d", req.Expiration)
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		w.Write(mockResponseJSON)

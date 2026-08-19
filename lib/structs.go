@@ -54,7 +54,7 @@ Error Types:
   - QuayError - API error responses
 
 Request Types:
-  - CreateOrganizationRequest, CreateTeamRequest, CreateRobotRequest, CreateApplicationRequest, CreateQuotaRequest, CreateAutoPruneRequest
+  - CreateOrganizationRequest, UpdateOrganizationRequest, CreateTeamRequest, UpdateTeamRequest, CreateRobotRequest, CreateApplicationRequest, CreateQuotaRequest, CreateAutoPruneRequest
 
 All structs include appropriate JSON tags for API serialization/deserialization.
 */
@@ -376,6 +376,13 @@ type ProxyCacheConfig struct {
 	Expiration       int    `json:"expiration,omitempty"`
 }
 
+// CreateProxyCacheConfigRequest represents the request to create proxy cache configuration
+type CreateProxyCacheConfigRequest struct {
+	UpstreamRegistry string `json:"upstream_registry"`
+	Insecure         bool   `json:"insecure"`
+	Expiration       int    `json:"expiration"`
+}
+
 // User represents a user account
 type User struct {
 	Name        string `json:"name,omitempty"`
@@ -417,11 +424,22 @@ type CreateOrganizationRequest struct {
 	Email string `json:"email"`
 }
 
+// UpdateOrganizationRequest represents the request to update an organization
+type UpdateOrganizationRequest struct {
+	Email string `json:"email"`
+}
+
 // CreateTeamRequest represents the request to create a team
 type CreateTeamRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
 	Role        string `json:"role,omitempty"`
+}
+
+// UpdateTeamRequest represents the request to update a team
+type UpdateTeamRequest struct {
+	Description string `json:"description"`
+	Role        string `json:"role"`
 }
 
 // CreateRobotRequest represents the request to create a robot account
@@ -514,6 +532,11 @@ type TagHistory struct {
 // UpdateTagRequest represents the request to update a tag
 type UpdateTagRequest struct {
 	Expiration string `json:"expiration,omitempty"`
+}
+
+// RevertTagRequest represents the request to revert a tag to a manifest digest
+type RevertTagRequest struct {
+	ManifestDigest string `json:"manifest_digest"`
 }
 
 // User Account Structures
@@ -736,6 +759,11 @@ type BuildTriggers struct {
 type ActivateTriggerRequest struct {
 	Config    map[string]any `json:"config,omitempty"`
 	PullRobot string         `json:"pull_robot,omitempty"`
+}
+
+// UpdateTriggerRequest represents the request to enable or disable a build trigger
+type UpdateTriggerRequest struct {
+	Enabled bool `json:"enabled"`
 }
 
 // ManualTriggerRequest represents the request to manually start a build trigger

@@ -31,10 +31,6 @@ import (
 	"net/http"
 )
 
-const (
-	fieldRole = "role"
-)
-
 // Team Management
 
 // GetTeams retrieves all teams for an organization
@@ -142,9 +138,9 @@ func (c *Client) UpdateTeam(orgname, teamname, description, role string) (*Team,
 		return nil, fmt.Errorf("role is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/team/%s", orgname, teamname), map[string]interface{}{
-		"description": description,
-		fieldRole:     role,
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/team/%s", orgname, teamname), UpdateTeamRequest{
+		Description: description,
+		Role:        role,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update team request: %w", err)
@@ -269,8 +265,8 @@ func (c *Client) SetTeamRepositoryPermission(orgname, teamname, repository, role
 		return fmt.Errorf("role is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/team/%s/permissions/%s", orgname, teamname, repository), map[string]interface{}{
-		fieldRole: role,
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/team/%s/permissions/%s", orgname, teamname, repository), SetRepositoryPermissionRequest{
+		Role: role,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create set team repository permission request: %w", err)

@@ -110,11 +110,9 @@ func (c *Client) UpdateTrigger(namespace, repository, triggerUUID string, enable
 		return nil, fmt.Errorf("triggerUUID is required")
 	}
 
-	body := map[string]interface{}{
-		"enabled": enabled,
-	}
-
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), body)
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), UpdateTriggerRequest{
+		Enabled: enabled,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update trigger request: %w", err)
 	}

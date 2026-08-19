@@ -243,6 +243,13 @@ func TestSetRobotRepositoryPermission(t *testing.T) {
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
+		var req SetRepositoryPermissionRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Errorf("Failed to decode request body: %v", err)
+		}
+		if req.Role != testRoleWrite {
+			t.Errorf("Expected role %s, got %s", testRoleWrite, req.Role)
+		}
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
