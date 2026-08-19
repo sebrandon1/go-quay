@@ -50,6 +50,7 @@ repos, err := client.ListRepositories(
     "my-namespace", // namespace (empty for all)
     false,          // include public repos
     false,          // only starred repos
+    false,          // include pull popularity scores
     1,              // page number
     25,             // results per page
 )
@@ -166,7 +167,11 @@ if err != nil {
 
 fmt.Printf("History for tag 'latest':\n")
 for _, entry := range history.Tags {
-    fmt.Printf("  %s -> %s\n", entry.StartTs, entry.ManifestDigest[:16])
+    digest := entry.ManifestDigest
+    if len(digest) > 16 {
+        digest = digest[:16]
+    }
+    fmt.Printf("  %d -> %s\n", entry.StartTs, digest)
 }
 ```
 
@@ -195,6 +200,15 @@ if err != nil {
     log.Fatalf("Failed to restore tag: %v", err)
 }
 fmt.Println("Tag restored")
+```
+
+### Change a tag to a digest
+
+```go
+err := client.ChangeTag("my-namespace", "my-app", "latest", "sha256:abc123...")
+if err != nil {
+    log.Fatalf("Failed to change tag: %v", err)
+}
 ```
 
 ## Deleting a Repository

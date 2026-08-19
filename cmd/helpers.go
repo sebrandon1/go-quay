@@ -9,7 +9,7 @@ import (
 )
 
 // outputFormat holds the selected output format (json, yaml, or table).
-// Set via the --output/-o persistent flag on getCmd.
+// Set via the --output/-O persistent flag on getCmd.
 var outputFormat string
 
 // getClient creates a Quay client with the configured token and URL.

@@ -1,6 +1,32 @@
 # CLI Reference
 
-Complete command reference for the `go-quay` CLI. All commands require a Quay.io authentication token via `--token` or `-t`.
+Complete command reference for the `go-quay` CLI.
+
+## Global flags and configuration
+
+Every `get` subcommand inherits these flags:
+
+| Flag | Env / config | Description |
+|------|----------------|-------------|
+| `--token` / `-t` | `QUAY_TOKEN` or config `token` | Quay.io API token |
+| `--quay-url` | `QUAY_URL` or config `quay-url` | API base URL (default `https://quay.io/api/v1`) |
+| `--output` / `-O` | — | `json` (default), `yaml`, or `table` |
+
+Precedence: flags > environment variables > config file > built-in defaults.
+
+Optional config file (YAML):
+
+- Linux: `~/.config/go-quay/config.yaml`
+- macOS: `~/Library/Application Support/go-quay/config.yaml`
+- Windows: `%AppData%/go-quay/config.yaml`
+
+```yaml
+token: your-token
+namespace: myorg
+quay-url: https://quay.io/api/v1
+```
+
+`namespace` supplies the default for `--namespace` / `-n` on commands that use it.
 
 ## Billing API
 
@@ -23,6 +49,10 @@ go-quay get billing org-info --organization ORG_NAME --token YOUR_TOKEN
 go-quay get billing org-subscription --organization ORG_NAME --token YOUR_TOKEN
 go-quay get billing org-invoices --organization ORG_NAME --token YOUR_TOKEN
 ```
+
+### User invoices (not supported)
+
+`go-quay get billing user-invoices` exists for completeness but the Quay API has no user-invoice endpoint. The command always errors. Use `org-invoices` for organizations.
 
 ## Build API
 
@@ -406,6 +436,8 @@ go-quay get repository list \
   --token YOUR_TOKEN
 ```
 
+`--popularity` is a boolean: it includes pull-count scores. Combine with `--table` to sort by that score. There is no `--popularity stars` mode; use `--starred` to filter starred repositories.
+
 ### Change repository visibility
 ```bash
 go-quay get repository change-visibility \
@@ -580,6 +612,16 @@ go-quay get tag restore \
   --namespace myorg \
   --repository myrepo \
   --tag deleted-tag \
+  --manifest sha256:abc123... \
+  --token YOUR_TOKEN
+```
+
+### Create or move a tag to a manifest
+```bash
+go-quay get tag change \
+  --namespace myorg \
+  --repository myrepo \
+  --tag latest \
   --manifest sha256:abc123... \
   --token YOUR_TOKEN
 ```
@@ -1211,5 +1253,39 @@ go-quay get repotoken delete \
   --repository REPOSITORY \
   --code TOKEN_CODE \
   --confirm \
+  --token YOUR_TOKEN
+```
+
+## Mirror API
+
+Configure a repository to pull tags from an external registry on a schedule.
+
+### Get mirror configuration
+```bash
+go-quay get mirror info \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --token YOUR_TOKEN
+```
+
+### Create mirror configuration
+```bash
+go-quay get mirror create \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --external-ref docker.io/library/nginx \
+  --robot-username myorg+mirrorbot \
+  --sync-interval 86400 \
+  --tag-rule ".*" \
+  --token YOUR_TOKEN
+```
+
+### Update mirror configuration
+```bash
+go-quay get mirror update \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --enabled \
+  --sync-interval 3600 \
   --token YOUR_TOKEN
 ```

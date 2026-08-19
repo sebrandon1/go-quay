@@ -178,13 +178,20 @@ echo "Testing user command help..."
 echo "Testing permissions command help..."
 ./$APP_NAME get permissions --help > /dev/null
 ./$APP_NAME get permissions list --help > /dev/null
-./$APP_NAME get permissions get --help > /dev/null
 ./$APP_NAME get permissions set --help > /dev/null
-./$APP_NAME get permissions delete --help > /dev/null
+./$APP_NAME get permissions remove --help > /dev/null
 
 # Test tag command help
 echo "Testing tag command help..."
 ./$APP_NAME get tag --help > /dev/null
+./$APP_NAME get tag change --help > /dev/null
+
+# Test mirror command help
+echo "Testing mirror command help..."
+./$APP_NAME get mirror --help > /dev/null
+./$APP_NAME get mirror info --help > /dev/null
+./$APP_NAME get mirror create --help > /dev/null
+./$APP_NAME get mirror update --help > /dev/null
 
 # Test error handling
 echo "Testing error handling..."
@@ -200,7 +207,7 @@ if [ -n "$QUAY_TOKEN" ]; then
     
     # Discovery API - returns API information (read-only, safe)
     printf "Testing discovery API... "
-    DISCOVERY_INFO=$(./$APP_NAME get discovery --token "$QUAY_TOKEN" 2>/dev/null)
+    DISCOVERY_INFO=$(./$APP_NAME get discovery api --token "$QUAY_TOKEN" 2>/dev/null)
     if [ $? -eq 0 ]; then
         echo "✓ (API discovery successful)"
     else
@@ -209,7 +216,7 @@ if [ -n "$QUAY_TOKEN" ]; then
     
     # Messages API - returns system messages (read-only, safe)
     printf "Testing messages API... "
-    MESSAGES_INFO=$(./$APP_NAME get messages --token "$QUAY_TOKEN" 2>/dev/null)
+    MESSAGES_INFO=$(./$APP_NAME get messages list --token "$QUAY_TOKEN" 2>/dev/null)
     if [ $? -eq 0 ]; then
         if echo "$MESSAGES_INFO" | grep -q "messages" 2>/dev/null; then
             MSG_COUNT=$(echo "$MESSAGES_INFO" | jq '.messages | length' 2>/dev/null || echo "0")
@@ -602,7 +609,7 @@ if [ -n "$QUAY_TOKEN" ]; then
         
         # Tags API - list tags (read-only)
         printf "Testing tags for $QUAY_NAMESPACE/$QUAY_REPOSITORY... "
-        TAGS_INFO=$(./$APP_NAME get tag list --namespace "$QUAY_NAMESPACE" --repository "$QUAY_REPOSITORY" --token "$QUAY_TOKEN" 2>/dev/null)
+        TAGS_INFO=$(./$APP_NAME get repository info --namespace "$QUAY_NAMESPACE" --repository "$QUAY_REPOSITORY" --token "$QUAY_TOKEN" 2>/dev/null)
         if [ $? -eq 0 ]; then
             if echo "$TAGS_INFO" | grep -q "tags" 2>/dev/null; then
                 TAG_COUNT=$(echo "$TAGS_INFO" | jq '.tags | length' 2>/dev/null || echo "0")

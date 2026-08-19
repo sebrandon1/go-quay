@@ -13,7 +13,7 @@ Provides both a reusable library (`lib/`) and a CLI (`cmd/`) built with Cobra.
 - **Full API Coverage** — Billing, builds, manifests, organizations, permissions, repos, robots, security scans, tags, teams, and more
 - **Library + CLI** — Use as a Go package or as a standalone command-line tool
 - **Container Image** — Available at `quay.io/bapalm/go-quay` for quick use without installation
-- **Popularity Sorting** — List repositories ranked by pull count or star count
+- **Popularity Sorting** — List repositories with pull-count scores (`--popularity --table` sorts by that score)
 
 ## Quick Start
 
@@ -86,8 +86,8 @@ func main() {
 # Get repository info
 go-quay get repository info -n myorg -r myapp -t "$QUAY_TOKEN"
 
-# List repositories sorted by popularity
-go-quay get repository list -n myorg --popularity stars --table -t "$QUAY_TOKEN"
+# List repositories sorted by pull count
+go-quay get repository list -n myorg --popularity --table -t "$QUAY_TOKEN"
 
 # Security scan a manifest
 go-quay get secscan info -n myorg -r myapp -m sha256:abc123... -t "$QUAY_TOKEN"
@@ -119,6 +119,7 @@ Each API links to the corresponding [Quay.io Swagger documentation](https://docs
 | [Messages](https://docs.quay.io/api/swagger/#Messages) | Yes | Yes | /api/v1/messages |
 | [Logs](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--aggregatelogs-get) | Yes | Yes | /api/v1/repository/{namespace}/{repository}/aggregatelogs, /api/v1/repository/{namespace}/{repository}/logs, /api/v1/organization/{orgname}/logs, /api/v1/organization/{orgname}/aggregatelogs, /api/v1/user/logs, /api/v1/user/aggregatelogs |
 | [Manifest](https://docs.quay.io/api/swagger/#Manifest) | Yes | Yes | /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}, /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels, /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels/{labelid} |
+| Mirror | Yes | Yes | /api/v1/repository/{namespace}/{repository}/mirror |
 | [Organization](https://docs.quay.io/api/swagger/#operation--api-v1-organization--orgname--get) | Yes | Yes | /api/v1/organization/{orgname}, /api/v1/organization/{orgname}/members, /api/v1/organization/{orgname}/teams, /api/v1/organization/{orgname}/team/{teamname}, /api/v1/organization/{orgname}/robots, /api/v1/organization/{orgname}/quota, /api/v1/organization/{orgname}/autoprunepolicy, /api/v1/organization/{orgname}/applications |
 | [Permission](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--permissions-get) | Yes | Yes | /api/v1/repository/{namespace}/{repository}/permissions, /api/v1/repository/{namespace}/{repository}/permissions/{username} |
 | [Prototype](https://docs.quay.io/api/swagger/#Prototype) | Yes | Yes | /api/v1/organization/{orgname}/prototypes, /api/v1/organization/{orgname}/prototypes/{uuid} |
@@ -136,16 +137,20 @@ Each API links to the corresponding [Quay.io Swagger documentation](https://docs
 ## Authentication
 
 1. Go to [Quay.io](https://quay.io) and log in
-2. Navigate to **Account Settings** and generate a token with appropriate permissions
-3. Use the token with `--token` / `-t` or set `QUAY_TOKEN`
+2. Create an **application token** (Account Settings → Applications) or a **robot account** token. Encrypted/CLI passwords are for `docker login`, not this API.
+3. Use the token with `--token` / `-t`, `QUAY_TOKEN`, or a config file (`token:` in `~/.config/go-quay/config.yaml` on Linux)
+
+Optional: `--quay-url` / `QUAY_URL` for a self-hosted registry. Output format: `--output` / `-O` (`json`, `yaml`, `table`). See [CLI Reference](docs/cli-reference.md).
 
 ## Development
 
 ```bash
-make build    # Build binary
-make test     # Run unit tests
-make lint     # Run linter
-make vet      # Run go vet
+make build     # Build binary
+make test      # Run unit tests
+make lint      # Run linter
+make vet       # Run go vet
+make coverage  # Tests with coverage
+make ci        # lint + vet + test + build
 ```
 
 ## Prerequisites

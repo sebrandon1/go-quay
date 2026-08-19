@@ -42,6 +42,12 @@ func TestSetVersion(t *testing.T) {
 	}
 }
 
+func TestRootCommandUse(t *testing.T) {
+	if rootCmd.Use != "go-quay" {
+		t.Errorf("Expected root command Use 'go-quay', got %q", rootCmd.Use)
+	}
+}
+
 func TestQuayURLFlagExists(t *testing.T) {
 	flag := getCmd.PersistentFlags().Lookup("quay-url")
 	if flag == nil {

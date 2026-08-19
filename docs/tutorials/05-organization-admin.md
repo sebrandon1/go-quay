@@ -31,8 +31,8 @@ func main() {
 
     fmt.Printf("Organization: %s\n", org.Name)
     fmt.Printf("Email: %s\n", org.Email)
-    fmt.Printf("Is Admin: %v\n", org.IsAdmin)
-    fmt.Printf("Is Member: %v\n", org.IsMember)
+    fmt.Printf("Is Admin: %v\n", org.IsOrgAdmin)
+    fmt.Printf("Can Create Repo: %v\n", org.CanCreateRepo)
 }
 ```
 
@@ -67,12 +67,12 @@ fmt.Printf("Created team: %s\n", team.Name)
 ### Listing Teams
 
 ```go
-teams, err := client.GetOrganizationTeams("my-org")
+teams, err := client.GetTeams("my-org")
 if err != nil {
     log.Fatalf("Failed to list teams: %v", err)
 }
 
-for _, team := range teams.Teams {
+for _, team := range teams {
     fmt.Printf("- %s (role: %s, members: %d)\n",
         team.Name, team.Role, team.MemberCount)
 }
@@ -185,18 +185,28 @@ Control storage usage in your organization:
 ### Getting Quota Information
 
 ```go
-quotas, err := client.GetOrganizationQuota("my-org")
+org, err := client.GetOrganization("my-org")
+if err != nil {
+    log.Fatalf("Failed to get organization: %v", err)
+}
+
+if org.QuotaReport != nil {
+    usedGB := float64(org.QuotaReport.RunningTotal) / (1024 * 1024 * 1024)
+    limitGB := float64(org.QuotaReport.ConfiguredQuota) / (1024 * 1024 * 1024)
+    if org.QuotaReport.ConfiguredQuota > 0 {
+        percent := float64(org.QuotaReport.RunningTotal) / float64(org.QuotaReport.ConfiguredQuota) * 100
+        fmt.Printf("Used: %.2f GB / %.2f GB (%.1f%%)\n", usedGB, limitGB, percent)
+    } else {
+        fmt.Printf("Used: %.2f GB\n", usedGB)
+    }
+}
+
+// Get configured quota limits (admin only)
+quota, err := client.GetQuota("my-org")
 if err != nil {
     log.Fatalf("Failed to get quota: %v", err)
 }
-
-for _, q := range quotas.Quotas {
-    usedGB := float64(q.UsedBytes) / (1024 * 1024 * 1024)
-    limitGB := float64(q.LimitBytes) / (1024 * 1024 * 1024)
-    percent := float64(q.UsedBytes) / float64(q.LimitBytes) * 100
-
-    fmt.Printf("Used: %.2f GB / %.2f GB (%.1f%%)\n", usedGB, limitGB, percent)
-}
+fmt.Printf("Limit: %d bytes\n", quota.LimitBytes)
 ```
 
 ### Setting Quota Limits
@@ -204,7 +214,7 @@ for _, q := range quotas.Quotas {
 ```go
 // Set 10 GB limit (requires super user)
 limitBytes := int64(10 * 1024 * 1024 * 1024)
-quota, err := client.CreateOrganizationQuota("my-org", limitBytes)
+quota, err := client.CreateQuota("my-org", limitBytes)
 if err != nil {
     log.Fatalf("Failed to create quota: %v", err)
 }
@@ -217,7 +227,11 @@ fmt.Printf("Quota set: %d bytes\n", quota.LimitBytes)
 ```go
 // Increase to 50 GB
 newLimit := int64(50 * 1024 * 1024 * 1024)
-quota, err := client.UpdateOrganizationQuota("my-org", quotaID, newLimit)
+quota, err := client.UpdateQuota("my-org", newLimit)
+if err != nil {
+    log.Fatalf("Failed to update quota: %v", err)
+}
+fmt.Printf("Updated limit: %d bytes\n", quota.LimitBytes)
 ```
 
 ## Auto-Prune Policies
@@ -228,7 +242,7 @@ Automatically clean up old tags to save storage:
 
 ```go
 // Keep only the last 10 tags
-policy, err := client.CreateOrganizationAutoPrunePolicy(
+policy, err := client.CreateAutoPrunePolicy(
     "my-org",
     "number_of_tags",   // method
     10,                 // value: keep 10 tags
@@ -252,7 +266,7 @@ fmt.Printf("Policy created: %s\n", policy.UUID)
 
 ```go
 // Only prune tags matching pattern
-policy, err := client.CreateOrganizationAutoPrunePolicy(
+policy, err := client.CreateAutoPrunePolicy(
     "my-org",
     "creation_date",
     30,                 // keep tags from last 30 days
@@ -263,7 +277,7 @@ policy, err := client.CreateOrganizationAutoPrunePolicy(
 ### Listing Policies
 
 ```go
-policies, err := client.GetOrganizationAutoPrunePolicies("my-org")
+policies, err := client.GetAutoPrunePolicies("my-org")
 if err != nil {
     log.Fatalf("Failed to get policies: %v", err)
 }
@@ -279,7 +293,7 @@ for _, p := range policies.Policies {
 ### Updating a Policy
 
 ```go
-updatedPolicy, err := client.UpdateOrganizationAutoPrunePolicy(
+updatedPolicy, err := client.UpdateAutoPrunePolicy(
     "my-org",
     policyUUID,
     "number_of_tags",
@@ -291,7 +305,7 @@ updatedPolicy, err := client.UpdateOrganizationAutoPrunePolicy(
 ### Deleting a Policy
 
 ```go
-err := client.DeleteOrganizationAutoPrunePolicy("my-org", policyUUID)
+err := client.DeleteAutoPrunePolicy("my-org", policyUUID)
 ```
 
 ## Default Permissions (Prototypes)
@@ -301,13 +315,13 @@ Automatically apply permissions to new repositories:
 ### Creating a Prototype
 
 ```go
-prototype, err := client.CreateOrganizationPrototype(
-    "my-org",
-    "write",              // role
-    "team",               // delegate kind: user, team, or robot
-    "developers",         // delegate name
-    nil,                  // activating user (optional)
-)
+prototype, err := client.CreatePrototype("my-org", &lib.CreatePrototypeRequest{
+    Role: "write",
+    Delegate: lib.PrototypeDelegateRequest{
+        Kind: "team",
+        Name: "developers",
+    },
+})
 if err != nil {
     log.Fatalf("Failed to create prototype: %v", err)
 }
@@ -318,7 +332,7 @@ fmt.Printf("Prototype created: %s\n", prototype.ID)
 ### Listing Prototypes
 
 ```go
-prototypes, err := client.GetOrganizationPrototypes("my-org")
+prototypes, err := client.GetPrototypes("my-org")
 if err != nil {
     log.Fatalf("Failed to get prototypes: %v", err)
 }
@@ -332,7 +346,7 @@ for _, p := range prototypes.Prototypes {
 ### Deleting a Prototype
 
 ```go
-err := client.DeleteOrganizationPrototype("my-org", prototypeID)
+err := client.DeletePrototype("my-org", prototypeID)
 ```
 
 ## OAuth Applications
@@ -342,7 +356,7 @@ Manage OAuth applications for your organization:
 ### Creating an Application
 
 ```go
-app, err := client.CreateOrganizationApplication(
+app, err := client.CreateApplication(
     "my-org",
     "My CI Tool",                           // name
     "CI/CD integration app",                // description
@@ -361,7 +375,7 @@ fmt.Printf("Client Secret: %s\n", app.ClientSecret)
 ### Listing Applications
 
 ```go
-apps, err := client.GetOrganizationApplications("my-org")
+apps, err := client.GetApplications("my-org")
 if err != nil {
     log.Fatalf("Failed to list apps: %v", err)
 }
@@ -374,7 +388,7 @@ for _, app := range apps.Applications {
 ### Resetting Client Secret
 
 ```go
-app, err := client.ResetOrganizationApplicationClientSecret("my-org", clientID)
+app, err := client.ResetApplicationClientSecret("my-org", clientID)
 if err != nil {
     log.Fatalf("Failed to reset secret: %v", err)
 }
@@ -387,7 +401,7 @@ fmt.Printf("New secret: %s\n", app.ClientSecret)
 Access organization activity logs:
 
 ```go
-logs, err := client.GetOrganizationLogs("my-org", "")
+logs, err := client.GetOrganizationLogs("my-org", "", "", "")
 if err != nil {
     log.Fatalf("Failed to get logs: %v", err)
 }
@@ -400,7 +414,7 @@ for _, entry := range logs.Logs {
 
 // Pagination
 if logs.NextPage != "" {
-    nextLogs, err := client.GetOrganizationLogs("my-org", logs.NextPage)
+    nextLogs, err := client.GetOrganizationLogs("my-org", logs.NextPage, "", "")
     // ... process next page
 }
 ```

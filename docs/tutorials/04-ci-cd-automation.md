@@ -34,7 +34,7 @@ func main() {
     orgName := "my-org"
 
     // Create a robot account
-    robot, err := client.CreateOrganizationRobot(
+    robot, err := client.CreateRobotAccount(
         orgName,
         "ci-deploy",                    // short name (becomes org+ci-deploy)
         "CI/CD deployment automation",  // description
@@ -53,7 +53,7 @@ func main() {
 ### Listing Robot Accounts
 
 ```go
-robots, err := client.GetOrganizationRobots("my-org")
+robots, err := client.GetRobotAccounts("my-org")
 if err != nil {
     log.Fatalf("Failed to list robots: %v", err)
 }
@@ -69,7 +69,7 @@ for _, robot := range robots.Robots {
 If a token is compromised:
 
 ```go
-newRobot, err := client.RegenerateOrganizationRobotToken("my-org", "ci-deploy")
+newRobot, err := client.RegenerateRobotToken("my-org", "ci-deploy")
 if err != nil {
     log.Fatalf("Failed to regenerate: %v", err)
 }
@@ -84,10 +84,10 @@ You can also create robots at the user level:
 
 ```go
 // Create user robot
-robot, err := client.CreateUserRobot("my-deploy-bot", "Personal deployment bot")
+robot, err := client.CreateUserRobotAccount("my-deploy-bot", "Personal deployment bot", nil)
 
 // List user robots
-robots, err := client.GetUserRobots()
+robots, err := client.GetUserRobotAccounts()
 
 // Regenerate user robot token
 newRobot, err := client.RegenerateUserRobotToken("my-deploy-bot")
@@ -155,12 +155,12 @@ Set up webhooks to notify external services when events occur:
 notification, err := client.CreateNotification(
     "my-org",
     "my-app",
-    lib.CreateNotificationRequest{
+    &lib.CreateNotificationRequest{
         Event:  "repo_push",          // trigger on image push
         Method: "webhook",            // notification method
         Title:  "Image Push Alert",   // friendly name
-        Config: lib.NotificationConfig{
-            URL: "https://my-ci-server.com/webhook",
+        Config: map[string]interface{}{
+            "url": "https://my-ci-server.com/webhook",
         },
     },
 )
@@ -180,7 +180,7 @@ fmt.Printf("Notification created: %s\n", notification.UUID)
 | `build_start` | Build has started |
 | `build_success` | Build completed successfully |
 | `build_failure` | Build failed |
-| `build_cancelled` | Build was cancelled |
+| `build_canceled` | Build was canceled |
 | `vulnerability_found` | New vulnerability discovered |
 
 ### Supported Methods
@@ -199,12 +199,12 @@ fmt.Printf("Notification created: %s\n", notification.UUID)
 notification, err := client.CreateNotification(
     "my-org",
     "my-app",
-    lib.CreateNotificationRequest{
+    &lib.CreateNotificationRequest{
         Event:  "vulnerability_found",
         Method: "slack",
         Title:  "Security Alert",
-        Config: lib.NotificationConfig{
-            URL: "https://hooks.slack.com/services/XXX/YYY/ZZZ",
+        Config: map[string]interface{}{
+            "url": "https://hooks.slack.com/services/XXX/YYY/ZZZ",
         },
     },
 )
@@ -226,7 +226,7 @@ if err != nil {
 
 ```go
 // List all notifications
-notifications, err := client.ListNotifications("my-org", "my-app")
+notifications, err := client.GetNotifications("my-org", "my-app")
 for _, n := range notifications.Notifications {
     fmt.Printf("- %s: %s (%s)\n", n.UUID[:8], n.Event, n.Method)
 }
@@ -245,7 +245,7 @@ Build triggers automatically build images when code is pushed to a repository.
 ### Listing Triggers
 
 ```go
-triggers, err := client.ListBuildTriggers("my-org", "my-app")
+triggers, err := client.GetTriggers("my-org", "my-app")
 if err != nil {
     log.Fatalf("Failed to list triggers: %v", err)
 }
@@ -262,7 +262,7 @@ for _, t := range triggers.Triggers {
 ### Getting Trigger Details
 
 ```go
-trigger, err := client.GetBuildTrigger("my-org", "my-app", triggerUUID)
+trigger, err := client.GetTrigger("my-org", "my-app", triggerUUID)
 if err != nil {
     log.Fatalf("Failed to get trigger: %v", err)
 }
@@ -276,7 +276,7 @@ fmt.Printf("Enabled: %v\n", trigger.Enabled)
 
 ```go
 // Start a build from a trigger
-build, err := client.StartBuildTrigger("my-org", "my-app", triggerUUID, "")
+build, err := client.StartTriggerBuild("my-org", "my-app", triggerUUID, nil)
 if err != nil {
     log.Fatalf("Failed to start build: %v", err)
 }
@@ -289,105 +289,36 @@ fmt.Printf("Status: %s\n", build.Phase)
 
 ```go
 // Activate a trigger with configuration
-err := client.ActivateBuildTrigger(
+trigger, err := client.ActivateTrigger(
     "my-org",
     "my-app",
     triggerUUID,
-    lib.ActivateTriggerRequest{
+    &lib.ActivateTriggerRequest{
         Config: map[string]interface{}{
             "build_source":    "master",
             "dockerfile_path": "/Dockerfile",
         },
     },
 )
+if err != nil {
+    log.Fatalf("Failed to activate trigger: %v", err)
+}
+fmt.Printf("Trigger activated: %s\n", trigger.ID)
 ```
 
-## Complete CI/CD Setup Example
+## Complete CI/CD Setup
 
-Here's a complete workflow to set up CI/CD for a new repository:
+Typical order: create the repo, create a robot, `SetUserPermission` for `org+robot`, then `CreateNotification` for `repo_push` / `vulnerability_found`. The runnable program is [ci-cd-integration](../../examples/ci-cd-integration/main.go).
 
 ```go
-package main
-
-import (
-    "fmt"
-    "log"
-    "os"
-
-    "github.com/sebrandon1/go-quay/lib"
-)
-
-func main() {
-    client, _ := lib.NewClient(os.Getenv("QUAY_TOKEN"))
-
-    org := "my-org"
-    repo := "my-new-app"
-    robotName := "ci-builder"
-    webhookURL := "https://ci.example.com/webhook"
-
-    // Step 1: Create repository
-    fmt.Println("1. Creating repository...")
-    _, err := client.CreateRepository(org, repo, "private", "My new application")
-    if err != nil {
-        log.Fatalf("Failed to create repo: %v", err)
-    }
-    fmt.Printf("   Created: %s/%s\n\n", org, repo)
-
-    // Step 2: Create robot account
-    fmt.Println("2. Creating robot account...")
-    robot, err := client.CreateOrganizationRobot(org, robotName, "CI/CD builder", nil)
-    if err != nil {
-        // Robot might already exist
-        log.Printf("   Robot exists or error: %v\n", err)
-    } else {
-        fmt.Printf("   Created: %s\n", robot.Name)
-        fmt.Printf("   Token: %s\n\n", robot.Token)
-    }
-
-    // Step 3: Grant robot permissions
-    fmt.Println("3. Setting robot permissions...")
-    fullRobotName := org + "+" + robotName
-    err = client.SetUserPermission(org, repo, fullRobotName, "write")
-    if err != nil {
-        log.Fatalf("Failed to set permission: %v", err)
-    }
-    fmt.Printf("   Granted write access to %s\n\n", fullRobotName)
-
-    // Step 4: Set up push notification
-    fmt.Println("4. Creating push notification...")
-    notification, err := client.CreateNotification(org, repo, lib.CreateNotificationRequest{
-        Event:  "repo_push",
-        Method: "webhook",
-        Title:  "CI Build Trigger",
-        Config: lib.NotificationConfig{URL: webhookURL},
-    })
-    if err != nil {
-        log.Printf("   Failed to create notification: %v\n", err)
-    } else {
-        fmt.Printf("   Created notification: %s\n\n", notification.UUID)
-    }
-
-    // Step 5: Set up vulnerability notification
-    fmt.Println("5. Creating security notification...")
-    secNotification, err := client.CreateNotification(org, repo, lib.CreateNotificationRequest{
-        Event:  "vulnerability_found",
-        Method: "webhook",
-        Title:  "Security Alert",
-        Config: lib.NotificationConfig{URL: webhookURL + "/security"},
-    })
-    if err != nil {
-        log.Printf("   Failed to create notification: %v\n", err)
-    } else {
-        fmt.Printf("   Created notification: %s\n\n", secNotification.UUID)
-    }
-
-    // Summary
-    fmt.Println("=== CI/CD Setup Complete ===")
-    fmt.Printf("\nDocker login:\n")
-    fmt.Printf("  docker login quay.io -u %s -p <token>\n", fullRobotName)
-    fmt.Printf("\nPush image:\n")
-    fmt.Printf("  docker push quay.io/%s/%s:latest\n", org, repo)
-}
+robot, err := client.CreateRobotAccount(org, robotName, "CI/CD builder", nil)
+err = client.SetUserPermission(org, repo, org+"+"+robotName, "write")
+notification, err := client.CreateNotification(org, repo, &lib.CreateNotificationRequest{
+    Event:  "repo_push",
+    Method: "webhook",
+    Title:  "CI Build Trigger",
+    Config: map[string]interface{}{"url": webhookURL},
+})
 ```
 
 ## Best Practices
