@@ -12,8 +12,8 @@ HTTP Helper Methods:
   - get(req, v) / post(req, v) / put(req, v) / delete(req) - Thin wrappers with preset accepted statuses
 
 Request Helpers:
-  - newRequest(method, url string, body io.Reader) (*http.Request, error)
-  - newRequestWithBody(method, url string, body any) (*http.Request, error)
+  - newRequest(ctx, method, url string, body io.Reader) (*http.Request, error)
+  - newRequestWithBody(ctx, method, url string, body any) (*http.Request, error)
   - decodeJSON(r io.Reader, v any) error
 
 All HTTP methods include:
@@ -26,6 +26,7 @@ package lib
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -119,7 +120,9 @@ func (c *Client) do(req *http.Request, v any, acceptedStatuses ...int) error {
 			return err
 		}
 
-		c.backoff(attempt, retryAfter)
+		if err := c.backoff(req.Context(), attempt, retryAfter); err != nil {
+			return err
+		}
 	}
 
 	return lastErr
@@ -144,6 +147,9 @@ func (e *retryableError) Unwrap() error { return e.err }
 func (c *Client) doOnce(req *http.Request, v any, acceptedStatuses []int) (error, error) {
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return nil, err
+		}
 		return nil, &retryableError{err: err}
 	}
 	defer resp.Body.Close()
@@ -198,11 +204,7 @@ func (c *Client) shouldRetry(attempt, maxAttempts int) bool {
 	return c.Retry != nil && attempt < maxAttempts-1
 }
 
-func (c *Client) backoff(attempt int, retryAfterSecs int) {
-	if c.Retry == nil {
-		return
-	}
-
+func (c *Client) backoff(ctx context.Context, attempt int, retryAfterSecs int) error {
 	var wait time.Duration
 	if retryAfterSecs > 0 {
 		wait = time.Duration(retryAfterSecs) * time.Second
@@ -214,7 +216,14 @@ func (c *Client) backoff(attempt int, retryAfterSecs int) {
 		wait = c.Retry.MaxBackoff
 	}
 
-	time.Sleep(wait)
+	t := time.NewTimer(wait)
+	defer t.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-t.C:
+		return nil
+	}
 }
 
 func isRetryableStatus(status int) bool {
@@ -260,13 +269,12 @@ func decodeJSON(r io.Reader, v any) error {
 	return json.NewDecoder(r).Decode(v)
 }
 
-//nolint:unparam
-func newRequest(method, url string, body io.Reader) (*http.Request, error) {
-	return http.NewRequest(method, url, body)
+func newRequest(ctx context.Context, method, url string, body io.Reader) (*http.Request, error) {
+	return http.NewRequestWithContext(ctx, method, url, body)
 }
 
 // newRequestWithBody creates a new HTTP request with JSON body
-func newRequestWithBody(method, url string, body any) (*http.Request, error) {
+func newRequestWithBody(ctx context.Context, method, url string, body any) (*http.Request, error) {
 	var bodyReader io.Reader
 	if body != nil {
 		data, err := json.Marshal(body)
@@ -275,5 +283,5 @@ func newRequestWithBody(method, url string, body any) (*http.Request, error) {
 		}
 		bodyReader = bytes.NewReader(data)
 	}
-	return http.NewRequest(method, url, bodyReader)
+	return newRequest(ctx, method, url, bodyReader)
 }

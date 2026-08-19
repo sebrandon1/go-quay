@@ -61,7 +61,7 @@ var orgInfoCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		org, err := client.GetOrganization(orgName)
+		org, err := client.GetOrganization(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("getting organization: %w", err)
 		}
@@ -79,7 +79,7 @@ var orgMembersCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		members, err := client.GetOrganizationMembers(orgName)
+		members, err := client.GetOrganizationMembers(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("getting organization members: %w", err)
 		}
@@ -97,7 +97,7 @@ var createOrgCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		org, err := client.CreateOrganization(orgName, email)
+		org, err := client.CreateOrganization(cmd.Context(), orgName, email)
 		if err != nil {
 			return fmt.Errorf("creating organization: %w", err)
 		}
@@ -115,7 +115,7 @@ var updateOrgCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		org, err := client.UpdateOrganization(orgName, email)
+		org, err := client.UpdateOrganization(cmd.Context(), orgName, email)
 		if err != nil {
 			return fmt.Errorf("updating organization: %w", err)
 		}
@@ -136,7 +136,7 @@ var deleteOrgCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.DeleteOrganization(orgName)
+		err = client.DeleteOrganization(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("deleting organization: %w", err)
 		}
@@ -155,7 +155,7 @@ var addMemberCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.AddOrganizationMember(orgName, memberName)
+		err = client.AddOrganizationMember(cmd.Context(), orgName, memberName)
 		if err != nil {
 			return fmt.Errorf("adding organization member: %w", err)
 		}
@@ -177,7 +177,7 @@ var removeMemberCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.RemoveOrganizationMember(orgName, memberName)
+		err = client.RemoveOrganizationMember(cmd.Context(), orgName, memberName)
 		if err != nil {
 			return fmt.Errorf("removing organization member: %w", err)
 		}
@@ -196,7 +196,7 @@ var getMemberCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		member, err := client.GetOrganizationMember(orgName, memberName)
+		member, err := client.GetOrganizationMember(cmd.Context(), orgName, memberName)
 		if err != nil {
 			return fmt.Errorf("getting organization member: %w", err)
 		}
@@ -214,7 +214,7 @@ var collaboratorsCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		collaborators, err := client.GetOrganizationCollaborators(orgName)
+		collaborators, err := client.GetOrganizationCollaborators(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("getting organization collaborators: %w", err)
 		}
@@ -232,7 +232,7 @@ var orgRepositoriesCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		repos, err := client.GetOrganizationRepositories(orgName)
+		repos, err := client.GetOrganizationRepositories(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("getting organization repositories: %w", err)
 		}

@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -44,7 +45,7 @@ func TestGetNotifications(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	notifications, err := client.GetNotifications(testNamespace, testRepository)
+	notifications, err := client.GetNotifications(context.Background(), testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("GetNotifications returned error: %v", err)
 	}
@@ -85,7 +86,7 @@ func TestGetNotification(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	notification, err := client.GetNotification(testNamespace, testRepository, testNotificationUUID)
+	notification, err := client.GetNotification(context.Background(), testNamespace, testRepository, testNotificationUUID)
 	if err != nil {
 		t.Fatalf("GetNotification returned error: %v", err)
 	}
@@ -133,7 +134,7 @@ func TestCreateNotification(t *testing.T) {
 		Title:  "New Webhook",
 	}
 
-	notification, err := client.CreateNotification(testNamespace, testRepository, notificationReq)
+	notification, err := client.CreateNotification(context.Background(), testNamespace, testRepository, notificationReq)
 	if err != nil {
 		t.Fatalf("CreateNotification returned error: %v", err)
 	}
@@ -161,7 +162,7 @@ func TestDeleteNotification(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteNotification(testNamespace, testRepository, testNotificationUUID)
+	err = client.DeleteNotification(context.Background(), testNamespace, testRepository, testNotificationUUID)
 	if err != nil {
 		t.Fatalf("DeleteNotification returned error: %v", err)
 	}
@@ -185,7 +186,7 @@ func TestTestNotification(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.TestNotification(testNamespace, testRepository, testNotificationUUID)
+	err = client.TestNotification(context.Background(), testNamespace, testRepository, testNotificationUUID)
 	if err != nil {
 		t.Fatalf("TestNotification returned error: %v", err)
 	}
@@ -209,7 +210,7 @@ func TestResetNotification(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.ResetNotification(testNamespace, testRepository, testNotificationUUID)
+	err = client.ResetNotification(context.Background(), testNamespace, testRepository, testNotificationUUID)
 	if err != nil {
 		t.Fatalf("ResetNotification returned error: %v", err)
 	}
@@ -250,7 +251,7 @@ func TestUpdateNotification(t *testing.T) {
 		Title:  testNotificationTitleUpdated,
 	}
 
-	notification, err := client.UpdateNotification(testNamespace, testRepository, testNotificationUUID, notificationReq)
+	notification, err := client.UpdateNotification(context.Background(), testNamespace, testRepository, testNotificationUUID, notificationReq)
 	if err != nil {
 		t.Fatalf("UpdateNotification returned error: %v", err)
 	}
@@ -274,7 +275,7 @@ func TestGetNotificationsError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetNotifications(testNamespace, testRepository)
+	_, err = client.GetNotifications(context.Background(), testNamespace, testRepository)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -291,7 +292,7 @@ func TestGetNotificationError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetNotification(testNamespace, testRepository, "nonexistent-uuid")
+	_, err = client.GetNotification(context.Background(), testNamespace, testRepository, "nonexistent-uuid")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -308,7 +309,7 @@ func TestNotificationHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.CreateNotification(testNamespace, testRepository, &CreateNotificationRequest{
+	_, err = client.CreateNotification(context.Background(), testNamespace, testRepository, &CreateNotificationRequest{
 		Event:  testNotificationEvent,
 		Method: testNotificationMethod,
 		Title:  "Test",
@@ -317,22 +318,22 @@ func TestNotificationHTTPErrors(t *testing.T) {
 		t.Error("Expected error from CreateNotification, got nil")
 	}
 
-	err = client.DeleteNotification(testNamespace, testRepository, testNotificationUUID)
+	err = client.DeleteNotification(context.Background(), testNamespace, testRepository, testNotificationUUID)
 	if err == nil {
 		t.Error("Expected error from DeleteNotification, got nil")
 	}
 
-	err = client.TestNotification(testNamespace, testRepository, testNotificationUUID)
+	err = client.TestNotification(context.Background(), testNamespace, testRepository, testNotificationUUID)
 	if err == nil {
 		t.Error("Expected error from TestNotification, got nil")
 	}
 
-	err = client.ResetNotification(testNamespace, testRepository, testNotificationUUID)
+	err = client.ResetNotification(context.Background(), testNamespace, testRepository, testNotificationUUID)
 	if err == nil {
 		t.Error("Expected error from ResetNotification, got nil")
 	}
 
-	_, err = client.UpdateNotification(testNamespace, testRepository, testNotificationUUID, &CreateNotificationRequest{
+	_, err = client.UpdateNotification(context.Background(), testNamespace, testRepository, testNotificationUUID, &CreateNotificationRequest{
 		Event:  testNotificationEvent,
 		Method: testNotificationMethod,
 		Title:  "Updated",

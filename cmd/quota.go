@@ -17,7 +17,7 @@ var orgQuotaCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		quota, err := client.GetQuota(orgName)
+		quota, err := client.GetQuota(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("getting organization quota: %w", err)
 		}
@@ -35,7 +35,7 @@ var createQuotaCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		quota, err := client.CreateQuota(orgName, limitBytes)
+		quota, err := client.CreateQuota(cmd.Context(), orgName, limitBytes)
 		if err != nil {
 			return fmt.Errorf("creating quota: %w", err)
 		}
@@ -53,7 +53,7 @@ var updateQuotaCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		quota, err := client.UpdateQuota(orgName, limitBytes)
+		quota, err := client.UpdateQuota(cmd.Context(), orgName, limitBytes)
 		if err != nil {
 			return fmt.Errorf("updating quota: %w", err)
 		}
@@ -74,7 +74,7 @@ var deleteQuotaCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.DeleteQuota(orgName)
+		err = client.DeleteQuota(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("deleting quota: %w", err)
 		}

@@ -17,13 +17,14 @@ Robot Account Management:
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetUserRobotAccounts retrieves all robot accounts for the authenticated user
-func (c *Client) GetUserRobotAccounts() (*RobotAccounts, error) {
-	req, err := newRequest(http.MethodGet, c.buildURL("/user/robots"), nil)
+func (c *Client) GetUserRobotAccounts(ctx context.Context) (*RobotAccounts, error) {
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/robots"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robots request: %w", err)
 	}
@@ -37,12 +38,12 @@ func (c *Client) GetUserRobotAccounts() (*RobotAccounts, error) {
 }
 
 // GetUserRobotAccount retrieves a specific robot account for the authenticated user
-func (c *Client) GetUserRobotAccount(robotShortname string) (*RobotAccount, error) {
+func (c *Client) GetUserRobotAccount(ctx context.Context, robotShortname string) (*RobotAccount, error) {
 	if robotShortname == "" {
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/user/robots/%s", robotShortname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/robots/%s", robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robot request: %w", err)
 	}
@@ -56,7 +57,7 @@ func (c *Client) GetUserRobotAccount(robotShortname string) (*RobotAccount, erro
 }
 
 // CreateUserRobotAccount creates a new robot account for the authenticated user
-func (c *Client) CreateUserRobotAccount(robotShortname, description string, unstructured map[string]interface{}) (*RobotAccount, error) {
+func (c *Client) CreateUserRobotAccount(ctx context.Context, robotShortname, description string, unstructured map[string]interface{}) (*RobotAccount, error) {
 	if robotShortname == "" {
 		return nil, fmt.Errorf("robotShortname is required")
 	}
@@ -66,7 +67,7 @@ func (c *Client) CreateUserRobotAccount(robotShortname, description string, unst
 		Unstructured: unstructured,
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/user/robots/%s", robotShortname), createReq)
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/user/robots/%s", robotShortname), createReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user robot request: %w", err)
 	}
@@ -80,12 +81,12 @@ func (c *Client) CreateUserRobotAccount(robotShortname, description string, unst
 }
 
 // DeleteUserRobotAccount deletes a robot account for the authenticated user
-func (c *Client) DeleteUserRobotAccount(robotShortname string) error {
+func (c *Client) DeleteUserRobotAccount(ctx context.Context, robotShortname string) error {
 	if robotShortname == "" {
 		return fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/user/robots/%s", robotShortname), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/user/robots/%s", robotShortname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete user robot request: %w", err)
 	}
@@ -98,12 +99,12 @@ func (c *Client) DeleteUserRobotAccount(robotShortname string) error {
 }
 
 // RegenerateUserRobotToken regenerates the token for a user's robot account
-func (c *Client) RegenerateUserRobotToken(robotShortname string) (*RobotAccount, error) {
+func (c *Client) RegenerateUserRobotToken(ctx context.Context, robotShortname string) (*RobotAccount, error) {
 	if robotShortname == "" {
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest(http.MethodPost, c.buildURL("/user/robots/%s/regenerate", robotShortname), nil)
+	req, err := newRequest(ctx, http.MethodPost, c.buildURL("/user/robots/%s/regenerate", robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create regenerate user robot token request: %w", err)
 	}
@@ -117,12 +118,12 @@ func (c *Client) RegenerateUserRobotToken(robotShortname string) (*RobotAccount,
 }
 
 // GetUserRobotPermissions retrieves the repository permissions for a user's robot account
-func (c *Client) GetUserRobotPermissions(robotShortname string) (*RobotPermissions, error) {
+func (c *Client) GetUserRobotPermissions(ctx context.Context, robotShortname string) (*RobotPermissions, error) {
 	if robotShortname == "" {
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/user/robots/%s/permissions", robotShortname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/robots/%s/permissions", robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robot permissions request: %w", err)
 	}
@@ -136,12 +137,12 @@ func (c *Client) GetUserRobotPermissions(robotShortname string) (*RobotPermissio
 }
 
 // GetUserRobotFederation retrieves the federation configuration for a user's robot account
-func (c *Client) GetUserRobotFederation(robotShortname string) (*RobotFederation, error) {
+func (c *Client) GetUserRobotFederation(ctx context.Context, robotShortname string) (*RobotFederation, error) {
 	if robotShortname == "" {
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/user/robots/%s/federation", robotShortname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/robots/%s/federation", robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robot federation request: %w", err)
 	}
@@ -155,12 +156,12 @@ func (c *Client) GetUserRobotFederation(robotShortname string) (*RobotFederation
 }
 
 // CreateUserRobotFederation creates or updates the federation configuration for a user's robot account
-func (c *Client) CreateUserRobotFederation(robotShortname string, configs []RobotFederationConfig) error {
+func (c *Client) CreateUserRobotFederation(ctx context.Context, robotShortname string, configs []RobotFederationConfig) error {
 	if robotShortname == "" {
 		return fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/user/robots/%s/federation", robotShortname), configs)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/user/robots/%s/federation", robotShortname), configs)
 	if err != nil {
 		return fmt.Errorf("failed to create user robot federation request: %w", err)
 	}
@@ -173,12 +174,12 @@ func (c *Client) CreateUserRobotFederation(robotShortname string, configs []Robo
 }
 
 // DeleteUserRobotFederation deletes the federation configuration for a user's robot account
-func (c *Client) DeleteUserRobotFederation(robotShortname string) error {
+func (c *Client) DeleteUserRobotFederation(ctx context.Context, robotShortname string) error {
 	if robotShortname == "" {
 		return fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/user/robots/%s/federation", robotShortname), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/user/robots/%s/federation", robotShortname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete user robot federation request: %w", err)
 	}

@@ -34,7 +34,7 @@ var searchReposCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		result, err := client.SearchRepositories(searchQuery, searchPage)
+		result, err := client.SearchRepositories(cmd.Context(), searchQuery, searchPage)
 		if err != nil {
 			return fmt.Errorf("searching repositories: %w", err)
 		}
@@ -62,7 +62,7 @@ Results include a 'kind' field indicating the entity type:
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		result, err := client.SearchAll(searchQuery)
+		result, err := client.SearchAll(cmd.Context(), searchQuery)
 		if err != nil {
 			return fmt.Errorf("searching: %w", err)
 		}

@@ -11,12 +11,13 @@ Repository Mirror Configuration:
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetMirrorConfig retrieves mirror configuration for a repository
-func (c *Client) GetMirrorConfig(namespace, repository string) (*MirrorConfig, error) {
+func (c *Client) GetMirrorConfig(ctx context.Context, namespace, repository string) (*MirrorConfig, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -24,7 +25,7 @@ func (c *Client) GetMirrorConfig(namespace, repository string) (*MirrorConfig, e
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/mirror", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/mirror", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get mirror config request: %w", err)
 	}
@@ -38,7 +39,7 @@ func (c *Client) GetMirrorConfig(namespace, repository string) (*MirrorConfig, e
 }
 
 // CreateMirrorConfig creates mirror configuration for a repository
-func (c *Client) CreateMirrorConfig(namespace, repository string, config *CreateMirrorConfigRequest) (*MirrorConfig, error) {
+func (c *Client) CreateMirrorConfig(ctx context.Context, namespace, repository string, config *CreateMirrorConfigRequest) (*MirrorConfig, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -46,7 +47,7 @@ func (c *Client) CreateMirrorConfig(namespace, repository string, config *Create
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/mirror", namespace, repository), config)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/mirror", namespace, repository), config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create mirror config request: %w", err)
 	}
@@ -60,7 +61,7 @@ func (c *Client) CreateMirrorConfig(namespace, repository string, config *Create
 }
 
 // UpdateMirrorConfig updates mirror configuration for a repository
-func (c *Client) UpdateMirrorConfig(namespace, repository string, config *UpdateMirrorConfigRequest) (*MirrorConfig, error) {
+func (c *Client) UpdateMirrorConfig(ctx context.Context, namespace, repository string, config *UpdateMirrorConfigRequest) (*MirrorConfig, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -68,7 +69,7 @@ func (c *Client) UpdateMirrorConfig(namespace, repository string, config *Update
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s/mirror", namespace, repository), config)
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/repository/%s/%s/mirror", namespace, repository), config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update mirror config request: %w", err)
 	}

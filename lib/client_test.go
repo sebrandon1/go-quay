@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -113,7 +114,7 @@ func TestUserAgentHeader(t *testing.T) {
 	}
 	client.Version = "1.2.3"
 
-	req, err := newRequest(httpMethodGet, server.URL+"/test", nil)
+	req, err := newRequest(context.Background(), httpMethodGet, server.URL+"/test", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -160,7 +161,7 @@ func TestGetRequest(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	req, err := newRequest(context.Background(), httpMethodGet, server.URL+"/api/v1/test", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -193,7 +194,7 @@ func TestQuayErrorParsing(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	req, err := newRequest(context.Background(), httpMethodGet, server.URL+"/api/v1/test", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -239,7 +240,7 @@ func TestQuayErrorFallbackToRawError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	req, err := newRequest(context.Background(), httpMethodGet, server.URL+"/api/v1/test", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -268,7 +269,7 @@ func TestGetRequestError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	req, err := newRequest(context.Background(), httpMethodGet, server.URL+"/api/v1/test", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -329,7 +330,7 @@ func TestPostRequest(t *testing.T) {
 	}
 
 	reqBody := postBody{Name: "test-create"}
-	req, err := newRequestWithBody(httpMethodPost, server.URL+"/api/v1/test", reqBody)
+	req, err := newRequestWithBody(context.Background(), httpMethodPost, server.URL+"/api/v1/test", reqBody)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -364,7 +365,7 @@ func TestPostRequestNoResponse(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req, err := newRequestWithBody(httpMethodPost, server.URL+"/api/v1/test", nil)
+	req, err := newRequestWithBody(context.Background(), httpMethodPost, server.URL+"/api/v1/test", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -405,7 +406,7 @@ func TestPutRequest(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req, err := newRequestWithBody(httpMethodPut, server.URL+"/api/v1/test", map[string]string{testFieldName: testUpdatedItem})
+	req, err := newRequestWithBody(context.Background(), httpMethodPut, server.URL+"/api/v1/test", map[string]string{testFieldName: testUpdatedItem})
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -440,7 +441,7 @@ func TestPutRequestNoContent(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req, err := newRequestWithBody(httpMethodPut, server.URL+"/api/v1/test", map[string]string{testFieldName: testPlaceholder})
+	req, err := newRequestWithBody(context.Background(), httpMethodPut, server.URL+"/api/v1/test", map[string]string{testFieldName: testPlaceholder})
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -476,7 +477,7 @@ func TestDeleteRequest(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req, err := newRequest(httpMethodDelete, server.URL+"/api/v1/test/item-123", nil)
+	req, err := newRequest(context.Background(), httpMethodDelete, server.URL+"/api/v1/test/item-123", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -499,7 +500,7 @@ func TestDeleteRequestError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req, err := newRequest(httpMethodDelete, server.URL+"/api/v1/test/item-123", nil)
+	req, err := newRequest(context.Background(), httpMethodDelete, server.URL+"/api/v1/test/item-123", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -536,7 +537,7 @@ func TestRetryOn429(t *testing.T) {
 		MaxBackoff:     10 * time.Millisecond,
 	}
 
-	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	req, err := newRequest(context.Background(), httpMethodGet, server.URL+"/api/v1/test", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -581,7 +582,7 @@ func TestRetryOn500(t *testing.T) {
 		MaxBackoff:     10 * time.Millisecond,
 	}
 
-	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	req, err := newRequest(context.Background(), httpMethodGet, server.URL+"/api/v1/test", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -616,7 +617,7 @@ func TestRetryExhausted(t *testing.T) {
 		MaxBackoff:     10 * time.Millisecond,
 	}
 
-	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	req, err := newRequest(context.Background(), httpMethodGet, server.URL+"/api/v1/test", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -650,7 +651,7 @@ func TestNoRetryOn4xx(t *testing.T) {
 		InitialBackoff: 1 * time.Millisecond,
 	}
 
-	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	req, err := newRequest(context.Background(), httpMethodGet, server.URL+"/api/v1/test", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -680,7 +681,7 @@ func TestNoRetryWithoutConfig(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req, err := newRequest(httpMethodGet, server.URL+"/api/v1/test", nil)
+	req, err := newRequest(context.Background(), httpMethodGet, server.URL+"/api/v1/test", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -693,5 +694,173 @@ func TestNoRetryWithoutConfig(t *testing.T) {
 
 	if attempts.Load() != 1 {
 		t.Errorf("Expected 1 attempt (no retry config), got %d", attempts.Load())
+	}
+}
+
+func TestCanceledContextBeforeDo(t *testing.T) {
+	var attempts atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		attempts.Add(1)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	req, err := newRequest(ctx, httpMethodGet, server.URL+"/api/v1/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	var result map[string]string
+	err = client.get(req, &result)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("Expected context.Canceled, got %v", err)
+	}
+	if attempts.Load() != 0 {
+		t.Errorf("Expected 0 HTTP attempts for canceled context, got %d", attempts.Load())
+	}
+}
+
+func TestCanceledContextAbortsInFlightRequest(t *testing.T) {
+	started := make(chan struct{})
+	block := make(chan struct{})
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		close(started)
+		<-block
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{}`))
+	}))
+	defer server.Close()
+	defer close(block)
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	req, err := newRequest(ctx, httpMethodGet, server.URL+"/api/v1/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	done := make(chan error, 1)
+	go func() {
+		var result map[string]string
+		done <- client.get(req, &result)
+	}()
+
+	select {
+	case <-started:
+	case <-time.After(2 * time.Second):
+		t.Fatal("server did not receive request")
+	}
+	cancel()
+
+	select {
+	case err := <-done:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("Expected context.Canceled, got %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("get did not return after cancel")
+	}
+}
+
+func TestCanceledContextDuringBackoff(t *testing.T) {
+	started := make(chan struct{})
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		select {
+		case <-started:
+		default:
+			close(started)
+		}
+		w.Header().Set("Retry-After", "30")
+		w.WriteHeader(http.StatusTooManyRequests)
+		w.Write([]byte(`{"error":"rate_limited"}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	client.Retry = &RetryConfig{
+		MaxRetries:     3,
+		InitialBackoff: 30 * time.Second,
+		MaxBackoff:     30 * time.Second,
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	req, err := newRequest(ctx, httpMethodGet, server.URL+"/api/v1/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	done := make(chan error, 1)
+	go func() {
+		var result map[string]string
+		done <- client.get(req, &result)
+	}()
+
+	select {
+	case <-started:
+	case <-time.After(2 * time.Second):
+		t.Fatal("server did not receive request")
+	}
+	cancel()
+
+	select {
+	case err := <-done:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("Expected context.Canceled during backoff, got %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("get did not return after cancel during backoff")
+	}
+}
+
+func TestDeadlineExceededDuringBackoff(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Retry-After", "30")
+		w.WriteHeader(http.StatusTooManyRequests)
+		w.Write([]byte(`{"error":"rate_limited"}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	client.Retry = &RetryConfig{
+		MaxRetries:     3,
+		InitialBackoff: 30 * time.Second,
+		MaxBackoff:     30 * time.Second,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+
+	req, err := newRequest(ctx, httpMethodGet, server.URL+"/api/v1/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	var result map[string]string
+	err = client.get(req, &result)
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("Expected context.DeadlineExceeded during backoff, got %v", err)
 	}
 }

@@ -17,7 +17,7 @@ var proxyCacheCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		config, err := client.GetProxyCacheConfig(orgName)
+		config, err := client.GetProxyCacheConfig(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("getting proxy cache config: %w", err)
 		}
@@ -35,7 +35,7 @@ var createProxyCacheCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		config, err := client.CreateProxyCacheConfig(orgName, upstreamRegistry, insecure, expiration)
+		config, err := client.CreateProxyCacheConfig(cmd.Context(), orgName, upstreamRegistry, insecure, expiration)
 		if err != nil {
 			return fmt.Errorf("creating proxy cache config: %w", err)
 		}
@@ -56,7 +56,7 @@ var deleteProxyCacheCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.DeleteProxyCacheConfig(orgName)
+		err = client.DeleteProxyCacheConfig(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("deleting proxy cache config: %w", err)
 		}

@@ -17,7 +17,7 @@ var orgApplicationsCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		applications, err := client.GetApplications(orgName)
+		applications, err := client.GetApplications(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("getting organization applications: %w", err)
 		}
@@ -35,7 +35,7 @@ var applicationCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		app, err := client.GetApplication(orgName, clientID)
+		app, err := client.GetApplication(cmd.Context(), orgName, clientID)
 		if err != nil {
 			return fmt.Errorf("getting application: %w", err)
 		}
@@ -53,7 +53,7 @@ var createApplicationCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		app, err := client.CreateApplication(orgName, appName, description, applicationURI, redirectURI)
+		app, err := client.CreateApplication(cmd.Context(), orgName, appName, description, applicationURI, redirectURI)
 		if err != nil {
 			return fmt.Errorf("creating application: %w", err)
 		}
@@ -71,7 +71,7 @@ var updateApplicationCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		app, err := client.UpdateApplication(orgName, clientID, appName, description, applicationURI, redirectURI)
+		app, err := client.UpdateApplication(cmd.Context(), orgName, clientID, appName, description, applicationURI, redirectURI)
 		if err != nil {
 			return fmt.Errorf("updating application: %w", err)
 		}
@@ -92,7 +92,7 @@ var deleteApplicationCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.DeleteApplication(orgName, clientID)
+		err = client.DeleteApplication(cmd.Context(), orgName, clientID)
 		if err != nil {
 			return fmt.Errorf("deleting application: %w", err)
 		}
@@ -111,7 +111,7 @@ var resetApplicationSecretCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		app, err := client.ResetApplicationClientSecret(orgName, clientID)
+		app, err := client.ResetApplicationClientSecret(cmd.Context(), orgName, clientID)
 		if err != nil {
 			return fmt.Errorf("resetting application secret: %w", err)
 		}

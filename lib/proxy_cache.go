@@ -11,17 +11,18 @@ Proxy Cache Configuration:
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetProxyCacheConfig retrieves proxy cache configuration for an organization
-func (c *Client) GetProxyCacheConfig(orgname string) (*ProxyCacheConfig, error) {
+func (c *Client) GetProxyCacheConfig(ctx context.Context, orgname string) (*ProxyCacheConfig, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/proxycache", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/proxycache", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get proxy cache config request: %w", err)
 	}
@@ -35,7 +36,7 @@ func (c *Client) GetProxyCacheConfig(orgname string) (*ProxyCacheConfig, error) 
 }
 
 // CreateProxyCacheConfig creates proxy cache configuration for an organization
-func (c *Client) CreateProxyCacheConfig(orgname, upstreamRegistry string, insecure bool, expiration int) (*ProxyCacheConfig, error) {
+func (c *Client) CreateProxyCacheConfig(ctx context.Context, orgname, upstreamRegistry string, insecure bool, expiration int) (*ProxyCacheConfig, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
@@ -43,7 +44,7 @@ func (c *Client) CreateProxyCacheConfig(orgname, upstreamRegistry string, insecu
 		return nil, fmt.Errorf("upstreamRegistry is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/proxycache", orgname), CreateProxyCacheConfigRequest{
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/organization/%s/proxycache", orgname), CreateProxyCacheConfigRequest{
 		UpstreamRegistry: upstreamRegistry,
 		Insecure:         insecure,
 		Expiration:       expiration,
@@ -61,12 +62,12 @@ func (c *Client) CreateProxyCacheConfig(orgname, upstreamRegistry string, insecu
 }
 
 // DeleteProxyCacheConfig deletes proxy cache configuration for an organization
-func (c *Client) DeleteProxyCacheConfig(orgname string) error {
+func (c *Client) DeleteProxyCacheConfig(ctx context.Context, orgname string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/proxycache", orgname), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/proxycache", orgname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete proxy cache config request: %w", err)
 	}

@@ -17,13 +17,14 @@ and the ability to star/unstar repositories for easy discovery.
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetUser retrieves information about the current authenticated user
-func (c *Client) GetUser() (*UserDetails, error) {
-	req, err := newRequest(http.MethodGet, c.buildURL("/user"), nil)
+func (c *Client) GetUser(ctx context.Context) (*UserDetails, error) {
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user request: %w", err)
 	}
@@ -37,8 +38,8 @@ func (c *Client) GetUser() (*UserDetails, error) {
 }
 
 // GetStarredRepositories retrieves repositories starred by the current user
-func (c *Client) GetStarredRepositories() (*StarredRepositories, error) {
-	req, err := newRequest(http.MethodGet, c.buildURL("/user/starred"), nil)
+func (c *Client) GetStarredRepositories(ctx context.Context) (*StarredRepositories, error) {
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/starred"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get starred repositories request: %w", err)
 	}
@@ -52,7 +53,7 @@ func (c *Client) GetStarredRepositories() (*StarredRepositories, error) {
 }
 
 // StarRepository adds a repository to the user's starred list
-func (c *Client) StarRepository(namespace, repository string) error {
+func (c *Client) StarRepository(ctx context.Context, namespace, repository string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -60,7 +61,7 @@ func (c *Client) StarRepository(namespace, repository string) error {
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(http.MethodPut, c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodPut, c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create star repository request: %w", err)
 	}
@@ -73,7 +74,7 @@ func (c *Client) StarRepository(namespace, repository string) error {
 }
 
 // UnstarRepository removes a repository from the user's starred list
-func (c *Client) UnstarRepository(namespace, repository string) error {
+func (c *Client) UnstarRepository(ctx context.Context, namespace, repository string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -81,7 +82,7 @@ func (c *Client) UnstarRepository(namespace, repository string) error {
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create unstar repository request: %w", err)
 	}
@@ -94,12 +95,12 @@ func (c *Client) UnstarRepository(namespace, repository string) error {
 }
 
 // GetUserByUsername retrieves information about a specific user
-func (c *Client) GetUserByUsername(username string) (*UserDetails, error) {
+func (c *Client) GetUserByUsername(ctx context.Context, username string) (*UserDetails, error) {
 	if username == "" {
 		return nil, fmt.Errorf("username is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/users/%s", username), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/users/%s", username), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user by username request: %w", err)
 	}
@@ -113,8 +114,8 @@ func (c *Client) GetUserByUsername(username string) (*UserDetails, error) {
 }
 
 // GetUserMarketplace retrieves marketplace information for the current user
-func (c *Client) GetUserMarketplace() (*MarketplaceInfo, error) {
-	req, err := newRequest(http.MethodGet, c.buildURL("/user/marketplace"), nil)
+func (c *Client) GetUserMarketplace(ctx context.Context) (*MarketplaceInfo, error) {
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/marketplace"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user marketplace request: %w", err)
 	}

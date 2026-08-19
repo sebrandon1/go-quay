@@ -20,18 +20,19 @@ Note: User invoice endpoint is not available in Quay API.
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetOrganizationBilling returns billing information for an organization
-func (c *Client) GetOrganizationBilling(orgname string) (*BillingInfo, error) {
+func (c *Client) GetOrganizationBilling(ctx context.Context, orgname string) (*BillingInfo, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
 	// Get new request
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/plan", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/plan", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization billing request: %w", err)
 	}
@@ -45,9 +46,9 @@ func (c *Client) GetOrganizationBilling(orgname string) (*BillingInfo, error) {
 }
 
 // GetUserBilling returns billing information for the current user
-func (c *Client) GetUserBilling() (*BillingInfo, error) {
+func (c *Client) GetUserBilling(ctx context.Context) (*BillingInfo, error) {
 	// Get new request
-	req, err := newRequest(http.MethodGet, c.buildURL("/user/plan"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/plan"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user billing request: %w", err)
 	}
@@ -61,13 +62,13 @@ func (c *Client) GetUserBilling() (*BillingInfo, error) {
 }
 
 // GetOrganizationSubscription returns subscription details for an organization
-func (c *Client) GetOrganizationSubscription(orgname string) (*Subscription, error) {
+func (c *Client) GetOrganizationSubscription(ctx context.Context, orgname string) (*Subscription, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
 	// Get new request
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/plan", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/plan", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization subscription request: %w", err)
 	}
@@ -81,9 +82,9 @@ func (c *Client) GetOrganizationSubscription(orgname string) (*Subscription, err
 }
 
 // GetUserSubscription returns subscription details for the current user
-func (c *Client) GetUserSubscription() (*Subscription, error) {
+func (c *Client) GetUserSubscription(ctx context.Context) (*Subscription, error) {
 	// Get new request
-	req, err := newRequest(http.MethodGet, c.buildURL("/user/plan"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/plan"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user subscription request: %w", err)
 	}
@@ -97,13 +98,13 @@ func (c *Client) GetUserSubscription() (*Subscription, error) {
 }
 
 // GetOrganizationInvoices returns invoices for an organization
-func (c *Client) GetOrganizationInvoices(orgname string) ([]Invoice, error) {
+func (c *Client) GetOrganizationInvoices(ctx context.Context, orgname string) ([]Invoice, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
 	// Get new request
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/invoices", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/invoices", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization invoices request: %w", err)
 	}
@@ -119,14 +120,14 @@ func (c *Client) GetOrganizationInvoices(orgname string) ([]Invoice, error) {
 }
 
 // GetUserInvoices - NOT AVAILABLE in Quay API (returns 404)
-func (c *Client) GetUserInvoices() ([]Invoice, error) {
+func (c *Client) GetUserInvoices(_ context.Context) ([]Invoice, error) {
 	return nil, fmt.Errorf("user invoices endpoint not available in Quay API")
 }
 
 // GetAvailablePlans returns available subscription plans
-func (c *Client) GetAvailablePlans() ([]Subscription, error) {
+func (c *Client) GetAvailablePlans(ctx context.Context) ([]Subscription, error) {
 	// Get new request
-	req, err := newRequest(http.MethodGet, c.buildURL("/plans"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/plans"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get available plans request: %w", err)
 	}

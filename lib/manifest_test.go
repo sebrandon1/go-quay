@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -61,7 +62,7 @@ func TestGetManifest(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	manifest, err := client.GetManifest(testNamespace, testRepository, testManifestRef)
+	manifest, err := client.GetManifest(context.Background(), testNamespace, testRepository, testManifestRef)
 	if err != nil {
 		t.Fatalf("GetManifest failed: %v", err)
 	}
@@ -98,7 +99,7 @@ func TestDeleteManifest(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteManifest(testNamespace, testRepository, testManifestRef)
+	err = client.DeleteManifest(context.Background(), testNamespace, testRepository, testManifestRef)
 	if err != nil {
 		t.Fatalf("DeleteManifest failed: %v", err)
 	}
@@ -145,7 +146,7 @@ func TestGetManifestLabels(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	labels, err := client.GetManifestLabels(testNamespace, testRepository, testManifestRef)
+	labels, err := client.GetManifestLabels(context.Background(), testNamespace, testRepository, testManifestRef)
 	if err != nil {
 		t.Fatalf("GetManifestLabels failed: %v", err)
 	}
@@ -204,7 +205,7 @@ func TestAddManifestLabel(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	label, err := client.AddManifestLabel(testNamespace, testRepository, testManifestRef, testLabelKeyEnvironment, testLabelValProduction, testMediaTypePlain)
+	label, err := client.AddManifestLabel(context.Background(), testNamespace, testRepository, testManifestRef, testLabelKeyEnvironment, testLabelValProduction, testMediaTypePlain)
 	if err != nil {
 		t.Fatalf("AddManifestLabel failed: %v", err)
 	}
@@ -251,7 +252,7 @@ func TestGetManifestLabel(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	label, err := client.GetManifestLabel(testNamespace, testRepository, testManifestRef, testLabelID)
+	label, err := client.GetManifestLabel(context.Background(), testNamespace, testRepository, testManifestRef, testLabelID)
 	if err != nil {
 		t.Fatalf("GetManifestLabel failed: %v", err)
 	}
@@ -283,7 +284,7 @@ func TestDeleteManifestLabel(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteManifestLabel(testNamespace, testRepository, testManifestRef, testLabelID)
+	err = client.DeleteManifestLabel(context.Background(), testNamespace, testRepository, testManifestRef, testLabelID)
 	if err != nil {
 		t.Fatalf("DeleteManifestLabel failed: %v", err)
 	}
@@ -303,37 +304,37 @@ func TestManifestErrorHandling(t *testing.T) {
 	}
 
 	// Test GetManifest error
-	_, err = client.GetManifest(testNamespace, testRepository, "nonexistent")
+	_, err = client.GetManifest(context.Background(), testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest, got nil")
 	}
 
 	// Test DeleteManifest error
-	err = client.DeleteManifest(testNamespace, testRepository, "nonexistent")
+	err = client.DeleteManifest(context.Background(), testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest, got nil")
 	}
 
 	// Test GetManifestLabels error
-	_, err = client.GetManifestLabels(testNamespace, testRepository, "nonexistent")
+	_, err = client.GetManifestLabels(context.Background(), testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest, got nil")
 	}
 
 	// Test AddManifestLabel error
-	_, err = client.AddManifestLabel(testNamespace, testRepository, "nonexistent", "key", "value", "")
+	_, err = client.AddManifestLabel(context.Background(), testNamespace, testRepository, "nonexistent", "key", "value", "")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest, got nil")
 	}
 
 	// Test GetManifestLabel error
-	_, err = client.GetManifestLabel(testNamespace, testRepository, "nonexistent", "labelid")
+	_, err = client.GetManifestLabel(context.Background(), testNamespace, testRepository, "nonexistent", "labelid")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest label, got nil")
 	}
 
 	// Test DeleteManifestLabel error
-	err = client.DeleteManifestLabel(testNamespace, testRepository, "nonexistent", "labelid")
+	err = client.DeleteManifestLabel(context.Background(), testNamespace, testRepository, "nonexistent", "labelid")
 	if err == nil {
 		t.Error("Expected error for non-existent manifest label, got nil")
 	}

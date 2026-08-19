@@ -37,7 +37,7 @@ var repoLogsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		logs, err := client.GetLogs(namespace, repository, nextPage, startdate, enddate)
+		logs, err := client.GetLogs(cmd.Context(), namespace, repository, nextPage, startdate, enddate)
 		if err != nil {
 			return fmt.Errorf("getting repository logs: %w", err)
 		}
@@ -56,7 +56,7 @@ var repoAggregatedLogsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		logs, err := client.GetAggregatedLogs(namespace, repository, startdate, enddate)
+		logs, err := client.GetAggregatedLogs(cmd.Context(), namespace, repository, startdate, enddate)
 		if err != nil {
 			return fmt.Errorf("getting repository aggregated logs: %w", err)
 		}
@@ -75,7 +75,7 @@ var orgLogsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		logs, err := client.GetOrganizationLogs(orgName, nextPage, startdate, enddate)
+		logs, err := client.GetOrganizationLogs(cmd.Context(), orgName, nextPage, startdate, enddate)
 		if err != nil {
 			return fmt.Errorf("getting organization logs: %w", err)
 		}
@@ -94,7 +94,7 @@ var orgAggregatedLogsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		logs, err := client.GetOrganizationAggregatedLogs(orgName, startdate, enddate)
+		logs, err := client.GetOrganizationAggregatedLogs(cmd.Context(), orgName, startdate, enddate)
 		if err != nil {
 			return fmt.Errorf("getting organization aggregated logs: %w", err)
 		}
@@ -113,7 +113,7 @@ var userLogsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		logs, err := client.GetUserLogs(nextPage, startdate, enddate)
+		logs, err := client.GetUserLogs(cmd.Context(), nextPage, startdate, enddate)
 		if err != nil {
 			return fmt.Errorf("getting user logs: %w", err)
 		}
@@ -132,7 +132,7 @@ var userAggregatedLogsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		logs, err := client.GetUserAggregatedLogs(startdate, enddate)
+		logs, err := client.GetUserAggregatedLogs(cmd.Context(), startdate, enddate)
 		if err != nil {
 			return fmt.Errorf("getting user aggregated logs: %w", err)
 		}
@@ -151,7 +151,7 @@ var exportOrgLogsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.ExportOrganizationLogs(orgName, &lib.ExportLogsRequest{
+		err = client.ExportOrganizationLogs(cmd.Context(), orgName, &lib.ExportLogsRequest{
 			StartTime:   starttime,
 			EndTime:     endtime,
 			CallbackURL: callbackURL,
@@ -176,7 +176,7 @@ var exportUserLogsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.ExportUserLogs(&lib.ExportLogsRequest{
+		err = client.ExportUserLogs(cmd.Context(), &lib.ExportLogsRequest{
 			StartTime:   starttime,
 			EndTime:     endtime,
 			CallbackURL: callbackURL,
@@ -201,7 +201,7 @@ var exportRepoLogsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.ExportRepositoryLogs(namespace, repository, &lib.ExportLogsRequest{
+		err = client.ExportRepositoryLogs(cmd.Context(), namespace, repository, &lib.ExportLogsRequest{
 			StartTime:   starttime,
 			EndTime:     endtime,
 			CallbackURL: callbackURL,

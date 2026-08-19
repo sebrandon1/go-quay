@@ -79,6 +79,7 @@ Let's get information about the current user:
 package main
 
 import (
+    "context"
     "fmt"
     "log"
     "os"
@@ -97,8 +98,10 @@ func main() {
         log.Fatalf("Failed to create client: %v", err)
     }
 
+    ctx := context.Background()
+
     // Get current user information
-    user, err := client.GetUser()
+    user, err := client.GetUser(ctx)
     if err != nil {
         log.Fatalf("Failed to get user: %v", err)
     }
@@ -117,7 +120,7 @@ Now let's list repositories in a namespace:
 
 ```go
 // List repositories in your namespace
-repos, err := client.ListRepositories("your-username", false, false, false, 1, 10)
+repos, err := client.ListRepositories(ctx, "your-username", false, false, false, 1, 10)
 if err != nil {
     log.Fatalf("Failed to list repositories: %v", err)
 }
@@ -138,7 +141,7 @@ Get detailed information about a specific repository:
 
 ```go
 // Get repository with tags
-repo, err := client.GetRepository("namespace", "repository-name")
+repo, err := client.GetRepository(ctx, "namespace", "repository-name")
 if err != nil {
     log.Fatalf("Failed to get repository: %v", err)
 }
@@ -159,13 +162,14 @@ The go-quay library returns `*lib.QuayError` when the API sends a JSON error bod
 
 ```go
 import (
+    "context"
     "errors"
     "fmt"
 
     "github.com/sebrandon1/go-quay/lib"
 )
 
-repo, err := client.GetRepository("namespace", "nonexistent-repo")
+repo, err := client.GetRepository(ctx, "namespace", "nonexistent-repo")
 if err != nil {
     var qerr *lib.QuayError
     if errors.As(err, &qerr) {

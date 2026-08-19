@@ -17,7 +17,7 @@ var orgTeamsCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		teams, err := client.GetTeams(orgName)
+		teams, err := client.GetTeams(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("getting organization teams: %w", err)
 		}
@@ -35,7 +35,7 @@ var teamInfoCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		team, err := client.GetTeam(orgName, teamName)
+		team, err := client.GetTeam(cmd.Context(), orgName, teamName)
 		if err != nil {
 			return fmt.Errorf("getting team: %w", err)
 		}
@@ -53,7 +53,7 @@ var teamMembersCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		members, err := client.GetTeamMembers(orgName, teamName)
+		members, err := client.GetTeamMembers(cmd.Context(), orgName, teamName)
 		if err != nil {
 			return fmt.Errorf("getting team members: %w", err)
 		}
@@ -71,7 +71,7 @@ var inviteMemberCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.InviteTeamMember(orgName, teamName, email)
+		err = client.InviteTeamMember(cmd.Context(), orgName, teamName, email)
 		if err != nil {
 			return fmt.Errorf("inviting team member: %w", err)
 		}
@@ -93,7 +93,7 @@ var cancelInviteCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.DeleteTeamInvite(orgName, teamName, email)
+		err = client.DeleteTeamInvite(cmd.Context(), orgName, teamName, email)
 		if err != nil {
 			return fmt.Errorf("canceling team invite: %w", err)
 		}

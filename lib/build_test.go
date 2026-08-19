@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -39,7 +40,7 @@ func TestGetBuilds(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	builds, err := client.GetBuilds(testNamespace, testRepository, 0)
+	builds, err := client.GetBuilds(context.Background(), testNamespace, testRepository, 0)
 	if err != nil {
 		t.Fatalf("GetBuilds returned error: %v", err)
 	}
@@ -79,7 +80,7 @@ func TestGetBuild(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	build, err := client.GetBuild(testNamespace, testRepository, testBuildUUID)
+	build, err := client.GetBuild(context.Background(), testNamespace, testRepository, testBuildUUID)
 	if err != nil {
 		t.Fatalf("GetBuild returned error: %v", err)
 	}
@@ -121,7 +122,7 @@ func TestGetBuildLogs(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	logs, err := client.GetBuildLogs(testNamespace, testRepository, testBuildUUID)
+	logs, err := client.GetBuildLogs(context.Background(), testNamespace, testRepository, testBuildUUID)
 	if err != nil {
 		t.Fatalf("GetBuildLogs returned error: %v", err)
 	}
@@ -166,7 +167,7 @@ func TestRequestBuild(t *testing.T) {
 		Tags:       []string{testTagNameLatest},
 	}
 
-	build, err := client.RequestBuild(testNamespace, testRepository, buildReq)
+	build, err := client.RequestBuild(context.Background(), testNamespace, testRepository, buildReq)
 	if err != nil {
 		t.Fatalf("RequestBuild returned error: %v", err)
 	}
@@ -194,7 +195,7 @@ func TestCancelBuild(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.CancelBuild(testNamespace, testRepository, testBuildUUID)
+	err = client.CancelBuild(context.Background(), testNamespace, testRepository, testBuildUUID)
 	if err != nil {
 		t.Fatalf("CancelBuild returned error: %v", err)
 	}
@@ -211,7 +212,7 @@ func TestGetBuildsError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetBuilds(testNamespace, testRepository, 0)
+	_, err = client.GetBuilds(context.Background(), testNamespace, testRepository, 0)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -245,7 +246,7 @@ func TestGetBuildStatus(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	status, err := client.GetBuildStatus(testNamespace, testRepository, testBuildUUID)
+	status, err := client.GetBuildStatus(context.Background(), testNamespace, testRepository, testBuildUUID)
 	if err != nil {
 		t.Fatalf("GetBuildStatus returned error: %v", err)
 	}
@@ -272,7 +273,7 @@ func TestGetBuildError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetBuild(testNamespace, testRepository, "nonexistent-uuid")
+	_, err = client.GetBuild(context.Background(), testNamespace, testRepository, "nonexistent-uuid")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -289,22 +290,22 @@ func TestBuildHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetBuildLogs(testNamespace, testRepository, testBuildUUID)
+	_, err = client.GetBuildLogs(context.Background(), testNamespace, testRepository, testBuildUUID)
 	if err == nil {
 		t.Error("Expected error from GetBuildLogs, got nil")
 	}
 
-	_, err = client.GetBuildStatus(testNamespace, testRepository, testBuildUUID)
+	_, err = client.GetBuildStatus(context.Background(), testNamespace, testRepository, testBuildUUID)
 	if err == nil {
 		t.Error("Expected error from GetBuildStatus, got nil")
 	}
 
-	_, err = client.RequestBuild(testNamespace, testRepository, &RequestBuildRequest{ArchiveURL: "https://example.com/archive.tar.gz"})
+	_, err = client.RequestBuild(context.Background(), testNamespace, testRepository, &RequestBuildRequest{ArchiveURL: "https://example.com/archive.tar.gz"})
 	if err == nil {
 		t.Error("Expected error from RequestBuild, got nil")
 	}
 
-	err = client.CancelBuild(testNamespace, testRepository, testBuildUUID)
+	err = client.CancelBuild(context.Background(), testNamespace, testRepository, testBuildUUID)
 	if err == nil {
 		t.Error("Expected error from CancelBuild, got nil")
 	}

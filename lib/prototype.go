@@ -22,17 +22,18 @@ Delegate kinds:
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetPrototypes retrieves all permission prototypes for an organization
-func (c *Client) GetPrototypes(orgname string) (*Prototypes, error) {
+func (c *Client) GetPrototypes(ctx context.Context, orgname string) (*Prototypes, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/prototypes", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/prototypes", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get prototypes request: %w", err)
 	}
@@ -46,12 +47,12 @@ func (c *Client) GetPrototypes(orgname string) (*Prototypes, error) {
 }
 
 // CreatePrototype creates a new permission prototype for an organization
-func (c *Client) CreatePrototype(orgname string, createReq *CreatePrototypeRequest) (*Prototype, error) {
+func (c *Client) CreatePrototype(ctx context.Context, orgname string, createReq *CreatePrototypeRequest) (*Prototype, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/prototypes", orgname), createReq)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/organization/%s/prototypes", orgname), createReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prototype request: %w", err)
 	}
@@ -65,7 +66,7 @@ func (c *Client) CreatePrototype(orgname string, createReq *CreatePrototypeReque
 }
 
 // GetPrototype retrieves a specific prototype by UUID
-func (c *Client) GetPrototype(orgname, prototypeUUID string) (*Prototype, error) {
+func (c *Client) GetPrototype(ctx context.Context, orgname, prototypeUUID string) (*Prototype, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
@@ -73,7 +74,7 @@ func (c *Client) GetPrototype(orgname, prototypeUUID string) (*Prototype, error)
 		return nil, fmt.Errorf("prototypeUUID is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get prototype request: %w", err)
 	}
@@ -87,7 +88,7 @@ func (c *Client) GetPrototype(orgname, prototypeUUID string) (*Prototype, error)
 }
 
 // UpdatePrototype updates an existing prototype
-func (c *Client) UpdatePrototype(orgname, prototypeUUID string, updateReq *UpdatePrototypeRequest) (*Prototype, error) {
+func (c *Client) UpdatePrototype(ctx context.Context, orgname, prototypeUUID string, updateReq *UpdatePrototypeRequest) (*Prototype, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
@@ -95,7 +96,7 @@ func (c *Client) UpdatePrototype(orgname, prototypeUUID string, updateReq *Updat
 		return nil, fmt.Errorf("prototypeUUID is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), updateReq)
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update prototype request: %w", err)
 	}
@@ -109,7 +110,7 @@ func (c *Client) UpdatePrototype(orgname, prototypeUUID string, updateReq *Updat
 }
 
 // DeletePrototype deletes a prototype
-func (c *Client) DeletePrototype(orgname, prototypeUUID string) error {
+func (c *Client) DeletePrototype(ctx context.Context, orgname, prototypeUUID string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -117,7 +118,7 @@ func (c *Client) DeletePrototype(orgname, prototypeUUID string) error {
 		return fmt.Errorf("prototypeUUID is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete prototype request: %w", err)
 	}

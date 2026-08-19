@@ -16,12 +16,13 @@ expiration management for individual tags.
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetTag retrieves detailed information about a specific tag
-func (c *Client) GetTag(namespace, repository, tag string) (*Tag, error) {
+func (c *Client) GetTag(ctx context.Context, namespace, repository, tag string) (*Tag, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -32,7 +33,7 @@ func (c *Client) GetTag(namespace, repository, tag string) (*Tag, error) {
 		return nil, fmt.Errorf("tag is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get tag request: %w", err)
 	}
@@ -46,7 +47,7 @@ func (c *Client) GetTag(namespace, repository, tag string) (*Tag, error) {
 }
 
 // UpdateTag updates tag metadata (currently supports expiration)
-func (c *Client) UpdateTag(namespace, repository, tag, expiration string) (*Tag, error) {
+func (c *Client) UpdateTag(ctx context.Context, namespace, repository, tag, expiration string) (*Tag, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -63,7 +64,7 @@ func (c *Client) UpdateTag(namespace, repository, tag, expiration string) (*Tag,
 		updateReq.Expiration = expiration
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), updateReq)
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update tag request: %w", err)
 	}
@@ -77,7 +78,7 @@ func (c *Client) UpdateTag(namespace, repository, tag, expiration string) (*Tag,
 }
 
 // DeleteTag deletes a specific tag from a repository
-func (c *Client) DeleteTag(namespace, repository, tag string) error {
+func (c *Client) DeleteTag(ctx context.Context, namespace, repository, tag string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -88,7 +89,7 @@ func (c *Client) DeleteTag(namespace, repository, tag string) error {
 		return fmt.Errorf("tag is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete tag request: %w", err)
 	}
@@ -101,7 +102,7 @@ func (c *Client) DeleteTag(namespace, repository, tag string) error {
 }
 
 // GetTagHistory retrieves the history of changes for a specific tag
-func (c *Client) GetTagHistory(namespace, repository, tag string) (*TagHistory, error) {
+func (c *Client) GetTagHistory(ctx context.Context, namespace, repository, tag string) (*TagHistory, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -112,7 +113,7 @@ func (c *Client) GetTagHistory(namespace, repository, tag string) (*TagHistory, 
 		return nil, fmt.Errorf("tag is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/tag/%s/history", namespace, repository, tag), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/%s/history", namespace, repository, tag), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get tag history request: %w", err)
 	}
@@ -126,7 +127,7 @@ func (c *Client) GetTagHistory(namespace, repository, tag string) (*TagHistory, 
 }
 
 // RevertTag reverts a tag to a previous state by manifest digest
-func (c *Client) RevertTag(namespace, repository, tag, manifestDigest string) (*Tag, error) {
+func (c *Client) RevertTag(ctx context.Context, namespace, repository, tag, manifestDigest string) (*Tag, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -140,7 +141,7 @@ func (c *Client) RevertTag(namespace, repository, tag, manifestDigest string) (*
 		return nil, fmt.Errorf("manifestDigest is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/tag/%s/revert", namespace, repository, tag), RevertTagRequest{
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/tag/%s/revert", namespace, repository, tag), RevertTagRequest{
 		ManifestDigest: manifestDigest,
 	})
 	if err != nil {
@@ -156,7 +157,7 @@ func (c *Client) RevertTag(namespace, repository, tag, manifestDigest string) (*
 }
 
 // ChangeTag creates or moves a tag to point at a specific manifest digest
-func (c *Client) ChangeTag(namespace, repository, tag, manifestDigest string) error {
+func (c *Client) ChangeTag(ctx context.Context, namespace, repository, tag, manifestDigest string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -175,7 +176,7 @@ func (c *Client) ChangeTag(namespace, repository, tag, manifestDigest string) er
 	}{
 		ManifestDigest: manifestDigest,
 	}
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), body)
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), body)
 	if err != nil {
 		return fmt.Errorf("failed to create change tag request: %w", err)
 	}
@@ -188,7 +189,7 @@ func (c *Client) ChangeTag(namespace, repository, tag, manifestDigest string) er
 }
 
 // RestoreTag restores a tag to a previous image
-func (c *Client) RestoreTag(namespace, repository, tag, manifestDigest string) error {
+func (c *Client) RestoreTag(ctx context.Context, namespace, repository, tag, manifestDigest string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -207,7 +208,7 @@ func (c *Client) RestoreTag(namespace, repository, tag, manifestDigest string) e
 	}{
 		ManifestDigest: manifestDigest,
 	}
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/tag/%s/restore", namespace, repository, tag), body)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/tag/%s/restore", namespace, repository, tag), body)
 	if err != nil {
 		return fmt.Errorf("failed to create restore tag request: %w", err)
 	}

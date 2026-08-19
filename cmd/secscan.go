@@ -43,7 +43,7 @@ The scan status can be:
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		security, err := client.GetManifestSecurity(namespace, repository, secScanManifestRef, includeVulnerabilities)
+		security, err := client.GetManifestSecurity(cmd.Context(), namespace, repository, secScanManifestRef, includeVulnerabilities)
 		if err != nil {
 			return fmt.Errorf("getting security scan: %w", err)
 		}

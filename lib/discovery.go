@@ -12,13 +12,14 @@ Registry Capabilities:
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetDiscovery retrieves API discovery information
-func (c *Client) GetDiscovery() (*Discovery, error) {
-	req, err := newRequest(http.MethodGet, c.buildURL("/discovery"), nil)
+func (c *Client) GetDiscovery(ctx context.Context) (*Discovery, error) {
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/discovery"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create discovery request: %w", err)
 	}
@@ -32,8 +33,8 @@ func (c *Client) GetDiscovery() (*Discovery, error) {
 }
 
 // GetRegistryCapabilities retrieves the registry capabilities including sparse manifest support and mirror architectures
-func (c *Client) GetRegistryCapabilities() (*RegistryCapabilities, error) {
-	req, err := newRequest(http.MethodGet, c.buildURL("/registry/capabilities"), nil)
+func (c *Client) GetRegistryCapabilities(ctx context.Context) (*RegistryCapabilities, error) {
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/registry/capabilities"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create registry capabilities request: %w", err)
 	}
@@ -47,12 +48,12 @@ func (c *Client) GetRegistryCapabilities() (*RegistryCapabilities, error) {
 }
 
 // GetAppInfo retrieves public information about an OAuth application by client ID
-func (c *Client) GetAppInfo(clientID string) (*Application, error) {
+func (c *Client) GetAppInfo(ctx context.Context, clientID string) (*Application, error) {
 	if clientID == "" {
 		return nil, fmt.Errorf("clientID is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/app/%s", clientID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/app/%s", clientID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get app info request: %w", err)
 	}
@@ -66,12 +67,12 @@ func (c *Client) GetAppInfo(clientID string) (*Application, error) {
 }
 
 // GetEntities searches for entities (users, robots, teams) matching a prefix
-func (c *Client) GetEntities(prefix string, includeOrgs, includeTeams bool) (*Entities, error) {
+func (c *Client) GetEntities(ctx context.Context, prefix string, includeOrgs, includeTeams bool) (*Entities, error) {
 	if prefix == "" {
 		return nil, fmt.Errorf("prefix is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/entities/%s", prefix), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/entities/%s", prefix), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get entities request: %w", err)
 	}

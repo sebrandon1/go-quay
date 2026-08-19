@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -58,7 +59,7 @@ func TestSearchRepositories(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	result, err := client.SearchRepositories(testSearchQueryValue, 0)
+	result, err := client.SearchRepositories(context.Background(), testSearchQueryValue, 0)
 	if err != nil {
 		t.Fatalf("SearchRepositories failed: %v", err)
 	}
@@ -103,7 +104,7 @@ func TestSearchRepositoriesWithPage(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	result, err := client.SearchRepositories("test", 2)
+	result, err := client.SearchRepositories(context.Background(), "test", 2)
 	if err != nil {
 		t.Fatalf("SearchRepositories failed: %v", err)
 	}
@@ -167,7 +168,7 @@ func TestSearchAll(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	result, err := client.SearchAll(testSearchQueryValue)
+	result, err := client.SearchAll(context.Background(), testSearchQueryValue)
 	if err != nil {
 		t.Fatalf("SearchAll failed: %v", err)
 	}
@@ -205,13 +206,13 @@ func TestSearchErrorHandling(t *testing.T) {
 	}
 
 	// Test SearchRepositories error
-	_, err = client.SearchRepositories("test", 0)
+	_, err = client.SearchRepositories(context.Background(), "test", 0)
 	if err == nil {
 		t.Error("Expected error for failed request, got nil")
 	}
 
 	// Test SearchAll error
-	_, err = client.SearchAll("test")
+	_, err = client.SearchAll(context.Background(), "test")
 	if err == nil {
 		t.Error("Expected error for failed request, got nil")
 	}
@@ -239,7 +240,7 @@ func TestSearchEmptyResults(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	result, err := client.SearchRepositories("nonexistent-repo-xyz", 0)
+	result, err := client.SearchRepositories(context.Background(), "nonexistent-repo-xyz", 0)
 	if err != nil {
 		t.Fatalf("SearchRepositories failed: %v", err)
 	}

@@ -33,7 +33,7 @@ var userInfoCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		user, err := client.GetUser()
+		user, err := client.GetUser(cmd.Context())
 		if err != nil {
 			return fmt.Errorf("getting user information: %w", err)
 		}
@@ -54,7 +54,7 @@ var userStarredCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		starred, err := client.GetStarredRepositories()
+		starred, err := client.GetStarredRepositories(cmd.Context())
 		if err != nil {
 			return fmt.Errorf("getting starred repositories: %w", err)
 		}
@@ -75,7 +75,7 @@ var starRepoCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.StarRepository(namespace, repository)
+		err = client.StarRepository(cmd.Context(), namespace, repository)
 		if err != nil {
 			return fmt.Errorf("starring repository: %w", err)
 		}
@@ -96,7 +96,7 @@ var unstarRepoCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.UnstarRepository(namespace, repository)
+		err = client.UnstarRepository(cmd.Context(), namespace, repository)
 		if err != nil {
 			return fmt.Errorf("unstarring repository: %w", err)
 		}
@@ -118,7 +118,7 @@ var userLookupCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		user, err := client.GetUserByUsername(lookupUsername)
+		user, err := client.GetUserByUsername(cmd.Context(), lookupUsername)
 		if err != nil {
 			return fmt.Errorf("looking up user: %w", err)
 		}
@@ -137,7 +137,7 @@ var userMarketplaceCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		marketplace, err := client.GetUserMarketplace()
+		marketplace, err := client.GetUserMarketplace(cmd.Context())
 		if err != nil {
 			return fmt.Errorf("getting user marketplace info: %w", err)
 		}

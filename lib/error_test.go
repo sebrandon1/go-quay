@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -38,7 +39,7 @@ func TestGetErrorType(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	errType, err := client.GetErrorType(testErrorType)
+	errType, err := client.GetErrorType(context.Background(), testErrorType)
 	if err != nil {
 		t.Fatalf("GetErrorType returned error: %v", err)
 	}
@@ -62,7 +63,7 @@ func TestGetErrorTypeError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetErrorType("nonexistent_error")
+	_, err = client.GetErrorType(context.Background(), "nonexistent_error")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}

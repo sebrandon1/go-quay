@@ -30,13 +30,13 @@ var mirrorInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get mirror configuration",
 	Long:  `Get the mirror configuration for a repository.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		config, err := client.GetMirrorConfig(namespace, repository)
+		config, err := client.GetMirrorConfig(cmd.Context(), namespace, repository)
 		if err != nil {
 			return fmt.Errorf("getting mirror config: %w", err)
 		}
@@ -49,7 +49,7 @@ var mirrorCreateCmd = &cobra.Command{
 	Use:   subcmdCreate,
 	Short: "Create mirror configuration",
 	Long:  `Create mirror configuration for a repository to sync from an external registry.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -66,7 +66,7 @@ var mirrorCreateCmd = &cobra.Command{
 		createReq.RootRule.Rule = mirrorTagRule
 		createReq.RootRule.RuleKind = mirrorTagRuleKind
 
-		config, err := client.CreateMirrorConfig(namespace, repository, createReq)
+		config, err := client.CreateMirrorConfig(cmd.Context(), namespace, repository, createReq)
 		if err != nil {
 			return fmt.Errorf("creating mirror config: %w", err)
 		}
@@ -80,7 +80,7 @@ var mirrorUpdateCmd = &cobra.Command{
 	Use:   subcmdUpdate,
 	Short: "Update mirror configuration",
 	Long:  `Update mirror configuration for a repository.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -102,7 +102,7 @@ var mirrorUpdateCmd = &cobra.Command{
 			updateReq.RobotUsername = mirrorRobotUsername
 		}
 
-		config, err := client.UpdateMirrorConfig(namespace, repository, updateReq)
+		config, err := client.UpdateMirrorConfig(cmd.Context(), namespace, repository, updateReq)
 		if err != nil {
 			return fmt.Errorf("updating mirror config: %w", err)
 		}

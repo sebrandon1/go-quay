@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -37,7 +38,7 @@ func TestGetMirrorConfig(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	config, err := client.GetMirrorConfig(testNamespace, testRepository)
+	config, err := client.GetMirrorConfig(context.Background(), testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("GetMirrorConfig returned error: %v", err)
 	}
@@ -77,7 +78,7 @@ func TestCreateMirrorConfig(t *testing.T) {
 		RobotUsername: "org+robot",
 	}
 
-	config, err := client.CreateMirrorConfig(testNamespace, testRepository, createReq)
+	config, err := client.CreateMirrorConfig(context.Background(), testNamespace, testRepository, createReq)
 	if err != nil {
 		t.Fatalf("CreateMirrorConfig returned error: %v", err)
 	}
@@ -115,7 +116,7 @@ func TestUpdateMirrorConfig(t *testing.T) {
 		IsEnabled: &enabled,
 	}
 
-	config, err := client.UpdateMirrorConfig(testNamespace, testRepository, updateReq)
+	config, err := client.UpdateMirrorConfig(context.Background(), testNamespace, testRepository, updateReq)
 	if err != nil {
 		t.Fatalf("UpdateMirrorConfig returned error: %v", err)
 	}
@@ -137,17 +138,17 @@ func TestMirrorConfigHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetMirrorConfig(testNamespace, testRepository)
+	_, err = client.GetMirrorConfig(context.Background(), testNamespace, testRepository)
 	if err == nil {
 		t.Error("Expected error from GetMirrorConfig, got nil")
 	}
 
-	_, err = client.CreateMirrorConfig(testNamespace, testRepository, &CreateMirrorConfigRequest{})
+	_, err = client.CreateMirrorConfig(context.Background(), testNamespace, testRepository, &CreateMirrorConfigRequest{})
 	if err == nil {
 		t.Error("Expected error from CreateMirrorConfig, got nil")
 	}
 
-	_, err = client.UpdateMirrorConfig(testNamespace, testRepository, &UpdateMirrorConfigRequest{})
+	_, err = client.UpdateMirrorConfig(context.Background(), testNamespace, testRepository, &UpdateMirrorConfigRequest{})
 	if err == nil {
 		t.Error("Expected error from UpdateMirrorConfig, got nil")
 	}
@@ -156,12 +157,12 @@ func TestMirrorConfigHTTPErrors(t *testing.T) {
 func TestMirrorConfigValidation(t *testing.T) {
 	client, _ := NewClient(testTokenValue)
 
-	_, err := client.GetMirrorConfig("", testRepository)
+	_, err := client.GetMirrorConfig(context.Background(), "", testRepository)
 	if err == nil {
 		t.Error("Expected error for empty namespace")
 	}
 
-	_, err = client.GetMirrorConfig(testNamespace, "")
+	_, err = client.GetMirrorConfig(context.Background(), testNamespace, "")
 	if err == nil {
 		t.Error("Expected error for empty repository")
 	}

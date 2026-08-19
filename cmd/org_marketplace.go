@@ -18,7 +18,7 @@ var marketplaceCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		marketplace, err := client.GetOrganizationMarketplace(orgName)
+		marketplace, err := client.GetOrganizationMarketplace(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("getting marketplace info: %w", err)
 		}
@@ -36,7 +36,7 @@ var createMarketplaceSubscriptionCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.CreateOrganizationMarketplaceSubscription(orgName, &lib.MarketplaceSubscriptionRequest{SKU: sku, Quantity: quantity})
+		err = client.CreateOrganizationMarketplaceSubscription(cmd.Context(), orgName, &lib.MarketplaceSubscriptionRequest{SKU: sku, Quantity: quantity})
 		if err != nil {
 			return fmt.Errorf("creating marketplace subscription: %w", err)
 		}
@@ -58,7 +58,7 @@ var deleteMarketplaceSubscriptionCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.DeleteOrganizationMarketplaceSubscription(orgName, subscriptionID)
+		err = client.DeleteOrganizationMarketplaceSubscription(cmd.Context(), orgName, subscriptionID)
 		if err != nil {
 			return fmt.Errorf("deleting marketplace subscription: %w", err)
 		}
@@ -80,7 +80,7 @@ var batchRemoveSubscriptionsCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.BatchRemoveOrganizationMarketplaceSubscriptions(orgName, subscriptionIDs)
+		err = client.BatchRemoveOrganizationMarketplaceSubscriptions(cmd.Context(), orgName, subscriptionIDs)
 		if err != nil {
 			return fmt.Errorf("batch removing subscriptions: %w", err)
 		}

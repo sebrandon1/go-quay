@@ -44,13 +44,13 @@ var triggerListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List all build triggers for a repository",
 	Long:  `List all build triggers configured for a repository.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		triggers, err := client.GetTriggers(triggerNamespace, triggerRepository)
+		triggers, err := client.GetTriggers(cmd.Context(), triggerNamespace, triggerRepository)
 		if err != nil {
 			return fmt.Errorf("getting triggers: %w", err)
 		}
@@ -64,13 +64,13 @@ var triggerInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get details of a specific build trigger",
 	Long:  `Get detailed information about a specific build trigger by its UUID.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		trigger, err := client.GetTrigger(triggerNamespace, triggerRepository, triggerUUID)
+		trigger, err := client.GetTrigger(cmd.Context(), triggerNamespace, triggerRepository, triggerUUID)
 		if err != nil {
 			return fmt.Errorf("getting trigger: %w", err)
 		}
@@ -84,13 +84,13 @@ var triggerDeleteCmd = &cobra.Command{
 	Use:   subcmdDelete,
 	Short: "Delete a build trigger",
 	Long:  `Delete a build trigger from a repository.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteTrigger(triggerNamespace, triggerRepository, triggerUUID)
+		err = client.DeleteTrigger(cmd.Context(), triggerNamespace, triggerRepository, triggerUUID)
 		if err != nil {
 			return fmt.Errorf("deleting trigger: %w", err)
 		}
@@ -105,13 +105,13 @@ var triggerEnableCmd = &cobra.Command{
 	Use:   "enable",
 	Short: "Enable a build trigger",
 	Long:  `Enable a build trigger for a repository.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		trigger, err := client.UpdateTrigger(triggerNamespace, triggerRepository, triggerUUID, true)
+		trigger, err := client.UpdateTrigger(cmd.Context(), triggerNamespace, triggerRepository, triggerUUID, true)
 		if err != nil {
 			return fmt.Errorf("enabling trigger: %w", err)
 		}
@@ -125,13 +125,13 @@ var triggerDisableCmd = &cobra.Command{
 	Use:   "disable",
 	Short: "Disable a build trigger",
 	Long:  `Disable a build trigger for a repository.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		trigger, err := client.UpdateTrigger(triggerNamespace, triggerRepository, triggerUUID, false)
+		trigger, err := client.UpdateTrigger(cmd.Context(), triggerNamespace, triggerRepository, triggerUUID, false)
 		if err != nil {
 			return fmt.Errorf("disabling trigger: %w", err)
 		}
@@ -145,7 +145,7 @@ var triggerStartCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Manually start a build from a trigger",
 	Long:  `Manually start a build using a configured trigger.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -158,7 +158,7 @@ var triggerStartCmd = &cobra.Command{
 			}
 		}
 
-		build, err := client.StartTriggerBuild(triggerNamespace, triggerRepository, triggerUUID, triggerReq)
+		build, err := client.StartTriggerBuild(cmd.Context(), triggerNamespace, triggerRepository, triggerUUID, triggerReq)
 		if err != nil {
 			return fmt.Errorf("starting trigger build: %w", err)
 		}
@@ -172,7 +172,7 @@ var triggerActivateCmd = &cobra.Command{
 	Use:   "activate",
 	Short: "Activate a build trigger with configuration",
 	Long:  `Activate a build trigger with the specified configuration.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -183,7 +183,7 @@ var triggerActivateCmd = &cobra.Command{
 			activateReq.PullRobot = triggerPullRobot
 		}
 
-		trigger, err := client.ActivateTrigger(triggerNamespace, triggerRepository, triggerUUID, activateReq)
+		trigger, err := client.ActivateTrigger(cmd.Context(), triggerNamespace, triggerRepository, triggerUUID, activateReq)
 		if err != nil {
 			return fmt.Errorf("activating trigger: %w", err)
 		}
@@ -196,13 +196,13 @@ var triggerBuildsCmd = &cobra.Command{
 	Use:   "builds",
 	Short: "List builds for a trigger",
 	Long:  `List builds that were started by a specific trigger.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		builds, err := client.GetTriggerBuilds(triggerNamespace, triggerRepository, triggerUUID, triggerBuildLimit)
+		builds, err := client.GetTriggerBuilds(cmd.Context(), triggerNamespace, triggerRepository, triggerUUID, triggerBuildLimit)
 		if err != nil {
 			return fmt.Errorf("getting trigger builds: %w", err)
 		}

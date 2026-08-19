@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -35,7 +36,7 @@ func TestGetProxyCacheConfig(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	config, err := client.GetProxyCacheConfig(testOrgName)
+	config, err := client.GetProxyCacheConfig(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("GetProxyCacheConfig returned error: %v", err)
 	}
@@ -88,7 +89,7 @@ func TestCreateProxyCacheConfig(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	config, err := client.CreateProxyCacheConfig(testOrgName, testUpstreamReg, true, 3600)
+	config, err := client.CreateProxyCacheConfig(context.Background(), testOrgName, testUpstreamReg, true, 3600)
 	if err != nil {
 		t.Fatalf("CreateProxyCacheConfig returned error: %v", err)
 	}
@@ -116,7 +117,7 @@ func TestDeleteProxyCacheConfig(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteProxyCacheConfig(testOrgName)
+	err = client.DeleteProxyCacheConfig(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("DeleteProxyCacheConfig returned error: %v", err)
 	}
@@ -125,17 +126,17 @@ func TestDeleteProxyCacheConfig(t *testing.T) {
 func TestProxyCacheHTTPErrors(t *testing.T) {
 	client := newOrgErrorClient(t)
 
-	_, err := client.GetProxyCacheConfig(testOrgName)
+	_, err := client.GetProxyCacheConfig(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error from GetProxyCacheConfig, got nil")
 	}
 
-	_, err = client.CreateProxyCacheConfig(testOrgName, testUpstreamReg, false, 86400)
+	_, err = client.CreateProxyCacheConfig(context.Background(), testOrgName, testUpstreamReg, false, 86400)
 	if err == nil {
 		t.Error("Expected error from CreateProxyCacheConfig, got nil")
 	}
 
-	err = client.DeleteProxyCacheConfig(testOrgName)
+	err = client.DeleteProxyCacheConfig(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error from DeleteProxyCacheConfig, got nil")
 	}

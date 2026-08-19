@@ -45,7 +45,7 @@ var robotListCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		robots, err := client.GetUserRobotAccounts()
+		robots, err := client.GetUserRobotAccounts(cmd.Context())
 		if err != nil {
 			return fmt.Errorf("getting robot accounts: %w", err)
 		}
@@ -66,7 +66,7 @@ var robotInfoCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		robot, err := client.GetUserRobotAccount(robotShortname)
+		robot, err := client.GetUserRobotAccount(cmd.Context(), robotShortname)
 		if err != nil {
 			return fmt.Errorf("getting robot account: %w", err)
 		}
@@ -87,7 +87,7 @@ var robotCreateCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		robot, err := client.CreateUserRobotAccount(robotShortname, robotDescription, nil)
+		robot, err := client.CreateUserRobotAccount(cmd.Context(), robotShortname, robotDescription, nil)
 		if err != nil {
 			return fmt.Errorf("creating robot account: %w", err)
 		}
@@ -113,7 +113,7 @@ var robotDeleteCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteUserRobotAccount(robotShortname)
+		err = client.DeleteUserRobotAccount(cmd.Context(), robotShortname)
 		if err != nil {
 			return fmt.Errorf("deleting robot account: %w", err)
 		}
@@ -134,7 +134,7 @@ var robotRegenerateCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		robot, err := client.RegenerateUserRobotToken(robotShortname)
+		robot, err := client.RegenerateUserRobotToken(cmd.Context(), robotShortname)
 		if err != nil {
 			return fmt.Errorf("regenerating robot token: %w", err)
 		}
@@ -156,7 +156,7 @@ var robotPermissionsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		permissions, err := client.GetUserRobotPermissions(robotShortname)
+		permissions, err := client.GetUserRobotPermissions(cmd.Context(), robotShortname)
 		if err != nil {
 			return fmt.Errorf("getting robot permissions: %w", err)
 		}
@@ -176,7 +176,7 @@ var robotFederationGetCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		federation, err := client.GetUserRobotFederation(robotShortname)
+		federation, err := client.GetUserRobotFederation(cmd.Context(), robotShortname)
 		if err != nil {
 			return fmt.Errorf("getting robot federation: %w", err)
 		}
@@ -199,7 +199,7 @@ var robotFederationCreateCmd = &cobra.Command{
 			{Issuer: federationIssuer, Subject: federationSubject},
 		}
 
-		err = client.CreateUserRobotFederation(robotShortname, configs)
+		err = client.CreateUserRobotFederation(cmd.Context(), robotShortname, configs)
 		if err != nil {
 			return fmt.Errorf("creating robot federation: %w", err)
 		}
@@ -219,7 +219,7 @@ var robotFederationDeleteCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteUserRobotFederation(robotShortname)
+		err = client.DeleteUserRobotFederation(cmd.Context(), robotShortname)
 		if err != nil {
 			return fmt.Errorf("deleting robot federation: %w", err)
 		}

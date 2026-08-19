@@ -22,13 +22,13 @@ var messagesListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "Get system messages",
 	Long:  `Get system-wide messages including maintenance notifications and announcements.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		messages, err := client.GetMessages()
+		messages, err := client.GetMessages(cmd.Context())
 		if err != nil {
 			return fmt.Errorf("getting messages: %w", err)
 		}
@@ -41,13 +41,13 @@ var messagesCreateCmd = &cobra.Command{
 	Use:   subcmdCreate,
 	Short: "Create a system message",
 	Long:  `Create a new system-wide message.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		message, err := client.CreateMessage(messageContent, messageSeverity, messageMediaType)
+		message, err := client.CreateMessage(cmd.Context(), messageContent, messageSeverity, messageMediaType)
 		if err != nil {
 			return fmt.Errorf("creating message: %w", err)
 		}

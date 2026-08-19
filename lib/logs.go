@@ -15,6 +15,7 @@ All log endpoints support pagination via next_page parameter.
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -42,7 +43,7 @@ func addLogQueryParams(req *http.Request, nextPage, startDate, endDate string) {
 }
 
 // GetAggregatedLogs returns the aggregated logs for a repository
-func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate string) (*AggregatedLogs, error) {
+func (c *Client) GetAggregatedLogs(ctx context.Context, namespace, repository, startDate, endDate string) (*AggregatedLogs, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -51,7 +52,7 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 	}
 
 	// Get new request
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/aggregatelogs", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/aggregatelogs", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repository aggregate logs request: %w", err)
 	}
@@ -71,7 +72,7 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 }
 
 // GetLogs returns the logs for a repository
-func (c *Client) GetLogs(namespace, repository, nextPage, startDate, endDate string) (*Logs, error) {
+func (c *Client) GetLogs(ctx context.Context, namespace, repository, nextPage, startDate, endDate string) (*Logs, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -79,7 +80,7 @@ func (c *Client) GetLogs(namespace, repository, nextPage, startDate, endDate str
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/logs", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/logs", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repository logs request: %w", err)
 	}
@@ -95,12 +96,12 @@ func (c *Client) GetLogs(namespace, repository, nextPage, startDate, endDate str
 }
 
 // GetOrganizationLogs returns the logs for an organization
-func (c *Client) GetOrganizationLogs(orgname, nextPage, startDate, endDate string) (*Logs, error) {
+func (c *Client) GetOrganizationLogs(ctx context.Context, orgname, nextPage, startDate, endDate string) (*Logs, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/logs", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/logs", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization logs request: %w", err)
 	}
@@ -116,12 +117,12 @@ func (c *Client) GetOrganizationLogs(orgname, nextPage, startDate, endDate strin
 }
 
 // GetOrganizationAggregatedLogs returns the aggregated logs for an organization
-func (c *Client) GetOrganizationAggregatedLogs(orgname, startDate, endDate string) (*AggregatedLogs, error) {
+func (c *Client) GetOrganizationAggregatedLogs(ctx context.Context, orgname, startDate, endDate string) (*AggregatedLogs, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/aggregatelogs", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/aggregatelogs", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization aggregate logs request: %w", err)
 	}
@@ -140,12 +141,12 @@ func (c *Client) GetOrganizationAggregatedLogs(orgname, startDate, endDate strin
 }
 
 // ExportOrganizationLogs exports the logs for an organization
-func (c *Client) ExportOrganizationLogs(orgname string, request *ExportLogsRequest) error {
+func (c *Client) ExportOrganizationLogs(ctx context.Context, orgname string, request *ExportLogsRequest) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/exportlogs", orgname), request)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/organization/%s/exportlogs", orgname), request)
 	if err != nil {
 		return fmt.Errorf("failed to create export organization logs request: %w", err)
 	}
@@ -158,8 +159,8 @@ func (c *Client) ExportOrganizationLogs(orgname string, request *ExportLogsReque
 }
 
 // GetUserLogs returns the logs for the current user
-func (c *Client) GetUserLogs(nextPage, startDate, endDate string) (*Logs, error) {
-	req, err := newRequest(http.MethodGet, c.buildURL("/user/logs"), nil)
+func (c *Client) GetUserLogs(ctx context.Context, nextPage, startDate, endDate string) (*Logs, error) {
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/logs"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user logs request: %w", err)
 	}
@@ -175,8 +176,8 @@ func (c *Client) GetUserLogs(nextPage, startDate, endDate string) (*Logs, error)
 }
 
 // GetUserAggregatedLogs returns the aggregated logs for the current user
-func (c *Client) GetUserAggregatedLogs(startDate, endDate string) (*AggregatedLogs, error) {
-	req, err := newRequest(http.MethodGet, c.buildURL("/user/aggregatelogs"), nil)
+func (c *Client) GetUserAggregatedLogs(ctx context.Context, startDate, endDate string) (*AggregatedLogs, error) {
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/aggregatelogs"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user aggregate logs request: %w", err)
 	}
@@ -195,8 +196,8 @@ func (c *Client) GetUserAggregatedLogs(startDate, endDate string) (*AggregatedLo
 }
 
 // ExportUserLogs exports the logs for the current user
-func (c *Client) ExportUserLogs(request *ExportLogsRequest) error {
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/user/exportlogs"), request)
+func (c *Client) ExportUserLogs(ctx context.Context, request *ExportLogsRequest) error {
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/user/exportlogs"), request)
 	if err != nil {
 		return fmt.Errorf("failed to create export user logs request: %w", err)
 	}
@@ -209,7 +210,7 @@ func (c *Client) ExportUserLogs(request *ExportLogsRequest) error {
 }
 
 // ExportRepositoryLogs exports the logs for a repository
-func (c *Client) ExportRepositoryLogs(namespace, repository string, request *ExportLogsRequest) error {
+func (c *Client) ExportRepositoryLogs(ctx context.Context, namespace, repository string, request *ExportLogsRequest) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -217,7 +218,7 @@ func (c *Client) ExportRepositoryLogs(namespace, repository string, request *Exp
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/exportlogs", namespace, repository), request)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/exportlogs", namespace, repository), request)
 	if err != nil {
 		return fmt.Errorf("failed to create export repository logs request: %w", err)
 	}

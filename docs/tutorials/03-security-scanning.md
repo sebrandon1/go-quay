@@ -34,6 +34,7 @@ Quay.io uses Clair to scan container images for vulnerabilities. When you push a
 package main
 
 import (
+    "context"
     "fmt"
     "log"
     "os"
@@ -43,9 +44,10 @@ import (
 
 func main() {
     client, _ := lib.NewClient(os.Getenv("QUAY_TOKEN"))
+    ctx := context.Background()
 
     // First, get the manifest digest for a tag
-    repo, err := client.GetRepository("my-namespace", "my-app")
+    repo, err := client.GetRepository(ctx, "my-namespace", "my-app")
     if err != nil {
         log.Fatalf("Failed to get repository: %v", err)
     }
@@ -64,7 +66,7 @@ func main() {
     }
 
     // Get security scan results
-    security, err := client.GetManifestSecurity(
+    security, err := client.GetManifestSecurity(ctx, 
         "my-namespace",
         "my-app",
         manifestDigest,
@@ -82,7 +84,7 @@ func main() {
 
 ```go
 // Get security scan with vulnerability details
-security, err := client.GetManifestSecurity(namespace, repo, digest, true)
+security, err := client.GetManifestSecurity(ctx, namespace, repo, digest, true)
 if err != nil {
     log.Fatalf("Failed to get security scan: %v", err)
 }
@@ -168,7 +170,8 @@ Loop over repos and tags, calling `GetManifestSecurity` for each digest. A full 
 
 ```go
 client, _ := lib.NewClient(os.Getenv("QUAY_TOKEN"))
-security, err := client.GetManifestSecurity(namespace, repo, digest, true)
+ctx := context.Background()
+security, err := client.GetManifestSecurity(ctx, namespace, repo, digest, true)
 if err != nil {
     log.Fatal(err)
 }
@@ -182,7 +185,7 @@ fmt.Printf("%s/%s: %s\n", namespace, repo, security.Status)
 Add security metadata to your images:
 
 ```go
-label, err := client.AddManifestLabel(
+label, err := client.AddManifestLabel(ctx, 
     "my-namespace",
     "my-app",
     manifestDigest,
@@ -196,7 +199,7 @@ if err != nil {
     fmt.Printf("Added label %s\n", label.ID)
 }
 
-labels, err := client.GetManifestLabels("my-namespace", "my-app", manifestDigest)
+labels, err := client.GetManifestLabels(ctx, "my-namespace", "my-app", manifestDigest)
 if err != nil {
     log.Fatalf("Failed to get labels: %v", err)
 }

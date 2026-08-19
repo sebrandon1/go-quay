@@ -23,13 +23,13 @@ var errorTypeCmd = &cobra.Command{
 	Long: `Get detailed information about a specific error type.
 
 This endpoint provides details about error types that can be returned by the Quay.io API.`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		errType, err := client.GetErrorType(errorTypeName)
+		errType, err := client.GetErrorType(cmd.Context(), errorTypeName)
 		if err != nil {
 			return fmt.Errorf("getting error type: %w", err)
 		}

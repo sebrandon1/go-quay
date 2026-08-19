@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -35,7 +36,7 @@ func TestGetApplications(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	apps, err := client.GetApplications(testOrgName)
+	apps, err := client.GetApplications(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("GetApplications returned error: %v", err)
 	}
@@ -86,7 +87,7 @@ func TestCreateApplication(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	app, err := client.CreateApplication(testOrgName, testAppName, "New application", testAppURI, testRedirectURI)
+	app, err := client.CreateApplication(context.Background(), testOrgName, testAppName, "New application", testAppURI, testRedirectURI)
 	if err != nil {
 		t.Fatalf("CreateApplication returned error: %v", err)
 	}
@@ -125,7 +126,7 @@ func TestGetApplication(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	app, err := client.GetApplication(testOrgName, testClientID)
+	app, err := client.GetApplication(context.Background(), testOrgName, testClientID)
 	if err != nil {
 		t.Fatalf("GetApplication returned error: %v", err)
 	}
@@ -163,7 +164,7 @@ func TestUpdateApplication(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	app, err := client.UpdateApplication(testOrgName, testClientID, "Updated App", updatedDescription, testAppURI, testRedirectURI)
+	app, err := client.UpdateApplication(context.Background(), testOrgName, testClientID, "Updated App", updatedDescription, testAppURI, testRedirectURI)
 	if err != nil {
 		t.Fatalf("UpdateApplication returned error: %v", err)
 	}
@@ -191,7 +192,7 @@ func TestDeleteApplication(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteApplication(testOrgName, testClientID)
+	err = client.DeleteApplication(context.Background(), testOrgName, testClientID)
 	if err != nil {
 		t.Fatalf("DeleteApplication returned error: %v", err)
 	}
@@ -223,7 +224,7 @@ func TestResetApplicationClientSecret(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	app, err := client.ResetApplicationClientSecret(testOrgName, testClientID)
+	app, err := client.ResetApplicationClientSecret(context.Background(), testOrgName, testClientID)
 	if err != nil {
 		t.Fatalf("ResetApplicationClientSecret returned error: %v", err)
 	}
@@ -236,32 +237,32 @@ func TestResetApplicationClientSecret(t *testing.T) {
 func TestApplicationHTTPErrors(t *testing.T) {
 	client := newOrgErrorClient(t)
 
-	_, err := client.GetApplications(testOrgName)
+	_, err := client.GetApplications(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error from GetApplications, got nil")
 	}
 
-	_, err = client.CreateApplication(testOrgName, testAppName, "desc", testAppURI, testRedirectURI)
+	_, err = client.CreateApplication(context.Background(), testOrgName, testAppName, "desc", testAppURI, testRedirectURI)
 	if err == nil {
 		t.Error("Expected error from CreateApplication, got nil")
 	}
 
-	_, err = client.GetApplication(testOrgName, testClientID)
+	_, err = client.GetApplication(context.Background(), testOrgName, testClientID)
 	if err == nil {
 		t.Error("Expected error from GetApplication, got nil")
 	}
 
-	_, err = client.UpdateApplication(testOrgName, testClientID, testAppName, "desc", testAppURI, testRedirectURI)
+	_, err = client.UpdateApplication(context.Background(), testOrgName, testClientID, testAppName, "desc", testAppURI, testRedirectURI)
 	if err == nil {
 		t.Error("Expected error from UpdateApplication, got nil")
 	}
 
-	err = client.DeleteApplication(testOrgName, testClientID)
+	err = client.DeleteApplication(context.Background(), testOrgName, testClientID)
 	if err == nil {
 		t.Error("Expected error from DeleteApplication, got nil")
 	}
 
-	_, err = client.ResetApplicationClientSecret(testOrgName, testClientID)
+	_, err = client.ResetApplicationClientSecret(context.Background(), testOrgName, testClientID)
 	if err == nil {
 		t.Error("Expected error from ResetApplicationClientSecret, got nil")
 	}

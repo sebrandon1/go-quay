@@ -44,13 +44,13 @@ var repotokenListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List all repository tokens",
 	Long:  `List all tokens for a repository. (DEPRECATED - use robot accounts)`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		tokens, err := client.GetRepoTokens(repoTokenNamespace, repoTokenRepository) //nolint:staticcheck // Intentionally using deprecated API
+		tokens, err := client.GetRepoTokens(cmd.Context(), repoTokenNamespace, repoTokenRepository) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
 			return fmt.Errorf("getting tokens: %w", err)
 		}
@@ -64,13 +64,13 @@ var repotokenInfoCmd = &cobra.Command{
 	Use:   subcmdInfo,
 	Short: "Get a specific token",
 	Long:  `Get detailed information about a specific repository token. (DEPRECATED - use robot accounts)`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		repoToken, err := client.GetRepoToken(repoTokenNamespace, repoTokenRepository, repoTokenCode) //nolint:staticcheck // Intentionally using deprecated API
+		repoToken, err := client.GetRepoToken(cmd.Context(), repoTokenNamespace, repoTokenRepository, repoTokenCode) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
 			return fmt.Errorf("getting token: %w", err)
 		}
@@ -84,7 +84,7 @@ var repotokenCreateCmd = &cobra.Command{
 	Use:   subcmdCreate,
 	Short: "Create a new token",
 	Long:  `Create a new repository token. (DEPRECATED - use robot accounts)`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -94,7 +94,7 @@ var repotokenCreateCmd = &cobra.Command{
 			FriendlyName: repoTokenName,
 		}
 
-		repoToken, err := client.CreateRepoToken(repoTokenNamespace, repoTokenRepository, createReq) //nolint:staticcheck // Intentionally using deprecated API
+		repoToken, err := client.CreateRepoToken(cmd.Context(), repoTokenNamespace, repoTokenRepository, createReq) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
 			return fmt.Errorf("creating token: %w", err)
 		}
@@ -108,7 +108,7 @@ var repotokenUpdateCmd = &cobra.Command{
 	Use:   subcmdUpdate,
 	Short: "Update a token",
 	Long:  `Update a repository token's role. (DEPRECATED - use robot accounts)`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
@@ -118,7 +118,7 @@ var repotokenUpdateCmd = &cobra.Command{
 			Role: repoTokenRole,
 		}
 
-		repoToken, err := client.UpdateRepoToken(repoTokenNamespace, repoTokenRepository, repoTokenCode, updateReq) //nolint:staticcheck // Intentionally using deprecated API
+		repoToken, err := client.UpdateRepoToken(cmd.Context(), repoTokenNamespace, repoTokenRepository, repoTokenCode, updateReq) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
 			return fmt.Errorf("updating token: %w", err)
 		}
@@ -132,7 +132,7 @@ var repotokenDeleteCmd = &cobra.Command{
 	Use:   subcmdDelete,
 	Short: "Delete a token",
 	Long:  `Delete a repository token. (DEPRECATED - use robot accounts)`,
-	RunE: func(_ *cobra.Command, _ []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		if !confirmTokenDelete {
 			return fmt.Errorf("--confirm is required to delete a token")
 		}
@@ -142,7 +142,7 @@ var repotokenDeleteCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteRepoToken(repoTokenNamespace, repoTokenRepository, repoTokenCode) //nolint:staticcheck // Intentionally using deprecated API
+		err = client.DeleteRepoToken(cmd.Context(), repoTokenNamespace, repoTokenRepository, repoTokenCode) //nolint:staticcheck // Intentionally using deprecated API
 		if err != nil {
 			return fmt.Errorf("deleting token: %w", err)
 		}

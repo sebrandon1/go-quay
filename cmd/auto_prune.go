@@ -17,7 +17,7 @@ var autoPruneCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		policies, err := client.GetAutoPrunePolicies(orgName)
+		policies, err := client.GetAutoPrunePolicies(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("getting auto-prune policies: %w", err)
 		}
@@ -35,7 +35,7 @@ var autoPrunePolicyCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		policy, err := client.GetAutoPrunePolicy(orgName, policyUUID)
+		policy, err := client.GetAutoPrunePolicy(cmd.Context(), orgName, policyUUID)
 		if err != nil {
 			return fmt.Errorf("getting auto-prune policy: %w", err)
 		}
@@ -53,7 +53,7 @@ var createAutoPruneCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		policy, err := client.CreateAutoPrunePolicy(orgName, method, pruneValue, tagPattern)
+		policy, err := client.CreateAutoPrunePolicy(cmd.Context(), orgName, method, pruneValue, tagPattern)
 		if err != nil {
 			return fmt.Errorf("creating auto-prune policy: %w", err)
 		}
@@ -71,7 +71,7 @@ var updateAutoPruneCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		policy, err := client.UpdateAutoPrunePolicy(orgName, policyUUID, method, pruneValue, tagPattern)
+		policy, err := client.UpdateAutoPrunePolicy(cmd.Context(), orgName, policyUUID, method, pruneValue, tagPattern)
 		if err != nil {
 			return fmt.Errorf("updating auto-prune policy: %w", err)
 		}
@@ -92,7 +92,7 @@ var deleteAutoPruneCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
-		err = client.DeleteAutoPrunePolicy(orgName, policyUUID)
+		err = client.DeleteAutoPrunePolicy(cmd.Context(), orgName, policyUUID)
 		if err != nil {
 			return fmt.Errorf("deleting auto-prune policy: %w", err)
 		}

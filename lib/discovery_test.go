@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -38,7 +39,7 @@ func TestGetDiscovery(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	discovery, err := client.GetDiscovery()
+	discovery, err := client.GetDiscovery(context.Background())
 	if err != nil {
 		t.Fatalf("GetDiscovery returned error: %v", err)
 	}
@@ -80,7 +81,7 @@ func TestGetRegistryCapabilities(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	capabilities, err := client.GetRegistryCapabilities()
+	capabilities, err := client.GetRegistryCapabilities(context.Background())
 	if err != nil {
 		t.Fatalf("GetRegistryCapabilities returned error: %v", err)
 	}
@@ -121,7 +122,7 @@ func TestGetAppInfo(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	app, err := client.GetAppInfo(testClientID)
+	app, err := client.GetAppInfo(context.Background(), testClientID)
 	if err != nil {
 		t.Fatalf("GetAppInfo returned error: %v", err)
 	}
@@ -167,7 +168,7 @@ func TestGetEntities(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	entities, err := client.GetEntities("test", true, true)
+	entities, err := client.GetEntities(context.Background(), "test", true, true)
 	if err != nil {
 		t.Fatalf("GetEntities returned error: %v", err)
 	}
@@ -191,7 +192,7 @@ func TestGetDiscoveryError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetDiscovery()
+	_, err = client.GetDiscovery(context.Background())
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -208,17 +209,17 @@ func TestDiscoveryHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetRegistryCapabilities()
+	_, err = client.GetRegistryCapabilities(context.Background())
 	if err == nil {
 		t.Error("Expected error from GetRegistryCapabilities, got nil")
 	}
 
-	_, err = client.GetAppInfo(testClientID)
+	_, err = client.GetAppInfo(context.Background(), testClientID)
 	if err == nil {
 		t.Error("Expected error from GetAppInfo, got nil")
 	}
 
-	_, err = client.GetEntities("test", true, true)
+	_, err = client.GetEntities(context.Background(), "test", true, true)
 	if err == nil {
 		t.Error("Expected error from GetEntities, got nil")
 	}

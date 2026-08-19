@@ -12,17 +12,18 @@ Marketplace Management:
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetOrganizationMarketplace gets marketplace information for an organization
-func (c *Client) GetOrganizationMarketplace(orgname string) (*MarketplaceInfo, error) {
+func (c *Client) GetOrganizationMarketplace(ctx context.Context, orgname string) (*MarketplaceInfo, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/marketplace", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/marketplace", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization marketplace request: %w", err)
 	}
@@ -36,12 +37,12 @@ func (c *Client) GetOrganizationMarketplace(orgname string) (*MarketplaceInfo, e
 }
 
 // CreateOrganizationMarketplaceSubscription creates a marketplace subscription
-func (c *Client) CreateOrganizationMarketplaceSubscription(orgname string, subscription *MarketplaceSubscriptionRequest) error {
+func (c *Client) CreateOrganizationMarketplaceSubscription(ctx context.Context, orgname string, subscription *MarketplaceSubscriptionRequest) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/marketplace", orgname), subscription)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/organization/%s/marketplace", orgname), subscription)
 	if err != nil {
 		return fmt.Errorf("failed to create marketplace subscription request: %w", err)
 	}
@@ -54,7 +55,7 @@ func (c *Client) CreateOrganizationMarketplaceSubscription(orgname string, subsc
 }
 
 // BatchRemoveOrganizationMarketplaceSubscriptions removes multiple marketplace subscriptions
-func (c *Client) BatchRemoveOrganizationMarketplaceSubscriptions(orgname string, subscriptionIDs []string) error {
+func (c *Client) BatchRemoveOrganizationMarketplaceSubscriptions(ctx context.Context, orgname string, subscriptionIDs []string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -64,7 +65,7 @@ func (c *Client) BatchRemoveOrganizationMarketplaceSubscriptions(orgname string,
 	}{
 		SubscriptionIDs: subscriptionIDs,
 	}
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/marketplace/batchremove", orgname), body)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/organization/%s/marketplace/batchremove", orgname), body)
 	if err != nil {
 		return fmt.Errorf("failed to create batch remove marketplace subscriptions request: %w", err)
 	}
@@ -77,7 +78,7 @@ func (c *Client) BatchRemoveOrganizationMarketplaceSubscriptions(orgname string,
 }
 
 // DeleteOrganizationMarketplaceSubscription removes a specific marketplace subscription
-func (c *Client) DeleteOrganizationMarketplaceSubscription(orgname, subscriptionID string) error {
+func (c *Client) DeleteOrganizationMarketplaceSubscription(ctx context.Context, orgname, subscriptionID string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -85,7 +86,7 @@ func (c *Client) DeleteOrganizationMarketplaceSubscription(orgname, subscription
 		return fmt.Errorf("subscriptionID is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/marketplace/%s", orgname, subscriptionID), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/marketplace/%s", orgname, subscriptionID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete marketplace subscription request: %w", err)
 	}
