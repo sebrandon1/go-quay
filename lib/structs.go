@@ -843,12 +843,6 @@ type CreateNotificationRequest struct {
 	Title       string         `json:"title,omitempty"`
 }
 
-// TestNotificationResponse represents the response from testing a notification
-type TestNotificationResponse struct {
-	Success bool   `json:"success,omitempty"`
-	Message string `json:"message,omitempty"`
-}
-
 // Mirror Configuration Structures
 
 // MirrorConfig represents the mirror configuration for a repository
