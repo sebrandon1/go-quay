@@ -101,8 +101,8 @@ func (c *Client) UpdateOrganization(orgname, email string) (*Organization, error
 		return nil, fmt.Errorf("email is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s", orgname), map[string]interface{}{
-		"email": email,
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s", orgname), UpdateOrganizationRequest{
+		Email: email,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update organization request: %w", err)

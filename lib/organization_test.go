@@ -129,6 +129,13 @@ func TestUpdateOrganization(t *testing.T) {
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
+		var req UpdateOrganizationRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Errorf("Failed to decode request body: %v", err)
+		}
+		if req.Email != updatedEmail {
+			t.Errorf("Expected email %s, got %s", updatedEmail, req.Email)
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(mockResponseJSON)
 	}))

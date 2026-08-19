@@ -140,8 +140,8 @@ func (c *Client) RevertTag(namespace, repository, tag, manifestDigest string) (*
 		return nil, fmt.Errorf("manifestDigest is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/tag/%s/revert", namespace, repository, tag), map[string]interface{}{
-		"manifest_digest": manifestDigest,
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/tag/%s/revert", namespace, repository, tag), RevertTagRequest{
+		ManifestDigest: manifestDigest,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create revert tag request: %w", err)

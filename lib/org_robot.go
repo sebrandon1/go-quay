@@ -177,8 +177,8 @@ func (c *Client) SetRobotRepositoryPermission(orgname, robotShortname, repositor
 		return fmt.Errorf("role is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/robots/%s/permissions/%s", orgname, robotShortname, repository), map[string]interface{}{
-		fieldRole: role,
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/robots/%s/permissions/%s", orgname, robotShortname, repository), SetRepositoryPermissionRequest{
+		Role: role,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create set robot repository permission request: %w", err)

@@ -142,6 +142,13 @@ func TestUpdateTrigger(t *testing.T) {
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
+		var req UpdateTriggerRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Errorf("Failed to decode request body: %v", err)
+		}
+		if req.Enabled {
+			t.Errorf("Expected enabled false, got true")
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(mockResponseJSON)
 	}))

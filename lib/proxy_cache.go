@@ -43,10 +43,10 @@ func (c *Client) CreateProxyCacheConfig(orgname, upstreamRegistry string, insecu
 		return nil, fmt.Errorf("upstreamRegistry is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/proxycache", orgname), map[string]interface{}{
-		"upstream_registry": upstreamRegistry,
-		"insecure":          insecure,
-		"expiration":        expiration,
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/proxycache", orgname), CreateProxyCacheConfigRequest{
+		UpstreamRegistry: upstreamRegistry,
+		Insecure:         insecure,
+		Expiration:       expiration,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create proxy cache config request: %w", err)

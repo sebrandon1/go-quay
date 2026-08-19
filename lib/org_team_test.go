@@ -153,6 +153,16 @@ func TestUpdateTeam(t *testing.T) {
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
 		}
+		var req UpdateTeamRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Errorf("Failed to decode request body: %v", err)
+		}
+		if req.Description != updatedDescription {
+			t.Errorf("Expected description %s, got %s", updatedDescription, req.Description)
+		}
+		if req.Role != roleAdmin {
+			t.Errorf("Expected role %s, got %s", roleAdmin, req.Role)
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(mockResponseJSON)
 	}))
@@ -352,6 +362,13 @@ func TestSetTeamRepositoryPermission(t *testing.T) {
 		expectedPath := "/api/v1/organization/" + testOrgName + "/team/" + testTeamName + "/permissions/" + testRepoName
 		if r.URL.Path != expectedPath {
 			t.Errorf("Expected path %s, got %s", expectedPath, r.URL.Path)
+		}
+		var req SetRepositoryPermissionRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Errorf("Failed to decode request body: %v", err)
+		}
+		if req.Role != testRoleWrite {
+			t.Errorf("Expected role %s, got %s", testRoleWrite, req.Role)
 		}
 		w.WriteHeader(http.StatusOK)
 	}))

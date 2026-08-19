@@ -215,13 +215,13 @@ func TestRevertTag(t *testing.T) {
 		}
 
 		// Verify request body
-		var req map[string]interface{}
+		var req RevertTagRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			t.Errorf("Failed to decode request body: %v", err)
 		}
 
-		if req["manifest_digest"] != testManifestDigest {
-			t.Errorf("Expected manifest_digest 'sha256:def456', got '%v'", req["manifest_digest"])
+		if req.ManifestDigest != testManifestDigest {
+			t.Errorf("Expected manifest_digest 'sha256:def456', got '%v'", req.ManifestDigest)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
