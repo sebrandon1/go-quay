@@ -1,10 +1,56 @@
 package cmd
 
 import (
+	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/sebrandon1/go-quay/lib"
+	"github.com/spf13/pflag"
 )
+
+func resetRootFlags(t *testing.T) {
+	t.Helper()
+	origCfg := appCfg
+	origFormat := outputFormat
+	resetTokenAndURLFlags()
+	t.Cleanup(func() {
+		resetTokenAndURLFlags()
+		outputFormat = origFormat
+		appCfg = origCfg
+		rootCmd.SetArgs([]string{})
+		rootCmd.SetOut(nil)
+		rootCmd.SetErr(nil)
+		getCmd.SetArgs([]string{})
+		getCmd.SetOut(nil)
+		getCmd.SetErr(nil)
+	})
+	outputFormat = outputJSON
+	appCfg = appConfig{}
+}
+
+func resetTokenAndURLFlags() {
+	token = ""
+	quayURL = lib.DefaultQuayURL
+	for _, f := range []*pflag.Flag{
+		getCmd.Flag("token"),
+		getCmd.PersistentFlags().Lookup("token"),
+	} {
+		if f != nil {
+			f.Changed = false
+			_ = f.Value.Set("")
+		}
+	}
+	for _, f := range []*pflag.Flag{
+		getCmd.Flag("quay-url"),
+		getCmd.PersistentFlags().Lookup("quay-url"),
+	} {
+		if f != nil {
+			f.Changed = false
+			_ = f.Value.Set(lib.DefaultQuayURL)
+		}
+	}
+}
 
 func TestTokenFlagExistsOnGetCmd(t *testing.T) {
 	flag := getCmd.PersistentFlags().Lookup("token")
@@ -19,7 +65,19 @@ func TestTokenFlagExistsOnGetCmd(t *testing.T) {
 	}
 }
 
+func TestTokenFlagDefValueEmpty(t *testing.T) {
+	flag := getCmd.PersistentFlags().Lookup("token")
+	if flag == nil {
+		t.Fatal("Expected --token flag on getCmd, not found")
+	}
+	if flag.DefValue != "" {
+		t.Errorf("token flag DefValue must be empty so --help does not leak secrets, got %q", flag.DefValue)
+	}
+}
+
 func TestTokenFlagOverridesEnvVar(t *testing.T) {
+	resetRootFlags(t)
+
 	flag := getCmd.PersistentFlags().Lookup("token")
 	if flag == nil {
 		t.Fatal("Expected --token flag on getCmd, not found")
@@ -54,11 +112,130 @@ func TestQuayURLFlagExists(t *testing.T) {
 		t.Fatal("Expected --quay-url flag on getCmd, not found")
 	}
 	if flag.DefValue != lib.DefaultQuayURL {
-		// Default may come from QUAY_URL env var at init time
-		if flag.Annotations != nil {
-			if _, found := flag.Annotations["cobra_annotation_bash_completion_one_required_flag"]; found {
-				t.Error("quay-url flag should not be marked as required")
+		t.Errorf("quay-url flag DefValue = %q, want %q", flag.DefValue, lib.DefaultQuayURL)
+	}
+}
+
+func TestHelpDoesNotLeakToken(t *testing.T) {
+	resetRootFlags(t)
+
+	const envSecret = "env-secret-token-must-not-appear"
+	const cfgSecret = "cfg-secret-token-must-not-appear"
+	t.Setenv("QUAY_TOKEN", envSecret)
+	appCfg.Token = cfgSecret
+
+	var buf bytes.Buffer
+	rootCmd.SetOut(&buf)
+	rootCmd.SetErr(&buf)
+	rootCmd.SetArgs([]string{cmdGet, "--help"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatalf("help should not error: %v", err)
+	}
+
+	out := buf.String()
+	if strings.Contains(out, envSecret) {
+		t.Error("help output leaked QUAY_TOKEN")
+	}
+	if strings.Contains(out, cfgSecret) {
+		t.Error("help output leaked config file token")
+	}
+}
+
+func TestResolveFlag(t *testing.T) {
+	const (
+		fromFlag   = "from-flag"
+		fromEnv    = "from-env"
+		fromConfig = "from-config"
+	)
+
+	tests := []struct {
+		name      string
+		changed   bool
+		flagValue string
+		fallbacks []string
+		want      string
+	}{
+		{name: "flag wins when changed", changed: true, flagValue: fromFlag, fallbacks: []string{fromEnv, fromConfig}, want: fromFlag},
+		{name: "empty flag wins when changed", changed: true, flagValue: "", fallbacks: []string{fromEnv}, want: ""},
+		{name: "env when flag unchanged", changed: false, flagValue: "ignored-default", fallbacks: []string{fromEnv, fromConfig}, want: fromEnv},
+		{name: "config when env empty", changed: false, flagValue: "", fallbacks: []string{"", fromConfig, "fallback"}, want: fromConfig},
+		{name: "fallback when others empty", changed: false, flagValue: "", fallbacks: []string{"", "", lib.DefaultQuayURL}, want: lib.DefaultQuayURL},
+		{name: "all empty", changed: false, flagValue: "", fallbacks: []string{"", ""}, want: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := resolveFlag(tt.changed, tt.flagValue, tt.fallbacks...)
+			if got != tt.want {
+				t.Errorf("resolveFlag() = %q, want %q", got, tt.want)
 			}
-		}
+		})
+	}
+}
+
+func TestPersistentPreRunResolvesTokenFromEnv(t *testing.T) {
+	resetRootFlags(t)
+	t.Setenv("QUAY_TOKEN", "from-env")
+
+	if err := getCmd.PersistentPreRunE(getCmd, nil); err != nil {
+		t.Fatalf("PersistentPreRunE: %v", err)
+	}
+	if token != "from-env" {
+		t.Errorf("token = %q, want %q", token, "from-env")
+	}
+}
+
+func TestPersistentPreRunResolvesTokenFromConfig(t *testing.T) {
+	resetRootFlags(t)
+	t.Setenv("QUAY_TOKEN", "")
+	appCfg.Token = "from-config"
+
+	if err := getCmd.PersistentPreRunE(getCmd, nil); err != nil {
+		t.Fatalf("PersistentPreRunE: %v", err)
+	}
+	if token != "from-config" {
+		t.Errorf("token = %q, want %q", token, "from-config")
+	}
+}
+
+func TestPersistentPreRunFlagOverridesEnv(t *testing.T) {
+	resetRootFlags(t)
+	t.Setenv("QUAY_TOKEN", "from-env")
+	token = "from-flag"
+	if f := getCmd.Flag("token"); f != nil {
+		f.Changed = true
+	}
+
+	if err := getCmd.PersistentPreRunE(getCmd, nil); err != nil {
+		t.Fatalf("PersistentPreRunE: %v", err)
+	}
+	if token != "from-flag" {
+		t.Errorf("token = %q, want %q", token, "from-flag")
+	}
+}
+
+func TestPersistentPreRunResolvesQuayURLFromEnv(t *testing.T) {
+	resetRootFlags(t)
+	t.Setenv("QUAY_TOKEN", "from-env")
+	t.Setenv("QUAY_URL", "https://custom.example/api/v1")
+
+	if err := getCmd.PersistentPreRunE(getCmd, nil); err != nil {
+		t.Fatalf("PersistentPreRunE: %v", err)
+	}
+	if quayURL != "https://custom.example/api/v1" {
+		t.Errorf("quayURL = %q, want custom env URL", quayURL)
+	}
+}
+
+func TestPersistentPreRunRequiresToken(t *testing.T) {
+	resetRootFlags(t)
+	t.Setenv("QUAY_TOKEN", "")
+
+	err := getCmd.PersistentPreRunE(getCmd, nil)
+	if err == nil {
+		t.Fatal("expected error when token is missing")
+	}
+	if !strings.Contains(err.Error(), "authentication token required") {
+		t.Errorf("unexpected error: %v", err)
 	}
 }

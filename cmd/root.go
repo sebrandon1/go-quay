@@ -23,7 +23,9 @@ var getCmd = &cobra.Command{
 	Use:   cmdGet,
 	Short: "Get objects from Quay.io",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		// Validate token is provided
+		token = resolveFlag(flagChanged(cmd, "token"), token, os.Getenv("QUAY_TOKEN"), appCfg.Token)
+		quayURL = resolveFlag(flagChanged(cmd, "quay-url"), quayURL, os.Getenv("QUAY_URL"), appCfg.QuayURL, lib.DefaultQuayURL)
+
 		if token == "" {
 			return fmt.Errorf(`authentication token required
 
@@ -31,7 +33,6 @@ Set QUAY_TOKEN environment variable, use --token/-t flag, or add to config file 
 Get your token at https://quay.io/organization/<org>?tab=applications`, configFilePath())
 		}
 
-		// Validate output format
 		switch outputFormat {
 		case outputJSON, outputYAML, outputTable:
 			// valid
@@ -43,11 +44,17 @@ Get your token at https://quay.io/organization/<org>?tab=applications`, configFi
 	},
 }
 
-func envOrDefault(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
+func flagChanged(cmd *cobra.Command, name string) bool {
+	f := cmd.Flag(name)
+	return f != nil && f.Changed
+}
+
+// resolveFlag returns flagValue when the flag was explicitly set; otherwise the first non-empty fallback.
+func resolveFlag(changed bool, flagValue string, fallbacks ...string) string {
+	if changed {
+		return flagValue
 	}
-	return fallback
+	return firstNonEmpty(fallbacks...)
 }
 
 // firstNonEmpty returns the first non-empty string from the given values.
@@ -61,8 +68,8 @@ func firstNonEmpty(values ...string) string {
 }
 
 func init() {
-	getCmd.PersistentFlags().StringVarP(&token, "token", "t", envOrDefault("QUAY_TOKEN", appCfg.Token), "Quay.io API token (default: $QUAY_TOKEN or config file)")
-	getCmd.PersistentFlags().StringVar(&quayURL, "quay-url", envOrDefault("QUAY_URL", firstNonEmpty(appCfg.QuayURL, lib.DefaultQuayURL)), "Quay API base URL (default: $QUAY_URL or config file)")
+	getCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Quay.io API token ($QUAY_TOKEN or config file)")
+	getCmd.PersistentFlags().StringVar(&quayURL, "quay-url", lib.DefaultQuayURL, "Quay API base URL ($QUAY_URL or config file)")
 	getCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, or table")
 	rootCmd.AddCommand(getCmd)
 	getCmd.AddCommand(repositoryCmd)
