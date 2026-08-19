@@ -13,7 +13,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -119,14 +118,4 @@ func main() {
 	}
 
 	fmt.Println("\n=== Example Complete ===")
-}
-
-// prettyPrint outputs a struct as formatted JSON (utility function)
-func prettyPrint(v interface{}) {
-	data, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		log.Printf("Failed to marshal: %v", err)
-		return
-	}
-	fmt.Println(string(data))
 }

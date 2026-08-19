@@ -56,5 +56,5 @@ func configFilePath() string {
 		return ""
 	}
 
-	return filepath.Join(dir, "go-quay", "config.yaml")
+	return filepath.Join(dir, cliName, "config.yaml")
 }

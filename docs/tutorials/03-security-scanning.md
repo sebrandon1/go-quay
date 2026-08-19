@@ -162,176 +162,27 @@ if security.Data != nil && security.Data.Layer != nil {
 }
 ```
 
-## Building a Security Dashboard
+## Scanning multiple images
 
-Here's how to build a simple security dashboard for multiple images:
-
-```go
-package main
-
-import (
-    "fmt"
-    "log"
-    "os"
-
-    "github.com/sebrandon1/go-quay/lib"
-)
-
-type ImageSecurity struct {
-    Name     string
-    Tag      string
-    Status   string
-    Critical int
-    High     int
-    Medium   int
-    Low      int
-}
-
-func main() {
-    client, _ := lib.NewClient(os.Getenv("QUAY_TOKEN"))
-    namespace := "my-org"
-
-    // Images to scan
-    images := []struct {
-        repo string
-        tag  string
-    }{
-        {"app-frontend", "latest"},
-        {"app-backend", "latest"},
-        {"app-worker", "latest"},
-    }
-
-    var results []ImageSecurity
-
-    for _, img := range images {
-        result := scanImage(client, namespace, img.repo, img.tag)
-        results = append(results, result)
-    }
-
-    // Print dashboard
-    fmt.Println("Security Dashboard")
-    fmt.Println("==================")
-    fmt.Printf("%-20s %-10s %-10s %8s %8s %8s %8s\n",
-        "Image", "Tag", "Status", "Critical", "High", "Medium", "Low")
-    fmt.Println(strings.Repeat("-", 80))
-
-    for _, r := range results {
-        fmt.Printf("%-20s %-10s %-10s %8d %8d %8d %8d\n",
-            r.Name, r.Tag, r.Status, r.Critical, r.High, r.Medium, r.Low)
-    }
-}
-
-func scanImage(client *lib.Client, namespace, repo, tag string) ImageSecurity {
-    result := ImageSecurity{Name: repo, Tag: tag}
-
-    // Get repository to find manifest digest
-    repoInfo, err := client.GetRepository(namespace, repo)
-    if err != nil {
-        result.Status = "error"
-        return result
-    }
-
-    // Find tag
-    var digest string
-    for _, t := range repoInfo.Tags.Tags {
-        if t.Name == tag {
-            digest = t.ManifestDigest
-            break
-        }
-    }
-
-    if digest == "" {
-        result.Status = "not found"
-        return result
-    }
-
-    // Get security scan
-    security, err := client.GetManifestSecurity(namespace, repo, digest, true)
-    if err != nil {
-        result.Status = "error"
-        return result
-    }
-
-    result.Status = security.Status
-
-    if security.Status == "scanned" && security.Data != nil && security.Data.Layer != nil {
-        for _, feature := range security.Data.Layer.Features {
-            for _, vuln := range feature.Vulnerabilities {
-                switch vuln.Severity {
-                case "Critical":
-                    result.Critical++
-                case "High":
-                    result.High++
-                case "Medium":
-                    result.Medium++
-                case "Low":
-                    result.Low++
-                }
-            }
-        }
-    }
-
-    return result
-}
-```
-
-## Automated Security Alerts
-
-Integrate security scanning into your CI/CD pipeline:
+Loop over repos and tags, calling `GetManifestSecurity` for each digest. A full dashboard (severity counts, CI fail thresholds) is in the [security-scan example](../../examples/security-scan/main.go).
 
 ```go
-package main
-
-import (
-    "fmt"
-    "os"
-
-    "github.com/sebrandon1/go-quay/lib"
-)
-
-func main() {
-    client, _ := lib.NewClient(os.Getenv("QUAY_TOKEN"))
-
-    // Configuration
-    namespace := os.Getenv("QUAY_NAMESPACE")
-    repo := os.Getenv("QUAY_REPOSITORY")
-    tag := os.Getenv("IMAGE_TAG")
-    maxCritical := 0  // Fail if any critical
-    maxHigh := 5      // Fail if more than 5 high
-
-    // Scan the image
-    result := scanImage(client, namespace, repo, tag)
-
-    // Check thresholds
-    exitCode := 0
-
-    if result.Critical > maxCritical {
-        fmt.Printf("FAIL: Found %d critical vulnerabilities (max: %d)\n",
-            result.Critical, maxCritical)
-        exitCode = 1
-    }
-
-    if result.High > maxHigh {
-        fmt.Printf("FAIL: Found %d high vulnerabilities (max: %d)\n",
-            result.High, maxHigh)
-        exitCode = 1
-    }
-
-    if exitCode == 0 {
-        fmt.Println("PASS: Image meets security requirements")
-    }
-
-    os.Exit(exitCode)
+client, _ := lib.NewClient(os.Getenv("QUAY_TOKEN"))
+security, err := client.GetManifestSecurity(namespace, repo, digest, true)
+if err != nil {
+    log.Fatal(err)
 }
+fmt.Printf("%s/%s: %s\n", namespace, repo, security.Status)
 ```
+
+`QUAY_NAMESPACE` and `QUAY_REPOSITORY` are used by that example and by integration tests. The CLI uses `--namespace` / `--repository` (or config `namespace`) instead.
 
 ## Working with Manifest Labels
 
 Add security metadata to your images:
 
 ```go
-// Add a security scan label to a manifest
-err := client.AddManifestLabel(
+label, err := client.AddManifestLabel(
     "my-namespace",
     "my-app",
     manifestDigest,
@@ -341,9 +192,10 @@ err := client.AddManifestLabel(
 )
 if err != nil {
     log.Printf("Failed to add label: %v", err)
+} else {
+    fmt.Printf("Added label %s\n", label.ID)
 }
 
-// List all labels on a manifest
 labels, err := client.GetManifestLabels("my-namespace", "my-app", manifestDigest)
 if err != nil {
     log.Fatalf("Failed to get labels: %v", err)

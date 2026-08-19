@@ -24,11 +24,21 @@ func main() {
     // Get token from environment (recommended)
     token := os.Getenv("QUAY_TOKEN")
 
-    // Create client
+    // Create client (quay.io)
     client, err := lib.NewClient(token)
     if err != nil {
         log.Fatalf("Failed to create client: %v", err)
     }
+
+    // Self-hosted Quay:
+    // client, err := lib.NewClientWithURL(token, "https://quay.example.com/api/v1")
+
+    // Optional retries on 429 and 5xx:
+    // client.Retry = &lib.RetryConfig{
+    //     MaxRetries:     3,
+    //     InitialBackoff: time.Second,
+    //     MaxBackoff:     30 * time.Second,
+    // }
 
     // Use client...
 }
@@ -83,6 +93,11 @@ err := client.DeleteRepository(namespace, name)
 
 // Change visibility
 err := client.ChangeRepositoryVisibility(namespace, name, "public")
+
+// Paginate automatically
+allRepos, err := client.ListAllRepositories(namespace, public, starred, popularity)
+allTags, err := client.ListAllTags(namespace, name, onlyActive)
+page, err := client.ListTagsPage(namespace, name, limit, pageNum, onlyActive)
 ```
 
 ### Tag Operations
@@ -105,6 +120,9 @@ err := client.RestoreTag(namespace, repo, tagName, manifestDigest)
 
 // Revert tag
 tag, err := client.RevertTag(namespace, repo, tagName, manifestDigest)
+
+// Create or move a tag to a digest
+err := client.ChangeTag(namespace, repo, tagName, manifestDigest)
 ```
 
 ### Manifest Operations
@@ -119,7 +137,7 @@ err := client.DeleteManifest(namespace, repo, digest)
 // Labels
 labels, err := client.GetManifestLabels(namespace, repo, digest)
 label, err := client.GetManifestLabel(namespace, repo, digest, labelID)
-err := client.AddManifestLabel(namespace, repo, digest, key, value, mediaType)
+label, err := client.AddManifestLabel(namespace, repo, digest, key, value, mediaType)
 err := client.DeleteManifestLabel(namespace, repo, digest, labelID)
 ```
 
@@ -204,11 +222,17 @@ err := client.RemoveTeamRepositoryPermission(orgname, teamname, repo)
 ### Permission Operations
 
 ```go
+// Combined user/robot permissions (used by CLI `permissions list/set/remove`)
+perms, err := client.GetRepositoryPermissions(namespace, repo)
+err := client.SetRepositoryPermission(namespace, repo, username, role)
+err := client.RemoveRepositoryPermission(namespace, repo, username)
+
 // User permissions
 perms, err := client.ListUserPermissions(namespace, repo)
 perm, err := client.GetUserPermission(namespace, repo, username)
 err := client.SetUserPermission(namespace, repo, username, role)
 err := client.DeleteUserPermission(namespace, repo, username)
+perm, err := client.GetUserTransitivePermission(namespace, repo, username)
 
 // Team permissions
 perms, err := client.ListTeamPermissions(namespace, repo)
@@ -279,7 +303,7 @@ notification, err := client.CreateNotification(namespace, repo, &lib.CreateNotif
     Event:  "repo_push",
     Method: "webhook",
     Title:  "My Notification",
-    Config: lib.NotificationConfig{URL: "https://example.com/webhook"},
+    Config: map[string]interface{}{"url": "https://example.com/webhook"},
 })
 
 // Update notification
@@ -371,8 +395,8 @@ plans, err := client.GetAvailablePlans()
 billing, err := client.GetUserBilling()
 subscription, err := client.GetUserSubscription()
 
-// User invoices
-invoices, err := client.GetUserInvoices()
+// User invoices are not available in the Quay API.
+// GetUserInvoices() always returns an error.
 
 // Organization billing
 billing, err := client.GetOrganizationBilling(orgname)
@@ -499,7 +523,7 @@ err := client.DeleteProxyCacheConfig(orgname)
 
 ```go
 // Get error type details
-errorType, err := client.GetErrorType(errorType)
+details, err := client.GetErrorType("invalid_token")
 ```
 
 ### Repository Tag Listing
@@ -509,56 +533,68 @@ errorType, err := client.GetErrorType(errorType)
 tags, err := client.ListTags(namespace, repo, limit, onlyActive)
 ```
 
-## Error Handling
+### Mirror Operations
 
 ```go
+config, err := client.GetMirrorConfig(namespace, repo)
+config, err := client.CreateMirrorConfig(namespace, repo, &lib.CreateMirrorConfigRequest{
+    ExternalRef:   "docker.io/library/nginx",
+    SyncInterval:  86400,
+    RobotUsername: "myorg+mirrorbot",
+})
+config, err := client.UpdateMirrorConfig(namespace, repo, &lib.UpdateMirrorConfigRequest{
+    ExternalRef: "docker.io/library/nginx",
+})
+```
+
+## Error Handling
+
+API errors that include a Quay JSON body are returned as `*lib.QuayError`:
+
+```go
+import "errors"
+
 result, err := client.GetRepository("namespace", "repo")
 if err != nil {
-    // Check for specific errors
-    errStr := err.Error()
-
-    switch {
-    case strings.Contains(errStr, "404"):
-        // Not found
-    case strings.Contains(errStr, "401"):
-        // Authentication failed
-    case strings.Contains(errStr, "403"):
-        // Permission denied
-    case strings.Contains(errStr, "429"):
-        // Rate limited - implement backoff
-    default:
-        // Other error
+    var qerr *lib.QuayError
+    if errors.As(err, &qerr) {
+        switch qerr.StatusCode() {
+        case 404:
+            // Not found
+        case 401:
+            // Authentication failed
+        case 403:
+            // Permission denied
+        case 429:
+            // Rate limited — set client.Retry or back off
+        }
+        return
     }
+    // Network or other error
 }
 ```
 
 ## Rate Limiting
 
-Quay.io implements rate limiting. Implement exponential backoff:
+Quay.io rate-limits requests. Enable built-in retries instead of wrapping every call:
 
 ```go
-func withRetry(fn func() error, maxRetries int) error {
-    var err error
-    for i := 0; i < maxRetries; i++ {
-        err = fn()
-        if err == nil {
-            return nil
-        }
-        if strings.Contains(err.Error(), "429") {
-            time.Sleep(time.Duration(1<<i) * time.Second)
-            continue
-        }
-        return err
-    }
-    return err
+import "time"
+
+client.Retry = &lib.RetryConfig{
+    MaxRetries:     3,
+    InitialBackoff: time.Second,
+    MaxBackoff:     30 * time.Second,
 }
 ```
+
+Retries apply to HTTP 429 and 5xx. `NewClient` leaves `Retry` nil until you set it.
 
 ## Best Practices
 
 1. **Environment Variables** - Store tokens in environment variables, not code
 2. **Error Handling** - Always check errors and handle appropriately
-3. **Rate Limiting** - Implement backoff for rate limit errors
+3. **Rate Limiting** - Set `client.Retry` for 429/5xx backoff
 4. **Pagination** - Use pagination for large result sets
 5. **Minimal Permissions** - Use tokens with minimal required permissions
 

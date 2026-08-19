@@ -42,6 +42,12 @@ func TestSetVersion(t *testing.T) {
 	}
 }
 
+func TestRootCommandUse(t *testing.T) {
+	if rootCmd.Use != cliName {
+		t.Errorf("Expected root command Use %q, got %q", cliName, rootCmd.Use)
+	}
+}
+
 func TestQuayURLFlagExists(t *testing.T) {
 	flag := getCmd.PersistentFlags().Lookup("quay-url")
 	if flag == nil {

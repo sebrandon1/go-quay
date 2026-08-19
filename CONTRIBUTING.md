@@ -1,108 +1,76 @@
 # Contributing to go-quay
 
-Thank you for your interest in contributing to go-quay! This document provides guidelines and information for contributors.
+Thank you for contributing! This guide covers setup, development workflow, and how to add new API endpoints.
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
+- Go 1.26+
+- golangci-lint (for `make lint`)
+- Quay.io API token (`QUAY_TOKEN`) and organization (`QUAY_ORG`) for integration tests
 
-- Go 1.21 or later
-- Valid Quay.io API token (for integration testing)
-- golangci-lint (for linting)
-
-### Setup
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/sebrandon1/go-quay.git
-   cd go-quay
-   ```
-
-2. Install dependencies:
-   ```bash
-   go mod download
-   ```
-
-3. Build the project:
-   ```bash
-   make build
-   ```
-
-## Development Workflow
-
-### Running Tests
+## Setup
 
 ```bash
-make test
-```
-
-### Running Linter
-
-```bash
-make lint
-```
-
-### Building
-
-```bash
+git clone https://github.com/sebrandon1/go-quay.git
+cd go-quay
+go mod download
 make build
+```
+
+## Development
+
+```bash
+make test              # Unit tests
+make lint              # golangci-lint
+make vet               # go vet
+make fmt               # gofmt + goimports
+make coverage          # Unit tests with coverage report
+make govulncheck       # Vulnerability scan
+make ci                # lint + vet + test + build
+make integration-test  # Live API tests (requires QUAY_TOKEN and QUAY_ORG)
+make check-swagger-alignment  # Verify lib methods match Quay Swagger spec
+```
+
+Run a single test:
+
+```bash
+go test ./lib/ -run TestCreateRepository -v
 ```
 
 ## Code Style
 
-- Follow standard Go conventions
-- Run `go fmt` before committing
-- Ensure `golangci-lint` passes with no issues
+- Follow standard Go conventions and run `go fmt` before committing
+- All tests and lint checks must pass
 - Add tests for new functionality
 
 ## Pull Request Process
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Make your changes
-4. Run tests and linting:
-   ```bash
-   make test
-   make lint
-   ```
-5. Commit your changes with a descriptive commit message
-6. Push to your fork
-7. Open a Pull Request against the `main` branch
+1. Fork the repository and create a feature branch
+2. Make your changes with tests
+3. Run `make test` and `make lint`
+4. Update documentation if you add features or CLI commands
+5. Open a pull request against `main`
 
-### PR Requirements
+## Adding a New API Endpoint
 
-- All tests must pass
-- Linting must pass with no issues
-- Include tests for new functionality
-- Update documentation if adding new features or CLI commands
+Every API domain follows the same pattern:
 
-## Adding New Quay API Endpoints
+1. Add request/response structs to `lib/structs.go`
+2. Add client method(s) to `lib/<domain>.go`
+3. Add unit tests to `lib/<domain>_test.go` using `httptest.NewServer` and `lib.NewClientWithURL(token, server.URL+"/api/v1")`
+4. Add Cobra command in `cmd/<domain>.go` and register it in `cmd/root.go`
+5. Update `README.md` (API coverage table), `docs/cli-reference.md`, and `docs/library-guide.md`
 
-When adding support for a new Quay API endpoint:
-
-1. Add data structures to `lib/structs.go`
-2. Add the client method to `lib/client.go`
-3. Add tests to `lib/client_test.go`
-4. Add CLI command to appropriate file in `cmd/`
-5. Add CLI tests if applicable
-6. Update the README.md with usage documentation
-7. Update the API coverage table in README.md
+See [CLAUDE.md](CLAUDE.md) for architecture details.
 
 ## Project Structure
 
 ```
 go-quay/
-├── cmd/           # CLI command implementations
-│   ├── root.go    # Root command and subcommand registration
-│   ├── billing.go # Billing API commands
-│   ├── build.go   # Build API commands
-│   ├── manifest.go# Manifest API commands
-│   ├── organization.go # Organization API commands
-│   ├── repository.go   # Repository API commands
-│   └── ...        # Other API command files
+├── cmd/           # CLI commands (Cobra)
 ├── lib/           # Quay API client library
-│   ├── client.go  # HTTP client and API methods
-│   └── structs.go # Data structures
+├── docs/          # Guides, CLI reference, and tutorials
+├── examples/      # Runnable example programs
 ├── scripts/       # Helper scripts
 ├── main.go        # Application entry point
 └── Makefile       # Build and development commands
@@ -110,4 +78,4 @@ go-quay/
 
 ## Questions?
 
-If you have questions, please open an issue on GitHub.
+Open an issue on GitHub.

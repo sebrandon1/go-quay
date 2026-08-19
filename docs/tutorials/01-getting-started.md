@@ -4,7 +4,7 @@ This tutorial walks you through the basics of using the go-quay library to inter
 
 ## Prerequisites
 
-- Go 1.21 or later
+- Go 1.26+
 - A Quay.io account with API access
 - An API token from Quay.io
 
@@ -19,12 +19,13 @@ go get github.com/sebrandon1/go-quay
 ## Step 2: Obtain an API Token
 
 1. Log in to [Quay.io](https://quay.io)
-2. Go to **Account Settings** (click your username → Account Settings)
-3. Navigate to **User Settings** → **CLI Password** or **Generate Encrypted Password**
-4. Create a new token with the permissions you need:
+2. Open **Account Settings** → **Applications** (or create a **Robot Account** under your user or organization)
+3. Create a token with the permissions you need:
    - **Read repositories** - for listing and pulling
    - **Write to repositories** - for pushing images
    - **Administer organization** - for managing teams and settings
+
+Do not use **CLI Password** / **Generate Encrypted Password** — those are for `docker login` only.
 
 Alternatively, create a **Robot Account** for automation:
 1. Go to your organization or user settings
@@ -108,13 +109,15 @@ func main() {
 }
 ```
 
+For a self-hosted registry, use `lib.NewClientWithURL(token, "https://quay.example.com/api/v1")`.
+
 ## Step 5: List Repositories
 
 Now let's list repositories in a namespace:
 
 ```go
 // List repositories in your namespace
-repos, err := client.ListRepositories("your-username", false, false, 1, 10)
+repos, err := client.ListRepositories("your-username", false, false, false, 1, 10)
 if err != nil {
     log.Fatalf("Failed to list repositories: %v", err)
 }
@@ -152,33 +155,44 @@ for _, tag := range repo.Tags.Tags {
 
 ## Error Handling
 
-The go-quay library returns descriptive errors. Here's how to handle common cases:
+The go-quay library returns `*lib.QuayError` when the API sends a JSON error body:
 
 ```go
+import (
+    "errors"
+    "fmt"
+
+    "github.com/sebrandon1/go-quay/lib"
+)
+
 repo, err := client.GetRepository("namespace", "nonexistent-repo")
 if err != nil {
-    // Check for specific error types
-    if strings.Contains(err.Error(), "404") {
-        fmt.Println("Repository not found")
-    } else if strings.Contains(err.Error(), "401") {
-        fmt.Println("Authentication failed - check your token")
-    } else if strings.Contains(err.Error(), "403") {
-        fmt.Println("Access denied - insufficient permissions")
-    } else {
-        fmt.Printf("Unexpected error: %v\n", err)
+    var qerr *lib.QuayError
+    if errors.As(err, &qerr) {
+        switch qerr.StatusCode() {
+        case 404:
+            fmt.Println("Repository not found")
+        case 401:
+            fmt.Println("Authentication failed - check your token")
+        case 403:
+            fmt.Println("Access denied - insufficient permissions")
+        default:
+            fmt.Printf("API error: %v\n", err)
+        }
+        return
     }
+    fmt.Printf("Unexpected error: %v\n", err)
     return
 }
 ```
 
 ## Environment Variables
 
-For production use, store your token securely:
-
-| Variable | Description |
-|----------|-------------|
-| `QUAY_TOKEN` | Your Quay.io API token |
-| `QUAY_NAMESPACE` | Default namespace (optional) |
+| Variable | Used by | Description |
+|----------|---------|-------------|
+| `QUAY_TOKEN` | library, CLI, examples | API token |
+| `QUAY_URL` | CLI | Optional API base URL (self-hosted Quay) |
+| `QUAY_NAMESPACE` | examples and integration tests only | Default namespace; the CLI uses `--namespace` or config `namespace` instead |
 
 ## Complete Example
 

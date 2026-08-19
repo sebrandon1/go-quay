@@ -43,6 +43,6 @@ check-swagger-alignment:
 	@go run ./scripts/check-swagger-alignment.go \
 		--swagger-url="https://quay.io/api/v1/discovery" \
 		--lib-path="./lib" \
-		--base-url-var="QuayURL"
+		--base-url-var="BaseURL"
 
 .PHONY: vet build lint test integration-test clean coverage govulncheck fmt ci check-swagger-alignment

@@ -21,5 +21,11 @@
 go.work
 go.work.sum
 go-quay
+
+# Built example binaries (go build in example dirs)
+/examples/basic-usage/basic-usage
+/examples/ci-cd-integration/ci-cd-integration
+/examples/organization-management/organization-management
+/examples/security-scan/security-scan
 .vscode
 *.bck.yml
