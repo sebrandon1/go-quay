@@ -22,7 +22,7 @@ import (
 
 // GetUserRobotAccounts retrieves all robot accounts for the authenticated user
 func (c *Client) GetUserRobotAccounts() (*RobotAccounts, error) {
-	req, err := newRequest("GET", c.BaseURL+"/user/robots", nil)
+	req, err := newRequest("GET", c.buildURL("/user/robots"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robots request: %w", err)
 	}

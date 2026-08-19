@@ -22,7 +22,7 @@ import (
 
 // GetUser retrieves information about the current authenticated user
 func (c *Client) GetUser() (*UserDetails, error) {
-	req, err := newRequest("GET", c.BaseURL+"/user", nil)
+	req, err := newRequest("GET", c.buildURL("/user"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user request: %w", err)
 	}
@@ -37,7 +37,7 @@ func (c *Client) GetUser() (*UserDetails, error) {
 
 // GetStarredRepositories retrieves repositories starred by the current user
 func (c *Client) GetStarredRepositories() (*StarredRepositories, error) {
-	req, err := newRequest("GET", c.BaseURL+"/user/starred", nil)
+	req, err := newRequest("GET", c.buildURL("/user/starred"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get starred repositories request: %w", err)
 	}

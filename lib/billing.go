@@ -46,7 +46,7 @@ func (c *Client) GetOrganizationBilling(orgname string) (*BillingInfo, error) {
 // GetUserBilling returns billing information for the current user
 func (c *Client) GetUserBilling() (*BillingInfo, error) {
 	// Get new request
-	req, err := newRequest("GET", c.BaseURL+"/user/plan", nil)
+	req, err := newRequest("GET", c.buildURL("/user/plan"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user billing request: %w", err)
 	}
@@ -82,7 +82,7 @@ func (c *Client) GetOrganizationSubscription(orgname string) (*Subscription, err
 // GetUserSubscription returns subscription details for the current user
 func (c *Client) GetUserSubscription() (*Subscription, error) {
 	// Get new request
-	req, err := newRequest("GET", c.BaseURL+"/user/plan", nil)
+	req, err := newRequest("GET", c.buildURL("/user/plan"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user subscription request: %w", err)
 	}
@@ -125,7 +125,7 @@ func (c *Client) GetUserInvoices() ([]Invoice, error) {
 // GetAvailablePlans returns available subscription plans
 func (c *Client) GetAvailablePlans() ([]Subscription, error) {
 	// Get new request
-	req, err := newRequest("GET", c.BaseURL+"/plans", nil)
+	req, err := newRequest("GET", c.buildURL("/plans"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get available plans request: %w", err)
 	}
