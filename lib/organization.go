@@ -25,6 +25,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // Organization Management
@@ -38,7 +39,7 @@ func (c *Client) CreateOrganization(name, email string) (*Organization, error) {
 		return nil, fmt.Errorf("email is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/organization/"), CreateOrganizationRequest{
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/"), CreateOrganizationRequest{
 		Name:  name,
 		Email: email,
 	})
@@ -60,7 +61,7 @@ func (c *Client) GetOrganization(orgname string) (*Organization, error) {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization request: %w", err)
 	}
@@ -79,7 +80,7 @@ func (c *Client) DeleteOrganization(orgname string) error {
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/organization/%s", orgname), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s", orgname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete organization request: %w", err)
 	}
@@ -100,7 +101,7 @@ func (c *Client) UpdateOrganization(orgname, email string) (*Organization, error
 		return nil, fmt.Errorf("email is required")
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s", orgname), map[string]interface{}{
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s", orgname), map[string]interface{}{
 		"email": email,
 	})
 	if err != nil {
@@ -123,7 +124,7 @@ func (c *Client) GetOrganizationMembers(orgname string) (*OrganizationMembers, e
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/members", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/members", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization members request: %w", err)
 	}
@@ -145,7 +146,7 @@ func (c *Client) GetOrganizationMember(orgname, membername string) (*Organizatio
 		return nil, fmt.Errorf("membername is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization member request: %w", err)
 	}
@@ -167,7 +168,7 @@ func (c *Client) AddOrganizationMember(orgname, membername string) error {
 		return fmt.Errorf("membername is required")
 	}
 
-	req, err := newRequest("PUT", c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
+	req, err := newRequest(http.MethodPut, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create add organization member request: %w", err)
 	}
@@ -188,7 +189,7 @@ func (c *Client) RemoveOrganizationMember(orgname, membername string) error {
 		return fmt.Errorf("membername is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create remove organization member request: %w", err)
 	}
@@ -208,7 +209,7 @@ func (c *Client) GetOrganizationRepositories(orgname string) (*OrganizationRepos
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/repositories", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/repositories", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization repositories request: %w", err)
 	}
@@ -229,7 +230,7 @@ func (c *Client) GetOrganizationCollaborators(orgname string) (*Collaborators, e
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/collaborators", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/collaborators", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization collaborators request: %w", err)
 	}

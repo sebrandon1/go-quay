@@ -143,16 +143,38 @@ func fetchSwaggerEndpoints(url string) ([]Endpoint, error) {
 	return endpoints, nil
 }
 
+func firstSubmatch(line string, patterns ...*regexp.Regexp) string {
+	for _, p := range patterns {
+		if m := p.FindStringSubmatch(line); len(m) > 1 {
+			return m[1]
+		}
+	}
+	return ""
+}
+
+func httpMethodFromLine(pattern *regexp.Regexp, line string) string {
+	m := pattern.FindStringSubmatch(line)
+	if len(m) < 2 {
+		return ""
+	}
+	if m[1] != "" {
+		return m[1]
+	}
+	if len(m) > 2 && m[2] != "" {
+		return strings.ToUpper(m[2])
+	}
+	return ""
+}
+
 func scanSourceEndpoints(libPath, baseURLVar string) ([]ImplementedEndpoint, error) {
 	var endpoints []ImplementedEndpoint
 
-	// Patterns to match endpoint definitions
 	// Matches: c.BaseURL + "/path", fmt.Sprintf("%s/path", c.BaseURL), or c.buildURL("/path", ...)
 	urlConcatPattern := regexp.MustCompile(baseURLVar + `\s*\+\s*"(/[^"]+)"`)
 	sprintfPattern := regexp.MustCompile(`fmt\.Sprintf\s*\(\s*"%s(/[^"]+)"`)
 	buildURLPattern := regexp.MustCompile(`buildURL\s*\(\s*"(/[^"]+)"`)
-	// Match HTTP method from http.NewRequest or newRequest calls
-	methodPattern := regexp.MustCompile(`(?:http\.NewRequest|newRequest|newRequestWithBody)\s*\(\s*"(GET|POST|PUT|DELETE|PATCH)"`)
+	methodPattern := regexp.MustCompile(`(?:http\.NewRequest|newRequest|newRequestWithBody)\s*\(\s*(?:"(GET|POST|PUT|DELETE|PATCH)"|http\.Method(Get|Post|Put|Delete|Patch))`)
+	funcPattern := regexp.MustCompile(`func\s+(?:\([^)]+\)\s+)?(\w+)`)
 
 	err := filepath.Walk(libPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -170,48 +192,31 @@ func scanSourceEndpoints(libPath, baseURLVar string) ([]ImplementedEndpoint, err
 
 		scanner := bufio.NewScanner(file)
 		var currentMethod string
-		lineNum := 0
 		var currentFunc string
 
 		for scanner.Scan() {
-			lineNum++
 			line := scanner.Text()
-
-			// Track current function name
-			if funcMatch := regexp.MustCompile(`func\s+(?:\([^)]+\)\s+)?(\w+)`).FindStringSubmatch(line); len(funcMatch) > 1 {
-				currentFunc = funcMatch[1]
+			if name := firstSubmatch(line, funcPattern); name != "" {
+				currentFunc = name
+			}
+			if method := httpMethodFromLine(methodPattern, line); method != "" {
+				currentMethod = method
+			}
+			urlPath := firstSubmatch(line, urlConcatPattern, sprintfPattern, buildURLPattern)
+			if urlPath == "" {
+				continue
 			}
 
-			// Look for HTTP method
-			if methodMatch := methodPattern.FindStringSubmatch(line); len(methodMatch) > 1 {
-				currentMethod = methodMatch[1]
+			method := currentMethod
+			if method == "" {
+				method = "GET"
 			}
-
-			// Look for URL patterns
-			var urlPath string
-			if matches := urlConcatPattern.FindStringSubmatch(line); len(matches) > 1 {
-				urlPath = matches[1]
-			} else if matches := sprintfPattern.FindStringSubmatch(line); len(matches) > 1 {
-				urlPath = matches[1]
-			} else if matches := buildURLPattern.FindStringSubmatch(line); len(matches) > 1 {
-				urlPath = matches[1]
-			}
-
-			if urlPath != "" {
-				// Normalize the path (replace %s, %d with {})
-				normalizedPath := normalizePath(urlPath)
-				method := currentMethod
-				if method == "" {
-					method = "GET" // Default assumption
-				}
-
-				endpoints = append(endpoints, ImplementedEndpoint{
-					Method:     method,
-					Path:       normalizedPath,
-					SourceFile: filepath.Base(path),
-					Function:   currentFunc,
-				})
-			}
+			endpoints = append(endpoints, ImplementedEndpoint{
+				Method:     method,
+				Path:       normalizePath(urlPath),
+				SourceFile: filepath.Base(path),
+				Function:   currentFunc,
+			})
 		}
 
 		return scanner.Err()

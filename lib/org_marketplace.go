@@ -13,6 +13,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetOrganizationMarketplace gets marketplace information for an organization
@@ -21,7 +22,7 @@ func (c *Client) GetOrganizationMarketplace(orgname string) (*MarketplaceInfo, e
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/marketplace", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/marketplace", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization marketplace request: %w", err)
 	}
@@ -40,7 +41,7 @@ func (c *Client) CreateOrganizationMarketplaceSubscription(orgname string, subsc
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/marketplace", orgname), subscription)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/marketplace", orgname), subscription)
 	if err != nil {
 		return fmt.Errorf("failed to create marketplace subscription request: %w", err)
 	}
@@ -63,7 +64,7 @@ func (c *Client) BatchRemoveOrganizationMarketplaceSubscriptions(orgname string,
 	}{
 		SubscriptionIDs: subscriptionIDs,
 	}
-	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/marketplace/batchremove", orgname), body)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/marketplace/batchremove", orgname), body)
 	if err != nil {
 		return fmt.Errorf("failed to create batch remove marketplace subscriptions request: %w", err)
 	}
@@ -84,7 +85,7 @@ func (c *Client) DeleteOrganizationMarketplaceSubscription(orgname, subscription
 		return fmt.Errorf("subscriptionID is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/organization/%s/marketplace/%s", orgname, subscriptionID), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/marketplace/%s", orgname, subscriptionID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete marketplace subscription request: %w", err)
 	}

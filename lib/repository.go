@@ -16,7 +16,10 @@ ListRepositories() supports a popularity flag for pull count data.
 */
 package lib
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
 type RepositoryTags struct {
 	Tags          []Tag `json:"tags,omitempty"`
@@ -56,7 +59,7 @@ func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags
 	}
 
 	repoURL := c.buildURL("/repository/%s/%s", namespace, repository)
-	req, err := newRequest("GET", repoURL, nil)
+	req, err := newRequest(http.MethodGet, repoURL, nil)
 	if err != nil {
 		return RepositoryWithTags{}, fmt.Errorf("failed to create request for repository: %w", err)
 	}
@@ -89,7 +92,7 @@ func (c *Client) CreateRepository(namespace, repository, visibility, description
 		return nil, fmt.Errorf("visibility is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/repository"), CreateRepositoryRequest{
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository"), CreateRepositoryRequest{
 		Repository:  repository,
 		Namespace:   namespace,
 		Visibility:  visibility,
@@ -126,7 +129,7 @@ func (c *Client) UpdateRepository(namespace, repository, description, visibility
 		updateReq.Visibility = visibility
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/repository/%s/%s", namespace, repository), updateReq)
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s", namespace, repository), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update repository request: %w", err)
 	}
@@ -148,7 +151,7 @@ func (c *Client) DeleteRepository(namespace, repository string) error {
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s", namespace, repository), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete repository request: %w", err)
 	}
@@ -162,7 +165,7 @@ func (c *Client) DeleteRepository(namespace, repository string) error {
 
 // ListRepositories lists all repositories visible to the user
 func (c *Client) ListRepositories(namespace string, public, starred, popularity bool, page, limit int) (*RepositoryList, error) {
-	req, err := newRequest("GET", c.buildURL("/repository"), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list repositories request: %w", err)
 	}
@@ -266,7 +269,7 @@ func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility st
 	}{
 		Visibility: visibility,
 	}
-	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/changevisibility", namespace, repository), body)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/changevisibility", namespace, repository), body)
 	if err != nil {
 		return fmt.Errorf("failed to create change visibility request: %w", err)
 	}
@@ -287,7 +290,7 @@ func (c *Client) ListTagsPage(namespace, repository string, limit, page int, onl
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list tags request: %w", err)
 	}
@@ -321,7 +324,7 @@ func (c *Client) ListTags(namespace, repository string, limit int, onlyActive bo
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list tags request: %w", err)
 	}

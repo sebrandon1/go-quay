@@ -15,6 +15,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetRepositoryPermissions retrieves permissions for a repository
@@ -26,7 +27,7 @@ func (c *Client) GetRepositoryPermissions(namespace, repository string) (*Reposi
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/permissions", namespace, repository), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/permissions", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repository permissions request: %w", err)
 	}
@@ -55,7 +56,7 @@ func (c *Client) SetRepositoryPermission(namespace, repository, username, role s
 		return fmt.Errorf("role is required")
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/repository/%s/%s/permissions/%s", namespace, repository, username), SetRepositoryPermissionRequest{
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s/permissions/%s", namespace, repository, username), SetRepositoryPermissionRequest{
 		Role: role,
 	})
 	if err != nil {
@@ -81,7 +82,7 @@ func (c *Client) RemoveRepositoryPermission(namespace, repository, username stri
 		return fmt.Errorf("username is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/permissions/%s", namespace, repository, username), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/permissions/%s", namespace, repository, username), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create remove repository permission request: %w", err)
 	}
@@ -104,7 +105,7 @@ func (c *Client) ListUserPermissions(namespace, repository string) (*RepositoryP
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/permissions/user/", namespace, repository), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/permissions/user/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list user permissions request: %w", err)
 	}
@@ -129,7 +130,7 @@ func (c *Client) GetUserPermission(namespace, repository, username string) (*Rep
 		return nil, fmt.Errorf("username is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/permissions/user/%s", namespace, repository, username), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/permissions/user/%s", namespace, repository, username), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user permission request: %w", err)
 	}
@@ -158,7 +159,7 @@ func (c *Client) SetUserPermission(namespace, repository, username, role string)
 		return fmt.Errorf("role is required")
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/repository/%s/%s/permissions/user/%s", namespace, repository, username), SetRepositoryPermissionRequest{
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s/permissions/user/%s", namespace, repository, username), SetRepositoryPermissionRequest{
 		Role: role,
 	})
 	if err != nil {
@@ -184,7 +185,7 @@ func (c *Client) DeleteUserPermission(namespace, repository, username string) er
 		return fmt.Errorf("username is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/permissions/user/%s", namespace, repository, username), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/permissions/user/%s", namespace, repository, username), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete user permission request: %w", err)
 	}
@@ -208,7 +209,7 @@ func (c *Client) GetUserTransitivePermission(namespace, repository, username str
 		return nil, fmt.Errorf("username is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/permissions/user/%s/transitive", namespace, repository, username), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/permissions/user/%s/transitive", namespace, repository, username), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user transitive permission request: %w", err)
 	}
@@ -232,7 +233,7 @@ func (c *Client) ListTeamPermissions(namespace, repository string) (*RepositoryP
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/permissions/team/", namespace, repository), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/permissions/team/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list team permissions request: %w", err)
 	}
@@ -257,7 +258,7 @@ func (c *Client) GetTeamPermission(namespace, repository, teamname string) (*Rep
 		return nil, fmt.Errorf("teamname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/permissions/team/%s", namespace, repository, teamname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/permissions/team/%s", namespace, repository, teamname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get team permission request: %w", err)
 	}
@@ -286,7 +287,7 @@ func (c *Client) SetTeamPermission(namespace, repository, teamname, role string)
 		return fmt.Errorf("role is required")
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/repository/%s/%s/permissions/team/%s", namespace, repository, teamname), SetRepositoryPermissionRequest{
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s/permissions/team/%s", namespace, repository, teamname), SetRepositoryPermissionRequest{
 		Role: role,
 	})
 	if err != nil {
@@ -312,7 +313,7 @@ func (c *Client) DeleteTeamPermission(namespace, repository, teamname string) er
 		return fmt.Errorf("teamname is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/permissions/team/%s", namespace, repository, teamname), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/permissions/team/%s", namespace, repository, teamname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete team permission request: %w", err)
 	}
