@@ -13,6 +13,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetManifestSecurity retrieves security scan information for a specific manifest
@@ -27,7 +28,7 @@ func (c *Client) GetManifestSecurity(namespace, repository, manifestRef string, 
 		return nil, fmt.Errorf("manifestRef is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/manifest/%s/security", namespace, repository, manifestRef), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/manifest/%s/security", namespace, repository, manifestRef), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get manifest security request: %w", err)
 	}

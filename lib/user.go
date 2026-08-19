@@ -18,11 +18,12 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetUser retrieves information about the current authenticated user
 func (c *Client) GetUser() (*UserDetails, error) {
-	req, err := newRequest("GET", c.buildURL("/user"), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/user"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user request: %w", err)
 	}
@@ -37,7 +38,7 @@ func (c *Client) GetUser() (*UserDetails, error) {
 
 // GetStarredRepositories retrieves repositories starred by the current user
 func (c *Client) GetStarredRepositories() (*StarredRepositories, error) {
-	req, err := newRequest("GET", c.buildURL("/user/starred"), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/user/starred"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get starred repositories request: %w", err)
 	}
@@ -59,7 +60,7 @@ func (c *Client) StarRepository(namespace, repository string) error {
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("PUT", c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
+	req, err := newRequest(http.MethodPut, c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create star repository request: %w", err)
 	}
@@ -80,7 +81,7 @@ func (c *Client) UnstarRepository(namespace, repository string) error {
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create unstar repository request: %w", err)
 	}
@@ -98,7 +99,7 @@ func (c *Client) GetUserByUsername(username string) (*UserDetails, error) {
 		return nil, fmt.Errorf("username is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/users/%s", username), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/users/%s", username), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user by username request: %w", err)
 	}
@@ -113,7 +114,7 @@ func (c *Client) GetUserByUsername(username string) (*UserDetails, error) {
 
 // GetUserMarketplace retrieves marketplace information for the current user
 func (c *Client) GetUserMarketplace() (*MarketplaceInfo, error) {
-	req, err := newRequest("GET", c.buildURL("/user/marketplace"), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/user/marketplace"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user marketplace request: %w", err)
 	}

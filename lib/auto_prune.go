@@ -14,6 +14,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetAutoPrunePolicies retrieves auto-prune policies for an organization
@@ -22,7 +23,7 @@ func (c *Client) GetAutoPrunePolicies(orgname string) (*AutoPrunePolicies, error
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/autoprunepolicy", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/autoprunepolicy", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get auto-prune policies request: %w", err)
 	}
@@ -44,7 +45,7 @@ func (c *Client) CreateAutoPrunePolicy(orgname, method string, value int, tagPat
 		return nil, fmt.Errorf("method is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/autoprunepolicy", orgname), CreateAutoPruneRequest{
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/autoprunepolicy", orgname), CreateAutoPruneRequest{
 		Method:     method,
 		Value:      value,
 		TagPattern: tagPattern,
@@ -70,7 +71,7 @@ func (c *Client) GetAutoPrunePolicy(orgname, policyUUID string) (*AutoPrunePolic
 		return nil, fmt.Errorf("policyUUID is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get auto-prune policy request: %w", err)
 	}
@@ -95,7 +96,7 @@ func (c *Client) UpdateAutoPrunePolicy(orgname, policyUUID, method string, value
 		return nil, fmt.Errorf("method is required")
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID), CreateAutoPruneRequest{
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID), CreateAutoPruneRequest{
 		Method:     method,
 		Value:      value,
 		TagPattern: tagPattern,
@@ -121,7 +122,7 @@ func (c *Client) DeleteAutoPrunePolicy(orgname, policyUUID string) error {
 		return fmt.Errorf("policyUUID is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete auto-prune policy request: %w", err)
 	}

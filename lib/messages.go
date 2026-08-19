@@ -13,11 +13,12 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetMessages retrieves system messages for the user
 func (c *Client) GetMessages() (*Messages, error) {
-	req, err := newRequest("GET", c.buildURL("/messages"), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/messages"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create messages request: %w", err)
 	}
@@ -57,7 +58,7 @@ func (c *Client) CreateMessage(content, severity, mediaType string) (*Message, e
 		},
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/messages"), body)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/messages"), body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create message request: %w", err)
 	}

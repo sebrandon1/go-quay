@@ -20,6 +20,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetManifest retrieves detailed information about a specific manifest
@@ -34,7 +35,7 @@ func (c *Client) GetManifest(namespace, repository, manifestRef string) (*Manife
 		return nil, fmt.Errorf("manifestRef is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/manifest/%s", namespace, repository, manifestRef), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/manifest/%s", namespace, repository, manifestRef), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get manifest request: %w", err)
 	}
@@ -59,7 +60,7 @@ func (c *Client) DeleteManifest(namespace, repository, manifestRef string) error
 		return fmt.Errorf("manifestRef is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/manifest/%s", namespace, repository, manifestRef), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/manifest/%s", namespace, repository, manifestRef), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete manifest request: %w", err)
 	}
@@ -83,7 +84,7 @@ func (c *Client) GetManifestLabels(namespace, repository, manifestRef string) (*
 		return nil, fmt.Errorf("manifestRef is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/manifest/%s/labels", namespace, repository, manifestRef), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/manifest/%s/labels", namespace, repository, manifestRef), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get manifest labels request: %w", err)
 	}
@@ -123,7 +124,7 @@ func (c *Client) AddManifestLabel(namespace, repository, manifestRef, key, value
 		addReq.MediaType = mediaType
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/manifest/%s/labels", namespace, repository, manifestRef), addReq)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/manifest/%s/labels", namespace, repository, manifestRef), addReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create add manifest label request: %w", err)
 	}
@@ -151,7 +152,7 @@ func (c *Client) GetManifestLabel(namespace, repository, manifestRef, labelID st
 		return nil, fmt.Errorf("labelID is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/manifest/%s/labels/%s", namespace, repository, manifestRef, labelID), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/manifest/%s/labels/%s", namespace, repository, manifestRef, labelID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get manifest label request: %w", err)
 	}
@@ -179,7 +180,7 @@ func (c *Client) DeleteManifestLabel(namespace, repository, manifestRef, labelID
 		return fmt.Errorf("labelID is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/manifest/%s/labels/%s", namespace, repository, manifestRef, labelID), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/manifest/%s/labels/%s", namespace, repository, manifestRef, labelID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete manifest label request: %w", err)
 	}

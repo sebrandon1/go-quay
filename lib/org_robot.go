@@ -24,6 +24,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // Robot Account Management
@@ -34,7 +35,7 @@ func (c *Client) GetRobotAccounts(orgname string) (*RobotAccounts, error) {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/robots", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/robots", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get robot accounts request: %w", err)
 	}
@@ -56,7 +57,7 @@ func (c *Client) CreateRobotAccount(orgname, robotShortname, description string,
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s/robots/%s", orgname, robotShortname), CreateRobotRequest{
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/robots/%s", orgname, robotShortname), CreateRobotRequest{
 		Description:  description,
 		Unstructured: unstructured,
 	})
@@ -81,7 +82,7 @@ func (c *Client) GetRobotAccount(orgname, robotShortname string) (*RobotAccount,
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/robots/%s", orgname, robotShortname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/robots/%s", orgname, robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get robot account request: %w", err)
 	}
@@ -103,7 +104,7 @@ func (c *Client) DeleteRobotAccount(orgname, robotShortname string) error {
 		return fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/organization/%s/robots/%s", orgname, robotShortname), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/robots/%s", orgname, robotShortname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete robot account request: %w", err)
 	}
@@ -124,7 +125,7 @@ func (c *Client) RegenerateRobotToken(orgname, robotShortname string) (*RobotAcc
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("POST", c.buildURL("/organization/%s/robots/%s/regenerate", orgname, robotShortname), nil)
+	req, err := newRequest(http.MethodPost, c.buildURL("/organization/%s/robots/%s/regenerate", orgname, robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create regenerate robot token request: %w", err)
 	}
@@ -148,7 +149,7 @@ func (c *Client) GetRobotPermissions(orgname, robotShortname string) (*RobotPerm
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/robots/%s/permissions", orgname, robotShortname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/robots/%s/permissions", orgname, robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get robot permissions request: %w", err)
 	}
@@ -176,7 +177,7 @@ func (c *Client) SetRobotRepositoryPermission(orgname, robotShortname, repositor
 		return fmt.Errorf("role is required")
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s/robots/%s/permissions/%s", orgname, robotShortname, repository), map[string]interface{}{
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/robots/%s/permissions/%s", orgname, robotShortname, repository), map[string]interface{}{
 		fieldRole: role,
 	})
 	if err != nil {
@@ -202,7 +203,7 @@ func (c *Client) RemoveRobotRepositoryPermission(orgname, robotShortname, reposi
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/organization/%s/robots/%s/permissions/%s", orgname, robotShortname, repository), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/robots/%s/permissions/%s", orgname, robotShortname, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create remove robot repository permission request: %w", err)
 	}
@@ -225,7 +226,7 @@ func (c *Client) GetRobotFederation(orgname, robotShortname string) (*RobotFeder
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/robots/%s/federation", orgname, robotShortname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/robots/%s/federation", orgname, robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get robot federation request: %w", err)
 	}
@@ -247,7 +248,7 @@ func (c *Client) CreateRobotFederation(orgname, robotShortname string, configs [
 		return fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/robots/%s/federation", orgname, robotShortname), configs)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/robots/%s/federation", orgname, robotShortname), configs)
 	if err != nil {
 		return fmt.Errorf("failed to create robot federation request: %w", err)
 	}
@@ -268,7 +269,7 @@ func (c *Client) DeleteRobotFederation(orgname, robotShortname string) error {
 		return fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/organization/%s/robots/%s/federation", orgname, robotShortname), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/robots/%s/federation", orgname, robotShortname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete robot federation request: %w", err)
 	}

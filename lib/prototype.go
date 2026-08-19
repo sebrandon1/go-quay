@@ -23,6 +23,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetPrototypes retrieves all permission prototypes for an organization
@@ -31,7 +32,7 @@ func (c *Client) GetPrototypes(orgname string) (*Prototypes, error) {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/prototypes", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/prototypes", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get prototypes request: %w", err)
 	}
@@ -50,7 +51,7 @@ func (c *Client) CreatePrototype(orgname string, createReq *CreatePrototypeReque
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/prototypes", orgname), createReq)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/prototypes", orgname), createReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prototype request: %w", err)
 	}
@@ -72,7 +73,7 @@ func (c *Client) GetPrototype(orgname, prototypeUUID string) (*Prototype, error)
 		return nil, fmt.Errorf("prototypeUUID is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get prototype request: %w", err)
 	}
@@ -94,7 +95,7 @@ func (c *Client) UpdatePrototype(orgname, prototypeUUID string, updateReq *Updat
 		return nil, fmt.Errorf("prototypeUUID is required")
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), updateReq)
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update prototype request: %w", err)
 	}
@@ -116,7 +117,7 @@ func (c *Client) DeletePrototype(orgname, prototypeUUID string) error {
 		return fmt.Errorf("prototypeUUID is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/prototypes/%s", orgname, prototypeUUID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete prototype request: %w", err)
 	}

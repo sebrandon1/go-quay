@@ -13,6 +13,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetErrorType retrieves details about a specific error type
@@ -21,7 +22,7 @@ func (c *Client) GetErrorType(errorType string) (*ErrorType, error) {
 		return nil, fmt.Errorf("errorType is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/error/%s", errorType), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/error/%s", errorType), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create error type request: %w", err)
 	}

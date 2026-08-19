@@ -15,6 +15,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetApplications retrieves applications for an organization
@@ -23,7 +24,7 @@ func (c *Client) GetApplications(orgname string) (*Applications, error) {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/applications", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/applications", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get applications request: %w", err)
 	}
@@ -45,7 +46,7 @@ func (c *Client) CreateApplication(orgname, name, description, applicationURI, r
 		return nil, fmt.Errorf("name is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/applications", orgname), CreateApplicationRequest{
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/applications", orgname), CreateApplicationRequest{
 		Name:           name,
 		Description:    description,
 		ApplicationURI: applicationURI,
@@ -72,7 +73,7 @@ func (c *Client) GetApplication(orgname, clientID string) (*Application, error) 
 		return nil, fmt.Errorf("clientID is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/applications/%s", orgname, clientID), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/applications/%s", orgname, clientID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get application request: %w", err)
 	}
@@ -94,7 +95,7 @@ func (c *Client) UpdateApplication(orgname, clientID, name, description, applica
 		return nil, fmt.Errorf("clientID is required")
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/organization/%s/applications/%s", orgname, clientID), CreateApplicationRequest{
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/applications/%s", orgname, clientID), CreateApplicationRequest{
 		Name:           name,
 		Description:    description,
 		ApplicationURI: applicationURI,
@@ -121,7 +122,7 @@ func (c *Client) DeleteApplication(orgname, clientID string) error {
 		return fmt.Errorf("clientID is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/organization/%s/applications/%s", orgname, clientID), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/applications/%s", orgname, clientID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete application request: %w", err)
 	}
@@ -142,7 +143,7 @@ func (c *Client) ResetApplicationClientSecret(orgname, clientID string) (*Applic
 		return nil, fmt.Errorf("clientID is required")
 	}
 
-	req, err := newRequest("POST", c.buildURL("/organization/%s/applications/%s/resetclientsecret", orgname, clientID), nil)
+	req, err := newRequest(http.MethodPost, c.buildURL("/organization/%s/applications/%s/resetclientsecret", orgname, clientID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create reset application client secret request: %w", err)
 	}

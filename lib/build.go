@@ -17,6 +17,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetBuilds retrieves a list of builds for a repository
@@ -33,7 +34,7 @@ func (c *Client) GetBuilds(namespace, repository string, limit int) (*Builds, er
 		url = fmt.Sprintf("%s?limit=%d", url, limit)
 	}
 
-	req, err := newRequest("GET", url, nil)
+	req, err := newRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get builds request: %w", err)
 	}
@@ -58,7 +59,7 @@ func (c *Client) GetBuild(namespace, repository, buildUUID string) (*Build, erro
 		return nil, fmt.Errorf("buildUUID is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/build/%s", namespace, repository, buildUUID), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/build/%s", namespace, repository, buildUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get build request: %w", err)
 	}
@@ -83,7 +84,7 @@ func (c *Client) GetBuildLogs(namespace, repository, buildUUID string) (*BuildLo
 		return nil, fmt.Errorf("buildUUID is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/build/%s/logs", namespace, repository, buildUUID), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/build/%s/logs", namespace, repository, buildUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get build logs request: %w", err)
 	}
@@ -105,7 +106,7 @@ func (c *Client) RequestBuild(namespace, repository string, buildRequest *Reques
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/build/", namespace, repository), buildRequest)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/build/", namespace, repository), buildRequest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request build request: %w", err)
 	}
@@ -130,7 +131,7 @@ func (c *Client) CancelBuild(namespace, repository, buildUUID string) error {
 		return fmt.Errorf("buildUUID is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/build/%s", namespace, repository, buildUUID), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/build/%s", namespace, repository, buildUUID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create cancel build request: %w", err)
 	}
@@ -154,7 +155,7 @@ func (c *Client) GetBuildStatus(namespace, repository, buildUUID string) (*Build
 		return nil, fmt.Errorf("buildUUID is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/build/%s/status", namespace, repository, buildUUID), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/build/%s/status", namespace, repository, buildUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get build status request: %w", err)
 	}

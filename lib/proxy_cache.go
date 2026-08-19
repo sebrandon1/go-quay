@@ -12,6 +12,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetProxyCacheConfig retrieves proxy cache configuration for an organization
@@ -20,7 +21,7 @@ func (c *Client) GetProxyCacheConfig(orgname string) (*ProxyCacheConfig, error) 
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/proxycache", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/proxycache", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get proxy cache config request: %w", err)
 	}
@@ -42,7 +43,7 @@ func (c *Client) CreateProxyCacheConfig(orgname, upstreamRegistry string, insecu
 		return nil, fmt.Errorf("upstreamRegistry is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/proxycache", orgname), map[string]interface{}{
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/proxycache", orgname), map[string]interface{}{
 		"upstream_registry": upstreamRegistry,
 		"insecure":          insecure,
 		"expiration":        expiration,
@@ -65,7 +66,7 @@ func (c *Client) DeleteProxyCacheConfig(orgname string) error {
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/organization/%s/proxycache", orgname), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/proxycache", orgname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete proxy cache config request: %w", err)
 	}

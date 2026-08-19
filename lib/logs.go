@@ -51,7 +51,7 @@ func (c *Client) GetAggregatedLogs(namespace, repository, startDate, endDate str
 	}
 
 	// Get new request
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/aggregatelogs", namespace, repository), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/aggregatelogs", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repository aggregate logs request: %w", err)
 	}
@@ -79,7 +79,7 @@ func (c *Client) GetLogs(namespace, repository, nextPage, startDate, endDate str
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/logs", namespace, repository), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/logs", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repository logs request: %w", err)
 	}
@@ -100,7 +100,7 @@ func (c *Client) GetOrganizationLogs(orgname, nextPage, startDate, endDate strin
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/logs", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/logs", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization logs request: %w", err)
 	}
@@ -121,7 +121,7 @@ func (c *Client) GetOrganizationAggregatedLogs(orgname, startDate, endDate strin
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/organization/%s/aggregatelogs", orgname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/aggregatelogs", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization aggregate logs request: %w", err)
 	}
@@ -145,7 +145,7 @@ func (c *Client) ExportOrganizationLogs(orgname string, request *ExportLogsReque
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/organization/%s/exportlogs", orgname), request)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/exportlogs", orgname), request)
 	if err != nil {
 		return fmt.Errorf("failed to create export organization logs request: %w", err)
 	}
@@ -159,7 +159,7 @@ func (c *Client) ExportOrganizationLogs(orgname string, request *ExportLogsReque
 
 // GetUserLogs returns the logs for the current user
 func (c *Client) GetUserLogs(nextPage, startDate, endDate string) (*Logs, error) {
-	req, err := newRequest("GET", c.buildURL("/user/logs"), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/user/logs"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user logs request: %w", err)
 	}
@@ -176,7 +176,7 @@ func (c *Client) GetUserLogs(nextPage, startDate, endDate string) (*Logs, error)
 
 // GetUserAggregatedLogs returns the aggregated logs for the current user
 func (c *Client) GetUserAggregatedLogs(startDate, endDate string) (*AggregatedLogs, error) {
-	req, err := newRequest("GET", c.buildURL("/user/aggregatelogs"), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/user/aggregatelogs"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user aggregate logs request: %w", err)
 	}
@@ -196,7 +196,7 @@ func (c *Client) GetUserAggregatedLogs(startDate, endDate string) (*AggregatedLo
 
 // ExportUserLogs exports the logs for the current user
 func (c *Client) ExportUserLogs(request *ExportLogsRequest) error {
-	req, err := newRequestWithBody("POST", c.buildURL("/user/exportlogs"), request)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/user/exportlogs"), request)
 	if err != nil {
 		return fmt.Errorf("failed to create export user logs request: %w", err)
 	}
@@ -217,7 +217,7 @@ func (c *Client) ExportRepositoryLogs(namespace, repository string, request *Exp
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/exportlogs", namespace, repository), request)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/exportlogs", namespace, repository), request)
 	if err != nil {
 		return fmt.Errorf("failed to create export repository logs request: %w", err)
 	}

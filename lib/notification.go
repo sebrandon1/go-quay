@@ -34,6 +34,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetNotifications retrieves all notifications for a repository
@@ -45,7 +46,7 @@ func (c *Client) GetNotifications(namespace, repository string) (*RepositoryNoti
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/notification/", namespace, repository), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/notification/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get notifications request: %w", err)
 	}
@@ -70,7 +71,7 @@ func (c *Client) GetNotification(namespace, repository, uuid string) (*Repositor
 		return nil, fmt.Errorf("uuid is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get notification request: %w", err)
 	}
@@ -92,7 +93,7 @@ func (c *Client) CreateNotification(namespace, repository string, notificationRe
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/notification/", namespace, repository), notificationReq)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/notification/", namespace, repository), notificationReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create notification request: %w", err)
 	}
@@ -117,7 +118,7 @@ func (c *Client) DeleteNotification(namespace, repository, uuid string) error {
 		return fmt.Errorf("uuid is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete notification request: %w", err)
 	}
@@ -141,7 +142,7 @@ func (c *Client) TestNotification(namespace, repository, uuid string) error {
 		return fmt.Errorf("uuid is required")
 	}
 
-	req, err := newRequest("POST", c.buildURL("/repository/%s/%s/notification/%s/test", namespace, repository, uuid), nil)
+	req, err := newRequest(http.MethodPost, c.buildURL("/repository/%s/%s/notification/%s/test", namespace, repository, uuid), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create test notification request: %w", err)
 	}
@@ -165,7 +166,7 @@ func (c *Client) ResetNotification(namespace, repository, uuid string) error {
 		return fmt.Errorf("uuid is required")
 	}
 
-	req, err := newRequest("POST", c.buildURL("/repository/%s/%s/notification/%s/reset", namespace, repository, uuid), nil)
+	req, err := newRequest(http.MethodPost, c.buildURL("/repository/%s/%s/notification/%s/reset", namespace, repository, uuid), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create reset notification request: %w", err)
 	}
@@ -189,7 +190,7 @@ func (c *Client) UpdateNotification(namespace, repository, uuid string, notifica
 		return nil, fmt.Errorf("uuid is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), notificationReq)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), notificationReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update notification request: %w", err)
 	}

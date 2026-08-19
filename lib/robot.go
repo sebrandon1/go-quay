@@ -18,11 +18,12 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetUserRobotAccounts retrieves all robot accounts for the authenticated user
 func (c *Client) GetUserRobotAccounts() (*RobotAccounts, error) {
-	req, err := newRequest("GET", c.buildURL("/user/robots"), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/user/robots"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robots request: %w", err)
 	}
@@ -41,7 +42,7 @@ func (c *Client) GetUserRobotAccount(robotShortname string) (*RobotAccount, erro
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/user/robots/%s", robotShortname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/user/robots/%s", robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robot request: %w", err)
 	}
@@ -65,7 +66,7 @@ func (c *Client) CreateUserRobotAccount(robotShortname, description string, unst
 		Unstructured: unstructured,
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/user/robots/%s", robotShortname), createReq)
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/user/robots/%s", robotShortname), createReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user robot request: %w", err)
 	}
@@ -84,7 +85,7 @@ func (c *Client) DeleteUserRobotAccount(robotShortname string) error {
 		return fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/user/robots/%s", robotShortname), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/user/robots/%s", robotShortname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete user robot request: %w", err)
 	}
@@ -102,7 +103,7 @@ func (c *Client) RegenerateUserRobotToken(robotShortname string) (*RobotAccount,
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("POST", c.buildURL("/user/robots/%s/regenerate", robotShortname), nil)
+	req, err := newRequest(http.MethodPost, c.buildURL("/user/robots/%s/regenerate", robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create regenerate user robot token request: %w", err)
 	}
@@ -121,7 +122,7 @@ func (c *Client) GetUserRobotPermissions(robotShortname string) (*RobotPermissio
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/user/robots/%s/permissions", robotShortname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/user/robots/%s/permissions", robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robot permissions request: %w", err)
 	}
@@ -140,7 +141,7 @@ func (c *Client) GetUserRobotFederation(robotShortname string) (*RobotFederation
 		return nil, fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/user/robots/%s/federation", robotShortname), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/user/robots/%s/federation", robotShortname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user robot federation request: %w", err)
 	}
@@ -159,7 +160,7 @@ func (c *Client) CreateUserRobotFederation(robotShortname string, configs []Robo
 		return fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/user/robots/%s/federation", robotShortname), configs)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/user/robots/%s/federation", robotShortname), configs)
 	if err != nil {
 		return fmt.Errorf("failed to create user robot federation request: %w", err)
 	}
@@ -177,7 +178,7 @@ func (c *Client) DeleteUserRobotFederation(robotShortname string) error {
 		return fmt.Errorf("robotShortname is required")
 	}
 
-	req, err := newRequest("DELETE", c.buildURL("/user/robots/%s/federation", robotShortname), nil)
+	req, err := newRequest(http.MethodDelete, c.buildURL("/user/robots/%s/federation", robotShortname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete user robot federation request: %w", err)
 	}

@@ -12,6 +12,7 @@ package lib
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // GetMirrorConfig retrieves mirror configuration for a repository
@@ -23,7 +24,7 @@ func (c *Client) GetMirrorConfig(namespace, repository string) (*MirrorConfig, e
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest("GET", c.buildURL("/repository/%s/%s/mirror", namespace, repository), nil)
+	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/mirror", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get mirror config request: %w", err)
 	}
@@ -45,7 +46,7 @@ func (c *Client) CreateMirrorConfig(namespace, repository string, config *Create
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequestWithBody("POST", c.buildURL("/repository/%s/%s/mirror", namespace, repository), config)
+	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/mirror", namespace, repository), config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create mirror config request: %w", err)
 	}
@@ -67,7 +68,7 @@ func (c *Client) UpdateMirrorConfig(namespace, repository string, config *Update
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequestWithBody("PUT", c.buildURL("/repository/%s/%s/mirror", namespace, repository), config)
+	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s/mirror", namespace, repository), config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update mirror config request: %w", err)
 	}

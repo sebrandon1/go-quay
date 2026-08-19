@@ -152,7 +152,8 @@ func scanSourceEndpoints(libPath, baseURLVar string) ([]ImplementedEndpoint, err
 	sprintfPattern := regexp.MustCompile(`fmt\.Sprintf\s*\(\s*"%s(/[^"]+)"`)
 	buildURLPattern := regexp.MustCompile(`buildURL\s*\(\s*"(/[^"]+)"`)
 	// Match HTTP method from http.NewRequest or newRequest calls
-	methodPattern := regexp.MustCompile(`(?:http\.NewRequest|newRequest|newRequestWithBody)\s*\(\s*"(GET|POST|PUT|DELETE|PATCH)"`)
+	// (string literals or net/http Method* constants)
+	methodPattern := regexp.MustCompile(`(?:http\.NewRequest|newRequest|newRequestWithBody)\s*\(\s*(?:"(GET|POST|PUT|DELETE|PATCH)"|http\.Method(Get|Post|Put|Delete|Patch))`)
 
 	err := filepath.Walk(libPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -184,7 +185,12 @@ func scanSourceEndpoints(libPath, baseURLVar string) ([]ImplementedEndpoint, err
 
 			// Look for HTTP method
 			if methodMatch := methodPattern.FindStringSubmatch(line); len(methodMatch) > 1 {
-				currentMethod = methodMatch[1]
+				switch {
+				case methodMatch[1] != "":
+					currentMethod = methodMatch[1]
+				case len(methodMatch) > 2 && methodMatch[2] != "":
+					currentMethod = strings.ToUpper(methodMatch[2])
+				}
 			}
 
 			// Look for URL patterns
