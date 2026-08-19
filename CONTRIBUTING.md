@@ -58,7 +58,7 @@ Every API domain follows the same pattern:
 1. Add request/response structs to `lib/structs.go`
 2. Add client method(s) to `lib/<domain>.go`
 3. Add unit tests to `lib/<domain>_test.go` using `httptest.NewServer` and `lib.NewClientWithURL(token, server.URL+"/api/v1")`
-4. Add Cobra command in `cmd/<domain>.go` and register it in `cmd/root.go`
+4. Add Cobra command in `cmd/<domain>.go` and register it in `cmd/root.go` under `get`. For create/delete/update/list/info actions, also register a verb-first alias in `cmd/zz_verbs.go` (clone the command; Cobra allows only one parent).
 5. Update `README.md` (API coverage table), `docs/cli-reference.md`, and `docs/library-guide.md`
 
 See [CLAUDE.md](CLAUDE.md) for architecture details.

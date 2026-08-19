@@ -30,7 +30,7 @@ sudo mv go-quay /usr/local/bin/
 ### Container image
 
 ```bash
-podman run --rm quay.io/bapalm/go-quay get repository info \
+podman run --rm quay.io/bapalm/go-quay info repository \
   -n myorg -r myapp -t "$QUAY_TOKEN"
 ```
 
@@ -86,14 +86,16 @@ func main() {
 
 ```bash
 # Get repository info
-go-quay get repository info -n myorg -r myapp -t "$QUAY_TOKEN"
+go-quay info repository -n myorg -r myapp -t "$QUAY_TOKEN"
 
 # List repositories sorted by pull count
-go-quay get repository list -n myorg --popularity --table -t "$QUAY_TOKEN"
+go-quay list repository -n myorg --popularity --table -t "$QUAY_TOKEN"
 
 # Security scan a manifest
-go-quay get secscan info -n myorg -r myapp -m sha256:abc123... -t "$QUAY_TOKEN"
+go-quay info secscan -n myorg -r myapp -m sha256:abc123... -t "$QUAY_TOKEN"
 ```
+
+Mutating commands use the same verb-first shape (`create` / `delete` / `update`). `go-quay get …` still works; mutating actions under `get` are deprecated.
 
 ## Guides
 

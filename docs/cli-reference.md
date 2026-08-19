@@ -2,9 +2,36 @@
 
 Complete command reference for the `go-quay` CLI.
 
+## Command structure
+
+Preferred form is verb-first:
+
+```bash
+go-quay <verb> <resource> [flags]
+```
+
+| Verb | Purpose |
+|------|---------|
+| `create` | Create or add a resource |
+| `delete` | Delete or remove a resource |
+| `update` | Update, set, or change a resource |
+| `list` | List resources |
+| `info` | Show a single resource |
+
+Examples:
+
+```bash
+go-quay create repository -n myorg -r myapp --visibility private
+go-quay list repository -n myorg
+go-quay info repository -n myorg -r myapp
+go-quay delete repository -n myorg -r myapp --confirm
+```
+
+`go-quay get <resource> <action>` still works. Mutating actions under `get` print a deprecation warning pointing at the verb-first command. Read-only groups that do not map to a single resource (`billing`, `logs`, `search`, `discovery`) remain under `get` only.
+
 ## Global flags and configuration
 
-Every `get` subcommand inherits these flags:
+Every command inherits these flags:
 
 | Flag | Env / config | Description |
 |------|----------------|-------------|
@@ -384,7 +411,7 @@ Full CRUD operations for repository management.
 
 ### Get repository information with tags
 ```bash
-go-quay get repository info \
+go-quay info repository \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --token YOUR_TOKEN
@@ -392,7 +419,7 @@ go-quay get repository info \
 
 ### Create a new repository
 ```bash
-go-quay get repository create \
+go-quay create repository \
   --namespace myorg \
   --repository mynewrepo \
   --visibility private \
@@ -402,7 +429,7 @@ go-quay get repository create \
 
 ### Update repository settings
 ```bash
-go-quay get repository update \
+go-quay update repository \
   --namespace myorg \
   --repository myrepo \
   --description "Updated description" \
@@ -411,7 +438,7 @@ go-quay get repository update \
 
 ### Delete a repository
 ```bash
-go-quay get repository delete \
+go-quay delete repository \
   --namespace myorg \
   --repository oldrepo \
   --confirm \
@@ -420,12 +447,12 @@ go-quay get repository delete \
 
 ### List repositories
 ```bash
-go-quay get repository list \
+go-quay list repository \
   --namespace myorg \
   --token YOUR_TOKEN
 
 # With filters
-go-quay get repository list \
+go-quay list repository \
   --namespace myorg \
   --public \
   --starred \
@@ -440,7 +467,7 @@ go-quay get repository list \
 
 ### Change repository visibility
 ```bash
-go-quay get repository change-visibility \
+go-quay update visibility \
   --namespace myorg \
   --repository myrepo \
   --visibility public \

@@ -5,9 +5,9 @@
 
 set -e
 
-BINARY="./bin/go-quay"
+BINARY="./go-quay"
 if [ ! -f "$BINARY" ]; then
-	BINARY="./go-quay"
+	BINARY="./bin/go-quay"
 fi
 
 # Check if binary exists
@@ -20,6 +20,18 @@ echo "Testing CLI command structure..."
 
 echo "Testing main commands..."
 $BINARY get --help
+$BINARY create --help
+$BINARY delete --help
+$BINARY update --help
+$BINARY list --help
+$BINARY info --help
+
+echo "Testing verb-first repository commands..."
+$BINARY create repository --help
+$BINARY delete repository --help
+$BINARY update repository --help
+$BINARY list repository --help
+$BINARY info repository --help
 
 echo "Testing repository commands..."
 $BINARY get repository --help
