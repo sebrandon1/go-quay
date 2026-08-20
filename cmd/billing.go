@@ -115,12 +115,9 @@ var userInvoicesCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		invoices, err := client.GetUserInvoices(cmd.Context())
-		if err != nil {
-			return fmt.Errorf("getting user invoices: %w", err)
-		}
-
-		return printJSON(invoices)
+		// GetUserInvoices always errors: Quay has no user-invoice endpoint.
+		_, err = client.GetUserInvoices(cmd.Context())
+		return fmt.Errorf("getting user invoices: %w", err)
 	},
 }
 
