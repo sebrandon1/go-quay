@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -95,7 +98,9 @@ func init() {
 	getCmd.AddCommand(mirrorCmd)
 }
 
-// Execute executes the root command.
+// Execute executes the root command, canceling in-flight HTTP on interrupt.
 func Execute() error {
-	return rootCmd.Execute()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	return rootCmd.ExecuteContext(ctx)
 }

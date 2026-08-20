@@ -22,19 +22,23 @@ Robot accounts are service accounts designed for automation. They provide:
 package main
 
 import (
+    "context"
     "fmt"
     "log"
     "os"
+    "time"
 
     "github.com/sebrandon1/go-quay/lib"
 )
 
 func main() {
     client, _ := lib.NewClient(os.Getenv("QUAY_TOKEN"))
+    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+    defer cancel()
     orgName := "my-org"
 
     // Create a robot account
-    robot, err := client.CreateRobotAccount(
+    robot, err := client.CreateRobotAccount(ctx, 
         orgName,
         "ci-deploy",                    // short name (becomes org+ci-deploy)
         "CI/CD deployment automation",  // description
@@ -53,7 +57,7 @@ func main() {
 ### Listing Robot Accounts
 
 ```go
-robots, err := client.GetRobotAccounts("my-org")
+robots, err := client.GetRobotAccounts(ctx, "my-org")
 if err != nil {
     log.Fatalf("Failed to list robots: %v", err)
 }
@@ -69,7 +73,7 @@ for _, robot := range robots.Robots {
 If a token is compromised:
 
 ```go
-newRobot, err := client.RegenerateRobotToken("my-org", "ci-deploy")
+newRobot, err := client.RegenerateRobotToken(ctx, "my-org", "ci-deploy")
 if err != nil {
     log.Fatalf("Failed to regenerate: %v", err)
 }
@@ -84,13 +88,13 @@ You can also create robots at the user level:
 
 ```go
 // Create user robot
-robot, err := client.CreateUserRobotAccount("my-deploy-bot", "Personal deployment bot", nil)
+robot, err := client.CreateUserRobotAccount(ctx, "my-deploy-bot", "Personal deployment bot", nil)
 
 // List user robots
-robots, err := client.GetUserRobotAccounts()
+robots, err := client.GetUserRobotAccounts(ctx)
 
 // Regenerate user robot token
-newRobot, err := client.RegenerateUserRobotToken("my-deploy-bot")
+newRobot, err := client.RegenerateUserRobotToken(ctx, "my-deploy-bot")
 ```
 
 ## Setting Repository Permissions
@@ -99,7 +103,7 @@ Grant robots access to specific repositories:
 
 ```go
 // Grant write access to a repository
-err := client.SetUserPermission(
+err := client.SetUserPermission(ctx, 
     "my-org",                    // namespace
     "my-app",                    // repository
     "my-org+ci-deploy",          // robot username
@@ -112,7 +116,7 @@ if err != nil {
 fmt.Println("Permission granted!")
 
 // Verify the permission
-perm, err := client.GetUserPermission("my-org", "my-app", "my-org+ci-deploy")
+perm, err := client.GetUserPermission(ctx, "my-org", "my-app", "my-org+ci-deploy")
 if err != nil {
     log.Fatalf("Failed to verify: %v", err)
 }
@@ -134,7 +138,7 @@ You can also grant permissions to entire teams:
 
 ```go
 // Set team permission
-err := client.SetTeamPermission(
+err := client.SetTeamPermission(ctx, 
     "my-org",
     "my-app",
     "developers",  // team name
@@ -142,7 +146,7 @@ err := client.SetTeamPermission(
 )
 
 // List team permissions
-perms, err := client.ListTeamPermissions("my-org", "my-app")
+perms, err := client.ListTeamPermissions(ctx, "my-org", "my-app")
 ```
 
 ## Webhook Notifications
@@ -152,7 +156,7 @@ Set up webhooks to notify external services when events occur:
 ### Creating a Webhook
 
 ```go
-notification, err := client.CreateNotification(
+notification, err := client.CreateNotification(ctx, 
     "my-org",
     "my-app",
     &lib.CreateNotificationRequest{
@@ -196,7 +200,7 @@ fmt.Printf("Notification created: %s\n", notification.UUID)
 ### Slack Integration
 
 ```go
-notification, err := client.CreateNotification(
+notification, err := client.CreateNotification(ctx, 
     "my-org",
     "my-app",
     &lib.CreateNotificationRequest{
@@ -214,7 +218,7 @@ notification, err := client.CreateNotification(
 
 ```go
 // Test a notification
-err := client.TestNotification("my-org", "my-app", notificationUUID)
+err := client.TestNotification(ctx, "my-org", "my-app", notificationUUID)
 if err != nil {
     log.Printf("Test failed: %v\n", err)
 } else {
@@ -226,16 +230,16 @@ if err != nil {
 
 ```go
 // List all notifications
-notifications, err := client.GetNotifications("my-org", "my-app")
+notifications, err := client.GetNotifications(ctx, "my-org", "my-app")
 for _, n := range notifications.Notifications {
     fmt.Printf("- %s: %s (%s)\n", n.UUID[:8], n.Event, n.Method)
 }
 
 // Reset failure count
-err = client.ResetNotification("my-org", "my-app", notificationUUID)
+err = client.ResetNotification(ctx, "my-org", "my-app", notificationUUID)
 
 // Delete a notification
-err = client.DeleteNotification("my-org", "my-app", notificationUUID)
+err = client.DeleteNotification(ctx, "my-org", "my-app", notificationUUID)
 ```
 
 ## Build Triggers
@@ -245,7 +249,7 @@ Build triggers automatically build images when code is pushed to a repository.
 ### Listing Triggers
 
 ```go
-triggers, err := client.GetTriggers("my-org", "my-app")
+triggers, err := client.GetTriggers(ctx, "my-org", "my-app")
 if err != nil {
     log.Fatalf("Failed to list triggers: %v", err)
 }
@@ -262,7 +266,7 @@ for _, t := range triggers.Triggers {
 ### Getting Trigger Details
 
 ```go
-trigger, err := client.GetTrigger("my-org", "my-app", triggerUUID)
+trigger, err := client.GetTrigger(ctx, "my-org", "my-app", triggerUUID)
 if err != nil {
     log.Fatalf("Failed to get trigger: %v", err)
 }
@@ -276,7 +280,7 @@ fmt.Printf("Enabled: %v\n", trigger.Enabled)
 
 ```go
 // Start a build from a trigger
-build, err := client.StartTriggerBuild("my-org", "my-app", triggerUUID, nil)
+build, err := client.StartTriggerBuild(ctx, "my-org", "my-app", triggerUUID, nil)
 if err != nil {
     log.Fatalf("Failed to start build: %v", err)
 }
@@ -289,7 +293,7 @@ fmt.Printf("Status: %s\n", build.Phase)
 
 ```go
 // Activate a trigger with configuration
-trigger, err := client.ActivateTrigger(
+trigger, err := client.ActivateTrigger(ctx, 
     "my-org",
     "my-app",
     triggerUUID,
@@ -311,9 +315,9 @@ fmt.Printf("Trigger activated: %s\n", trigger.ID)
 Typical order: create the repo, create a robot, `SetUserPermission` for `org+robot`, then `CreateNotification` for `repo_push` / `vulnerability_found`. The runnable program is [ci-cd-integration](../../examples/ci-cd-integration/main.go).
 
 ```go
-robot, err := client.CreateRobotAccount(org, robotName, "CI/CD builder", nil)
-err = client.SetUserPermission(org, repo, org+"+"+robotName, "write")
-notification, err := client.CreateNotification(org, repo, &lib.CreateNotificationRequest{
+robot, err := client.CreateRobotAccount(ctx, org, robotName, "CI/CD builder", nil)
+err = client.SetUserPermission(ctx, org, repo, org+"+"+robotName, "write")
+notification, err := client.CreateNotification(ctx, org, repo, &lib.CreateNotificationRequest{
     Event:  "repo_push",
     Method: "webhook",
     Title:  "CI Build Trigger",

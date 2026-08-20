@@ -23,12 +23,13 @@ Supported trigger services:
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetTriggers retrieves all build triggers for a repository
-func (c *Client) GetTriggers(namespace, repository string) (*BuildTriggers, error) {
+func (c *Client) GetTriggers(ctx context.Context, namespace, repository string) (*BuildTriggers, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -36,7 +37,7 @@ func (c *Client) GetTriggers(namespace, repository string) (*BuildTriggers, erro
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/trigger/", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/trigger/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get triggers request: %w", err)
 	}
@@ -50,7 +51,7 @@ func (c *Client) GetTriggers(namespace, repository string) (*BuildTriggers, erro
 }
 
 // GetTrigger retrieves a specific build trigger by UUID
-func (c *Client) GetTrigger(namespace, repository, triggerUUID string) (*BuildTrigger, error) {
+func (c *Client) GetTrigger(ctx context.Context, namespace, repository, triggerUUID string) (*BuildTrigger, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -61,7 +62,7 @@ func (c *Client) GetTrigger(namespace, repository, triggerUUID string) (*BuildTr
 		return nil, fmt.Errorf("triggerUUID is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get trigger request: %w", err)
 	}
@@ -75,7 +76,7 @@ func (c *Client) GetTrigger(namespace, repository, triggerUUID string) (*BuildTr
 }
 
 // DeleteTrigger deletes a build trigger
-func (c *Client) DeleteTrigger(namespace, repository, triggerUUID string) error {
+func (c *Client) DeleteTrigger(ctx context.Context, namespace, repository, triggerUUID string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -86,7 +87,7 @@ func (c *Client) DeleteTrigger(namespace, repository, triggerUUID string) error 
 		return fmt.Errorf("triggerUUID is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete trigger request: %w", err)
 	}
@@ -99,7 +100,7 @@ func (c *Client) DeleteTrigger(namespace, repository, triggerUUID string) error 
 }
 
 // UpdateTrigger updates a build trigger (enable/disable)
-func (c *Client) UpdateTrigger(namespace, repository, triggerUUID string, enabled bool) (*BuildTrigger, error) {
+func (c *Client) UpdateTrigger(ctx context.Context, namespace, repository, triggerUUID string, enabled bool) (*BuildTrigger, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -110,7 +111,7 @@ func (c *Client) UpdateTrigger(namespace, repository, triggerUUID string, enable
 		return nil, fmt.Errorf("triggerUUID is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), UpdateTriggerRequest{
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), UpdateTriggerRequest{
 		Enabled: enabled,
 	})
 	if err != nil {
@@ -126,7 +127,7 @@ func (c *Client) UpdateTrigger(namespace, repository, triggerUUID string, enable
 }
 
 // StartTriggerBuild manually starts a build from a trigger
-func (c *Client) StartTriggerBuild(namespace, repository, triggerUUID string, triggerReq *ManualTriggerRequest) (*Build, error) {
+func (c *Client) StartTriggerBuild(ctx context.Context, namespace, repository, triggerUUID string, triggerReq *ManualTriggerRequest) (*Build, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -142,7 +143,7 @@ func (c *Client) StartTriggerBuild(namespace, repository, triggerUUID string, tr
 		body = triggerReq
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/trigger/%s/start", namespace, repository, triggerUUID), body)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/trigger/%s/start", namespace, repository, triggerUUID), body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create start trigger build request: %w", err)
 	}
@@ -156,7 +157,7 @@ func (c *Client) StartTriggerBuild(namespace, repository, triggerUUID string, tr
 }
 
 // ActivateTrigger activates a build trigger with configuration
-func (c *Client) ActivateTrigger(namespace, repository, triggerUUID string, activateReq *ActivateTriggerRequest) (*BuildTrigger, error) {
+func (c *Client) ActivateTrigger(ctx context.Context, namespace, repository, triggerUUID string, activateReq *ActivateTriggerRequest) (*BuildTrigger, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -167,7 +168,7 @@ func (c *Client) ActivateTrigger(namespace, repository, triggerUUID string, acti
 		return nil, fmt.Errorf("triggerUUID is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/trigger/%s/activate", namespace, repository, triggerUUID), activateReq)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/trigger/%s/activate", namespace, repository, triggerUUID), activateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create activate trigger request: %w", err)
 	}
@@ -181,7 +182,7 @@ func (c *Client) ActivateTrigger(namespace, repository, triggerUUID string, acti
 }
 
 // GetTriggerBuilds gets the builds started by a specific trigger
-func (c *Client) GetTriggerBuilds(namespace, repository, triggerUUID string, limit int) (*Builds, error) {
+func (c *Client) GetTriggerBuilds(ctx context.Context, namespace, repository, triggerUUID string, limit int) (*Builds, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -192,7 +193,7 @@ func (c *Client) GetTriggerBuilds(namespace, repository, triggerUUID string, lim
 		return nil, fmt.Errorf("triggerUUID is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/trigger/%s/builds", namespace, repository, triggerUUID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/trigger/%s/builds", namespace, repository, triggerUUID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get trigger builds request: %w", err)
 	}

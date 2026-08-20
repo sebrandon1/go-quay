@@ -15,6 +15,7 @@ Create a new container repository:
 package main
 
 import (
+    "context"
     "fmt"
     "log"
     "os"
@@ -24,9 +25,10 @@ import (
 
 func main() {
     client, _ := lib.NewClient(os.Getenv("QUAY_TOKEN"))
+    ctx := context.Background()
 
     // Create a private repository
-    repo, err := client.CreateRepository(
+    repo, err := client.CreateRepository(ctx, 
         "my-namespace",          // namespace (org or username)
         "my-new-app",           // repository name
         "private",              // visibility: "private" or "public"
@@ -46,7 +48,7 @@ List all repositories you have access to:
 
 ```go
 // List repositories with filters
-repos, err := client.ListRepositories(
+repos, err := client.ListRepositories(ctx, 
     "my-namespace", // namespace (empty for all)
     false,          // include public repos
     false,          // only starred repos
@@ -69,7 +71,7 @@ for _, r := range repos.Repositories {
 Fetch complete repository information including tags:
 
 ```go
-repo, err := client.GetRepository("my-namespace", "my-app")
+repo, err := client.GetRepository(ctx, "my-namespace", "my-app")
 if err != nil {
     log.Fatalf("Failed to get repository: %v", err)
 }
@@ -103,7 +105,7 @@ Modify repository settings:
 
 ```go
 // Update description and visibility
-updatedRepo, err := client.UpdateRepository(
+updatedRepo, err := client.UpdateRepository(ctx, 
     "my-namespace",
     "my-app",
     "Updated description for my app", // new description
@@ -119,7 +121,7 @@ fmt.Printf("Updated: %s/%s\n", updatedRepo.Namespace, updatedRepo.Name)
 You can also change just the visibility:
 
 ```go
-err := client.ChangeRepositoryVisibility("my-namespace", "my-app", "private")
+err := client.ChangeRepositoryVisibility(ctx, "my-namespace", "my-app", "private")
 if err != nil {
     log.Fatalf("Failed to change visibility: %v", err)
 }
@@ -131,7 +133,7 @@ fmt.Println("Repository is now private")
 ### Get Tag Details
 
 ```go
-tag, err := client.GetTag("my-namespace", "my-app", "v1.0.0")
+tag, err := client.GetTag(ctx, "my-namespace", "my-app", "v1.0.0")
 if err != nil {
     log.Fatalf("Failed to get tag: %v", err)
 }
@@ -144,7 +146,7 @@ fmt.Printf("Digest: %s\n", tag.ManifestDigest)
 
 ```go
 // Set tag to expire in 30 days
-updatedTag, err := client.UpdateTag(
+updatedTag, err := client.UpdateTag(ctx, 
     "my-namespace",
     "my-app",
     "latest",
@@ -160,7 +162,7 @@ fmt.Printf("Tag %s will expire at %s\n", updatedTag.Name, updatedTag.Expiration)
 ### View Tag History
 
 ```go
-history, err := client.GetTagHistory("my-namespace", "my-app", "latest")
+history, err := client.GetTagHistory(ctx, "my-namespace", "my-app", "latest")
 if err != nil {
     log.Fatalf("Failed to get history: %v", err)
 }
@@ -178,7 +180,7 @@ for _, entry := range history.Tags {
 ### Delete a Tag
 
 ```go
-err := client.DeleteTag("my-namespace", "my-app", "old-version")
+err := client.DeleteTag(ctx, "my-namespace", "my-app", "old-version")
 if err != nil {
     log.Fatalf("Failed to delete tag: %v", err)
 }
@@ -190,7 +192,7 @@ fmt.Println("Tag deleted")
 Restore a tag to a previous image:
 
 ```go
-err := client.RestoreTag(
+err := client.RestoreTag(ctx, 
     "my-namespace",
     "my-app",
     "latest",
@@ -205,7 +207,7 @@ fmt.Println("Tag restored")
 ### Change a tag to a digest
 
 ```go
-err := client.ChangeTag("my-namespace", "my-app", "latest", "sha256:abc123...")
+err := client.ChangeTag(ctx, "my-namespace", "my-app", "latest", "sha256:abc123...")
 if err != nil {
     log.Fatalf("Failed to change tag: %v", err)
 }
@@ -216,7 +218,7 @@ if err != nil {
 **Warning:** This operation is irreversible!
 
 ```go
-err := client.DeleteRepository("my-namespace", "my-app")
+err := client.DeleteRepository(ctx, "my-namespace", "my-app")
 if err != nil {
     log.Fatalf("Failed to delete: %v", err)
 }
@@ -229,13 +231,13 @@ Star a repository for easy access:
 
 ```go
 // Star a repository
-err := client.StarRepository("quay", "quay")
+err := client.StarRepository(ctx, "quay", "quay")
 if err != nil {
     log.Fatalf("Failed to star: %v", err)
 }
 
 // Get starred repositories
-starred, err := client.GetStarredRepositories()
+starred, err := client.GetStarredRepositories(ctx)
 if err != nil {
     log.Fatalf("Failed to get starred: %v", err)
 }
@@ -246,7 +248,7 @@ for _, r := range starred.Repositories {
 }
 
 // Unstar a repository
-err = client.UnstarRepository("quay", "quay")
+err = client.UnstarRepository(ctx, "quay", "quay")
 ```
 
 ## Complete Workflow Example
@@ -257,6 +259,7 @@ Here's a complete example managing a repository lifecycle:
 package main
 
 import (
+    "context"
     "fmt"
     "log"
     "os"
@@ -266,12 +269,13 @@ import (
 
 func main() {
     client, _ := lib.NewClient(os.Getenv("QUAY_TOKEN"))
+    ctx := context.Background()
     namespace := "my-org"
     repoName := "demo-app"
 
     // 1. Create repository
     fmt.Println("Creating repository...")
-    repo, err := client.CreateRepository(namespace, repoName, "private", "Demo application")
+    repo, err := client.CreateRepository(ctx, namespace, repoName, "private", "Demo application")
     if err != nil {
         log.Fatalf("Create failed: %v", err)
     }
@@ -279,7 +283,7 @@ func main() {
 
     // 2. Update description
     fmt.Println("Updating repository...")
-    _, err = client.UpdateRepository(namespace, repoName, "Production demo application", "")
+    _, err = client.UpdateRepository(ctx, namespace, repoName, "Production demo application", "")
     if err != nil {
         log.Fatalf("Update failed: %v", err)
     }
@@ -287,7 +291,7 @@ func main() {
 
     // 3. Star the repository
     fmt.Println("Starring repository...")
-    err = client.StarRepository(namespace, repoName)
+    err = client.StarRepository(ctx, namespace, repoName)
     if err != nil {
         log.Printf("Star failed (might not be supported): %v\n", err)
     } else {
@@ -296,7 +300,7 @@ func main() {
 
     // 4. Get final state
     fmt.Println("Final repository state:")
-    finalRepo, _ := client.GetRepository(namespace, repoName)
+    finalRepo, _ := client.GetRepository(ctx, namespace, repoName)
     fmt.Printf("  Name: %s\n", finalRepo.Name)
     fmt.Printf("  Description: %s\n", finalRepo.Description)
     fmt.Printf("  Starred: %v\n", finalRepo.IsStarred)

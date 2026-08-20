@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -50,7 +51,7 @@ func TestGetAggregatedLogs(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	logs, err := client.GetAggregatedLogs(testNamespace, testRepository, testStartDate, testEndDate)
+	logs, err := client.GetAggregatedLogs(context.Background(), testNamespace, testRepository, testStartDate, testEndDate)
 	if err != nil {
 		t.Fatalf("GetAggregatedLogs returned error: %v", err)
 	}
@@ -98,7 +99,7 @@ func TestGetLogs(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	logs, err := client.GetLogs(testNamespace, testRepository, "", "", "")
+	logs, err := client.GetLogs(context.Background(), testNamespace, testRepository, "", "", "")
 	if err != nil {
 		t.Fatalf("GetLogs returned error: %v", err)
 	}
@@ -134,7 +135,7 @@ func TestGetLogsWithDateRange(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetLogs(testNamespace, testRepository, "", testStartDate, testEndDate)
+	_, err = client.GetLogs(context.Background(), testNamespace, testRepository, "", testStartDate, testEndDate)
 	if err != nil {
 		t.Fatalf("GetLogs with date range returned error: %v", err)
 	}
@@ -157,7 +158,7 @@ func TestGetLogsWithNextPage(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetLogs(testNamespace, testRepository, testNextPage, "", "")
+	_, err = client.GetLogs(context.Background(), testNamespace, testRepository, testNextPage, "", "")
 	if err != nil {
 		t.Fatalf("GetLogs with next page returned error: %v", err)
 	}
@@ -187,7 +188,7 @@ func TestGetOrganizationLogsWithDateRange(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetOrganizationLogs(testNamespace, "", testStartDate, testEndDateMay)
+	_, err = client.GetOrganizationLogs(context.Background(), testNamespace, "", testStartDate, testEndDateMay)
 	if err != nil {
 		t.Fatalf("GetOrganizationLogs with date range returned error: %v", err)
 	}
@@ -217,7 +218,7 @@ func TestGetUserLogsWithDateRange(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetUserLogs("", testStartDate, testEndDateMay)
+	_, err = client.GetUserLogs(context.Background(), "", testStartDate, testEndDateMay)
 	if err != nil {
 		t.Fatalf("GetUserLogs with date range returned error: %v", err)
 	}
@@ -255,7 +256,7 @@ func TestGetOrganizationAggregatedLogs(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	logs, err := client.GetOrganizationAggregatedLogs(testNamespace, testStartDate, testEndDateMay)
+	logs, err := client.GetOrganizationAggregatedLogs(context.Background(), testNamespace, testStartDate, testEndDateMay)
 	if err != nil {
 		t.Fatalf("GetOrganizationAggregatedLogs returned error: %v", err)
 	}
@@ -292,7 +293,7 @@ func TestExportOrganizationLogs(t *testing.T) {
 		CallbackURL: "https://example.com/callback",
 	}
 
-	err = client.ExportOrganizationLogs(testNamespace, exportReq)
+	err = client.ExportOrganizationLogs(context.Background(), testNamespace, exportReq)
 	if err != nil {
 		t.Fatalf("ExportOrganizationLogs returned error: %v", err)
 	}
@@ -330,7 +331,7 @@ func TestGetUserAggregatedLogs(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	logs, err := client.GetUserAggregatedLogs(testStartDate, testEndDateMay)
+	logs, err := client.GetUserAggregatedLogs(context.Background(), testStartDate, testEndDateMay)
 	if err != nil {
 		t.Fatalf("GetUserAggregatedLogs returned error: %v", err)
 	}
@@ -367,7 +368,7 @@ func TestExportUserLogs(t *testing.T) {
 		Email:     testEmailAddress,
 	}
 
-	err = client.ExportUserLogs(exportReq)
+	err = client.ExportUserLogs(context.Background(), exportReq)
 	if err != nil {
 		t.Fatalf("ExportUserLogs returned error: %v", err)
 	}
@@ -397,7 +398,7 @@ func TestExportRepositoryLogs(t *testing.T) {
 		CallbackURL: "https://example.com/callback",
 	}
 
-	err = client.ExportRepositoryLogs(testNamespace, testRepository, exportReq)
+	err = client.ExportRepositoryLogs(context.Background(), testNamespace, testRepository, exportReq)
 	if err != nil {
 		t.Fatalf("ExportRepositoryLogs returned error: %v", err)
 	}
@@ -414,7 +415,7 @@ func TestGetAggregatedLogsError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetAggregatedLogs(testNamespace, testRepository, "", "")
+	_, err = client.GetAggregatedLogs(context.Background(), testNamespace, testRepository, "", "")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -431,7 +432,7 @@ func TestGetLogsError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetLogs(testNamespace, testRepository, "", "", "")
+	_, err = client.GetLogs(context.Background(), testNamespace, testRepository, "", "", "")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -448,37 +449,37 @@ func TestLogsHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetOrganizationLogs(testNamespace, "", "", "")
+	_, err = client.GetOrganizationLogs(context.Background(), testNamespace, "", "", "")
 	if err == nil {
 		t.Error("Expected error from GetOrganizationLogs, got nil")
 	}
 
-	_, err = client.GetOrganizationAggregatedLogs(testNamespace, testStartDate, testEndDateMay)
+	_, err = client.GetOrganizationAggregatedLogs(context.Background(), testNamespace, testStartDate, testEndDateMay)
 	if err == nil {
 		t.Error("Expected error from GetOrganizationAggregatedLogs, got nil")
 	}
 
-	err = client.ExportOrganizationLogs(testNamespace, &ExportLogsRequest{StartTime: testStartDate, EndTime: testEndDateMay})
+	err = client.ExportOrganizationLogs(context.Background(), testNamespace, &ExportLogsRequest{StartTime: testStartDate, EndTime: testEndDateMay})
 	if err == nil {
 		t.Error("Expected error from ExportOrganizationLogs, got nil")
 	}
 
-	_, err = client.GetUserLogs("", testStartDate, testEndDateMay)
+	_, err = client.GetUserLogs(context.Background(), "", testStartDate, testEndDateMay)
 	if err == nil {
 		t.Error("Expected error from GetUserLogs, got nil")
 	}
 
-	_, err = client.GetUserAggregatedLogs(testStartDate, testEndDateMay)
+	_, err = client.GetUserAggregatedLogs(context.Background(), testStartDate, testEndDateMay)
 	if err == nil {
 		t.Error("Expected error from GetUserAggregatedLogs, got nil")
 	}
 
-	err = client.ExportUserLogs(&ExportLogsRequest{StartTime: testStartDate, EndTime: testEndDateMay})
+	err = client.ExportUserLogs(context.Background(), &ExportLogsRequest{StartTime: testStartDate, EndTime: testEndDateMay})
 	if err == nil {
 		t.Error("Expected error from ExportUserLogs, got nil")
 	}
 
-	err = client.ExportRepositoryLogs(testNamespace, testRepository, &ExportLogsRequest{StartTime: testStartDate, EndTime: testEndDateMay})
+	err = client.ExportRepositoryLogs(context.Background(), testNamespace, testRepository, &ExportLogsRequest{StartTime: testStartDate, EndTime: testEndDateMay})
 	if err == nil {
 		t.Error("Expected error from ExportRepositoryLogs, got nil")
 	}

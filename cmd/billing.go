@@ -25,7 +25,7 @@ var orgBillingCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		billing, err := client.GetOrganizationBilling(billingOrgName)
+		billing, err := client.GetOrganizationBilling(cmd.Context(), billingOrgName)
 		if err != nil {
 			return fmt.Errorf("getting organization billing: %w", err)
 		}
@@ -43,7 +43,7 @@ var userBillingCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		billing, err := client.GetUserBilling()
+		billing, err := client.GetUserBilling(cmd.Context())
 		if err != nil {
 			return fmt.Errorf("getting user billing: %w", err)
 		}
@@ -61,7 +61,7 @@ var orgSubscriptionCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		subscription, err := client.GetOrganizationSubscription(billingOrgName)
+		subscription, err := client.GetOrganizationSubscription(cmd.Context(), billingOrgName)
 		if err != nil {
 			return fmt.Errorf("getting organization subscription: %w", err)
 		}
@@ -79,7 +79,7 @@ var userSubscriptionCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		subscription, err := client.GetUserSubscription()
+		subscription, err := client.GetUserSubscription(cmd.Context())
 		if err != nil {
 			return fmt.Errorf("getting user subscription: %w", err)
 		}
@@ -97,7 +97,7 @@ var orgInvoicesCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		invoices, err := client.GetOrganizationInvoices(billingOrgName)
+		invoices, err := client.GetOrganizationInvoices(cmd.Context(), billingOrgName)
 		if err != nil {
 			return fmt.Errorf("getting organization invoices: %w", err)
 		}
@@ -115,7 +115,7 @@ var userInvoicesCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		invoices, err := client.GetUserInvoices()
+		invoices, err := client.GetUserInvoices(cmd.Context())
 		if err != nil {
 			return fmt.Errorf("getting user invoices: %w", err)
 		}
@@ -133,7 +133,7 @@ var plansCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		plans, err := client.GetAvailablePlans()
+		plans, err := client.GetAvailablePlans(cmd.Context())
 		if err != nil {
 			return fmt.Errorf("getting available plans: %w", err)
 		}

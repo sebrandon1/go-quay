@@ -42,7 +42,7 @@ var manifestInfoCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		manifest, err := client.GetManifest(namespace, repository, manifestRef)
+		manifest, err := client.GetManifest(cmd.Context(), namespace, repository, manifestRef)
 		if err != nil {
 			return fmt.Errorf("getting manifest information: %w", err)
 		}
@@ -67,7 +67,7 @@ var manifestDeleteCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteManifest(namespace, repository, manifestRef)
+		err = client.DeleteManifest(cmd.Context(), namespace, repository, manifestRef)
 		if err != nil {
 			return fmt.Errorf("deleting manifest: %w", err)
 		}
@@ -88,7 +88,7 @@ var manifestLabelsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		labels, err := client.GetManifestLabels(namespace, repository, manifestRef)
+		labels, err := client.GetManifestLabels(cmd.Context(), namespace, repository, manifestRef)
 		if err != nil {
 			return fmt.Errorf("getting manifest labels: %w", err)
 		}
@@ -109,7 +109,7 @@ var manifestLabelCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		label, err := client.GetManifestLabel(namespace, repository, manifestRef, labelID)
+		label, err := client.GetManifestLabel(cmd.Context(), namespace, repository, manifestRef, labelID)
 		if err != nil {
 			return fmt.Errorf("getting manifest label: %w", err)
 		}
@@ -130,7 +130,7 @@ var manifestAddLabelCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		label, err := client.AddManifestLabel(namespace, repository, manifestRef, labelKey, labelValue, labelMediaType)
+		label, err := client.AddManifestLabel(cmd.Context(), namespace, repository, manifestRef, labelKey, labelValue, labelMediaType)
 		if err != nil {
 			return fmt.Errorf("adding manifest label: %w", err)
 		}
@@ -151,7 +151,7 @@ var manifestRemoveLabelCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteManifestLabel(namespace, repository, manifestRef, labelID)
+		err = client.DeleteManifestLabel(cmd.Context(), namespace, repository, manifestRef, labelID)
 		if err != nil {
 			return fmt.Errorf("removing manifest label: %w", err)
 		}

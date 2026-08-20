@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -64,7 +65,7 @@ func TestCreateRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	repo, err := client.CreateRepository(testNamespace, testRepository, "private", "Test repository")
+	repo, err := client.CreateRepository(context.Background(), testNamespace, testRepository, "private", "Test repository")
 	if err != nil {
 		t.Fatalf("CreateRepository failed: %v", err)
 	}
@@ -119,7 +120,7 @@ func TestUpdateRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	repo, err := client.UpdateRepository(testNamespace, testRepository, updatedDescription, "public")
+	repo, err := client.UpdateRepository(context.Background(), testNamespace, testRepository, updatedDescription, "public")
 	if err != nil {
 		t.Fatalf("UpdateRepository failed: %v", err)
 	}
@@ -147,7 +148,7 @@ func TestDeleteRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteRepository(testNamespace, testRepository)
+	err = client.DeleteRepository(context.Background(), testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("DeleteRepository failed: %v", err)
 	}
@@ -187,7 +188,7 @@ func TestListRepositories(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	repos, err := client.ListRepositories(testNamespace, true, false, false, 0, 0)
+	repos, err := client.ListRepositories(context.Background(), testNamespace, true, false, false, 0, 0)
 	if err != nil {
 		t.Fatalf("ListRepositories returned error: %v", err)
 	}
@@ -234,7 +235,7 @@ func TestListTags(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	tags, err := client.ListTags(testNamespace, testRepository, 5, true)
+	tags, err := client.ListTags(context.Background(), testNamespace, testRepository, 5, true)
 	if err != nil {
 		t.Fatalf("ListTags returned error: %v", err)
 	}
@@ -271,7 +272,7 @@ func TestChangeRepositoryVisibility(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.ChangeRepositoryVisibility(testNamespace, testRepository, "public")
+	err = client.ChangeRepositoryVisibility(context.Background(), testNamespace, testRepository, "public")
 	if err != nil {
 		t.Fatalf("ChangeRepositoryVisibility returned error: %v", err)
 	}
@@ -325,7 +326,7 @@ func TestGetRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	repoWithTags, err := client.GetRepository(testNamespace, testRepository)
+	repoWithTags, err := client.GetRepository(context.Background(), testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("GetRepository failed: %v", err)
 	}
@@ -352,32 +353,32 @@ func TestRepositoryHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetRepository(testNamespace, testRepository)
+	_, err = client.GetRepository(context.Background(), testNamespace, testRepository)
 	if err == nil {
 		t.Error("Expected error from GetRepository, got nil")
 	}
 
-	_, err = client.CreateRepository(testNamespace, testRepository, "public", testRepoDescription)
+	_, err = client.CreateRepository(context.Background(), testNamespace, testRepository, "public", testRepoDescription)
 	if err == nil {
 		t.Error("Expected error from CreateRepository, got nil")
 	}
 
-	_, err = client.UpdateRepository(testNamespace, testRepository, updatedDescription, "private")
+	_, err = client.UpdateRepository(context.Background(), testNamespace, testRepository, updatedDescription, "private")
 	if err == nil {
 		t.Error("Expected error from UpdateRepository, got nil")
 	}
 
-	err = client.DeleteRepository(testNamespace, testRepository)
+	err = client.DeleteRepository(context.Background(), testNamespace, testRepository)
 	if err == nil {
 		t.Error("Expected error from DeleteRepository, got nil")
 	}
 
-	_, err = client.ListRepositories(testNamespace, false, false, false, 1, 10)
+	_, err = client.ListRepositories(context.Background(), testNamespace, false, false, false, 1, 10)
 	if err == nil {
 		t.Error("Expected error from ListRepositories, got nil")
 	}
 
-	err = client.ChangeRepositoryVisibility(testNamespace, testRepository, "public")
+	err = client.ChangeRepositoryVisibility(context.Background(), testNamespace, testRepository, "public")
 	if err == nil {
 		t.Error("Expected error from ChangeRepositoryVisibility, got nil")
 	}
@@ -406,7 +407,7 @@ func TestListAllRepositories(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	repos, err := client.ListAllRepositories(testNamespace, true, false, false)
+	repos, err := client.ListAllRepositories(context.Background(), testNamespace, true, false, false)
 	if err != nil {
 		t.Fatalf("ListAllRepositories returned error: %v", err)
 	}
@@ -438,7 +439,7 @@ func TestListAllTags(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	tags, err := client.ListAllTags(testNamespace, testRepository, true)
+	tags, err := client.ListAllTags(context.Background(), testNamespace, testRepository, true)
 	if err != nil {
 		t.Fatalf("ListAllTags returned error: %v", err)
 	}

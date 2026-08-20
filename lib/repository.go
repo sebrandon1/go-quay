@@ -17,6 +17,7 @@ ListRepositories() supports a popularity flag for pull count data.
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -50,7 +51,7 @@ type RepositoryWithTags struct {
 }
 
 // GetRepository returns a repository with tags information baked in
-func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags, error) {
+func (c *Client) GetRepository(ctx context.Context, namespace, repository string) (RepositoryWithTags, error) {
 	if namespace == "" {
 		return RepositoryWithTags{}, fmt.Errorf("namespace is required")
 	}
@@ -59,7 +60,7 @@ func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags
 	}
 
 	repoURL := c.buildURL("/repository/%s/%s", namespace, repository)
-	req, err := newRequest(http.MethodGet, repoURL, nil)
+	req, err := newRequest(ctx, http.MethodGet, repoURL, nil)
 	if err != nil {
 		return RepositoryWithTags{}, fmt.Errorf("failed to create request for repository: %w", err)
 	}
@@ -69,7 +70,7 @@ func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags
 		return RepositoryWithTags{}, fmt.Errorf("failed to fetch repository details: %w", err)
 	}
 
-	tags, err := c.ListTags(namespace, repository, 0, false)
+	tags, err := c.ListTags(ctx, namespace, repository, 0, false)
 	if err != nil {
 		return RepositoryWithTags{}, fmt.Errorf("failed to fetch repository tags: %w", err)
 	}
@@ -81,7 +82,7 @@ func (c *Client) GetRepository(namespace, repository string) (RepositoryWithTags
 }
 
 // CreateRepository creates a new repository
-func (c *Client) CreateRepository(namespace, repository, visibility, description string) (*Repository, error) {
+func (c *Client) CreateRepository(ctx context.Context, namespace, repository, visibility, description string) (*Repository, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -92,7 +93,7 @@ func (c *Client) CreateRepository(namespace, repository, visibility, description
 		return nil, fmt.Errorf("visibility is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository"), CreateRepositoryRequest{
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository"), CreateRepositoryRequest{
 		Repository:  repository,
 		Namespace:   namespace,
 		Visibility:  visibility,
@@ -111,7 +112,7 @@ func (c *Client) CreateRepository(namespace, repository, visibility, description
 }
 
 // UpdateRepository updates an existing repository
-func (c *Client) UpdateRepository(namespace, repository, description, visibility string) (*Repository, error) {
+func (c *Client) UpdateRepository(ctx context.Context, namespace, repository, description, visibility string) (*Repository, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -129,7 +130,7 @@ func (c *Client) UpdateRepository(namespace, repository, description, visibility
 		updateReq.Visibility = visibility
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s", namespace, repository), updateReq)
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/repository/%s/%s", namespace, repository), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update repository request: %w", err)
 	}
@@ -143,7 +144,7 @@ func (c *Client) UpdateRepository(namespace, repository, description, visibility
 }
 
 // DeleteRepository deletes a repository
-func (c *Client) DeleteRepository(namespace, repository string) error {
+func (c *Client) DeleteRepository(ctx context.Context, namespace, repository string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -151,7 +152,7 @@ func (c *Client) DeleteRepository(namespace, repository string) error {
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s", namespace, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete repository request: %w", err)
 	}
@@ -164,8 +165,8 @@ func (c *Client) DeleteRepository(namespace, repository string) error {
 }
 
 // ListRepositories lists all repositories visible to the user
-func (c *Client) ListRepositories(namespace string, public, starred, popularity bool, page, limit int) (*RepositoryList, error) {
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository"), nil)
+func (c *Client) ListRepositories(ctx context.Context, namespace string, public, starred, popularity bool, page, limit int) (*RepositoryList, error) {
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list repositories request: %w", err)
 	}
@@ -200,13 +201,13 @@ func (c *Client) ListRepositories(namespace string, public, starred, popularity 
 }
 
 // ListAllRepositories fetches all repositories by following pagination automatically.
-func (c *Client) ListAllRepositories(namespace string, public, starred, popularity bool) ([]OrganizationRepository, error) {
+func (c *Client) ListAllRepositories(ctx context.Context, namespace string, public, starred, popularity bool) ([]OrganizationRepository, error) {
 	var all []OrganizationRepository
 	page := 1
 	const pageSize = 100
 
 	for {
-		repos, err := c.ListRepositories(namespace, public, starred, popularity, page, pageSize)
+		repos, err := c.ListRepositories(ctx, namespace, public, starred, popularity, page, pageSize)
 		if err != nil {
 			return nil, err
 		}
@@ -223,7 +224,7 @@ func (c *Client) ListAllRepositories(namespace string, public, starred, populari
 }
 
 // ListAllTags fetches all tags for a repository by following pagination automatically.
-func (c *Client) ListAllTags(namespace, repository string, onlyActive bool) ([]Tag, error) {
+func (c *Client) ListAllTags(ctx context.Context, namespace, repository string, onlyActive bool) ([]Tag, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -236,7 +237,7 @@ func (c *Client) ListAllTags(namespace, repository string, onlyActive bool) ([]T
 	const pageSize = 100
 
 	for {
-		tags, err := c.ListTagsPage(namespace, repository, pageSize, page, onlyActive)
+		tags, err := c.ListTagsPage(ctx, namespace, repository, pageSize, page, onlyActive)
 		if err != nil {
 			return nil, err
 		}
@@ -253,7 +254,7 @@ func (c *Client) ListAllTags(namespace, repository string, onlyActive bool) ([]T
 }
 
 // ChangeRepositoryVisibility changes the visibility (public/private) of a repository
-func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility string) error {
+func (c *Client) ChangeRepositoryVisibility(ctx context.Context, namespace, repository, visibility string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -269,7 +270,7 @@ func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility st
 	}{
 		Visibility: visibility,
 	}
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/changevisibility", namespace, repository), body)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/changevisibility", namespace, repository), body)
 	if err != nil {
 		return fmt.Errorf("failed to create change visibility request: %w", err)
 	}
@@ -282,7 +283,7 @@ func (c *Client) ChangeRepositoryVisibility(namespace, repository, visibility st
 }
 
 // ListTagsPage lists tags for a repository with pagination support.
-func (c *Client) ListTagsPage(namespace, repository string, limit, page int, onlyActive bool) (*RepositoryTags, error) {
+func (c *Client) ListTagsPage(ctx context.Context, namespace, repository string, limit, page int, onlyActive bool) (*RepositoryTags, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -290,7 +291,7 @@ func (c *Client) ListTagsPage(namespace, repository string, limit, page int, onl
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list tags request: %w", err)
 	}
@@ -316,7 +317,7 @@ func (c *Client) ListTagsPage(namespace, repository string, limit, page int, onl
 }
 
 // ListTags lists tags for a repository
-func (c *Client) ListTags(namespace, repository string, limit int, onlyActive bool) (*RepositoryTags, error) {
+func (c *Client) ListTags(ctx context.Context, namespace, repository string, limit int, onlyActive bool) (*RepositoryTags, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -324,7 +325,7 @@ func (c *Client) ListTags(namespace, repository string, limit int, onlyActive bo
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list tags request: %w", err)
 	}

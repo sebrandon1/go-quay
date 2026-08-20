@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -38,7 +39,7 @@ func TestGetTeams(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	teams, err := client.GetTeams(testOrgName)
+	teams, err := client.GetTeams(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("GetTeams returned error: %v", err)
 	}
@@ -82,7 +83,7 @@ func TestGetTeam(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	team, err := client.GetTeam(testOrgName, testTeamName)
+	team, err := client.GetTeam(context.Background(), testOrgName, testTeamName)
 	if err != nil {
 		t.Fatalf("GetTeam returned error: %v", err)
 	}
@@ -124,7 +125,7 @@ func TestCreateTeam(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	team, err := client.CreateTeam(testOrgName, testTeamName, testTeamDescNew, roleMember)
+	team, err := client.CreateTeam(context.Background(), testOrgName, testTeamName, testTeamDescNew, roleMember)
 	if err != nil {
 		t.Fatalf("CreateTeam returned error: %v", err)
 	}
@@ -173,7 +174,7 @@ func TestUpdateTeam(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	team, err := client.UpdateTeam(testOrgName, testTeamName, updatedDescription, roleAdmin)
+	team, err := client.UpdateTeam(context.Background(), testOrgName, testTeamName, updatedDescription, roleAdmin)
 	if err != nil {
 		t.Fatalf("UpdateTeam returned error: %v", err)
 	}
@@ -207,7 +208,7 @@ func TestDeleteTeam(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteTeam(testOrgName, testTeamName)
+	err = client.DeleteTeam(context.Background(), testOrgName, testTeamName)
 	if err != nil {
 		t.Fatalf("DeleteTeam returned error: %v", err)
 	}
@@ -242,7 +243,7 @@ func TestGetTeamMembers(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	members, err := client.GetTeamMembers(testOrgName, testTeamName)
+	members, err := client.GetTeamMembers(context.Background(), testOrgName, testTeamName)
 	if err != nil {
 		t.Fatalf("GetTeamMembers returned error: %v", err)
 	}
@@ -279,7 +280,7 @@ func TestAddTeamMember(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.AddTeamMember(testOrgName, testTeamName, testUserName)
+	err = client.AddTeamMember(context.Background(), testOrgName, testTeamName, testUserName)
 	if err != nil {
 		t.Fatalf("AddTeamMember returned error: %v", err)
 	}
@@ -303,7 +304,7 @@ func TestRemoveTeamMember(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.RemoveTeamMember(testOrgName, testTeamName, testUserName)
+	err = client.RemoveTeamMember(context.Background(), testOrgName, testTeamName, testUserName)
 	if err != nil {
 		t.Fatalf("RemoveTeamMember returned error: %v", err)
 	}
@@ -338,7 +339,7 @@ func TestGetTeamPermissions(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	perms, err := client.GetTeamPermissions(testOrgName, testTeamName)
+	perms, err := client.GetTeamPermissions(context.Background(), testOrgName, testTeamName)
 	if err != nil {
 		t.Fatalf("GetTeamPermissions returned error: %v", err)
 	}
@@ -379,7 +380,7 @@ func TestSetTeamRepositoryPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.SetTeamRepositoryPermission(testOrgName, testTeamName, testRepoName, testRoleWrite)
+	err = client.SetTeamRepositoryPermission(context.Background(), testOrgName, testTeamName, testRepoName, testRoleWrite)
 	if err != nil {
 		t.Fatalf("SetTeamRepositoryPermission returned error: %v", err)
 	}
@@ -403,7 +404,7 @@ func TestRemoveTeamRepositoryPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.RemoveTeamRepositoryPermission(testOrgName, testTeamName, testRepoName)
+	err = client.RemoveTeamRepositoryPermission(context.Background(), testOrgName, testTeamName, testRepoName)
 	if err != nil {
 		t.Fatalf("RemoveTeamRepositoryPermission returned error: %v", err)
 	}
@@ -429,7 +430,7 @@ func TestInviteTeamMember(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.InviteTeamMember(testOrgName, testTeamName, testEmailAddress)
+	err = client.InviteTeamMember(context.Background(), testOrgName, testTeamName, testEmailAddress)
 	if err != nil {
 		t.Fatalf("InviteTeamMember returned error: %v", err)
 	}
@@ -453,7 +454,7 @@ func TestDeleteTeamInvite(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteTeamInvite(testOrgName, testTeamName, testEmailAddress)
+	err = client.DeleteTeamInvite(context.Background(), testOrgName, testTeamName, testEmailAddress)
 	if err != nil {
 		t.Fatalf("DeleteTeamInvite returned error: %v", err)
 	}
@@ -472,7 +473,7 @@ func TestGetTeamsError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetTeams(testOrgName)
+	_, err = client.GetTeams(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -489,7 +490,7 @@ func TestGetTeamError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetTeam(testOrgName, "nonexistent-team")
+	_, err = client.GetTeam(context.Background(), testOrgName, "nonexistent-team")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -498,67 +499,67 @@ func TestGetTeamError(t *testing.T) {
 func TestOrganizationTeamHTTPErrors(t *testing.T) {
 	client := newOrgErrorClient(t)
 
-	_, err := client.GetTeams(testOrgName)
+	_, err := client.GetTeams(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error from GetTeams, got nil")
 	}
 
-	_, err = client.CreateTeam(testOrgName, testTeamName, testTeamDescDev, roleMember)
+	_, err = client.CreateTeam(context.Background(), testOrgName, testTeamName, testTeamDescDev, roleMember)
 	if err == nil {
 		t.Error("Expected error from CreateTeam, got nil")
 	}
 
-	_, err = client.GetTeam(testOrgName, testTeamName)
+	_, err = client.GetTeam(context.Background(), testOrgName, testTeamName)
 	if err == nil {
 		t.Error("Expected error from GetTeam, got nil")
 	}
 
-	err = client.DeleteTeam(testOrgName, testTeamName)
+	err = client.DeleteTeam(context.Background(), testOrgName, testTeamName)
 	if err == nil {
 		t.Error("Expected error from DeleteTeam, got nil")
 	}
 
-	_, err = client.UpdateTeam(testOrgName, testTeamName, testTeamDescDev, roleMember)
+	_, err = client.UpdateTeam(context.Background(), testOrgName, testTeamName, testTeamDescDev, roleMember)
 	if err == nil {
 		t.Error("Expected error from UpdateTeam, got nil")
 	}
 
-	_, err = client.GetTeamMembers(testOrgName, testTeamName)
+	_, err = client.GetTeamMembers(context.Background(), testOrgName, testTeamName)
 	if err == nil {
 		t.Error("Expected error from GetTeamMembers, got nil")
 	}
 
-	err = client.AddTeamMember(testOrgName, testTeamName, testMemberName)
+	err = client.AddTeamMember(context.Background(), testOrgName, testTeamName, testMemberName)
 	if err == nil {
 		t.Error("Expected error from AddTeamMember, got nil")
 	}
 
-	err = client.RemoveTeamMember(testOrgName, testTeamName, testMemberName)
+	err = client.RemoveTeamMember(context.Background(), testOrgName, testTeamName, testMemberName)
 	if err == nil {
 		t.Error("Expected error from RemoveTeamMember, got nil")
 	}
 
-	_, err = client.GetTeamPermissions(testOrgName, testTeamName)
+	_, err = client.GetTeamPermissions(context.Background(), testOrgName, testTeamName)
 	if err == nil {
 		t.Error("Expected error from GetTeamPermissions, got nil")
 	}
 
-	err = client.SetTeamRepositoryPermission(testOrgName, testTeamName, testRepository, testRoleRead)
+	err = client.SetTeamRepositoryPermission(context.Background(), testOrgName, testTeamName, testRepository, testRoleRead)
 	if err == nil {
 		t.Error("Expected error from SetTeamRepositoryPermission, got nil")
 	}
 
-	err = client.RemoveTeamRepositoryPermission(testOrgName, testTeamName, testRepository)
+	err = client.RemoveTeamRepositoryPermission(context.Background(), testOrgName, testTeamName, testRepository)
 	if err == nil {
 		t.Error("Expected error from RemoveTeamRepositoryPermission, got nil")
 	}
 
-	err = client.InviteTeamMember(testOrgName, testTeamName, testEmailAddress)
+	err = client.InviteTeamMember(context.Background(), testOrgName, testTeamName, testEmailAddress)
 	if err == nil {
 		t.Error("Expected error from InviteTeamMember, got nil")
 	}
 
-	err = client.DeleteTeamInvite(testOrgName, testTeamName, testEmailAddress)
+	err = client.DeleteTeamInvite(context.Background(), testOrgName, testTeamName, testEmailAddress)
 	if err == nil {
 		t.Error("Expected error from DeleteTeamInvite, got nil")
 	}

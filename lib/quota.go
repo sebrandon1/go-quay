@@ -12,17 +12,18 @@ Quota Management:
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetQuota retrieves quota information for an organization
-func (c *Client) GetQuota(orgname string) (*Quota, error) {
+func (c *Client) GetQuota(ctx context.Context, orgname string) (*Quota, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/quota", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/quota", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get quota request: %w", err)
 	}
@@ -36,12 +37,12 @@ func (c *Client) GetQuota(orgname string) (*Quota, error) {
 }
 
 // CreateQuota creates a quota for an organization
-func (c *Client) CreateQuota(orgname string, limitBytes int64) (*Quota, error) {
+func (c *Client) CreateQuota(ctx context.Context, orgname string, limitBytes int64) (*Quota, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/%s/quota", orgname), CreateQuotaRequest{
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/organization/%s/quota", orgname), CreateQuotaRequest{
 		LimitBytes: limitBytes,
 	})
 	if err != nil {
@@ -57,12 +58,12 @@ func (c *Client) CreateQuota(orgname string, limitBytes int64) (*Quota, error) {
 }
 
 // UpdateQuota updates quota limits for an organization
-func (c *Client) UpdateQuota(orgname string, limitBytes int64) (*Quota, error) {
+func (c *Client) UpdateQuota(ctx context.Context, orgname string, limitBytes int64) (*Quota, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/quota", orgname), CreateQuotaRequest{
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/organization/%s/quota", orgname), CreateQuotaRequest{
 		LimitBytes: limitBytes,
 	})
 	if err != nil {
@@ -78,12 +79,12 @@ func (c *Client) UpdateQuota(orgname string, limitBytes int64) (*Quota, error) {
 }
 
 // DeleteQuota deletes quota for an organization
-func (c *Client) DeleteQuota(orgname string) error {
+func (c *Client) DeleteQuota(ctx context.Context, orgname string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/quota", orgname), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/quota", orgname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete quota request: %w", err)
 	}

@@ -13,6 +13,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -32,12 +33,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	ctx := context.Background()
 
 	fmt.Println("=== go-quay Basic Usage Example ===")
 
 	// Step 3: Get current user information
 	fmt.Println("1. Getting current user information...")
-	user, err := client.GetUser()
+	user, err := client.GetUser(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get user: %v", err)
 	}
@@ -47,7 +49,7 @@ func main() {
 
 	// Step 4: List starred repositories
 	fmt.Println("2. Getting starred repositories...")
-	starred, err := client.GetStarredRepositories()
+	starred, err := client.GetStarredRepositories(ctx)
 	if err != nil {
 		log.Printf("   Could not get starred repos: %v\n", err)
 	} else if len(starred.Repositories) == 0 {
@@ -68,7 +70,7 @@ func main() {
 	}
 
 	fmt.Printf("3. Listing repositories in namespace '%s'...\n", namespace)
-	repos, err := client.ListRepositories(namespace, false, false, false, 1, 10)
+	repos, err := client.ListRepositories(ctx, namespace, false, false, false, 1, 10)
 	if err != nil {
 		log.Printf("   Could not list repositories: %v\n", err)
 	} else if len(repos.Repositories) == 0 {
@@ -90,7 +92,7 @@ func main() {
 		firstRepo := repos.Repositories[0]
 		fmt.Printf("4. Getting details for repository '%s/%s'...\n", firstRepo.Namespace, firstRepo.Name)
 
-		repoDetails, err := client.GetRepository(firstRepo.Namespace, firstRepo.Name)
+		repoDetails, err := client.GetRepository(ctx, firstRepo.Namespace, firstRepo.Name)
 		if err != nil {
 			log.Printf("   Could not get repository details: %v\n", err)
 		} else {

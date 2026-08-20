@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -44,7 +45,7 @@ func TestGetMessages(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	messages, err := client.GetMessages()
+	messages, err := client.GetMessages(context.Background())
 	if err != nil {
 		t.Fatalf("GetMessages returned error: %v", err)
 	}
@@ -74,7 +75,7 @@ func TestGetMessagesEmpty(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	messages, err := client.GetMessages()
+	messages, err := client.GetMessages(context.Background())
 	if err != nil {
 		t.Fatalf("GetMessages returned error: %v", err)
 	}
@@ -112,7 +113,7 @@ func TestCreateMessage(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	message, err := client.CreateMessage("System maintenance scheduled", "warning", testMediaTypePlain)
+	message, err := client.CreateMessage(context.Background(), "System maintenance scheduled", "warning", testMediaTypePlain)
 	if err != nil {
 		t.Fatalf("CreateMessage returned error: %v", err)
 	}
@@ -136,7 +137,7 @@ func TestGetMessagesError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetMessages()
+	_, err = client.GetMessages(context.Background())
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -153,7 +154,7 @@ func TestMessagesHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.CreateMessage("test content", "info", testMediaTypePlain)
+	_, err = client.CreateMessage(context.Background(), "test content", "info", testMediaTypePlain)
 	if err == nil {
 		t.Error("Expected error from CreateMessage, got nil")
 	}

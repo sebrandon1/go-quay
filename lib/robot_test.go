@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -50,7 +51,7 @@ func TestGetUserRobotAccounts(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	robots, err := client.GetUserRobotAccounts()
+	robots, err := client.GetUserRobotAccounts(context.Background())
 	if err != nil {
 		t.Fatalf("GetUserRobotAccounts failed: %v", err)
 	}
@@ -93,7 +94,7 @@ func TestGetUserRobotAccount(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	robot, err := client.GetUserRobotAccount(testRobotShortname)
+	robot, err := client.GetUserRobotAccount(context.Background(), testRobotShortname)
 	if err != nil {
 		t.Fatalf("GetUserRobotAccount failed: %v", err)
 	}
@@ -144,7 +145,7 @@ func TestCreateUserRobotAccount(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	robot, err := client.CreateUserRobotAccount("newbot", "New automation robot", nil)
+	robot, err := client.CreateUserRobotAccount(context.Background(), "newbot", "New automation robot", nil)
 	if err != nil {
 		t.Fatalf("CreateUserRobotAccount failed: %v", err)
 	}
@@ -176,7 +177,7 @@ func TestDeleteUserRobotAccount(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteUserRobotAccount(testRobotShortname)
+	err = client.DeleteUserRobotAccount(context.Background(), testRobotShortname)
 	if err != nil {
 		t.Fatalf("DeleteUserRobotAccount failed: %v", err)
 	}
@@ -212,7 +213,7 @@ func TestRegenerateUserRobotToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	robot, err := client.RegenerateUserRobotToken(testRobotShortname)
+	robot, err := client.RegenerateUserRobotToken(context.Background(), testRobotShortname)
 	if err != nil {
 		t.Fatalf("RegenerateUserRobotToken failed: %v", err)
 	}
@@ -258,7 +259,7 @@ func TestGetUserRobotPermissions(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	permissions, err := client.GetUserRobotPermissions(testRobotShortname)
+	permissions, err := client.GetUserRobotPermissions(context.Background(), testRobotShortname)
 	if err != nil {
 		t.Fatalf("GetUserRobotPermissions failed: %v", err)
 	}
@@ -284,37 +285,37 @@ func TestUserRobotErrorHandling(t *testing.T) {
 	}
 
 	// Test GetUserRobotAccounts error
-	_, err = client.GetUserRobotAccounts()
+	_, err = client.GetUserRobotAccounts(context.Background())
 	if err == nil {
 		t.Error("Expected error for failed request, got nil")
 	}
 
 	// Test GetUserRobotAccount error
-	_, err = client.GetUserRobotAccount("nonexistent")
+	_, err = client.GetUserRobotAccount(context.Background(), "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent robot, got nil")
 	}
 
 	// Test CreateUserRobotAccount error
-	_, err = client.CreateUserRobotAccount("badbot", "desc", nil)
+	_, err = client.CreateUserRobotAccount(context.Background(), "badbot", "desc", nil)
 	if err == nil {
 		t.Error("Expected error for failed create, got nil")
 	}
 
 	// Test DeleteUserRobotAccount error
-	err = client.DeleteUserRobotAccount("nonexistent")
+	err = client.DeleteUserRobotAccount(context.Background(), "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent robot, got nil")
 	}
 
 	// Test RegenerateUserRobotToken error
-	_, err = client.RegenerateUserRobotToken("nonexistent")
+	_, err = client.RegenerateUserRobotToken(context.Background(), "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent robot, got nil")
 	}
 
 	// Test GetUserRobotPermissions error
-	_, err = client.GetUserRobotPermissions("nonexistent")
+	_, err = client.GetUserRobotPermissions(context.Background(), "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent robot, got nil")
 	}
@@ -346,7 +347,7 @@ func TestGetUserRobotFederation(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	federation, err := client.GetUserRobotFederation(testRobotShortname)
+	federation, err := client.GetUserRobotFederation(context.Background(), testRobotShortname)
 	if err != nil {
 		t.Fatalf("GetUserRobotFederation returned error: %v", err)
 	}
@@ -381,7 +382,7 @@ func TestCreateUserRobotFederation(t *testing.T) {
 		{Issuer: testFederationIssuer, Subject: testFederationSubject},
 	}
 
-	err = client.CreateUserRobotFederation(testRobotShortname, configs)
+	err = client.CreateUserRobotFederation(context.Background(), testRobotShortname, configs)
 	if err != nil {
 		t.Fatalf("CreateUserRobotFederation returned error: %v", err)
 	}
@@ -405,7 +406,7 @@ func TestDeleteUserRobotFederation(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteUserRobotFederation(testRobotShortname)
+	err = client.DeleteUserRobotFederation(context.Background(), testRobotShortname)
 	if err != nil {
 		t.Fatalf("DeleteUserRobotFederation returned error: %v", err)
 	}
@@ -422,19 +423,19 @@ func TestRobotHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetUserRobotFederation(testRobotShortname)
+	_, err = client.GetUserRobotFederation(context.Background(), testRobotShortname)
 	if err == nil {
 		t.Error("Expected error from GetUserRobotFederation, got nil")
 	}
 
-	err = client.CreateUserRobotFederation(testRobotShortname, []RobotFederationConfig{
+	err = client.CreateUserRobotFederation(context.Background(), testRobotShortname, []RobotFederationConfig{
 		{Issuer: testFederationIssuer, Subject: testFederationSubject},
 	})
 	if err == nil {
 		t.Error("Expected error from CreateUserRobotFederation, got nil")
 	}
 
-	err = client.DeleteUserRobotFederation(testRobotShortname)
+	err = client.DeleteUserRobotFederation(context.Background(), testRobotShortname)
 	if err == nil {
 		t.Error("Expected error from DeleteUserRobotFederation, got nil")
 	}

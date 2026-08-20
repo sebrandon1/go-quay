@@ -53,7 +53,7 @@ var teamListCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		teams, err := client.GetTeams(teamCmdOrgname)
+		teams, err := client.GetTeams(cmd.Context(), teamCmdOrgname)
 		if err != nil {
 			return fmt.Errorf("getting teams: %w", err)
 		}
@@ -74,7 +74,7 @@ var teamCmdInfoCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		team, err := client.GetTeam(teamCmdOrgname, teamCmdName)
+		team, err := client.GetTeam(cmd.Context(), teamCmdOrgname, teamCmdName)
 		if err != nil {
 			return fmt.Errorf("getting team: %w", err)
 		}
@@ -100,7 +100,7 @@ Roles:
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		team, err := client.CreateTeam(teamCmdOrgname, teamCmdName, teamCmdDescription, teamCmdRole)
+		team, err := client.CreateTeam(cmd.Context(), teamCmdOrgname, teamCmdName, teamCmdDescription, teamCmdRole)
 		if err != nil {
 			return fmt.Errorf("creating team: %w", err)
 		}
@@ -121,7 +121,7 @@ var teamUpdateCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		team, err := client.UpdateTeam(teamCmdOrgname, teamCmdName, teamCmdDescription, teamCmdRole)
+		team, err := client.UpdateTeam(cmd.Context(), teamCmdOrgname, teamCmdName, teamCmdDescription, teamCmdRole)
 		if err != nil {
 			return fmt.Errorf("updating team: %w", err)
 		}
@@ -146,7 +146,7 @@ var teamDeleteCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteTeam(teamCmdOrgname, teamCmdName)
+		err = client.DeleteTeam(cmd.Context(), teamCmdOrgname, teamCmdName)
 		if err != nil {
 			return fmt.Errorf("deleting team: %w", err)
 		}
@@ -167,7 +167,7 @@ var teamCmdMembersCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		members, err := client.GetTeamMembers(teamCmdOrgname, teamCmdName)
+		members, err := client.GetTeamMembers(cmd.Context(), teamCmdOrgname, teamCmdName)
 		if err != nil {
 			return fmt.Errorf("getting team members: %w", err)
 		}
@@ -188,7 +188,7 @@ var teamAddMemberCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.AddTeamMember(teamCmdOrgname, teamCmdName, teamCmdMemberName)
+		err = client.AddTeamMember(cmd.Context(), teamCmdOrgname, teamCmdName, teamCmdMemberName)
 		if err != nil {
 			return fmt.Errorf("adding team member: %w", err)
 		}
@@ -213,7 +213,7 @@ var teamRemoveMemberCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.RemoveTeamMember(teamCmdOrgname, teamCmdName, teamCmdMemberName)
+		err = client.RemoveTeamMember(cmd.Context(), teamCmdOrgname, teamCmdName, teamCmdMemberName)
 		if err != nil {
 			return fmt.Errorf("removing team member: %w", err)
 		}
@@ -234,7 +234,7 @@ var teamPermissionsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		permissions, err := client.GetTeamPermissions(teamCmdOrgname, teamCmdName)
+		permissions, err := client.GetTeamPermissions(cmd.Context(), teamCmdOrgname, teamCmdName)
 		if err != nil {
 			return fmt.Errorf("getting team permissions: %w", err)
 		}
@@ -260,7 +260,7 @@ Permission roles:
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.SetTeamRepositoryPermission(teamCmdOrgname, teamCmdName, teamCmdRepository, teamCmdPermissionRole)
+		err = client.SetTeamRepositoryPermission(cmd.Context(), teamCmdOrgname, teamCmdName, teamCmdRepository, teamCmdPermissionRole)
 		if err != nil {
 			return fmt.Errorf("setting team permission: %w", err)
 		}
@@ -287,7 +287,7 @@ var teamRemovePermissionCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.RemoveTeamRepositoryPermission(teamCmdOrgname, teamCmdName, teamCmdRepository)
+		err = client.RemoveTeamRepositoryPermission(cmd.Context(), teamCmdOrgname, teamCmdName, teamCmdRepository)
 		if err != nil {
 			return fmt.Errorf("removing team permission: %w", err)
 		}

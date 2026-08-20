@@ -13,6 +13,7 @@ This tutorial covers organization management tasks: teams, members, quotas, poli
 package main
 
 import (
+    "context"
     "fmt"
     "log"
     "os"
@@ -22,9 +23,10 @@ import (
 
 func main() {
     client, _ := lib.NewClient(os.Getenv("QUAY_TOKEN"))
+    ctx := context.Background()
     orgName := "my-org"
 
-    org, err := client.GetOrganization(orgName)
+    org, err := client.GetOrganization(ctx, orgName)
     if err != nil {
         log.Fatalf("Failed to get org: %v", err)
     }
@@ -43,7 +45,7 @@ Teams group users together for easier permission management.
 ### Creating a Team
 
 ```go
-team, err := client.CreateTeam(
+team, err := client.CreateTeam(ctx, 
     "my-org",
     "developers",           // team name
     "Development team",     // description
@@ -67,7 +69,7 @@ fmt.Printf("Created team: %s\n", team.Name)
 ### Listing Teams
 
 ```go
-teams, err := client.GetTeams("my-org")
+teams, err := client.GetTeams(ctx, "my-org")
 if err != nil {
     log.Fatalf("Failed to list teams: %v", err)
 }
@@ -81,7 +83,7 @@ for _, team := range teams {
 ### Updating a Team
 
 ```go
-updatedTeam, err := client.UpdateTeam(
+updatedTeam, err := client.UpdateTeam(ctx, 
     "my-org",
     "developers",
     "Updated description",
@@ -92,7 +94,7 @@ updatedTeam, err := client.UpdateTeam(
 ### Deleting a Team
 
 ```go
-err := client.DeleteTeam("my-org", "developers")
+err := client.DeleteTeam(ctx, "my-org", "developers")
 if err != nil {
     log.Fatalf("Failed to delete team: %v", err)
 }
@@ -103,7 +105,7 @@ if err != nil {
 ### Adding Members to a Team
 
 ```go
-err := client.AddTeamMember("my-org", "developers", "john.doe")
+err := client.AddTeamMember(ctx, "my-org", "developers", "john.doe")
 if err != nil {
     log.Fatalf("Failed to add member: %v", err)
 }
@@ -113,7 +115,7 @@ fmt.Println("Member added!")
 ### Listing Team Members
 
 ```go
-members, err := client.GetTeamMembers("my-org", "developers")
+members, err := client.GetTeamMembers(ctx, "my-org", "developers")
 if err != nil {
     log.Fatalf("Failed to get members: %v", err)
 }
@@ -126,7 +128,7 @@ for _, m := range members.Members {
 ### Removing Members
 
 ```go
-err := client.RemoveTeamMember("my-org", "developers", "john.doe")
+err := client.RemoveTeamMember(ctx, "my-org", "developers", "john.doe")
 if err != nil {
     log.Fatalf("Failed to remove member: %v", err)
 }
@@ -137,7 +139,7 @@ if err != nil {
 List all organization members:
 
 ```go
-members, err := client.GetOrganizationMembers("my-org")
+members, err := client.GetOrganizationMembers(ctx, "my-org")
 if err != nil {
     log.Fatalf("Failed to list members: %v", err)
 }
@@ -154,7 +156,7 @@ Grant teams access to repositories:
 
 ```go
 // Set team permission for a repository
-err := client.SetTeamRepositoryPermission(
+err := client.SetTeamRepositoryPermission(ctx, 
     "my-org",
     "developers",   // team name
     "my-app",       // repository
@@ -165,7 +167,7 @@ if err != nil {
 }
 
 // List team permissions
-perms, err := client.GetTeamPermissions("my-org", "developers")
+perms, err := client.GetTeamPermissions(ctx, "my-org", "developers")
 if err != nil {
     log.Fatalf("Failed to get permissions: %v", err)
 }
@@ -175,7 +177,7 @@ for _, p := range perms.Permissions {
 }
 
 // Remove team permission
-err = client.RemoveTeamRepositoryPermission("my-org", "developers", "my-app")
+err = client.RemoveTeamRepositoryPermission(ctx, "my-org", "developers", "my-app")
 ```
 
 ## Quota Management
@@ -185,7 +187,7 @@ Control storage usage in your organization:
 ### Getting Quota Information
 
 ```go
-org, err := client.GetOrganization("my-org")
+org, err := client.GetOrganization(ctx, "my-org")
 if err != nil {
     log.Fatalf("Failed to get organization: %v", err)
 }
@@ -202,7 +204,7 @@ if org.QuotaReport != nil {
 }
 
 // Get configured quota limits (admin only)
-quota, err := client.GetQuota("my-org")
+quota, err := client.GetQuota(ctx, "my-org")
 if err != nil {
     log.Fatalf("Failed to get quota: %v", err)
 }
@@ -214,7 +216,7 @@ fmt.Printf("Limit: %d bytes\n", quota.LimitBytes)
 ```go
 // Set 10 GB limit (requires super user)
 limitBytes := int64(10 * 1024 * 1024 * 1024)
-quota, err := client.CreateQuota("my-org", limitBytes)
+quota, err := client.CreateQuota(ctx, "my-org", limitBytes)
 if err != nil {
     log.Fatalf("Failed to create quota: %v", err)
 }
@@ -227,7 +229,7 @@ fmt.Printf("Quota set: %d bytes\n", quota.LimitBytes)
 ```go
 // Increase to 50 GB
 newLimit := int64(50 * 1024 * 1024 * 1024)
-quota, err := client.UpdateQuota("my-org", newLimit)
+quota, err := client.UpdateQuota(ctx, "my-org", newLimit)
 if err != nil {
     log.Fatalf("Failed to update quota: %v", err)
 }
@@ -242,7 +244,7 @@ Automatically clean up old tags to save storage:
 
 ```go
 // Keep only the last 10 tags
-policy, err := client.CreateAutoPrunePolicy(
+policy, err := client.CreateAutoPrunePolicy(ctx, 
     "my-org",
     "number_of_tags",   // method
     10,                 // value: keep 10 tags
@@ -266,7 +268,7 @@ fmt.Printf("Policy created: %s\n", policy.UUID)
 
 ```go
 // Only prune tags matching pattern
-policy, err := client.CreateAutoPrunePolicy(
+policy, err := client.CreateAutoPrunePolicy(ctx, 
     "my-org",
     "creation_date",
     30,                 // keep tags from last 30 days
@@ -277,7 +279,7 @@ policy, err := client.CreateAutoPrunePolicy(
 ### Listing Policies
 
 ```go
-policies, err := client.GetAutoPrunePolicies("my-org")
+policies, err := client.GetAutoPrunePolicies(ctx, "my-org")
 if err != nil {
     log.Fatalf("Failed to get policies: %v", err)
 }
@@ -293,7 +295,7 @@ for _, p := range policies.Policies {
 ### Updating a Policy
 
 ```go
-updatedPolicy, err := client.UpdateAutoPrunePolicy(
+updatedPolicy, err := client.UpdateAutoPrunePolicy(ctx, 
     "my-org",
     policyUUID,
     "number_of_tags",
@@ -305,7 +307,7 @@ updatedPolicy, err := client.UpdateAutoPrunePolicy(
 ### Deleting a Policy
 
 ```go
-err := client.DeleteAutoPrunePolicy("my-org", policyUUID)
+err := client.DeleteAutoPrunePolicy(ctx, "my-org", policyUUID)
 ```
 
 ## Default Permissions (Prototypes)
@@ -315,7 +317,7 @@ Automatically apply permissions to new repositories:
 ### Creating a Prototype
 
 ```go
-prototype, err := client.CreatePrototype("my-org", &lib.CreatePrototypeRequest{
+prototype, err := client.CreatePrototype(ctx, "my-org", &lib.CreatePrototypeRequest{
     Role: "write",
     Delegate: lib.PrototypeDelegateRequest{
         Kind: "team",
@@ -332,7 +334,7 @@ fmt.Printf("Prototype created: %s\n", prototype.ID)
 ### Listing Prototypes
 
 ```go
-prototypes, err := client.GetPrototypes("my-org")
+prototypes, err := client.GetPrototypes(ctx, "my-org")
 if err != nil {
     log.Fatalf("Failed to get prototypes: %v", err)
 }
@@ -346,7 +348,7 @@ for _, p := range prototypes.Prototypes {
 ### Deleting a Prototype
 
 ```go
-err := client.DeletePrototype("my-org", prototypeID)
+err := client.DeletePrototype(ctx, "my-org", prototypeID)
 ```
 
 ## OAuth Applications
@@ -356,7 +358,7 @@ Manage OAuth applications for your organization:
 ### Creating an Application
 
 ```go
-app, err := client.CreateApplication(
+app, err := client.CreateApplication(ctx, 
     "my-org",
     "My CI Tool",                           // name
     "CI/CD integration app",                // description
@@ -375,7 +377,7 @@ fmt.Printf("Client Secret: %s\n", app.ClientSecret)
 ### Listing Applications
 
 ```go
-apps, err := client.GetApplications("my-org")
+apps, err := client.GetApplications(ctx, "my-org")
 if err != nil {
     log.Fatalf("Failed to list apps: %v", err)
 }
@@ -388,7 +390,7 @@ for _, app := range apps.Applications {
 ### Resetting Client Secret
 
 ```go
-app, err := client.ResetApplicationClientSecret("my-org", clientID)
+app, err := client.ResetApplicationClientSecret(ctx, "my-org", clientID)
 if err != nil {
     log.Fatalf("Failed to reset secret: %v", err)
 }
@@ -401,7 +403,7 @@ fmt.Printf("New secret: %s\n", app.ClientSecret)
 Access organization activity logs:
 
 ```go
-logs, err := client.GetOrganizationLogs("my-org", "", "", "")
+logs, err := client.GetOrganizationLogs(ctx, "my-org", "", "", "")
 if err != nil {
     log.Fatalf("Failed to get logs: %v", err)
 }
@@ -414,7 +416,7 @@ for _, entry := range logs.Logs {
 
 // Pagination
 if logs.NextPage != "" {
-    nextLogs, err := client.GetOrganizationLogs("my-org", logs.NextPage, "", "")
+    nextLogs, err := client.GetOrganizationLogs(ctx, "my-org", logs.NextPage, "", "")
     // ... process next page
 }
 ```
@@ -424,7 +426,7 @@ if logs.NextPage != "" {
 Get log statistics:
 
 ```go
-aggLogs, err := client.GetOrganizationAggregatedLogs(
+aggLogs, err := client.GetOrganizationAggregatedLogs(ctx, 
     "my-org",
     "01/01/2024",  // start date
     "01/31/2024",  // end date

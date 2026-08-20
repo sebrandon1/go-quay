@@ -14,6 +14,7 @@ go get github.com/sebrandon1/go-quay
 package main
 
 import (
+    "context"
     "fmt"
     "log"
     "os"
@@ -27,7 +28,8 @@ func main() {
         log.Fatal(err)
     }
 
-    user, err := client.GetUser()
+    ctx := context.Background()
+    user, err := client.GetUser(ctx)
     if err != nil {
         log.Fatal(err)
     }

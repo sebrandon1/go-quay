@@ -16,6 +16,7 @@ Robot accounts provide better security, auditing, and permission management.
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -23,7 +24,7 @@ import (
 // GetRepoTokens retrieves all tokens for a repository.
 //
 // Deprecated: Use robot accounts instead.
-func (c *Client) GetRepoTokens(namespace, repository string) (*RepoTokens, error) {
+func (c *Client) GetRepoTokens(ctx context.Context, namespace, repository string) (*RepoTokens, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -31,7 +32,7 @@ func (c *Client) GetRepoTokens(namespace, repository string) (*RepoTokens, error
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/tokens", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tokens", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repo tokens request: %w", err)
 	}
@@ -47,7 +48,7 @@ func (c *Client) GetRepoTokens(namespace, repository string) (*RepoTokens, error
 // CreateRepoToken creates a new repository token.
 //
 // Deprecated: Use robot accounts instead.
-func (c *Client) CreateRepoToken(namespace, repository string, createReq *CreateRepoTokenRequest) (*RepoToken, error) {
+func (c *Client) CreateRepoToken(ctx context.Context, namespace, repository string, createReq *CreateRepoTokenRequest) (*RepoToken, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -55,7 +56,7 @@ func (c *Client) CreateRepoToken(namespace, repository string, createReq *Create
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/tokens", namespace, repository), createReq)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/tokens", namespace, repository), createReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create repo token request: %w", err)
 	}
@@ -71,7 +72,7 @@ func (c *Client) CreateRepoToken(namespace, repository string, createReq *Create
 // GetRepoToken retrieves a specific repository token.
 //
 // Deprecated: Use robot accounts instead.
-func (c *Client) GetRepoToken(namespace, repository, code string) (*RepoToken, error) {
+func (c *Client) GetRepoToken(ctx context.Context, namespace, repository, code string) (*RepoToken, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -82,7 +83,7 @@ func (c *Client) GetRepoToken(namespace, repository, code string) (*RepoToken, e
 		return nil, fmt.Errorf("code is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repo token request: %w", err)
 	}
@@ -98,7 +99,7 @@ func (c *Client) GetRepoToken(namespace, repository, code string) (*RepoToken, e
 // UpdateRepoToken updates a repository token.
 //
 // Deprecated: Use robot accounts instead.
-func (c *Client) UpdateRepoToken(namespace, repository, code string, updateReq *UpdateRepoTokenRequest) (*RepoToken, error) {
+func (c *Client) UpdateRepoToken(ctx context.Context, namespace, repository, code string, updateReq *UpdateRepoTokenRequest) (*RepoToken, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -109,7 +110,7 @@ func (c *Client) UpdateRepoToken(namespace, repository, code string, updateReq *
 		return nil, fmt.Errorf("code is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code), updateReq)
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code), updateReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update repo token request: %w", err)
 	}
@@ -125,7 +126,7 @@ func (c *Client) UpdateRepoToken(namespace, repository, code string, updateReq *
 // DeleteRepoToken deletes a repository token.
 //
 // Deprecated: Use robot accounts instead.
-func (c *Client) DeleteRepoToken(namespace, repository, code string) error {
+func (c *Client) DeleteRepoToken(ctx context.Context, namespace, repository, code string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -136,7 +137,7 @@ func (c *Client) DeleteRepoToken(namespace, repository, code string) error {
 		return fmt.Errorf("code is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete repo token request: %w", err)
 	}

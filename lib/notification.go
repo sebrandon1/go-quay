@@ -33,12 +33,13 @@ Supported methods:
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetNotifications retrieves all notifications for a repository
-func (c *Client) GetNotifications(namespace, repository string) (*RepositoryNotifications, error) {
+func (c *Client) GetNotifications(ctx context.Context, namespace, repository string) (*RepositoryNotifications, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -46,7 +47,7 @@ func (c *Client) GetNotifications(namespace, repository string) (*RepositoryNoti
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/notification/", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/notification/", namespace, repository), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get notifications request: %w", err)
 	}
@@ -60,7 +61,7 @@ func (c *Client) GetNotifications(namespace, repository string) (*RepositoryNoti
 }
 
 // GetNotification retrieves a specific notification by UUID
-func (c *Client) GetNotification(namespace, repository, uuid string) (*RepositoryNotification, error) {
+func (c *Client) GetNotification(ctx context.Context, namespace, repository, uuid string) (*RepositoryNotification, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -71,7 +72,7 @@ func (c *Client) GetNotification(namespace, repository, uuid string) (*Repositor
 		return nil, fmt.Errorf("uuid is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get notification request: %w", err)
 	}
@@ -85,7 +86,7 @@ func (c *Client) GetNotification(namespace, repository, uuid string) (*Repositor
 }
 
 // CreateNotification creates a new notification for a repository
-func (c *Client) CreateNotification(namespace, repository string, notificationReq *CreateNotificationRequest) (*RepositoryNotification, error) {
+func (c *Client) CreateNotification(ctx context.Context, namespace, repository string, notificationReq *CreateNotificationRequest) (*RepositoryNotification, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -93,7 +94,7 @@ func (c *Client) CreateNotification(namespace, repository string, notificationRe
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/notification/", namespace, repository), notificationReq)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/notification/", namespace, repository), notificationReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create notification request: %w", err)
 	}
@@ -107,7 +108,7 @@ func (c *Client) CreateNotification(namespace, repository string, notificationRe
 }
 
 // DeleteNotification deletes a notification from a repository
-func (c *Client) DeleteNotification(namespace, repository, uuid string) error {
+func (c *Client) DeleteNotification(ctx context.Context, namespace, repository, uuid string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -118,7 +119,7 @@ func (c *Client) DeleteNotification(namespace, repository, uuid string) error {
 		return fmt.Errorf("uuid is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete notification request: %w", err)
 	}
@@ -131,7 +132,7 @@ func (c *Client) DeleteNotification(namespace, repository, uuid string) error {
 }
 
 // TestNotification tests a notification by sending a test event
-func (c *Client) TestNotification(namespace, repository, uuid string) error {
+func (c *Client) TestNotification(ctx context.Context, namespace, repository, uuid string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -142,7 +143,7 @@ func (c *Client) TestNotification(namespace, repository, uuid string) error {
 		return fmt.Errorf("uuid is required")
 	}
 
-	req, err := newRequest(http.MethodPost, c.buildURL("/repository/%s/%s/notification/%s/test", namespace, repository, uuid), nil)
+	req, err := newRequest(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/notification/%s/test", namespace, repository, uuid), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create test notification request: %w", err)
 	}
@@ -155,7 +156,7 @@ func (c *Client) TestNotification(namespace, repository, uuid string) error {
 }
 
 // ResetNotification resets failure count for a notification
-func (c *Client) ResetNotification(namespace, repository, uuid string) error {
+func (c *Client) ResetNotification(ctx context.Context, namespace, repository, uuid string) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is required")
 	}
@@ -166,7 +167,7 @@ func (c *Client) ResetNotification(namespace, repository, uuid string) error {
 		return fmt.Errorf("uuid is required")
 	}
 
-	req, err := newRequest(http.MethodPost, c.buildURL("/repository/%s/%s/notification/%s/reset", namespace, repository, uuid), nil)
+	req, err := newRequest(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/notification/%s/reset", namespace, repository, uuid), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create reset notification request: %w", err)
 	}
@@ -179,7 +180,7 @@ func (c *Client) ResetNotification(namespace, repository, uuid string) error {
 }
 
 // UpdateNotification updates an existing notification
-func (c *Client) UpdateNotification(namespace, repository, uuid string, notificationReq *CreateNotificationRequest) (*RepositoryNotification, error) {
+func (c *Client) UpdateNotification(ctx context.Context, namespace, repository, uuid string, notificationReq *CreateNotificationRequest) (*RepositoryNotification, error) {
 	if namespace == "" {
 		return nil, fmt.Errorf("namespace is required")
 	}
@@ -190,7 +191,7 @@ func (c *Client) UpdateNotification(namespace, repository, uuid string, notifica
 		return nil, fmt.Errorf("uuid is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), notificationReq)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository/%s/%s/notification/%s", namespace, repository, uuid), notificationReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update notification request: %w", err)
 	}

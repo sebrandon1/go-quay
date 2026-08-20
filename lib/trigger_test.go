@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -39,7 +40,7 @@ func TestGetTriggers(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	triggers, err := client.GetTriggers(testNamespace, testRepository)
+	triggers, err := client.GetTriggers(context.Background(), testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("GetTriggers returned error: %v", err)
 	}
@@ -85,7 +86,7 @@ func TestGetTrigger(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	trigger, err := client.GetTrigger(testNamespace, testRepository, testTriggerUUID)
+	trigger, err := client.GetTrigger(context.Background(), testNamespace, testRepository, testTriggerUUID)
 	if err != nil {
 		t.Fatalf("GetTrigger returned error: %v", err)
 	}
@@ -119,7 +120,7 @@ func TestDeleteTrigger(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteTrigger(testNamespace, testRepository, testTriggerUUID)
+	err = client.DeleteTrigger(context.Background(), testNamespace, testRepository, testTriggerUUID)
 	if err != nil {
 		t.Fatalf("DeleteTrigger returned error: %v", err)
 	}
@@ -159,7 +160,7 @@ func TestUpdateTrigger(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	trigger, err := client.UpdateTrigger(testNamespace, testRepository, testTriggerUUID, false)
+	trigger, err := client.UpdateTrigger(context.Background(), testNamespace, testRepository, testTriggerUUID, false)
 	if err != nil {
 		t.Fatalf("UpdateTrigger returned error: %v", err)
 	}
@@ -199,7 +200,7 @@ func TestStartTriggerBuild(t *testing.T) {
 		CommitSHA: "abc123def456",
 	}
 
-	build, err := client.StartTriggerBuild(testNamespace, testRepository, testTriggerUUID, triggerReq)
+	build, err := client.StartTriggerBuild(context.Background(), testNamespace, testRepository, testTriggerUUID, triggerReq)
 	if err != nil {
 		t.Fatalf("StartTriggerBuild returned error: %v", err)
 	}
@@ -243,7 +244,7 @@ func TestActivateTrigger(t *testing.T) {
 		},
 	}
 
-	trigger, err := client.ActivateTrigger(testNamespace, testRepository, testTriggerUUID, activateReq)
+	trigger, err := client.ActivateTrigger(context.Background(), testNamespace, testRepository, testTriggerUUID, activateReq)
 	if err != nil {
 		t.Fatalf("ActivateTrigger returned error: %v", err)
 	}
@@ -283,7 +284,7 @@ func TestGetTriggerBuilds(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	builds, err := client.GetTriggerBuilds(testNamespace, testRepository, testTriggerUUID, 0)
+	builds, err := client.GetTriggerBuilds(context.Background(), testNamespace, testRepository, testTriggerUUID, 0)
 	if err != nil {
 		t.Fatalf("GetTriggerBuilds returned error: %v", err)
 	}
@@ -307,7 +308,7 @@ func TestGetTriggersError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetTriggers(testNamespace, testRepository)
+	_, err = client.GetTriggers(context.Background(), testNamespace, testRepository)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -324,7 +325,7 @@ func TestGetTriggerError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetTrigger(testNamespace, testRepository, "nonexistent-uuid")
+	_, err = client.GetTrigger(context.Background(), testNamespace, testRepository, "nonexistent-uuid")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -341,27 +342,27 @@ func TestTriggerHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteTrigger(testNamespace, testRepository, testTriggerUUID)
+	err = client.DeleteTrigger(context.Background(), testNamespace, testRepository, testTriggerUUID)
 	if err == nil {
 		t.Error("Expected error from DeleteTrigger, got nil")
 	}
 
-	_, err = client.UpdateTrigger(testNamespace, testRepository, testTriggerUUID, true)
+	_, err = client.UpdateTrigger(context.Background(), testNamespace, testRepository, testTriggerUUID, true)
 	if err == nil {
 		t.Error("Expected error from UpdateTrigger, got nil")
 	}
 
-	_, err = client.StartTriggerBuild(testNamespace, testRepository, testTriggerUUID, &ManualTriggerRequest{CommitSHA: testHashABC123})
+	_, err = client.StartTriggerBuild(context.Background(), testNamespace, testRepository, testTriggerUUID, &ManualTriggerRequest{CommitSHA: testHashABC123})
 	if err == nil {
 		t.Error("Expected error from StartTriggerBuild, got nil")
 	}
 
-	_, err = client.ActivateTrigger(testNamespace, testRepository, testTriggerUUID, &ActivateTriggerRequest{})
+	_, err = client.ActivateTrigger(context.Background(), testNamespace, testRepository, testTriggerUUID, &ActivateTriggerRequest{})
 	if err == nil {
 		t.Error("Expected error from ActivateTrigger, got nil")
 	}
 
-	_, err = client.GetTriggerBuilds(testNamespace, testRepository, testTriggerUUID, 10)
+	_, err = client.GetTriggerBuilds(context.Background(), testNamespace, testRepository, testTriggerUUID, 10)
 	if err == nil {
 		t.Error("Expected error from GetTriggerBuilds, got nil")
 	}

@@ -62,7 +62,7 @@ var notificationListCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		notifications, err := client.GetNotifications(notificationNamespace, notificationRepository)
+		notifications, err := client.GetNotifications(cmd.Context(), notificationNamespace, notificationRepository)
 		if err != nil {
 			return fmt.Errorf("getting notifications: %w", err)
 		}
@@ -83,7 +83,7 @@ var notificationInfoCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		notification, err := client.GetNotification(notificationNamespace, notificationRepository, notificationUUID)
+		notification, err := client.GetNotification(cmd.Context(), notificationNamespace, notificationRepository, notificationUUID)
 		if err != nil {
 			return fmt.Errorf("getting notification: %w", err)
 		}
@@ -125,7 +125,7 @@ For slack method, provide the --url flag with the Slack webhook URL.`,
 			Title:  notificationTitle,
 		}
 
-		notification, err := client.CreateNotification(notificationNamespace, notificationRepository, notificationReq)
+		notification, err := client.CreateNotification(cmd.Context(), notificationNamespace, notificationRepository, notificationReq)
 		if err != nil {
 			return fmt.Errorf("creating notification: %w", err)
 		}
@@ -150,7 +150,7 @@ var notificationDeleteCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteNotification(notificationNamespace, notificationRepository, notificationUUID)
+		err = client.DeleteNotification(cmd.Context(), notificationNamespace, notificationRepository, notificationUUID)
 		if err != nil {
 			return fmt.Errorf("deleting notification: %w", err)
 		}
@@ -171,7 +171,7 @@ var notificationTestCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.TestNotification(notificationNamespace, notificationRepository, notificationUUID)
+		err = client.TestNotification(cmd.Context(), notificationNamespace, notificationRepository, notificationUUID)
 		if err != nil {
 			return fmt.Errorf("testing notification: %w", err)
 		}
@@ -192,7 +192,7 @@ var notificationResetCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.ResetNotification(notificationNamespace, notificationRepository, notificationUUID)
+		err = client.ResetNotification(cmd.Context(), notificationNamespace, notificationRepository, notificationUUID)
 		if err != nil {
 			return fmt.Errorf("resetting notification: %w", err)
 		}
@@ -229,7 +229,7 @@ var notificationUpdateCmd = &cobra.Command{
 			Title:  notificationTitle,
 		}
 
-		notification, err := client.UpdateNotification(notificationNamespace, notificationRepository, notificationUUID, notificationReq)
+		notification, err := client.UpdateNotification(cmd.Context(), notificationNamespace, notificationRepository, notificationUUID, notificationReq)
 		if err != nil {
 			return fmt.Errorf("updating notification: %w", err)
 		}

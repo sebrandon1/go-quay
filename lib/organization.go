@@ -24,6 +24,7 @@ Organization Collaborators:
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -31,7 +32,7 @@ import (
 // Organization Management
 
 // CreateOrganization creates a new organization
-func (c *Client) CreateOrganization(name, email string) (*Organization, error) {
+func (c *Client) CreateOrganization(ctx context.Context, name, email string) (*Organization, error) {
 	if name == "" {
 		return nil, fmt.Errorf("name is required")
 	}
@@ -39,7 +40,7 @@ func (c *Client) CreateOrganization(name, email string) (*Organization, error) {
 		return nil, fmt.Errorf("email is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/organization/"), CreateOrganizationRequest{
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/organization/"), CreateOrganizationRequest{
 		Name:  name,
 		Email: email,
 	})
@@ -56,12 +57,12 @@ func (c *Client) CreateOrganization(name, email string) (*Organization, error) {
 }
 
 // GetOrganization retrieves organization details
-func (c *Client) GetOrganization(orgname string) (*Organization, error) {
+func (c *Client) GetOrganization(ctx context.Context, orgname string) (*Organization, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization request: %w", err)
 	}
@@ -75,12 +76,12 @@ func (c *Client) GetOrganization(orgname string) (*Organization, error) {
 }
 
 // DeleteOrganization deletes an organization
-func (c *Client) DeleteOrganization(orgname string) error {
+func (c *Client) DeleteOrganization(ctx context.Context, orgname string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s", orgname), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s", orgname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete organization request: %w", err)
 	}
@@ -93,7 +94,7 @@ func (c *Client) DeleteOrganization(orgname string) error {
 }
 
 // UpdateOrganization updates organization settings
-func (c *Client) UpdateOrganization(orgname, email string) (*Organization, error) {
+func (c *Client) UpdateOrganization(ctx context.Context, orgname, email string) (*Organization, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
@@ -101,7 +102,7 @@ func (c *Client) UpdateOrganization(orgname, email string) (*Organization, error
 		return nil, fmt.Errorf("email is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s", orgname), UpdateOrganizationRequest{
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/organization/%s", orgname), UpdateOrganizationRequest{
 		Email: email,
 	})
 	if err != nil {
@@ -119,12 +120,12 @@ func (c *Client) UpdateOrganization(orgname, email string) (*Organization, error
 // Organization Members Management
 
 // GetOrganizationMembers retrieves organization members
-func (c *Client) GetOrganizationMembers(orgname string) (*OrganizationMembers, error) {
+func (c *Client) GetOrganizationMembers(ctx context.Context, orgname string) (*OrganizationMembers, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/members", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/members", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization members request: %w", err)
 	}
@@ -138,7 +139,7 @@ func (c *Client) GetOrganizationMembers(orgname string) (*OrganizationMembers, e
 }
 
 // GetOrganizationMember gets information about a specific organization member
-func (c *Client) GetOrganizationMember(orgname, membername string) (*OrganizationMember, error) {
+func (c *Client) GetOrganizationMember(ctx context.Context, orgname, membername string) (*OrganizationMember, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
@@ -146,7 +147,7 @@ func (c *Client) GetOrganizationMember(orgname, membername string) (*Organizatio
 		return nil, fmt.Errorf("membername is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization member request: %w", err)
 	}
@@ -160,7 +161,7 @@ func (c *Client) GetOrganizationMember(orgname, membername string) (*Organizatio
 }
 
 // AddOrganizationMember adds a member to an organization
-func (c *Client) AddOrganizationMember(orgname, membername string) error {
+func (c *Client) AddOrganizationMember(ctx context.Context, orgname, membername string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -168,7 +169,7 @@ func (c *Client) AddOrganizationMember(orgname, membername string) error {
 		return fmt.Errorf("membername is required")
 	}
 
-	req, err := newRequest(http.MethodPut, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
+	req, err := newRequest(ctx, http.MethodPut, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create add organization member request: %w", err)
 	}
@@ -181,7 +182,7 @@ func (c *Client) AddOrganizationMember(orgname, membername string) error {
 }
 
 // RemoveOrganizationMember removes a member from an organization
-func (c *Client) RemoveOrganizationMember(orgname, membername string) error {
+func (c *Client) RemoveOrganizationMember(ctx context.Context, orgname, membername string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -189,7 +190,7 @@ func (c *Client) RemoveOrganizationMember(orgname, membername string) error {
 		return fmt.Errorf("membername is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create remove organization member request: %w", err)
 	}
@@ -204,12 +205,12 @@ func (c *Client) RemoveOrganizationMember(orgname, membername string) error {
 // Organization Repositories
 
 // GetOrganizationRepositories retrieves repositories for an organization
-func (c *Client) GetOrganizationRepositories(orgname string) (*OrganizationRepositories, error) {
+func (c *Client) GetOrganizationRepositories(ctx context.Context, orgname string) (*OrganizationRepositories, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/repositories", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/repositories", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization repositories request: %w", err)
 	}
@@ -225,12 +226,12 @@ func (c *Client) GetOrganizationRepositories(orgname string) (*OrganizationRepos
 // Organization Collaborators
 
 // GetOrganizationCollaborators gets the list of collaborators for an organization
-func (c *Client) GetOrganizationCollaborators(orgname string) (*Collaborators, error) {
+func (c *Client) GetOrganizationCollaborators(ctx context.Context, orgname string) (*Collaborators, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/collaborators", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/collaborators", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization collaborators request: %w", err)
 	}

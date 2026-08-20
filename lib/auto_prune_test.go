@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -35,7 +36,7 @@ func TestGetAutoPrunePolicies(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	policies, err := client.GetAutoPrunePolicies(testOrgName)
+	policies, err := client.GetAutoPrunePolicies(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("GetAutoPrunePolicies returned error: %v", err)
 	}
@@ -85,7 +86,7 @@ func TestCreateAutoPrunePolicy(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	policy, err := client.CreateAutoPrunePolicy(testOrgName, testAutoPruneMethodNumberOfTags, 20, testTagPatternRelease)
+	policy, err := client.CreateAutoPrunePolicy(context.Background(), testOrgName, testAutoPruneMethodNumberOfTags, 20, testTagPatternRelease)
 	if err != nil {
 		t.Fatalf("CreateAutoPrunePolicy returned error: %v", err)
 	}
@@ -122,7 +123,7 @@ func TestGetAutoPrunePolicy(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	policy, err := client.GetAutoPrunePolicy(testOrgName, testPolicyUUID)
+	policy, err := client.GetAutoPrunePolicy(context.Background(), testOrgName, testPolicyUUID)
 	if err != nil {
 		t.Fatalf("GetAutoPrunePolicy returned error: %v", err)
 	}
@@ -162,7 +163,7 @@ func TestUpdateAutoPrunePolicy(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	policy, err := client.UpdateAutoPrunePolicy(testOrgName, testPolicyUUID, testAutoPruneMethodNumberOfTags, 30, testTagPatternRelease)
+	policy, err := client.UpdateAutoPrunePolicy(context.Background(), testOrgName, testPolicyUUID, testAutoPruneMethodNumberOfTags, 30, testTagPatternRelease)
 	if err != nil {
 		t.Fatalf("UpdateAutoPrunePolicy returned error: %v", err)
 	}
@@ -193,7 +194,7 @@ func TestDeleteAutoPrunePolicy(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteAutoPrunePolicy(testOrgName, testPolicyUUID)
+	err = client.DeleteAutoPrunePolicy(context.Background(), testOrgName, testPolicyUUID)
 	if err != nil {
 		t.Fatalf("DeleteAutoPrunePolicy returned error: %v", err)
 	}
@@ -202,27 +203,27 @@ func TestDeleteAutoPrunePolicy(t *testing.T) {
 func TestAutoPruneHTTPErrors(t *testing.T) {
 	client := newOrgErrorClient(t)
 
-	_, err := client.GetAutoPrunePolicies(testOrgName)
+	_, err := client.GetAutoPrunePolicies(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error from GetAutoPrunePolicies, got nil")
 	}
 
-	_, err = client.CreateAutoPrunePolicy(testOrgName, testAutoPruneMethodNumberOfTags, 10, "")
+	_, err = client.CreateAutoPrunePolicy(context.Background(), testOrgName, testAutoPruneMethodNumberOfTags, 10, "")
 	if err == nil {
 		t.Error("Expected error from CreateAutoPrunePolicy, got nil")
 	}
 
-	_, err = client.GetAutoPrunePolicy(testOrgName, testPolicyUUID)
+	_, err = client.GetAutoPrunePolicy(context.Background(), testOrgName, testPolicyUUID)
 	if err == nil {
 		t.Error("Expected error from GetAutoPrunePolicy, got nil")
 	}
 
-	_, err = client.UpdateAutoPrunePolicy(testOrgName, testPolicyUUID, testAutoPruneMethodNumberOfTags, 20, "")
+	_, err = client.UpdateAutoPrunePolicy(context.Background(), testOrgName, testPolicyUUID, testAutoPruneMethodNumberOfTags, 20, "")
 	if err == nil {
 		t.Error("Expected error from UpdateAutoPrunePolicy, got nil")
 	}
 
-	err = client.DeleteAutoPrunePolicy(testOrgName, testPolicyUUID)
+	err = client.DeleteAutoPrunePolicy(context.Background(), testOrgName, testPolicyUUID)
 	if err == nil {
 		t.Error("Expected error from DeleteAutoPrunePolicy, got nil")
 	}

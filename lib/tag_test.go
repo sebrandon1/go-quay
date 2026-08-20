@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -47,7 +48,7 @@ func TestGetTag(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	tag, err := client.GetTag(testNamespace, testRepository, testTagNameV1)
+	tag, err := client.GetTag(context.Background(), testNamespace, testRepository, testTagNameV1)
 	if err != nil {
 		t.Fatalf("GetTag failed: %v", err)
 	}
@@ -104,7 +105,7 @@ func TestUpdateTag(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	tag, err := client.UpdateTag(testNamespace, testRepository, testTagNameV1, testExpirationTime)
+	tag, err := client.UpdateTag(context.Background(), testNamespace, testRepository, testTagNameV1, testExpirationTime)
 	if err != nil {
 		t.Fatalf("UpdateTag failed: %v", err)
 	}
@@ -132,7 +133,7 @@ func TestDeleteTag(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteTag(testNamespace, testRepository, "old-version")
+	err = client.DeleteTag(context.Background(), testNamespace, testRepository, "old-version")
 	if err != nil {
 		t.Fatalf("DeleteTag failed: %v", err)
 	}
@@ -177,7 +178,7 @@ func TestGetTagHistory(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	history, err := client.GetTagHistory(testNamespace, testRepository, testTagNameLatest)
+	history, err := client.GetTagHistory(context.Background(), testNamespace, testRepository, testTagNameLatest)
 	if err != nil {
 		t.Fatalf("GetTagHistory failed: %v", err)
 	}
@@ -235,7 +236,7 @@ func TestRevertTag(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	tag, err := client.RevertTag(testNamespace, testRepository, testTagNameLatest, testManifestDigest)
+	tag, err := client.RevertTag(context.Background(), testNamespace, testRepository, testTagNameLatest, testManifestDigest)
 	if err != nil {
 		t.Fatalf("RevertTag failed: %v", err)
 	}
@@ -273,7 +274,7 @@ func TestChangeTag(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.ChangeTag(testNamespace, testRepository, testTagNameLatest, testManifestDigest)
+	err = client.ChangeTag(context.Background(), testNamespace, testRepository, testTagNameLatest, testManifestDigest)
 	if err != nil {
 		t.Fatalf("ChangeTag returned error: %v", err)
 	}
@@ -307,7 +308,7 @@ func TestRestoreTag(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.RestoreTag(testNamespace, testRepository, testTagNameLatest, testManifestDigest)
+	err = client.RestoreTag(context.Background(), testNamespace, testRepository, testTagNameLatest, testManifestDigest)
 	if err != nil {
 		t.Fatalf("RestoreTag returned error: %v", err)
 	}
@@ -327,43 +328,43 @@ func TestTagErrorHandling(t *testing.T) {
 	}
 
 	// Test GetTag error
-	_, err = client.GetTag(testNamespace, testRepository, "nonexistent")
+	_, err = client.GetTag(context.Background(), testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
 	}
 
 	// Test UpdateTag error
-	_, err = client.UpdateTag(testNamespace, testRepository, "nonexistent", testExpirationTime)
+	_, err = client.UpdateTag(context.Background(), testNamespace, testRepository, "nonexistent", testExpirationTime)
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
 	}
 
 	// Test DeleteTag error
-	err = client.DeleteTag(testNamespace, testRepository, "nonexistent")
+	err = client.DeleteTag(context.Background(), testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
 	}
 
 	// Test GetTagHistory error
-	_, err = client.GetTagHistory(testNamespace, testRepository, "nonexistent")
+	_, err = client.GetTagHistory(context.Background(), testNamespace, testRepository, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
 	}
 
 	// Test RevertTag error
-	_, err = client.RevertTag(testNamespace, testRepository, "nonexistent", testDigestSHA256)
+	_, err = client.RevertTag(context.Background(), testNamespace, testRepository, "nonexistent", testDigestSHA256)
 	if err == nil {
 		t.Error("Expected error for non-existent tag, got nil")
 	}
 
 	// Test ChangeTag error
-	err = client.ChangeTag(testNamespace, testRepository, "nonexistent", testDigestSHA256)
+	err = client.ChangeTag(context.Background(), testNamespace, testRepository, "nonexistent", testDigestSHA256)
 	if err == nil {
 		t.Error("Expected error from ChangeTag, got nil")
 	}
 
 	// Test RestoreTag error
-	err = client.RestoreTag(testNamespace, testRepository, "nonexistent", testDigestSHA256)
+	err = client.RestoreTag(context.Background(), testNamespace, testRepository, "nonexistent", testDigestSHA256)
 	if err == nil {
 		t.Error("Expected error from RestoreTag, got nil")
 	}

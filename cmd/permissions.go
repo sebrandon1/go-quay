@@ -39,7 +39,7 @@ var permListCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		permissions, err := client.GetRepositoryPermissions(namespace, repository)
+		permissions, err := client.GetRepositoryPermissions(cmd.Context(), namespace, repository)
 		if err != nil {
 			return fmt.Errorf("getting repository permissions: %w", err)
 		}
@@ -60,7 +60,7 @@ var permSetCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.SetRepositoryPermission(namespace, repository, permissionUser, permissionRole)
+		err = client.SetRepositoryPermission(cmd.Context(), namespace, repository, permissionUser, permissionRole)
 		if err != nil {
 			return fmt.Errorf("setting repository permission: %w", err)
 		}
@@ -82,7 +82,7 @@ var permRemoveCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.RemoveRepositoryPermission(namespace, repository, permissionUser)
+		err = client.RemoveRepositoryPermission(cmd.Context(), namespace, repository, permissionUser)
 		if err != nil {
 			return fmt.Errorf("removing repository permission: %w", err)
 		}
@@ -102,7 +102,7 @@ var permUserPermissionsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		permissions, err := client.ListUserPermissions(namespace, repository)
+		permissions, err := client.ListUserPermissions(cmd.Context(), namespace, repository)
 		if err != nil {
 			return fmt.Errorf("getting user permissions: %w", err)
 		}
@@ -120,7 +120,7 @@ var permUserPermissionCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		permission, err := client.GetUserPermission(namespace, repository, permissionUser)
+		permission, err := client.GetUserPermission(cmd.Context(), namespace, repository, permissionUser)
 		if err != nil {
 			return fmt.Errorf("getting user permission: %w", err)
 		}
@@ -138,7 +138,7 @@ var permSetUserPermCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.SetUserPermission(namespace, repository, permissionUser, permissionRole)
+		err = client.SetUserPermission(cmd.Context(), namespace, repository, permissionUser, permissionRole)
 		if err != nil {
 			return fmt.Errorf("setting user permission: %w", err)
 		}
@@ -163,7 +163,7 @@ var permDeleteUserPermCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteUserPermission(namespace, repository, permissionUser)
+		err = client.DeleteUserPermission(cmd.Context(), namespace, repository, permissionUser)
 		if err != nil {
 			return fmt.Errorf("deleting user permission: %w", err)
 		}
@@ -183,7 +183,7 @@ var permUserTransitiveCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		permission, err := client.GetUserTransitivePermission(namespace, repository, permissionUser)
+		permission, err := client.GetUserTransitivePermission(cmd.Context(), namespace, repository, permissionUser)
 		if err != nil {
 			return fmt.Errorf("getting user transitive permission: %w", err)
 		}
@@ -201,7 +201,7 @@ var permTeamPermissionsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		permissions, err := client.ListTeamPermissions(namespace, repository)
+		permissions, err := client.ListTeamPermissions(cmd.Context(), namespace, repository)
 		if err != nil {
 			return fmt.Errorf("getting team permissions: %w", err)
 		}
@@ -219,7 +219,7 @@ var permTeamPermissionCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		permission, err := client.GetTeamPermission(namespace, repository, permissionTeamName)
+		permission, err := client.GetTeamPermission(cmd.Context(), namespace, repository, permissionTeamName)
 		if err != nil {
 			return fmt.Errorf("getting team permission: %w", err)
 		}
@@ -237,7 +237,7 @@ var permSetTeamPermCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.SetTeamPermission(namespace, repository, permissionTeamName, permissionRole)
+		err = client.SetTeamPermission(cmd.Context(), namespace, repository, permissionTeamName, permissionRole)
 		if err != nil {
 			return fmt.Errorf("setting team permission: %w", err)
 		}
@@ -262,7 +262,7 @@ var permDeleteTeamPermCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteTeamPermission(namespace, repository, permissionTeamName)
+		err = client.DeleteTeamPermission(cmd.Context(), namespace, repository, permissionTeamName)
 		if err != nil {
 			return fmt.Errorf("deleting team permission: %w", err)
 		}

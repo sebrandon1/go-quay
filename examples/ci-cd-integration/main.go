@@ -13,6 +13,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -45,6 +46,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	ctx := context.Background()
 
 	fmt.Println("=== CI/CD Integration Setup ===")
 	fmt.Printf("Organization: %s\n", *namespace)
@@ -52,7 +54,7 @@ func main() {
 
 	// Step 1: Check organization access
 	fmt.Println("1. Verifying organization access...")
-	org, err := client.GetOrganization(*namespace)
+	org, err := client.GetOrganization(ctx, *namespace)
 	if err != nil {
 		log.Fatalf("Failed to get organization (do you have access?): %v", err)
 	}
@@ -61,7 +63,7 @@ func main() {
 
 	// Step 2: List existing robot accounts
 	fmt.Println("2. Checking existing robot accounts...")
-	robots, err := client.GetRobotAccounts(*namespace)
+	robots, err := client.GetRobotAccounts(ctx, *namespace)
 	if err != nil {
 		log.Printf("   Could not list robots: %v\n", err)
 	} else {
@@ -77,7 +79,7 @@ func main() {
 	fmt.Printf("3. Setting up robot account '%s'...\n", fullRobotName)
 
 	// Check if robot exists
-	existingRobot, err := client.GetRobotAccount(*namespace, *robotName)
+	existingRobot, err := client.GetRobotAccount(ctx, *namespace, *robotName)
 	if err == nil {
 		fmt.Println("   Robot already exists, using existing account")
 		fmt.Printf("   Name: %s\n", existingRobot.Name)
@@ -85,7 +87,7 @@ func main() {
 	} else {
 		// Create new robot
 		fmt.Println("   Creating new robot account...")
-		newRobot, err := client.CreateRobotAccount(*namespace, *robotName, "CI/CD automation robot", nil)
+		newRobot, err := client.CreateRobotAccount(ctx, *namespace, *robotName, "CI/CD automation robot", nil)
 		if err != nil {
 			log.Fatalf("Failed to create robot: %v", err)
 		}
@@ -99,7 +101,7 @@ func main() {
 	fmt.Printf("4. Setting repository permissions for '%s'...\n", fullRobotName)
 
 	// Grant write permission to the robot
-	err = client.SetUserPermission(*namespace, *repository, fullRobotName, "write")
+	err = client.SetUserPermission(ctx, *namespace, *repository, fullRobotName, "write")
 	if err != nil {
 		log.Printf("   Could not set permission: %v\n", err)
 	} else {
@@ -107,7 +109,7 @@ func main() {
 	}
 
 	// Verify permission was set
-	perm, err := client.GetUserPermission(*namespace, *repository, fullRobotName)
+	perm, err := client.GetUserPermission(ctx, *namespace, *repository, fullRobotName)
 	if err != nil {
 		log.Printf("   Could not verify permission: %v\n", err)
 	} else {
@@ -119,7 +121,7 @@ func main() {
 	if *webhookURL != "" {
 		fmt.Println("5. Setting up webhook notification...")
 
-		notification, err := client.CreateNotification(*namespace, *repository, &lib.CreateNotificationRequest{
+		notification, err := client.CreateNotification(ctx, *namespace, *repository, &lib.CreateNotificationRequest{
 			Event:  "repo_push",
 			Method: "webhook",
 			Title:  "CI/CD Push Notification",
@@ -140,7 +142,7 @@ func main() {
 
 	// Step 6: List build triggers
 	fmt.Println("6. Checking build triggers...")
-	triggers, err := client.GetTriggers(*namespace, *repository)
+	triggers, err := client.GetTriggers(ctx, *namespace, *repository)
 	if err != nil {
 		log.Printf("   Could not list triggers: %v\n", err)
 	} else if len(triggers.Triggers) == 0 {
@@ -160,7 +162,7 @@ func main() {
 
 	// Step 7: List existing notifications
 	fmt.Println("7. Checking existing notifications...")
-	notifications, err := client.GetNotifications(*namespace, *repository)
+	notifications, err := client.GetNotifications(ctx, *namespace, *repository)
 	if err != nil {
 		log.Printf("   Could not list notifications: %v\n", err)
 	} else if len(notifications.Notifications) == 0 {

@@ -12,13 +12,14 @@ such as maintenance notifications or important announcements.
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetMessages retrieves system messages for the user
-func (c *Client) GetMessages() (*Messages, error) {
-	req, err := newRequest(http.MethodGet, c.buildURL("/messages"), nil)
+func (c *Client) GetMessages(ctx context.Context) (*Messages, error) {
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/messages"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create messages request: %w", err)
 	}
@@ -32,7 +33,7 @@ func (c *Client) GetMessages() (*Messages, error) {
 }
 
 // CreateMessage creates a new global message (admin only)
-func (c *Client) CreateMessage(content, severity, mediaType string) (*Message, error) {
+func (c *Client) CreateMessage(ctx context.Context, content, severity, mediaType string) (*Message, error) {
 	if content == "" {
 		return nil, fmt.Errorf("content is required")
 	}
@@ -58,7 +59,7 @@ func (c *Client) CreateMessage(content, severity, mediaType string) (*Message, e
 		},
 	}
 
-	req, err := newRequestWithBody(http.MethodPost, c.buildURL("/messages"), body)
+	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/messages"), body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create message request: %w", err)
 	}

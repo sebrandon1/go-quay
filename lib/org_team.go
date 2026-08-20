@@ -27,6 +27,7 @@ Team Invitations:
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -34,12 +35,12 @@ import (
 // Team Management
 
 // GetTeams retrieves all teams for an organization
-func (c *Client) GetTeams(orgname string) ([]Team, error) {
+func (c *Client) GetTeams(ctx context.Context, orgname string) ([]Team, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/teams", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/teams", orgname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get teams request: %w", err)
 	}
@@ -55,7 +56,7 @@ func (c *Client) GetTeams(orgname string) ([]Team, error) {
 }
 
 // CreateTeam creates a new team in an organization
-func (c *Client) CreateTeam(orgname, teamname, description, role string) (*Team, error) {
+func (c *Client) CreateTeam(ctx context.Context, orgname, teamname, description, role string) (*Team, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
@@ -66,7 +67,7 @@ func (c *Client) CreateTeam(orgname, teamname, description, role string) (*Team,
 		return nil, fmt.Errorf("role is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/team/%s", orgname, teamname), CreateTeamRequest{
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/organization/%s/team/%s", orgname, teamname), CreateTeamRequest{
 		Name:        teamname,
 		Description: description,
 		Role:        role,
@@ -84,7 +85,7 @@ func (c *Client) CreateTeam(orgname, teamname, description, role string) (*Team,
 }
 
 // GetTeam retrieves details for a specific team
-func (c *Client) GetTeam(orgname, teamname string) (*Team, error) {
+func (c *Client) GetTeam(ctx context.Context, orgname, teamname string) (*Team, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
@@ -92,7 +93,7 @@ func (c *Client) GetTeam(orgname, teamname string) (*Team, error) {
 		return nil, fmt.Errorf("teamname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/team/%s", orgname, teamname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/team/%s", orgname, teamname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get team request: %w", err)
 	}
@@ -106,7 +107,7 @@ func (c *Client) GetTeam(orgname, teamname string) (*Team, error) {
 }
 
 // DeleteTeam deletes a team from an organization
-func (c *Client) DeleteTeam(orgname, teamname string) error {
+func (c *Client) DeleteTeam(ctx context.Context, orgname, teamname string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -114,7 +115,7 @@ func (c *Client) DeleteTeam(orgname, teamname string) error {
 		return fmt.Errorf("teamname is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/team/%s", orgname, teamname), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/team/%s", orgname, teamname), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete team request: %w", err)
 	}
@@ -127,7 +128,7 @@ func (c *Client) DeleteTeam(orgname, teamname string) error {
 }
 
 // UpdateTeam updates team settings
-func (c *Client) UpdateTeam(orgname, teamname, description, role string) (*Team, error) {
+func (c *Client) UpdateTeam(ctx context.Context, orgname, teamname, description, role string) (*Team, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
@@ -138,7 +139,7 @@ func (c *Client) UpdateTeam(orgname, teamname, description, role string) (*Team,
 		return nil, fmt.Errorf("role is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/team/%s", orgname, teamname), UpdateTeamRequest{
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/organization/%s/team/%s", orgname, teamname), UpdateTeamRequest{
 		Description: description,
 		Role:        role,
 	})
@@ -157,7 +158,7 @@ func (c *Client) UpdateTeam(orgname, teamname, description, role string) (*Team,
 // Team Members Management
 
 // GetTeamMembers retrieves members of a team
-func (c *Client) GetTeamMembers(orgname, teamname string) (*TeamMembers, error) {
+func (c *Client) GetTeamMembers(ctx context.Context, orgname, teamname string) (*TeamMembers, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
@@ -165,7 +166,7 @@ func (c *Client) GetTeamMembers(orgname, teamname string) (*TeamMembers, error) 
 		return nil, fmt.Errorf("teamname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/team/%s/members", orgname, teamname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/team/%s/members", orgname, teamname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get team members request: %w", err)
 	}
@@ -179,7 +180,7 @@ func (c *Client) GetTeamMembers(orgname, teamname string) (*TeamMembers, error) 
 }
 
 // AddTeamMember adds a member to a team
-func (c *Client) AddTeamMember(orgname, teamname, membername string) error {
+func (c *Client) AddTeamMember(ctx context.Context, orgname, teamname, membername string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -190,7 +191,7 @@ func (c *Client) AddTeamMember(orgname, teamname, membername string) error {
 		return fmt.Errorf("membername is required")
 	}
 
-	req, err := newRequest(http.MethodPut, c.buildURL("/organization/%s/team/%s/members/%s", orgname, teamname, membername), nil)
+	req, err := newRequest(ctx, http.MethodPut, c.buildURL("/organization/%s/team/%s/members/%s", orgname, teamname, membername), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create add team member request: %w", err)
 	}
@@ -203,7 +204,7 @@ func (c *Client) AddTeamMember(orgname, teamname, membername string) error {
 }
 
 // RemoveTeamMember removes a member from a team
-func (c *Client) RemoveTeamMember(orgname, teamname, membername string) error {
+func (c *Client) RemoveTeamMember(ctx context.Context, orgname, teamname, membername string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -214,7 +215,7 @@ func (c *Client) RemoveTeamMember(orgname, teamname, membername string) error {
 		return fmt.Errorf("membername is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/team/%s/members/%s", orgname, teamname, membername), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/team/%s/members/%s", orgname, teamname, membername), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create remove team member request: %w", err)
 	}
@@ -229,7 +230,7 @@ func (c *Client) RemoveTeamMember(orgname, teamname, membername string) error {
 // Team Permissions Management
 
 // GetTeamPermissions retrieves repository permissions for a team
-func (c *Client) GetTeamPermissions(orgname, teamname string) (*TeamPermissions, error) {
+func (c *Client) GetTeamPermissions(ctx context.Context, orgname, teamname string) (*TeamPermissions, error) {
 	if orgname == "" {
 		return nil, fmt.Errorf("orgname is required")
 	}
@@ -237,7 +238,7 @@ func (c *Client) GetTeamPermissions(orgname, teamname string) (*TeamPermissions,
 		return nil, fmt.Errorf("teamname is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/organization/%s/team/%s/permissions", orgname, teamname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/team/%s/permissions", orgname, teamname), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get team permissions request: %w", err)
 	}
@@ -251,7 +252,7 @@ func (c *Client) GetTeamPermissions(orgname, teamname string) (*TeamPermissions,
 }
 
 // SetTeamRepositoryPermission sets repository permission for a team
-func (c *Client) SetTeamRepositoryPermission(orgname, teamname, repository, role string) error {
+func (c *Client) SetTeamRepositoryPermission(ctx context.Context, orgname, teamname, repository, role string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -265,7 +266,7 @@ func (c *Client) SetTeamRepositoryPermission(orgname, teamname, repository, role
 		return fmt.Errorf("role is required")
 	}
 
-	req, err := newRequestWithBody(http.MethodPut, c.buildURL("/organization/%s/team/%s/permissions/%s", orgname, teamname, repository), SetRepositoryPermissionRequest{
+	req, err := newRequestWithBody(ctx, http.MethodPut, c.buildURL("/organization/%s/team/%s/permissions/%s", orgname, teamname, repository), SetRepositoryPermissionRequest{
 		Role: role,
 	})
 	if err != nil {
@@ -280,7 +281,7 @@ func (c *Client) SetTeamRepositoryPermission(orgname, teamname, repository, role
 }
 
 // RemoveTeamRepositoryPermission removes repository permission for a team
-func (c *Client) RemoveTeamRepositoryPermission(orgname, teamname, repository string) error {
+func (c *Client) RemoveTeamRepositoryPermission(ctx context.Context, orgname, teamname, repository string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -291,7 +292,7 @@ func (c *Client) RemoveTeamRepositoryPermission(orgname, teamname, repository st
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/team/%s/permissions/%s", orgname, teamname, repository), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/team/%s/permissions/%s", orgname, teamname, repository), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create remove team repository permission request: %w", err)
 	}
@@ -306,7 +307,7 @@ func (c *Client) RemoveTeamRepositoryPermission(orgname, teamname, repository st
 // Team Invitations
 
 // InviteTeamMember invites a member to a team via email
-func (c *Client) InviteTeamMember(orgname, teamname, email string) error {
+func (c *Client) InviteTeamMember(ctx context.Context, orgname, teamname, email string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -317,7 +318,7 @@ func (c *Client) InviteTeamMember(orgname, teamname, email string) error {
 		return fmt.Errorf("email is required")
 	}
 
-	req, err := newRequest(http.MethodPut, c.buildURL("/organization/%s/team/%s/invite/%s", orgname, teamname, email), nil)
+	req, err := newRequest(ctx, http.MethodPut, c.buildURL("/organization/%s/team/%s/invite/%s", orgname, teamname, email), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create invite team member request: %w", err)
 	}
@@ -330,7 +331,7 @@ func (c *Client) InviteTeamMember(orgname, teamname, email string) error {
 }
 
 // DeleteTeamInvite deletes a pending team invitation
-func (c *Client) DeleteTeamInvite(orgname, teamname, email string) error {
+func (c *Client) DeleteTeamInvite(ctx context.Context, orgname, teamname, email string) error {
 	if orgname == "" {
 		return fmt.Errorf("orgname is required")
 	}
@@ -341,7 +342,7 @@ func (c *Client) DeleteTeamInvite(orgname, teamname, email string) error {
 		return fmt.Errorf("email is required")
 	}
 
-	req, err := newRequest(http.MethodDelete, c.buildURL("/organization/%s/team/%s/invite/%s", orgname, teamname, email), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/team/%s/invite/%s", orgname, teamname, email), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete team invite request: %w", err)
 	}

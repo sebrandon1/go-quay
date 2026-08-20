@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -34,7 +35,7 @@ func TestGetQuota(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	quota, err := client.GetQuota(testOrgName)
+	quota, err := client.GetQuota(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("GetQuota returned error: %v", err)
 	}
@@ -80,7 +81,7 @@ func TestCreateQuota(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	quota, err := client.CreateQuota(testOrgName, limitBytes)
+	quota, err := client.CreateQuota(context.Background(), testOrgName, limitBytes)
 	if err != nil {
 		t.Fatalf("CreateQuota returned error: %v", err)
 	}
@@ -116,7 +117,7 @@ func TestUpdateQuota(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	quota, err := client.UpdateQuota(testOrgName, limitBytes)
+	quota, err := client.UpdateQuota(context.Background(), testOrgName, limitBytes)
 	if err != nil {
 		t.Fatalf("UpdateQuota returned error: %v", err)
 	}
@@ -144,7 +145,7 @@ func TestDeleteQuota(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteQuota(testOrgName)
+	err = client.DeleteQuota(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("DeleteQuota returned error: %v", err)
 	}
@@ -153,22 +154,22 @@ func TestDeleteQuota(t *testing.T) {
 func TestQuotaHTTPErrors(t *testing.T) {
 	client := newOrgErrorClient(t)
 
-	_, err := client.GetQuota(testOrgName)
+	_, err := client.GetQuota(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error from GetQuota, got nil")
 	}
 
-	_, err = client.CreateQuota(testOrgName, 1073741824)
+	_, err = client.CreateQuota(context.Background(), testOrgName, 1073741824)
 	if err == nil {
 		t.Error("Expected error from CreateQuota, got nil")
 	}
 
-	_, err = client.UpdateQuota(testOrgName, 2147483648)
+	_, err = client.UpdateQuota(context.Background(), testOrgName, 2147483648)
 	if err == nil {
 		t.Error("Expected error from UpdateQuota, got nil")
 	}
 
-	err = client.DeleteQuota(testOrgName)
+	err = client.DeleteQuota(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error from DeleteQuota, got nil")
 	}

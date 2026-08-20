@@ -13,6 +13,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -45,6 +46,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
+	ctx := context.Background()
 
 	fmt.Println("=== Security Scan Report ===")
 	fmt.Printf("Repository: %s/%s\n", *namespace, *repository)
@@ -52,7 +54,7 @@ func main() {
 
 	// Step 1: Get repository and tag information
 	fmt.Println("1. Fetching repository information...")
-	repo, err := client.GetRepository(*namespace, *repository)
+	repo, err := client.GetRepository(ctx, *namespace, *repository)
 	if err != nil {
 		log.Fatalf("Failed to get repository: %v", err)
 	}
@@ -73,7 +75,7 @@ func main() {
 
 	// Step 2: Get manifest details
 	fmt.Println("\n2. Fetching manifest details...")
-	manifest, err := client.GetManifest(*namespace, *repository, manifestDigest)
+	manifest, err := client.GetManifest(ctx, *namespace, *repository, manifestDigest)
 	if err != nil {
 		log.Fatalf("Failed to get manifest: %v", err)
 	}
@@ -82,7 +84,7 @@ func main() {
 
 	// Step 3: Get security scan results
 	fmt.Println("\n3. Fetching security scan results...")
-	security, err := client.GetManifestSecurity(*namespace, *repository, manifestDigest, true)
+	security, err := client.GetManifestSecurity(ctx, *namespace, *repository, manifestDigest, true)
 	if err != nil {
 		log.Fatalf("Failed to get security scan: %v", err)
 	}

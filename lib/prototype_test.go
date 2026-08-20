@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -44,7 +45,7 @@ func TestGetPrototypes(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	prototypes, err := client.GetPrototypes(testNamespace)
+	prototypes, err := client.GetPrototypes(context.Background(), testNamespace)
 	if err != nil {
 		t.Fatalf("GetPrototypes returned error: %v", err)
 	}
@@ -91,7 +92,7 @@ func TestCreatePrototype(t *testing.T) {
 		Role: testRoleRead,
 	}
 
-	prototype, err := client.CreatePrototype(testNamespace, createReq)
+	prototype, err := client.CreatePrototype(context.Background(), testNamespace, createReq)
 	if err != nil {
 		t.Fatalf("CreatePrototype returned error: %v", err)
 	}
@@ -130,7 +131,7 @@ func TestGetPrototype(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	prototype, err := client.GetPrototype(testNamespace, testPrototypeUUID)
+	prototype, err := client.GetPrototype(context.Background(), testNamespace, testPrototypeUUID)
 	if err != nil {
 		t.Fatalf("GetPrototype returned error: %v", err)
 	}
@@ -165,7 +166,7 @@ func TestUpdatePrototype(t *testing.T) {
 		Role: testRoleWrite,
 	}
 
-	prototype, err := client.UpdatePrototype(testNamespace, testPrototypeUUID, updateReq)
+	prototype, err := client.UpdatePrototype(context.Background(), testNamespace, testPrototypeUUID, updateReq)
 	if err != nil {
 		t.Fatalf("UpdatePrototype returned error: %v", err)
 	}
@@ -193,7 +194,7 @@ func TestDeletePrototype(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeletePrototype(testNamespace, testPrototypeUUID)
+	err = client.DeletePrototype(context.Background(), testNamespace, testPrototypeUUID)
 	if err != nil {
 		t.Fatalf("DeletePrototype returned error: %v", err)
 	}
@@ -210,7 +211,7 @@ func TestGetPrototypesError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetPrototypes(testNamespace)
+	_, err = client.GetPrototypes(context.Background(), testNamespace)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -227,7 +228,7 @@ func TestPrototypeHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.CreatePrototype(testNamespace, &CreatePrototypeRequest{
+	_, err = client.CreatePrototype(context.Background(), testNamespace, &CreatePrototypeRequest{
 		Role: testRoleRead,
 		Delegate: PrototypeDelegateRequest{
 			Name: testPrototypeTeamName,
@@ -238,17 +239,17 @@ func TestPrototypeHTTPErrors(t *testing.T) {
 		t.Error("Expected error from CreatePrototype, got nil")
 	}
 
-	_, err = client.GetPrototype(testNamespace, testPrototypeUUID)
+	_, err = client.GetPrototype(context.Background(), testNamespace, testPrototypeUUID)
 	if err == nil {
 		t.Error("Expected error from GetPrototype, got nil")
 	}
 
-	_, err = client.UpdatePrototype(testNamespace, testPrototypeUUID, &UpdatePrototypeRequest{Role: testRoleWrite})
+	_, err = client.UpdatePrototype(context.Background(), testNamespace, testPrototypeUUID, &UpdatePrototypeRequest{Role: testRoleWrite})
 	if err == nil {
 		t.Error("Expected error from UpdatePrototype, got nil")
 	}
 
-	err = client.DeletePrototype(testNamespace, testPrototypeUUID)
+	err = client.DeletePrototype(context.Background(), testNamespace, testPrototypeUUID)
 	if err == nil {
 		t.Error("Expected error from DeletePrototype, got nil")
 	}

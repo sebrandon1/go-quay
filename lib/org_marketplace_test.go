@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -36,7 +37,7 @@ func TestGetOrganizationMarketplace(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	marketplace, err := client.GetOrganizationMarketplace(testOrgName)
+	marketplace, err := client.GetOrganizationMarketplace(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("GetOrganizationMarketplace returned error: %v", err)
 	}
@@ -75,7 +76,7 @@ func TestCreateOrganizationMarketplaceSubscription(t *testing.T) {
 		Quantity: 1,
 	}
 
-	err = client.CreateOrganizationMarketplaceSubscription(testOrgName, subReq)
+	err = client.CreateOrganizationMarketplaceSubscription(context.Background(), testOrgName, subReq)
 	if err != nil {
 		t.Fatalf("CreateOrganizationMarketplaceSubscription returned error: %v", err)
 	}
@@ -99,7 +100,7 @@ func TestBatchRemoveOrganizationMarketplaceSubscriptions(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.BatchRemoveOrganizationMarketplaceSubscriptions(testOrgName, []string{testSubscriptionID, "sub-456"})
+	err = client.BatchRemoveOrganizationMarketplaceSubscriptions(context.Background(), testOrgName, []string{testSubscriptionID, "sub-456"})
 	if err != nil {
 		t.Fatalf("BatchRemoveOrganizationMarketplaceSubscriptions returned error: %v", err)
 	}
@@ -123,7 +124,7 @@ func TestDeleteOrganizationMarketplaceSubscription(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteOrganizationMarketplaceSubscription(testOrgName, testSubscriptionID)
+	err = client.DeleteOrganizationMarketplaceSubscription(context.Background(), testOrgName, testSubscriptionID)
 	if err != nil {
 		t.Fatalf("DeleteOrganizationMarketplaceSubscription returned error: %v", err)
 	}
@@ -132,22 +133,22 @@ func TestDeleteOrganizationMarketplaceSubscription(t *testing.T) {
 func TestMarketplaceHTTPErrors(t *testing.T) {
 	client := newOrgErrorClient(t)
 
-	_, err := client.GetOrganizationMarketplace(testOrgName)
+	_, err := client.GetOrganizationMarketplace(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error from GetOrganizationMarketplace, got nil")
 	}
 
-	err = client.CreateOrganizationMarketplaceSubscription(testOrgName, &MarketplaceSubscriptionRequest{SKU: testPlaceholder})
+	err = client.CreateOrganizationMarketplaceSubscription(context.Background(), testOrgName, &MarketplaceSubscriptionRequest{SKU: testPlaceholder})
 	if err == nil {
 		t.Error("Expected error from CreateOrganizationMarketplaceSubscription, got nil")
 	}
 
-	err = client.BatchRemoveOrganizationMarketplaceSubscriptions(testOrgName, []string{testSubscriptionID})
+	err = client.BatchRemoveOrganizationMarketplaceSubscriptions(context.Background(), testOrgName, []string{testSubscriptionID})
 	if err == nil {
 		t.Error("Expected error from BatchRemoveOrganizationMarketplaceSubscriptions, got nil")
 	}
 
-	err = client.DeleteOrganizationMarketplaceSubscription(testOrgName, testSubscriptionID)
+	err = client.DeleteOrganizationMarketplaceSubscription(context.Background(), testOrgName, testSubscriptionID)
 	if err == nil {
 		t.Error("Expected error from DeleteOrganizationMarketplaceSubscription, got nil")
 	}

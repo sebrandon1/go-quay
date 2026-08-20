@@ -48,7 +48,7 @@ var buildListCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		builds, err := client.GetBuilds(buildNamespace, buildRepository, buildLimit)
+		builds, err := client.GetBuilds(cmd.Context(), buildNamespace, buildRepository, buildLimit)
 		if err != nil {
 			return fmt.Errorf("getting builds: %w", err)
 		}
@@ -69,7 +69,7 @@ var buildInfoCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		build, err := client.GetBuild(buildNamespace, buildRepository, buildUUID)
+		build, err := client.GetBuild(cmd.Context(), buildNamespace, buildRepository, buildUUID)
 		if err != nil {
 			return fmt.Errorf("getting build: %w", err)
 		}
@@ -90,7 +90,7 @@ var buildLogsCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		logs, err := client.GetBuildLogs(buildNamespace, buildRepository, buildUUID)
+		logs, err := client.GetBuildLogs(cmd.Context(), buildNamespace, buildRepository, buildUUID)
 		if err != nil {
 			return fmt.Errorf("getting build logs: %w", err)
 		}
@@ -120,7 +120,7 @@ The archive should be a tar.gz file containing a Dockerfile and any necessary bu
 			Tags:           buildTags,
 		}
 
-		build, err := client.RequestBuild(buildNamespace, buildRepository, buildReq)
+		build, err := client.RequestBuild(cmd.Context(), buildNamespace, buildRepository, buildReq)
 		if err != nil {
 			return fmt.Errorf("requesting build: %w", err)
 		}
@@ -145,7 +145,7 @@ var buildCancelCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.CancelBuild(buildNamespace, buildRepository, buildUUID)
+		err = client.CancelBuild(cmd.Context(), buildNamespace, buildRepository, buildUUID)
 		if err != nil {
 			return fmt.Errorf("canceling build: %w", err)
 		}
@@ -165,7 +165,7 @@ var buildStatusCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		status, err := client.GetBuildStatus(buildNamespace, buildRepository, buildUUID)
+		status, err := client.GetBuildStatus(cmd.Context(), buildNamespace, buildRepository, buildUUID)
 		if err != nil {
 			return fmt.Errorf("getting build status: %w", err)
 		}

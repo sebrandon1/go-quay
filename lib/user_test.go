@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -56,7 +57,7 @@ func TestGetUser(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	user, err := client.GetUser()
+	user, err := client.GetUser(context.Background())
 	if err != nil {
 		t.Fatalf("GetUser failed: %v", err)
 	}
@@ -129,7 +130,7 @@ func TestGetStarredRepositories(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	starred, err := client.GetStarredRepositories()
+	starred, err := client.GetStarredRepositories(context.Background())
 	if err != nil {
 		t.Fatalf("GetStarredRepositories failed: %v", err)
 	}
@@ -178,7 +179,7 @@ func TestStarRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.StarRepository(testSearchQueryValue, testSearchQueryValue)
+	err = client.StarRepository(context.Background(), testSearchQueryValue, testSearchQueryValue)
 	if err != nil {
 		t.Fatalf("StarRepository failed: %v", err)
 	}
@@ -202,7 +203,7 @@ func TestUnstarRepository(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.UnstarRepository(testSearchQueryValue, testSearchQueryValue)
+	err = client.UnstarRepository(context.Background(), testSearchQueryValue, testSearchQueryValue)
 	if err != nil {
 		t.Fatalf("UnstarRepository failed: %v", err)
 	}
@@ -235,7 +236,7 @@ func TestGetUserByUsername(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	user, err := client.GetUserByUsername(testUserName)
+	user, err := client.GetUserByUsername(context.Background(), testUserName)
 	if err != nil {
 		t.Fatalf("GetUserByUsername returned error: %v", err)
 	}
@@ -275,7 +276,7 @@ func TestGetUserMarketplace(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	marketplace, err := client.GetUserMarketplace()
+	marketplace, err := client.GetUserMarketplace(context.Background())
 	if err != nil {
 		t.Fatalf("GetUserMarketplace returned error: %v", err)
 	}
@@ -305,25 +306,25 @@ func TestUserErrorHandling(t *testing.T) {
 	}
 
 	// Test GetUser error
-	_, err = client.GetUser()
+	_, err = client.GetUser(context.Background())
 	if err == nil {
 		t.Error("Expected error for invalid token, got nil")
 	}
 
 	// Test GetStarredRepositories error
-	_, err = client.GetStarredRepositories()
+	_, err = client.GetStarredRepositories(context.Background())
 	if err == nil {
 		t.Error("Expected error for invalid token, got nil")
 	}
 
 	// Test StarRepository error
-	err = client.StarRepository(testSearchQueryValue, testSearchQueryValue)
+	err = client.StarRepository(context.Background(), testSearchQueryValue, testSearchQueryValue)
 	if err == nil {
 		t.Error("Expected error for invalid token, got nil")
 	}
 
 	// Test UnstarRepository error
-	err = client.UnstarRepository(testSearchQueryValue, testSearchQueryValue)
+	err = client.UnstarRepository(context.Background(), testSearchQueryValue, testSearchQueryValue)
 	if err == nil {
 		t.Error("Expected error for invalid token, got nil")
 	}
@@ -342,12 +343,12 @@ func TestUserStarRepositoryNotFound(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.StarRepository("nonexistent", "repository")
+	err = client.StarRepository(context.Background(), "nonexistent", "repository")
 	if err == nil {
 		t.Error("Expected error for non-existent repository, got nil")
 	}
 
-	err = client.UnstarRepository("nonexistent", "repository")
+	err = client.UnstarRepository(context.Background(), "nonexistent", "repository")
 	if err == nil {
 		t.Error("Expected error for non-existent repository, got nil")
 	}
@@ -364,12 +365,12 @@ func TestUserHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetUserByUsername(testUserName)
+	_, err = client.GetUserByUsername(context.Background(), testUserName)
 	if err == nil {
 		t.Error("Expected error from GetUserByUsername, got nil")
 	}
 
-	_, err = client.GetUserMarketplace()
+	_, err = client.GetUserMarketplace(context.Background())
 	if err == nil {
 		t.Error("Expected error from GetUserMarketplace, got nil")
 	}

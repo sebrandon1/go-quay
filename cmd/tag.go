@@ -39,7 +39,7 @@ var tagInfoCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		tag, err := client.GetTag(namespace, repository, tagName)
+		tag, err := client.GetTag(cmd.Context(), namespace, repository, tagName)
 		if err != nil {
 			return fmt.Errorf("getting tag information: %w", err)
 		}
@@ -60,7 +60,7 @@ var tagUpdateCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		tag, err := client.UpdateTag(namespace, repository, tagName, tagExpiration)
+		tag, err := client.UpdateTag(cmd.Context(), namespace, repository, tagName, tagExpiration)
 		if err != nil {
 			return fmt.Errorf("updating tag: %w", err)
 		}
@@ -85,7 +85,7 @@ var tagDeleteCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteTag(namespace, repository, tagName)
+		err = client.DeleteTag(cmd.Context(), namespace, repository, tagName)
 		if err != nil {
 			return fmt.Errorf("deleting tag: %w", err)
 		}
@@ -106,7 +106,7 @@ var tagHistoryCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		history, err := client.GetTagHistory(namespace, repository, tagName)
+		history, err := client.GetTagHistory(cmd.Context(), namespace, repository, tagName)
 		if err != nil {
 			return fmt.Errorf("getting tag history: %w", err)
 		}
@@ -127,7 +127,7 @@ var tagRevertCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		tag, err := client.RevertTag(namespace, repository, tagName, manifestDigest)
+		tag, err := client.RevertTag(cmd.Context(), namespace, repository, tagName, manifestDigest)
 		if err != nil {
 			return fmt.Errorf("reverting tag: %w", err)
 		}
@@ -148,7 +148,7 @@ var tagChangeCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.ChangeTag(namespace, repository, tagName, manifestDigest)
+		err = client.ChangeTag(cmd.Context(), namespace, repository, tagName, manifestDigest)
 		if err != nil {
 			return fmt.Errorf("changing tag: %w", err)
 		}
@@ -168,7 +168,7 @@ var tagRestoreCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.RestoreTag(namespace, repository, tagName, manifestDigest)
+		err = client.RestoreTag(cmd.Context(), namespace, repository, tagName, manifestDigest)
 		if err != nil {
 			return fmt.Errorf("restoring tag: %w", err)
 		}

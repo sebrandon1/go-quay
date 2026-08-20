@@ -46,7 +46,7 @@ var repoInfoCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		repo, err := client.GetRepository(namespace, repository)
+		repo, err := client.GetRepository(cmd.Context(), namespace, repository)
 		if err != nil {
 			return fmt.Errorf("getting repository: %w", err)
 		}
@@ -66,7 +66,7 @@ var repoCreateCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		repo, err := client.CreateRepository(namespace, repository, repoVisibility, repoDescription)
+		repo, err := client.CreateRepository(cmd.Context(), namespace, repository, repoVisibility, repoDescription)
 		if err != nil {
 			return fmt.Errorf("creating repository: %w", err)
 		}
@@ -87,7 +87,7 @@ var repoUpdateCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		repo, err := client.UpdateRepository(namespace, repository, repoDescription, repoVisibility)
+		repo, err := client.UpdateRepository(cmd.Context(), namespace, repository, repoDescription, repoVisibility)
 		if err != nil {
 			return fmt.Errorf("updating repository: %w", err)
 		}
@@ -112,7 +112,7 @@ var repoDeleteCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.DeleteRepository(namespace, repository)
+		err = client.DeleteRepository(cmd.Context(), namespace, repository)
 		if err != nil {
 			return fmt.Errorf("deleting repository: %w", err)
 		}
@@ -143,7 +143,7 @@ Use --table with --popularity for an enriched dashboard sorted by pull count:
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		repos, err := client.ListRepositories(namespace, repoPublic, repoStarred, repoPopularity, repoPage, repoLimit)
+		repos, err := client.ListRepositories(cmd.Context(), namespace, repoPublic, repoStarred, repoPopularity, repoPage, repoLimit)
 		if err != nil {
 			return fmt.Errorf("listing repositories: %w", err)
 		}
@@ -168,7 +168,7 @@ Use --table with --popularity for an enriched dashboard sorted by pull count:
 			tagDisplay := "0"
 			recentPushes := 0
 
-			tags, err := client.ListTags(namespace, repo.Name, 100, true)
+			tags, err := client.ListTags(cmd.Context(), namespace, repo.Name, 100, true)
 			if err == nil && len(tags.Tags) > 0 {
 				for _, tag := range tags.Tags {
 					if strings.HasPrefix(tag.Name, "sha256-") || strings.HasSuffix(tag.Name, ".sig") || strings.HasSuffix(tag.Name, ".att") || strings.HasSuffix(tag.Name, ".sbom") {
@@ -217,7 +217,7 @@ var repoChangeVisibilityCmd = &cobra.Command{
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		err = client.ChangeRepositoryVisibility(namespace, repository, repoVisibility)
+		err = client.ChangeRepositoryVisibility(cmd.Context(), namespace, repository, repoVisibility)
 		if err != nil {
 			return fmt.Errorf("changing repository visibility: %w", err)
 		}

@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -56,7 +57,7 @@ func TestGetRepositoryPermissions(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	permissions, err := client.GetRepositoryPermissions(testNamespace, testRepository)
+	permissions, err := client.GetRepositoryPermissions(context.Background(), testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("GetRepositoryPermissions failed: %v", err)
 	}
@@ -118,7 +119,7 @@ func TestSetRepositoryPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.SetRepositoryPermission(testNamespace, testRepository, testPermUserName, testRoleWrite)
+	err = client.SetRepositoryPermission(context.Background(), testNamespace, testRepository, testPermUserName, testRoleWrite)
 	if err != nil {
 		t.Fatalf("SetRepositoryPermission failed: %v", err)
 	}
@@ -139,7 +140,7 @@ func TestSetRepositoryPermissionInvalidRole(t *testing.T) {
 	// Test with valid roles
 	validRoles := []string{testRoleRead, testRoleWrite, roleAdmin}
 	for _, role := range validRoles {
-		err = client.SetRepositoryPermission(testNamespace, testRepository, testKindUser, role)
+		err = client.SetRepositoryPermission(context.Background(), testNamespace, testRepository, testKindUser, role)
 		if err != nil {
 			t.Errorf("SetRepositoryPermission failed for valid role '%s': %v", role, err)
 		}
@@ -164,7 +165,7 @@ func TestRemoveRepositoryPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.RemoveRepositoryPermission(testNamespace, testRepository, testPermUserName)
+	err = client.RemoveRepositoryPermission(context.Background(), testNamespace, testRepository, testPermUserName)
 	if err != nil {
 		t.Fatalf("RemoveRepositoryPermission failed: %v", err)
 	}
@@ -196,7 +197,7 @@ func TestListUserPermissions(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	perms, err := client.ListUserPermissions(testNamespace, testRepository)
+	perms, err := client.ListUserPermissions(context.Background(), testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("ListUserPermissions returned error: %v", err)
 	}
@@ -235,7 +236,7 @@ func TestGetUserPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	perm, err := client.GetUserPermission(testNamespace, testRepository, testPermUserName)
+	perm, err := client.GetUserPermission(context.Background(), testNamespace, testRepository, testPermUserName)
 	if err != nil {
 		t.Fatalf("GetUserPermission returned error: %v", err)
 	}
@@ -263,7 +264,7 @@ func TestSetUserPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.SetUserPermission(testNamespace, testRepository, testPermUserName, testRoleWrite)
+	err = client.SetUserPermission(context.Background(), testNamespace, testRepository, testPermUserName, testRoleWrite)
 	if err != nil {
 		t.Fatalf("SetUserPermission returned error: %v", err)
 	}
@@ -287,7 +288,7 @@ func TestDeleteUserPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteUserPermission(testNamespace, testRepository, testPermUserName)
+	err = client.DeleteUserPermission(context.Background(), testNamespace, testRepository, testPermUserName)
 	if err != nil {
 		t.Fatalf("DeleteUserPermission returned error: %v", err)
 	}
@@ -319,7 +320,7 @@ func TestGetUserTransitivePermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	perm, err := client.GetUserTransitivePermission(testNamespace, testRepository, testPermUserName)
+	perm, err := client.GetUserTransitivePermission(context.Background(), testNamespace, testRepository, testPermUserName)
 	if err != nil {
 		t.Fatalf("GetUserTransitivePermission returned error: %v", err)
 	}
@@ -355,7 +356,7 @@ func TestListTeamPermissions(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	perms, err := client.ListTeamPermissions(testNamespace, testRepository)
+	perms, err := client.ListTeamPermissions(context.Background(), testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("ListTeamPermissions returned error: %v", err)
 	}
@@ -394,7 +395,7 @@ func TestGetTeamPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	perm, err := client.GetTeamPermission(testNamespace, testRepository, testPrototypeTeamName)
+	perm, err := client.GetTeamPermission(context.Background(), testNamespace, testRepository, testPrototypeTeamName)
 	if err != nil {
 		t.Fatalf("GetTeamPermission returned error: %v", err)
 	}
@@ -422,7 +423,7 @@ func TestSetTeamPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.SetTeamPermission(testNamespace, testRepository, testPrototypeTeamName, testRoleWrite)
+	err = client.SetTeamPermission(context.Background(), testNamespace, testRepository, testPrototypeTeamName, testRoleWrite)
 	if err != nil {
 		t.Fatalf("SetTeamPermission returned error: %v", err)
 	}
@@ -446,7 +447,7 @@ func TestDeleteTeamPermission(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteTeamPermission(testNamespace, testRepository, testPrototypeTeamName)
+	err = client.DeleteTeamPermission(context.Background(), testNamespace, testRepository, testPrototypeTeamName)
 	if err != nil {
 		t.Fatalf("DeleteTeamPermission returned error: %v", err)
 	}
@@ -466,73 +467,73 @@ func TestPermissionsErrorHandling(t *testing.T) {
 	}
 
 	// Test GetRepositoryPermissions error
-	_, err = client.GetRepositoryPermissions(testNamespace, "nonexistent")
+	_, err = client.GetRepositoryPermissions(context.Background(), testNamespace, "nonexistent")
 	if err == nil {
 		t.Error("Expected error for non-existent repository, got nil")
 	}
 
 	// Test SetRepositoryPermission error
-	err = client.SetRepositoryPermission(testNamespace, "nonexistent", testKindUser, testRoleRead)
+	err = client.SetRepositoryPermission(context.Background(), testNamespace, "nonexistent", testKindUser, testRoleRead)
 	if err == nil {
 		t.Error("Expected error for non-existent repository, got nil")
 	}
 
 	// Test RemoveRepositoryPermission error
-	err = client.RemoveRepositoryPermission(testNamespace, "nonexistent", testKindUser)
+	err = client.RemoveRepositoryPermission(context.Background(), testNamespace, "nonexistent", testKindUser)
 	if err == nil {
 		t.Error("Expected error for non-existent repository, got nil")
 	}
 
 	// Test ListUserPermissions error
-	_, err = client.ListUserPermissions(testNamespace, "nonexistent")
+	_, err = client.ListUserPermissions(context.Background(), testNamespace, "nonexistent")
 	if err == nil {
 		t.Error("Expected error from ListUserPermissions, got nil")
 	}
 
 	// Test GetUserPermission error
-	_, err = client.GetUserPermission(testNamespace, "nonexistent", testPermUserName)
+	_, err = client.GetUserPermission(context.Background(), testNamespace, "nonexistent", testPermUserName)
 	if err == nil {
 		t.Error("Expected error from GetUserPermission, got nil")
 	}
 
 	// Test SetUserPermission error
-	err = client.SetUserPermission(testNamespace, "nonexistent", testPermUserName, testRoleRead)
+	err = client.SetUserPermission(context.Background(), testNamespace, "nonexistent", testPermUserName, testRoleRead)
 	if err == nil {
 		t.Error("Expected error from SetUserPermission, got nil")
 	}
 
 	// Test DeleteUserPermission error
-	err = client.DeleteUserPermission(testNamespace, "nonexistent", testPermUserName)
+	err = client.DeleteUserPermission(context.Background(), testNamespace, "nonexistent", testPermUserName)
 	if err == nil {
 		t.Error("Expected error from DeleteUserPermission, got nil")
 	}
 
 	// Test GetUserTransitivePermission error
-	_, err = client.GetUserTransitivePermission(testNamespace, "nonexistent", testPermUserName)
+	_, err = client.GetUserTransitivePermission(context.Background(), testNamespace, "nonexistent", testPermUserName)
 	if err == nil {
 		t.Error("Expected error from GetUserTransitivePermission, got nil")
 	}
 
 	// Test ListTeamPermissions error
-	_, err = client.ListTeamPermissions(testNamespace, "nonexistent")
+	_, err = client.ListTeamPermissions(context.Background(), testNamespace, "nonexistent")
 	if err == nil {
 		t.Error("Expected error from ListTeamPermissions, got nil")
 	}
 
 	// Test GetTeamPermission error
-	_, err = client.GetTeamPermission(testNamespace, "nonexistent", testTeamName)
+	_, err = client.GetTeamPermission(context.Background(), testNamespace, "nonexistent", testTeamName)
 	if err == nil {
 		t.Error("Expected error from GetTeamPermission, got nil")
 	}
 
 	// Test SetTeamPermission error
-	err = client.SetTeamPermission(testNamespace, "nonexistent", testTeamName, testRoleRead)
+	err = client.SetTeamPermission(context.Background(), testNamespace, "nonexistent", testTeamName, testRoleRead)
 	if err == nil {
 		t.Error("Expected error from SetTeamPermission, got nil")
 	}
 
 	// Test DeleteTeamPermission error
-	err = client.DeleteTeamPermission(testNamespace, "nonexistent", testTeamName)
+	err = client.DeleteTeamPermission(context.Background(), testNamespace, "nonexistent", testTeamName)
 	if err == nil {
 		t.Error("Expected error from DeleteTeamPermission, got nil")
 	}

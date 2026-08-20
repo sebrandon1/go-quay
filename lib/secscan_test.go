@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -76,7 +77,7 @@ func TestGetManifestSecurity(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	securityScan, err := client.GetManifestSecurity(testNamespace, testRepository, testSecScanManifestRef, true)
+	securityScan, err := client.GetManifestSecurity(context.Background(), testNamespace, testRepository, testSecScanManifestRef, true)
 	if err != nil {
 		t.Fatalf("GetManifestSecurity failed: %v", err)
 	}
@@ -144,7 +145,7 @@ func TestGetManifestSecurityWithoutVulnerabilities(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	securityScan, err := client.GetManifestSecurity(testNamespace, testRepository, testSecScanManifestRef, false)
+	securityScan, err := client.GetManifestSecurity(context.Background(), testNamespace, testRepository, testSecScanManifestRef, false)
 	if err != nil {
 		t.Fatalf("GetManifestSecurity failed: %v", err)
 	}
@@ -174,7 +175,7 @@ func TestGetManifestSecurityQueued(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	securityScan, err := client.GetManifestSecurity(testNamespace, testRepository, testSecScanManifestRef, true)
+	securityScan, err := client.GetManifestSecurity(context.Background(), testNamespace, testRepository, testSecScanManifestRef, true)
 	if err != nil {
 		t.Fatalf("GetManifestSecurity failed: %v", err)
 	}
@@ -200,7 +201,7 @@ func TestGetManifestSecurityErrorHandling(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetManifestSecurity(testNamespace, testRepository, "nonexistent", true)
+	_, err = client.GetManifestSecurity(context.Background(), testNamespace, testRepository, "nonexistent", true)
 	if err == nil {
 		t.Error("Expected error for non-existent manifest, got nil")
 	}
@@ -226,7 +227,7 @@ func TestGetManifestSecurityUnsupported(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	securityScan, err := client.GetManifestSecurity(testNamespace, testRepository, testSecScanManifestRef, true)
+	securityScan, err := client.GetManifestSecurity(context.Background(), testNamespace, testRepository, testSecScanManifestRef, true)
 	if err != nil {
 		t.Fatalf("GetManifestSecurity failed: %v", err)
 	}

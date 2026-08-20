@@ -12,17 +12,18 @@ that can be returned by the Quay.io API.
 package lib
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 // GetErrorType retrieves details about a specific error type
-func (c *Client) GetErrorType(errorType string) (*ErrorType, error) {
+func (c *Client) GetErrorType(ctx context.Context, errorType string) (*ErrorType, error) {
 	if errorType == "" {
 		return nil, fmt.Errorf("errorType is required")
 	}
 
-	req, err := newRequest(http.MethodGet, c.buildURL("/error/%s", errorType), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/error/%s", errorType), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create error type request: %w", err)
 	}

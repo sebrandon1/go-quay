@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -40,7 +41,7 @@ func TestGetOrganizationBilling(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	billing, err := client.GetOrganizationBilling(testNamespace)
+	billing, err := client.GetOrganizationBilling(context.Background(), testNamespace)
 	if err != nil {
 		t.Fatalf("GetOrganizationBilling returned error: %v", err)
 	}
@@ -93,7 +94,7 @@ func TestGetUserBilling(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	billing, err := client.GetUserBilling()
+	billing, err := client.GetUserBilling(context.Background())
 	if err != nil {
 		t.Fatalf("GetUserBilling returned error: %v", err)
 	}
@@ -141,7 +142,7 @@ func TestGetOrganizationSubscription(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	subscription, err := client.GetOrganizationSubscription(testNamespace)
+	subscription, err := client.GetOrganizationSubscription(context.Background(), testNamespace)
 	if err != nil {
 		t.Fatalf("GetOrganizationSubscription returned error: %v", err)
 	}
@@ -189,7 +190,7 @@ func TestGetUserSubscription(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	subscription, err := client.GetUserSubscription()
+	subscription, err := client.GetUserSubscription(context.Background())
 	if err != nil {
 		t.Fatalf("GetUserSubscription returned error: %v", err)
 	}
@@ -246,7 +247,7 @@ func TestGetOrganizationInvoices(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	invoices, err := client.GetOrganizationInvoices(testNamespace)
+	invoices, err := client.GetOrganizationInvoices(context.Background(), testNamespace)
 	if err != nil {
 		t.Fatalf("GetOrganizationInvoices returned error: %v", err)
 	}
@@ -274,7 +275,7 @@ func TestGetUserInvoices(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	invoices, err := client.GetUserInvoices()
+	invoices, err := client.GetUserInvoices(context.Background())
 	if err == nil {
 		t.Error("Expected error for unsupported endpoint, got nil")
 	}
@@ -328,7 +329,7 @@ func TestGetAvailablePlans(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	plans, err := client.GetAvailablePlans()
+	plans, err := client.GetAvailablePlans(context.Background())
 	if err != nil {
 		t.Fatalf("GetAvailablePlans returned error: %v", err)
 	}
@@ -366,7 +367,7 @@ func TestGetOrganizationBillingError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	billing, err := client.GetOrganizationBilling(testNamespace)
+	billing, err := client.GetOrganizationBilling(context.Background(), testNamespace)
 	if err == nil {
 		t.Error("Expected error for 500 response, got nil")
 	}
@@ -388,7 +389,7 @@ func TestGetUserBillingError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	billing, err := client.GetUserBilling()
+	billing, err := client.GetUserBilling(context.Background())
 	if err == nil {
 		t.Error("Expected error for 401 response, got nil")
 	}
@@ -410,7 +411,7 @@ func TestGetAvailablePlansError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	plans, err := client.GetAvailablePlans()
+	plans, err := client.GetAvailablePlans(context.Background())
 	if err == nil {
 		t.Error("Expected error for 404 response, got nil")
 	}
@@ -431,17 +432,17 @@ func TestBillingHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetOrganizationSubscription(testNamespace)
+	_, err = client.GetOrganizationSubscription(context.Background(), testNamespace)
 	if err == nil {
 		t.Error("Expected error from GetOrganizationSubscription, got nil")
 	}
 
-	_, err = client.GetUserSubscription()
+	_, err = client.GetUserSubscription(context.Background())
 	if err == nil {
 		t.Error("Expected error from GetUserSubscription, got nil")
 	}
 
-	_, err = client.GetOrganizationInvoices(testNamespace)
+	_, err = client.GetOrganizationInvoices(context.Background(), testNamespace)
 	if err == nil {
 		t.Error("Expected error from GetOrganizationInvoices, got nil")
 	}

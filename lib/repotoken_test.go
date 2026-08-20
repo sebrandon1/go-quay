@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -38,7 +39,7 @@ func TestGetRepoTokens(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	tokens, err := client.GetRepoTokens(testNamespace, testRepository)
+	tokens, err := client.GetRepoTokens(context.Background(), testNamespace, testRepository)
 	if err != nil {
 		t.Fatalf("GetRepoTokens returned error: %v", err)
 	}
@@ -78,7 +79,7 @@ func TestCreateRepoToken(t *testing.T) {
 		FriendlyName: "New CI Token",
 	}
 
-	token, err := client.CreateRepoToken(testNamespace, testRepository, createReq)
+	token, err := client.CreateRepoToken(context.Background(), testNamespace, testRepository, createReq)
 	if err != nil {
 		t.Fatalf("CreateRepoToken returned error: %v", err)
 	}
@@ -114,7 +115,7 @@ func TestGetRepoToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	token, err := client.GetRepoToken(testNamespace, testRepository, testTokenCode)
+	token, err := client.GetRepoToken(context.Background(), testNamespace, testRepository, testTokenCode)
 	if err != nil {
 		t.Fatalf("GetRepoToken returned error: %v", err)
 	}
@@ -150,7 +151,7 @@ func TestUpdateRepoToken(t *testing.T) {
 		Role: testRoleWrite,
 	}
 
-	token, err := client.UpdateRepoToken(testNamespace, testRepository, testTokenCode, updateReq)
+	token, err := client.UpdateRepoToken(context.Background(), testNamespace, testRepository, testTokenCode, updateReq)
 	if err != nil {
 		t.Fatalf("UpdateRepoToken returned error: %v", err)
 	}
@@ -178,7 +179,7 @@ func TestDeleteRepoToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteRepoToken(testNamespace, testRepository, testTokenCode)
+	err = client.DeleteRepoToken(context.Background(), testNamespace, testRepository, testTokenCode)
 	if err != nil {
 		t.Fatalf("DeleteRepoToken returned error: %v", err)
 	}
@@ -195,7 +196,7 @@ func TestGetRepoTokensError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetRepoTokens(testNamespace, testRepository)
+	_, err = client.GetRepoTokens(context.Background(), testNamespace, testRepository)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -212,22 +213,22 @@ func TestRepoTokenHTTPErrors(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.CreateRepoToken(testNamespace, testRepository, &CreateRepoTokenRequest{FriendlyName: testPlaceholder})
+	_, err = client.CreateRepoToken(context.Background(), testNamespace, testRepository, &CreateRepoTokenRequest{FriendlyName: testPlaceholder})
 	if err == nil {
 		t.Error("Expected error from CreateRepoToken, got nil")
 	}
 
-	_, err = client.GetRepoToken(testNamespace, testRepository, testTokenCode)
+	_, err = client.GetRepoToken(context.Background(), testNamespace, testRepository, testTokenCode)
 	if err == nil {
 		t.Error("Expected error from GetRepoToken, got nil")
 	}
 
-	_, err = client.UpdateRepoToken(testNamespace, testRepository, testTokenCode, &UpdateRepoTokenRequest{Role: testRoleWrite})
+	_, err = client.UpdateRepoToken(context.Background(), testNamespace, testRepository, testTokenCode, &UpdateRepoTokenRequest{Role: testRoleWrite})
 	if err == nil {
 		t.Error("Expected error from UpdateRepoToken, got nil")
 	}
 
-	err = client.DeleteRepoToken(testNamespace, testRepository, testTokenCode)
+	err = client.DeleteRepoToken(context.Background(), testNamespace, testRepository, testTokenCode)
 	if err == nil {
 		t.Error("Expected error from DeleteRepoToken, got nil")
 	}

@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -36,7 +37,7 @@ func TestGetOrganization(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	org, err := client.GetOrganization(testOrgName)
+	org, err := client.GetOrganization(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("GetOrganization returned error: %v", err)
 	}
@@ -63,7 +64,7 @@ func TestGetOrganizationError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetOrganization(testOrgName)
+	_, err = client.GetOrganization(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -103,7 +104,7 @@ func TestCreateOrganization(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	org, err := client.CreateOrganization(testOrgName, testEmailAddress)
+	org, err := client.CreateOrganization(context.Background(), testOrgName, testEmailAddress)
 	if err != nil {
 		t.Fatalf("CreateOrganization returned error: %v", err)
 	}
@@ -146,7 +147,7 @@ func TestUpdateOrganization(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	org, err := client.UpdateOrganization(testOrgName, updatedEmail)
+	org, err := client.UpdateOrganization(context.Background(), testOrgName, updatedEmail)
 	if err != nil {
 		t.Fatalf("UpdateOrganization returned error: %v", err)
 	}
@@ -174,7 +175,7 @@ func TestDeleteOrganization(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.DeleteOrganization(testOrgName)
+	err = client.DeleteOrganization(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("DeleteOrganization returned error: %v", err)
 	}
@@ -209,7 +210,7 @@ func TestGetOrganizationMembers(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	members, err := client.GetOrganizationMembers(testOrgName)
+	members, err := client.GetOrganizationMembers(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("GetOrganizationMembers returned error: %v", err)
 	}
@@ -233,7 +234,7 @@ func TestGetOrganizationMembersError(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.GetOrganizationMembers(testOrgName)
+	_, err = client.GetOrganizationMembers(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -257,7 +258,7 @@ func TestAddOrganizationMember(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.AddOrganizationMember(testOrgName, testMemberName)
+	err = client.AddOrganizationMember(context.Background(), testOrgName, testMemberName)
 	if err != nil {
 		t.Fatalf("AddOrganizationMember returned error: %v", err)
 	}
@@ -281,7 +282,7 @@ func TestRemoveOrganizationMember(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.RemoveOrganizationMember(testOrgName, testMemberName)
+	err = client.RemoveOrganizationMember(context.Background(), testOrgName, testMemberName)
 	if err != nil {
 		t.Fatalf("RemoveOrganizationMember returned error: %v", err)
 	}
@@ -315,7 +316,7 @@ func TestGetOrganizationMember(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	member, err := client.GetOrganizationMember(testOrgName, testMemberName)
+	member, err := client.GetOrganizationMember(context.Background(), testOrgName, testMemberName)
 	if err != nil {
 		t.Fatalf("GetOrganizationMember returned error: %v", err)
 	}
@@ -357,7 +358,7 @@ func TestGetOrganizationRepositories(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	repos, err := client.GetOrganizationRepositories(testOrgName)
+	repos, err := client.GetOrganizationRepositories(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("GetOrganizationRepositories returned error: %v", err)
 	}
@@ -399,7 +400,7 @@ func TestGetOrganizationCollaborators(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	collabs, err := client.GetOrganizationCollaborators(testOrgName)
+	collabs, err := client.GetOrganizationCollaborators(context.Background(), testOrgName)
 	if err != nil {
 		t.Fatalf("GetOrganizationCollaborators returned error: %v", err)
 	}
@@ -417,42 +418,42 @@ func TestGetOrganizationCollaborators(t *testing.T) {
 func TestOrganizationCRUDHTTPErrors(t *testing.T) {
 	client := newOrgErrorClient(t)
 
-	_, err := client.CreateOrganization("testorg", testEmailAddress)
+	_, err := client.CreateOrganization(context.Background(), "testorg", testEmailAddress)
 	if err == nil {
 		t.Error("Expected error from CreateOrganization, got nil")
 	}
 
-	_, err = client.UpdateOrganization(testOrgName, testEmailAddress)
+	_, err = client.UpdateOrganization(context.Background(), testOrgName, testEmailAddress)
 	if err == nil {
 		t.Error("Expected error from UpdateOrganization, got nil")
 	}
 
-	err = client.DeleteOrganization(testOrgName)
+	err = client.DeleteOrganization(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error from DeleteOrganization, got nil")
 	}
 
-	err = client.AddOrganizationMember(testOrgName, testMemberName)
+	err = client.AddOrganizationMember(context.Background(), testOrgName, testMemberName)
 	if err == nil {
 		t.Error("Expected error from AddOrganizationMember, got nil")
 	}
 
-	err = client.RemoveOrganizationMember(testOrgName, testMemberName)
+	err = client.RemoveOrganizationMember(context.Background(), testOrgName, testMemberName)
 	if err == nil {
 		t.Error("Expected error from RemoveOrganizationMember, got nil")
 	}
 
-	_, err = client.GetOrganizationMember(testOrgName, testMemberName)
+	_, err = client.GetOrganizationMember(context.Background(), testOrgName, testMemberName)
 	if err == nil {
 		t.Error("Expected error from GetOrganizationMember, got nil")
 	}
 
-	_, err = client.GetOrganizationRepositories(testOrgName)
+	_, err = client.GetOrganizationRepositories(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error from GetOrganizationRepositories, got nil")
 	}
 
-	_, err = client.GetOrganizationCollaborators(testOrgName)
+	_, err = client.GetOrganizationCollaborators(context.Background(), testOrgName)
 	if err == nil {
 		t.Error("Expected error from GetOrganizationCollaborators, got nil")
 	}
