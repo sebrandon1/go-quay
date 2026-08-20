@@ -24,27 +24,28 @@ func SetVersion(v string) {
 
 var getCmd = &cobra.Command{
 	Use:   cmdGet,
-	Short: "Get objects from Quay.io",
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		token = resolveFlag(flagChanged(cmd, "token"), token, os.Getenv("QUAY_TOKEN"), appCfg.Token)
-		quayURL = resolveFlag(flagChanged(cmd, "quay-url"), quayURL, os.Getenv("QUAY_URL"), appCfg.QuayURL, lib.DefaultQuayURL)
+	Short: "Get objects from Quay.io (legacy parent; prefer create/delete/update/list/info)",
+}
 
-		if token == "" {
-			return fmt.Errorf(`authentication token required
+func persistentPreRunE(cmd *cobra.Command, _ []string) error {
+	token = resolveFlag(flagChanged(cmd, "token"), token, os.Getenv("QUAY_TOKEN"), appCfg.Token)
+	quayURL = resolveFlag(flagChanged(cmd, "quay-url"), quayURL, os.Getenv("QUAY_URL"), appCfg.QuayURL, lib.DefaultQuayURL)
+
+	if token == "" {
+		return fmt.Errorf(`authentication token required
 
 Set QUAY_TOKEN environment variable, use --token/-t flag, or add to config file (%s).
 Get your token at https://quay.io/organization/<org>?tab=applications`, configFilePath())
-		}
+	}
 
-		switch outputFormat {
-		case outputJSON, outputYAML, outputTable:
-			// valid
-		default:
-			return fmt.Errorf("invalid output format %q: must be json, yaml, or table", outputFormat)
-		}
+	switch outputFormat {
+	case outputJSON, outputYAML, outputTable:
+		// valid
+	default:
+		return fmt.Errorf("invalid output format %q: must be json, yaml, or table", outputFormat)
+	}
 
-		return nil
-	},
+	return nil
 }
 
 func flagChanged(cmd *cobra.Command, name string) bool {
@@ -71,9 +72,10 @@ func firstNonEmpty(values ...string) string {
 }
 
 func init() {
-	getCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Quay.io API token ($QUAY_TOKEN or config file)")
-	getCmd.PersistentFlags().StringVar(&quayURL, "quay-url", lib.DefaultQuayURL, "Quay API base URL ($QUAY_URL or config file)")
-	getCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, or table")
+	rootCmd.PersistentPreRunE = persistentPreRunE
+	rootCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Quay.io API token ($QUAY_TOKEN or config file)")
+	rootCmd.PersistentFlags().StringVar(&quayURL, "quay-url", lib.DefaultQuayURL, "Quay API base URL ($QUAY_URL or config file)")
+	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, or table")
 	rootCmd.AddCommand(getCmd)
 	getCmd.AddCommand(repositoryCmd)
 	getCmd.AddCommand(billingCmd)

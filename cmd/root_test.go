@@ -33,8 +33,8 @@ func resetTokenAndURLFlags() {
 	token = ""
 	quayURL = lib.DefaultQuayURL
 	for _, f := range []*pflag.Flag{
-		getCmd.Flag("token"),
-		getCmd.PersistentFlags().Lookup("token"),
+		rootCmd.Flag("token"),
+		rootCmd.PersistentFlags().Lookup("token"),
 	} {
 		if f != nil {
 			f.Changed = false
@@ -42,8 +42,8 @@ func resetTokenAndURLFlags() {
 		}
 	}
 	for _, f := range []*pflag.Flag{
-		getCmd.Flag("quay-url"),
-		getCmd.PersistentFlags().Lookup("quay-url"),
+		rootCmd.Flag("quay-url"),
+		rootCmd.PersistentFlags().Lookup("quay-url"),
 	} {
 		if f != nil {
 			f.Changed = false
@@ -53,9 +53,9 @@ func resetTokenAndURLFlags() {
 }
 
 func TestTokenFlagExistsOnGetCmd(t *testing.T) {
-	flag := getCmd.PersistentFlags().Lookup("token")
+	flag := rootCmd.PersistentFlags().Lookup("token")
 	if flag == nil {
-		t.Fatal("Expected --token flag on getCmd, not found")
+		t.Fatal("Expected --token flag on rootCmd, not found")
 	}
 
 	if flag.Annotations != nil {
@@ -66,9 +66,9 @@ func TestTokenFlagExistsOnGetCmd(t *testing.T) {
 }
 
 func TestTokenFlagDefValueEmpty(t *testing.T) {
-	flag := getCmd.PersistentFlags().Lookup("token")
+	flag := rootCmd.PersistentFlags().Lookup("token")
 	if flag == nil {
-		t.Fatal("Expected --token flag on getCmd, not found")
+		t.Fatal("Expected --token flag on rootCmd, not found")
 	}
 	if flag.DefValue != "" {
 		t.Errorf("token flag DefValue must be empty so --help does not leak secrets, got %q", flag.DefValue)
@@ -78,9 +78,9 @@ func TestTokenFlagDefValueEmpty(t *testing.T) {
 func TestTokenFlagOverridesEnvVar(t *testing.T) {
 	resetRootFlags(t)
 
-	flag := getCmd.PersistentFlags().Lookup("token")
+	flag := rootCmd.PersistentFlags().Lookup("token")
 	if flag == nil {
-		t.Fatal("Expected --token flag on getCmd, not found")
+		t.Fatal("Expected --token flag on rootCmd, not found")
 	}
 
 	err := flag.Value.Set("explicit-token")
@@ -107,9 +107,9 @@ func TestRootCommandUse(t *testing.T) {
 }
 
 func TestQuayURLFlagExists(t *testing.T) {
-	flag := getCmd.PersistentFlags().Lookup("quay-url")
+	flag := rootCmd.PersistentFlags().Lookup("quay-url")
 	if flag == nil {
-		t.Fatal("Expected --quay-url flag on getCmd, not found")
+		t.Fatal("Expected --quay-url flag on rootCmd, not found")
 	}
 	if flag.DefValue != lib.DefaultQuayURL {
 		t.Errorf("quay-url flag DefValue = %q, want %q", flag.DefValue, lib.DefaultQuayURL)
@@ -177,7 +177,7 @@ func TestPersistentPreRunResolvesTokenFromEnv(t *testing.T) {
 	resetRootFlags(t)
 	t.Setenv("QUAY_TOKEN", "from-env")
 
-	if err := getCmd.PersistentPreRunE(getCmd, nil); err != nil {
+	if err := persistentPreRunE(rootCmd, nil); err != nil {
 		t.Fatalf("PersistentPreRunE: %v", err)
 	}
 	if token != "from-env" {
@@ -190,7 +190,7 @@ func TestPersistentPreRunResolvesTokenFromConfig(t *testing.T) {
 	t.Setenv("QUAY_TOKEN", "")
 	appCfg.Token = "from-config"
 
-	if err := getCmd.PersistentPreRunE(getCmd, nil); err != nil {
+	if err := persistentPreRunE(rootCmd, nil); err != nil {
 		t.Fatalf("PersistentPreRunE: %v", err)
 	}
 	if token != "from-config" {
@@ -202,11 +202,11 @@ func TestPersistentPreRunFlagOverridesEnv(t *testing.T) {
 	resetRootFlags(t)
 	t.Setenv("QUAY_TOKEN", "from-env")
 	token = "from-flag"
-	if f := getCmd.Flag("token"); f != nil {
+	if f := rootCmd.Flag("token"); f != nil {
 		f.Changed = true
 	}
 
-	if err := getCmd.PersistentPreRunE(getCmd, nil); err != nil {
+	if err := persistentPreRunE(rootCmd, nil); err != nil {
 		t.Fatalf("PersistentPreRunE: %v", err)
 	}
 	if token != "from-flag" {
@@ -219,7 +219,7 @@ func TestPersistentPreRunResolvesQuayURLFromEnv(t *testing.T) {
 	t.Setenv("QUAY_TOKEN", "from-env")
 	t.Setenv("QUAY_URL", "https://custom.example/api/v1")
 
-	if err := getCmd.PersistentPreRunE(getCmd, nil); err != nil {
+	if err := persistentPreRunE(rootCmd, nil); err != nil {
 		t.Fatalf("PersistentPreRunE: %v", err)
 	}
 	if quayURL != "https://custom.example/api/v1" {
@@ -231,9 +231,23 @@ func TestPersistentPreRunRequiresToken(t *testing.T) {
 	resetRootFlags(t)
 	t.Setenv("QUAY_TOKEN", "")
 
-	err := getCmd.PersistentPreRunE(getCmd, nil)
+	err := persistentPreRunE(rootCmd, nil)
 	if err == nil {
 		t.Fatal("expected error when token is missing")
+	}
+	if !strings.Contains(err.Error(), "authentication token required") {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestVerbPathRequiresToken(t *testing.T) {
+	resetRootFlags(t)
+	t.Setenv("QUAY_TOKEN", "")
+
+	rootCmd.SetArgs([]string{cmdCreate, cmdRepository, "-n", "ns", "-r", "repo"})
+	err := rootCmd.Execute()
+	if err == nil {
+		t.Fatal("expected error when token is missing on create repository")
 	}
 	if !strings.Contains(err.Error(), "authentication token required") {
 		t.Errorf("unexpected error: %v", err)

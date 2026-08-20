@@ -218,3 +218,176 @@ func TestRepoCreateCmd(t *testing.T) {
 		t.Errorf("expected namespace in output, got: %s", output)
 	}
 }
+
+func TestVerbRepoCreateCmd(t *testing.T) {
+	resetRepositoryFlags(t)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("expected POST, got %s", r.Method)
+		}
+		if !strings.HasSuffix(r.URL.Path, "/repository") {
+			t.Errorf("unexpected path: %s", r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		_, _ = w.Write([]byte(`{"namespace": "` + testNamespace + `", "name": "newrepo", "is_public": false}`))
+	}))
+	defer server.Close()
+
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	rootCmd.SetArgs([]string{
+		cmdCreate, testTokenFlag, testTokenValue, testQuayURLFlag, server.URL,
+		cmdRepository, "-n", testNamespace, "-r", "newrepo",
+		"--visibility", "private", "--description", "a test repo",
+	})
+	err := rootCmd.Execute()
+
+	w.Close()
+	os.Stdout = oldStdout
+
+	if err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
+
+	var buf bytes.Buffer
+	_, _ = io.Copy(&buf, r)
+	output := buf.String()
+
+	if !strings.Contains(output, `"name": "newrepo"`) {
+		t.Errorf("expected newrepo in output, got: %s", output)
+	}
+	if !strings.Contains(output, `"namespace": "`+testNamespace+`"`) {
+		t.Errorf("expected namespace in output, got: %s", output)
+	}
+}
+
+func TestVerbRepoListCmd(t *testing.T) {
+	resetRepositoryFlags(t)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("expected GET, got %s", r.Method)
+		}
+		if !strings.HasSuffix(r.URL.Path, "/repository") {
+			t.Errorf("unexpected path: %s", r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"repositories": [{"name": "repo1", "namespace": "` + testNamespace + `"}]}`))
+	}))
+	defer server.Close()
+
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	rootCmd.SetArgs([]string{
+		cmdList, testTokenFlag, testTokenValue, testQuayURLFlag, server.URL,
+		cmdRepository, "-n", testNamespace,
+	})
+	err := rootCmd.Execute()
+
+	w.Close()
+	os.Stdout = oldStdout
+
+	if err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
+
+	var buf bytes.Buffer
+	_, _ = io.Copy(&buf, r)
+	output := buf.String()
+
+	if !strings.Contains(output, `"name": "repo1"`) {
+		t.Errorf("expected repo1 in output, got: %s", output)
+	}
+}
+
+func TestVerbRepoInfoCmd(t *testing.T) {
+	resetRepositoryFlags(t)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case strings.Contains(r.URL.Path, "/repository/"+testNamespace+"/"+testRepository+"/tag/"):
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"tags": [{"name": "latest", "manifest_digest": "sha256:abc123"}]}`))
+		case strings.HasSuffix(r.URL.Path, "/repository/"+testNamespace+"/"+testRepository):
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"namespace": "` + testNamespace + `", "name": "` + testRepository + `", "is_public": true}`))
+		default:
+			t.Errorf("unexpected request path: %s", r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	rootCmd.SetArgs([]string{
+		cmdInfo, testTokenFlag, testTokenValue, testQuayURLFlag, server.URL,
+		cmdRepository, "-n", testNamespace, "-r", testRepository,
+	})
+	err := rootCmd.Execute()
+
+	w.Close()
+	os.Stdout = oldStdout
+
+	if err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
+
+	var buf bytes.Buffer
+	_, _ = io.Copy(&buf, r)
+	output := buf.String()
+
+	if !strings.Contains(output, `"name": "`+testRepository+`"`) {
+		t.Errorf("expected repo name in output, got: %s", output)
+	}
+}
+
+func TestVerbRepoDeleteRequiresConfirm(t *testing.T) {
+	resetRepositoryFlags(t)
+
+	rootCmd.SetArgs([]string{
+		cmdDelete, testTokenFlag, testTokenValue, testQuayURLFlag, "http://127.0.0.1:1",
+		cmdRepository, "-n", testNamespace, "-r", testRepository,
+	})
+	err := rootCmd.Execute()
+	if err == nil {
+		t.Fatal("expected error without --confirm")
+	}
+	if !strings.Contains(err.Error(), "confirm") {
+		t.Errorf("expected confirm error, got: %v", err)
+	}
+}
+
+func TestVerbRepoDeleteCmd(t *testing.T) {
+	resetRepositoryFlags(t)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			t.Errorf("expected DELETE, got %s", r.Method)
+		}
+		wantPath := "/repository/" + testNamespace + "/" + testRepository
+		if !strings.HasSuffix(r.URL.Path, wantPath) {
+			t.Errorf("unexpected path: %s", r.URL.Path)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	rootCmd.SetArgs([]string{
+		cmdDelete, testTokenFlag, testTokenValue, testQuayURLFlag, server.URL,
+		cmdRepository, "-n", testNamespace, "-r", testRepository, "--confirm",
+	})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
+}

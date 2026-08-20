@@ -6,9 +6,9 @@
 
 set -e
 
-BINARY="./bin/go-quay"
+BINARY="./go-quay"
 if [ ! -f "$BINARY" ]; then
-	BINARY="./go-quay"
+	BINARY="./bin/go-quay"
 fi
 
 # Check if binary exists
@@ -25,8 +25,11 @@ set +e
 
 # Repository examples
 echo "Testing repository command examples..."
+$BINARY create repository --namespace test --repository test --visibility private --description "test" --token dummy 2>&1 | grep -v "Error creating client" || true
+$BINARY update repository --namespace test --repository test --description "test" --token dummy 2>&1 | grep -v "Error creating client" || true
+$BINARY delete repository --namespace test --repository test --confirm --token dummy 2>&1 | grep -v "Error creating client" || true
 $BINARY get repository create --namespace test --repository test --visibility private --description "test" --token dummy 2>&1 | grep -v "Error creating client" || true
-$BINARY get repository update --namespace test --repository test --description "test" --token dummy 2>&1 | grep -v "Error creating client" || true  
+$BINARY get repository update --namespace test --repository test --description "test" --token dummy 2>&1 | grep -v "Error creating client" || true
 $BINARY get repository delete --namespace test --repository test --confirm --token dummy 2>&1 | grep -v "Error creating client" || true
 
 # Permissions examples

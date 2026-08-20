@@ -39,7 +39,7 @@ Every API domain follows the same pattern:
 
 2. **`lib/structs.go`** — All request/response types for the entire API in one file, with JSON tags matching the Quay API.
 
-3. **`cmd/<domain>.go`** — Cobra commands that parse flags, call `getClient()` (`lib.NewClientWithURL(token, quayURL)`), invoke the lib method, and print output via `printJSON()`. Commands are registered in `cmd/root.go` under the `get` parent command.
+3. **`cmd/<domain>.go`** — Cobra commands that parse flags, call `getClient()` (`lib.NewClientWithURL(token, quayURL)`), invoke the lib method, and print output via `printJSON()`. Commands are registered in `cmd/root.go` under the legacy `get` parent. Verb-first aliases (`create` / `delete` / `update` / `list` / `info`) are registered in `cmd/zz_verbs.go`.
 
 ### Key patterns
 
@@ -55,9 +55,9 @@ Every API domain follows the same pattern:
 
 ### CLI command tree
 
-All API commands hang off `go-quay get`:
+Preferred: `go-quay <verb> <resource>` with verbs `create`, `delete`, `update`, `list`, `info`.
 
-`repository`, `billing`, `organization`, `permissions`, `tag`, `user`, `manifest`, `secscan`, `robot`, `search`, `team`, `build`, `notification`, `trigger`, `discovery`, `error`, `messages`, `prototype`, `repotoken`, `logs`, `mirror`
+Legacy: all API commands still hang off `go-quay get` (`repository`, `billing`, `organization`, `permissions`, `tag`, `user`, `manifest`, `secscan`, `robot`, `search`, `team`, `build`, `notification`, `trigger`, `discovery`, `error`, `messages`, `prototype`, `repotoken`, `logs`, `mirror`). Mutating `get` subcommands are deprecated.
 
 ## Configuration
 
@@ -73,7 +73,7 @@ CLI flag precedence: flags > environment variables > config file > built-in defa
 1. Add request/response structs to `lib/structs.go`
 2. Add client method(s) to `lib/<domain>.go` following the existing pattern
 3. Add unit tests to `lib/<domain>_test.go` using `httptest.NewServer` and `NewClientWithURL`
-4. Add Cobra command in `cmd/<domain>.go` and register it in `cmd/root.go`
+4. Add Cobra command in `cmd/<domain>.go` and register it in `cmd/root.go` under `get`. If it is a create/delete/update/list/info action, also add a verb-first alias in `cmd/zz_verbs.go` (do not `AddCommand` the same `*cobra.Command` under two parents).
 5. Update `README.md` API coverage, `docs/cli-reference.md`, and `docs/library-guide.md`
 
 ## Requirements
