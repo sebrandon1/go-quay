@@ -1,6 +1,6 @@
 module github.com/sebrandon1/go-quay
 
-go 1.26.6
+go 1.26.5
 
 toolchain go1.26.6
 
