@@ -111,10 +111,11 @@ jobs:
       with:
         go-version-file: 'go.mod'
 
+    - name: Install gosec
+      run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+
     - name: Run gosec
-      uses: securego/gosec@master
-      with:
-        args: -exclude-dir=scripts ./...
+      run: gosec -exclude-dir=scripts ./...
 
   swagger-alignment:
     name: Check API Coverage
