@@ -1,8 +1,8 @@
 module github.com/sebrandon1/go-quay
 
-go 1.26.5
+go 1.26.0
 
-toolchain go1.26.6
+toolchain go1.26.7
 
 require (
 	github.com/spf13/cobra v1.10.2
