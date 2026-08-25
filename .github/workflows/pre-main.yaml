@@ -12,6 +12,8 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: auto
     steps:
     - name: Checkout code
       uses: actions/checkout@v7
@@ -78,6 +80,8 @@ jobs:
   validate-examples:
     name: Validate Examples
     runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: auto
     steps:
     - name: Checkout code
       uses: actions/checkout@v7
@@ -96,6 +100,8 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: auto
     steps:
     - name: Checkout code
       uses: actions/checkout@v7
@@ -105,14 +111,17 @@ jobs:
       with:
         go-version-file: 'go.mod'
 
+    - name: Install gosec
+      run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+
     - name: Run gosec
-      uses: securego/gosec@master
-      with:
-        args: -exclude-dir=scripts ./...
+      run: gosec -exclude-dir=scripts ./...
 
   swagger-alignment:
     name: Check API Coverage
     runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: auto
     steps:
     - name: Checkout code
       uses: actions/checkout@v7
