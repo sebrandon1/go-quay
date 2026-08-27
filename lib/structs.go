@@ -611,23 +611,19 @@ type SearchAllResult struct {
 
 // Manifest represents a container image manifest
 type Manifest struct {
-	Digest         string          `json:"digest,omitempty"`
-	SchemaVersion  int             `json:"schemaVersion,omitempty"`
-	MediaType      string          `json:"mediaType,omitempty"`
-	Size           int64           `json:"size,omitempty"`
-	Layers         []ManifestLayer `json:"layers,omitempty"`
-	Config         ManifestConfig  `json:"config,omitempty"`
-	IsManifestList bool            `json:"is_manifest_list,omitempty"`
-	ManifestData   string          `json:"manifest_data,omitempty"`
+	Digest               string          `json:"digest,omitempty"`
+	IsManifestList       bool            `json:"is_manifest_list,omitempty"`
+	ManifestData         string          `json:"manifest_data,omitempty"`
+	LayersCompressedSize int64           `json:"layers_compressed_size,omitempty"`
+	Layers               []ManifestLayer `json:"layers,omitempty"`
 }
 
 // ManifestLayer represents a layer in a manifest
 type ManifestLayer struct {
-	MediaType string `json:"mediaType,omitempty"`
-	Size      int64  `json:"size,omitempty"`
-	Digest    string `json:"digest,omitempty"`
-	Index     int    `json:"index,omitempty"`
-	Command   string `json:"command,omitempty"`
+	Index          int      `json:"index,omitempty"`
+	CompressedSize int64    `json:"compressed_size,omitempty"`
+	BlobDigest     string   `json:"blob_digest,omitempty"`
+	Command        []string `json:"command,omitempty"`
 }
 
 // ManifestConfig represents the config of a manifest
