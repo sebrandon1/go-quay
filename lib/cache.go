@@ -86,6 +86,18 @@ func (c *CachedClient) ListAllTags(ctx context.Context, namespace, repository st
 	return c.inner.ListAllTags(ctx, namespace, repository, onlyActive)
 }
 
+func (c *CachedClient) GetManifestSecurity(ctx context.Context, namespace, repository, manifestRef string, vulnerabilities bool) (*SecurityScan, error) {
+	return c.inner.GetManifestSecurity(ctx, namespace, repository, manifestRef, vulnerabilities)
+}
+
+func (c *CachedClient) GetManifest(ctx context.Context, namespace, repository, manifestRef string) (*Manifest, error) {
+	return c.inner.GetManifest(ctx, namespace, repository, manifestRef)
+}
+
+func (c *CachedClient) GetManifestLabels(ctx context.Context, namespace, repository, manifestRef string) (*ManifestLabels, error) {
+	return c.inner.GetManifestLabels(ctx, namespace, repository, manifestRef)
+}
+
 func (c *CachedClient) ClearCache() {
 	c.mu.Lock()
 	c.cache = make(map[string]cacheEntry)

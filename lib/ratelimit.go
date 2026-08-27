@@ -45,6 +45,27 @@ func (c *RateLimitedClient) ListAllTags(ctx context.Context, namespace, reposito
 	return c.inner.ListAllTags(ctx, namespace, repository, onlyActive)
 }
 
+func (c *RateLimitedClient) GetManifestSecurity(ctx context.Context, namespace, repository, manifestRef string, vulnerabilities bool) (*SecurityScan, error) {
+	if err := c.limiter.Wait(ctx); err != nil {
+		return nil, err
+	}
+	return c.inner.GetManifestSecurity(ctx, namespace, repository, manifestRef, vulnerabilities)
+}
+
+func (c *RateLimitedClient) GetManifest(ctx context.Context, namespace, repository, manifestRef string) (*Manifest, error) {
+	if err := c.limiter.Wait(ctx); err != nil {
+		return nil, err
+	}
+	return c.inner.GetManifest(ctx, namespace, repository, manifestRef)
+}
+
+func (c *RateLimitedClient) GetManifestLabels(ctx context.Context, namespace, repository, manifestRef string) (*ManifestLabels, error) {
+	if err := c.limiter.Wait(ctx); err != nil {
+		return nil, err
+	}
+	return c.inner.GetManifestLabels(ctx, namespace, repository, manifestRef)
+}
+
 func NewCachedRateLimitedClient(base RepositoryReader, cacheTTL time.Duration, ratePerSecond float64, burst int) *CachedClient {
 	rl := NewRateLimitedClient(base, ratePerSecond, burst)
 	return NewCachedClient(rl, WithCacheTTL(cacheTTL))

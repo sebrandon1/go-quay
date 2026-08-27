@@ -15,29 +15,21 @@ const (
 
 func TestGetManifest(t *testing.T) {
 	mockManifest := Manifest{
-		Digest:         testManifestRef,
-		SchemaVersion:  2,
-		MediaType:      "application/vnd.docker.distribution.manifest.v2+json",
-		Size:           1024000,
-		IsManifestList: false,
+		Digest:               testManifestRef,
+		IsManifestList:       false,
+		LayersCompressedSize: 1024000,
 		Layers: []ManifestLayer{
 			{
-				MediaType: "application/vnd.docker.image.rootfs.diff.tar.gzip",
-				Size:      512000,
-				Digest:    "sha256:layer1digest",
-				Index:     0,
+				CompressedSize: 512000,
+				BlobDigest:     "sha256:layer1digest",
+				Index:          0,
+				Command:        []string{"bazel build //foo"},
 			},
 			{
-				MediaType: "application/vnd.docker.image.rootfs.diff.tar.gzip",
-				Size:      512000,
-				Digest:    "sha256:layer2digest",
-				Index:     1,
+				CompressedSize: 512000,
+				BlobDigest:     "sha256:layer2digest",
+				Index:          1,
 			},
-		},
-		Config: ManifestConfig{
-			MediaType: "application/vnd.docker.container.image.v1+json",
-			Size:      1500,
-			Digest:    "sha256:configdigest",
 		},
 	}
 
@@ -70,14 +62,14 @@ func TestGetManifest(t *testing.T) {
 	if manifest.Digest != testManifestRef {
 		t.Errorf("Expected manifest digest '%s', got '%s'", testManifestRef, manifest.Digest)
 	}
-	if manifest.SchemaVersion != 2 {
-		t.Errorf("Expected schema version 2, got %d", manifest.SchemaVersion)
-	}
 	if len(manifest.Layers) != 2 {
 		t.Errorf("Expected 2 layers, got %d", len(manifest.Layers))
 	}
-	if manifest.Config.Digest != "sha256:configdigest" {
-		t.Errorf("Expected config digest 'sha256:configdigest', got '%s'", manifest.Config.Digest)
+	if manifest.LayersCompressedSize != 1024000 {
+		t.Errorf("Expected layers_compressed_size 1024000, got %d", manifest.LayersCompressedSize)
+	}
+	if manifest.Layers[0].BlobDigest != "sha256:layer1digest" {
+		t.Errorf("Expected layer 0 blob_digest 'sha256:layer1digest', got '%s'", manifest.Layers[0].BlobDigest)
 	}
 }
 
