@@ -60,6 +60,8 @@ type Client struct {
 	HTTPClient  *http.Client
 }
 
+var _ RepositoryReader = (*Client)(nil)
+
 func NewClientWithURL(bearerToken, baseURL string) (*Client, error) {
 	transport := &http.Transport{
 		DialContext: (&net.Dialer{
