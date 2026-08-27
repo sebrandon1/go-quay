@@ -25,3 +25,18 @@ func (m *mockReader) ListAllTags(_ context.Context, _, _ string, _ bool) ([]Tag,
 	m.calls.Add(1)
 	return nil, m.err
 }
+
+func (m *mockReader) GetManifestSecurity(_ context.Context, _, _, _ string, _ bool) (*SecurityScan, error) {
+	m.calls.Add(1)
+	return nil, m.err
+}
+
+func (m *mockReader) GetManifest(_ context.Context, _, _, _ string) (*Manifest, error) {
+	m.calls.Add(1)
+	return nil, m.err
+}
+
+func (m *mockReader) GetManifestLabels(_ context.Context, _, _, _ string) (*ManifestLabels, error) {
+	m.calls.Add(1)
+	return nil, m.err
+}
