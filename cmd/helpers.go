@@ -18,6 +18,9 @@ func getClient() (*lib.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	if client == nil {
+		return nil, fmt.Errorf("unexpected nil client")
+	}
 	client.Version = rootCmd.Version
 	return client, nil
 }
