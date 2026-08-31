@@ -20,3 +20,5 @@ go run main.go
 `basic-usage` also reads `QUAY_NAMESPACE` (optional; defaults to the authenticated username). That variable is not a CLI flag — the CLI uses `--namespace` or config `namespace`.
 
 Some examples accept flags — run with `-h` for usage.
+
+Run offline smoke tests with `make examples-test` from the repository root.
