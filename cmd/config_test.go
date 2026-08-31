@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -97,6 +98,79 @@ func TestConfigFilePath(t *testing.T) {
 	}
 	if filepath.Base(filepath.Dir(path)) != cliName {
 		t.Errorf("Expected config dir named %q, got %q", cliName, filepath.Base(filepath.Dir(path)))
+	}
+}
+
+func TestLoadConfigFromUserConfigDir(t *testing.T) {
+	configContent := []byte(`token: "disk-token"
+namespace: "disk-ns"
+quay-url: "https://disk.example/api/v1"
+`)
+
+	var configDir string
+	switch runtime.GOOS {
+	case "windows":
+		base := t.TempDir()
+		t.Setenv("APPDATA", base)
+		configDir = filepath.Join(base, cliName)
+	case "darwin":
+		home := t.TempDir()
+		t.Setenv("HOME", home)
+		configDir = filepath.Join(home, "Library", "Application Support", cliName)
+	default:
+		base := t.TempDir()
+		t.Setenv("XDG_CONFIG_HOME", base)
+		configDir = filepath.Join(base, cliName)
+	}
+
+	if err := os.MkdirAll(configDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	configPath := filepath.Join(configDir, "config.yaml")
+	if err := os.WriteFile(configPath, configContent, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := loadConfig()
+	if cfg.Token != "disk-token" {
+		t.Errorf("Token = %q, want disk-token", cfg.Token)
+	}
+	if cfg.Namespace != "disk-ns" {
+		t.Errorf("Namespace = %q, want disk-ns", cfg.Namespace)
+	}
+	if cfg.QuayURL != "https://disk.example/api/v1" {
+		t.Errorf("QuayURL = %q, want disk URL", cfg.QuayURL)
+	}
+}
+
+func TestLoadConfigInvalidFileReturnsEmpty(t *testing.T) {
+	var configDir string
+	switch runtime.GOOS {
+	case "windows":
+		base := t.TempDir()
+		t.Setenv("APPDATA", base)
+		configDir = filepath.Join(base, cliName)
+	case "darwin":
+		home := t.TempDir()
+		t.Setenv("HOME", home)
+		configDir = filepath.Join(home, "Library", "Application Support", cliName)
+	default:
+		base := t.TempDir()
+		t.Setenv("XDG_CONFIG_HOME", base)
+		configDir = filepath.Join(base, cliName)
+	}
+
+	if err := os.MkdirAll(configDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	configPath := filepath.Join(configDir, "config.yaml")
+	if err := os.WriteFile(configPath, []byte(`{invalid`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := loadConfig()
+	if cfg.Token != "" || cfg.Namespace != "" || cfg.QuayURL != "" {
+		t.Errorf("expected empty config for invalid YAML, got %+v", cfg)
 	}
 }
 

@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"bytes"
+	"context"
+	"os"
 	"strings"
 	"testing"
 
@@ -242,6 +244,36 @@ func TestPersistentPreRunRequiresToken(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "authentication token required") {
 		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestPersistentPreRunInvalidOutputFormat(t *testing.T) {
+	resetRootFlags(t)
+	t.Setenv("QUAY_TOKEN", "from-env")
+	outputFormat = "xml"
+
+	err := persistentPreRunE(rootCmd, nil)
+	if err == nil {
+		t.Fatal("expected error for invalid output format")
+	}
+	if !strings.Contains(err.Error(), "invalid output format") {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestExecuteHelp(t *testing.T) {
+	resetRootFlags(t)
+
+	oldArgs := os.Args
+	os.Args = []string{cliName, "--help"}
+	t.Cleanup(func() {
+		os.Args = oldArgs
+		rootCmd.SetArgs([]string{})
+		rootCmd.SetContext(context.Background())
+	})
+
+	if err := Execute(); err != nil {
+		t.Fatalf("Execute: %v", err)
 	}
 }
 
