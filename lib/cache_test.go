@@ -52,14 +52,18 @@ func TestCachedClient_Expiry(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, _ = cached.GetRepository(ctx, testNamespace, testPlaceholder)
+	if _, err := cached.GetRepository(ctx, testNamespace, testPlaceholder); err != nil {
+		t.Fatalf("GetRepository: %v", err)
+	}
 	if mock.calls.Load() != 1 {
 		t.Fatalf("expected 1 call, got %d", mock.calls.Load())
 	}
 
 	time.Sleep(20 * time.Millisecond)
 
-	_, _ = cached.GetRepository(ctx, testNamespace, testPlaceholder)
+	if _, err := cached.GetRepository(ctx, testNamespace, testPlaceholder); err != nil {
+		t.Fatalf("GetRepository: %v", err)
+	}
 	if mock.calls.Load() != 2 {
 		t.Fatalf("expected 2 calls after TTL expiry, got %d", mock.calls.Load())
 	}
@@ -75,9 +79,13 @@ func TestCachedClient_ClearCache(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, _ = cached.GetRepository(ctx, testNamespace, testPlaceholder)
+	if _, err := cached.GetRepository(ctx, testNamespace, testPlaceholder); err != nil {
+		t.Fatalf("GetRepository: %v", err)
+	}
 	cached.ClearCache()
-	_, _ = cached.GetRepository(ctx, testNamespace, testPlaceholder)
+	if _, err := cached.GetRepository(ctx, testNamespace, testPlaceholder); err != nil {
+		t.Fatalf("GetRepository: %v", err)
+	}
 
 	if mock.calls.Load() != 2 {
 		t.Fatalf("expected 2 calls after ClearCache, got %d", mock.calls.Load())
@@ -94,11 +102,15 @@ func TestCachedClient_CleanupExpired(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, _ = cached.GetRepository(ctx, testNamespace, testPlaceholder)
+	if _, err := cached.GetRepository(ctx, testNamespace, testPlaceholder); err != nil {
+		t.Fatalf("GetRepository: %v", err)
+	}
 	time.Sleep(20 * time.Millisecond)
 	cached.CleanupExpired()
 
-	_, _ = cached.GetRepository(ctx, testNamespace, testPlaceholder)
+	if _, err := cached.GetRepository(ctx, testNamespace, testPlaceholder); err != nil {
+		t.Fatalf("GetRepository: %v", err)
+	}
 	if mock.calls.Load() != 2 {
 		t.Fatalf("expected 2 calls after CleanupExpired, got %d", mock.calls.Load())
 	}
@@ -160,8 +172,12 @@ func TestCachedClient_DifferentKeys(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, _ = cached.GetRepository(ctx, "ns1", "repo1")
-	_, _ = cached.GetRepository(ctx, "ns2", "repo2")
+	if _, err := cached.GetRepository(ctx, "ns1", "repo1"); err != nil {
+		t.Fatalf("GetRepository ns1: %v", err)
+	}
+	if _, err := cached.GetRepository(ctx, "ns2", "repo2"); err != nil {
+		t.Fatalf("GetRepository ns2: %v", err)
+	}
 
 	if mock.calls.Load() != 2 {
 		t.Fatalf("expected 2 calls for different keys, got %d", mock.calls.Load())

@@ -2,7 +2,6 @@ package lib
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -19,7 +18,7 @@ func TestGetErrorType(t *testing.T) {
 		Description: "The provided authentication token is invalid or expired",
 		Status:      401,
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {

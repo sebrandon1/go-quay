@@ -24,7 +24,7 @@ func TestCreateRepository(t *testing.T) {
 		Kind:        testKindImage,
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockRepo)
+	mockResponseJSON := mustMarshal(t, mockRepo)
 
 	// Create test server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +87,7 @@ func TestUpdateRepository(t *testing.T) {
 		IsPublic:    true,
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockRepo)
+	mockResponseJSON := mustMarshal(t, mockRepo)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPut {
@@ -162,7 +162,7 @@ func TestListRepositories(t *testing.T) {
 		},
 		HasAdditional: false,
 	}
-	mockResponseJSON, _ := json.Marshal(mockRepos)
+	mockResponseJSON := mustMarshal(t, mockRepos)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -209,7 +209,7 @@ func TestListTags(t *testing.T) {
 		},
 		HasAdditional: true,
 	}
-	mockResponseJSON, _ := json.Marshal(mockTags)
+	mockResponseJSON := mustMarshal(t, mockTags)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -296,8 +296,8 @@ func TestGetRepository(t *testing.T) {
 		HasAdditional: false,
 	}
 
-	mockRepoJSON, _ := json.Marshal(mockRepo)
-	mockTagsJSON, _ := json.Marshal(mockTags)
+	mockRepoJSON := mustMarshal(t, mockRepo)
+	mockTagsJSON := mustMarshal(t, mockTags)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -395,7 +395,7 @@ func TestListAllRepositories(t *testing.T) {
 			},
 			HasAdditional: hasMore,
 		}
-		data, _ := json.Marshal(repos)
+		data := mustMarshal(t, repos)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(data)
@@ -427,7 +427,7 @@ func TestListAllTags(t *testing.T) {
 			Page:          page,
 			HasAdditional: hasMore,
 		}
-		data, _ := json.Marshal(tags)
+		data := mustMarshal(t, tags)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(data)

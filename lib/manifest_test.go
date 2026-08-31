@@ -33,7 +33,7 @@ func TestGetManifest(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockManifest)
+	mockResponseJSON := mustMarshal(t, mockManifest)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -117,7 +117,7 @@ func TestGetManifestLabels(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockLabels)
+	mockResponseJSON := mustMarshal(t, mockLabels)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -163,7 +163,7 @@ func TestAddManifestLabel(t *testing.T) {
 		MediaType:  testMediaTypePlain,
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockLabel)
+	mockResponseJSON := mustMarshal(t, mockLabel)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -222,7 +222,7 @@ func TestGetManifestLabel(t *testing.T) {
 		MediaType:  testMediaTypePlain,
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockLabel)
+	mockResponseJSON := mustMarshal(t, mockLabel)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {

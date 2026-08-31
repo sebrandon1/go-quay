@@ -2,7 +2,6 @@ package lib
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -19,7 +18,7 @@ func TestGetDiscovery(t *testing.T) {
 			},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -61,7 +60,7 @@ func TestGetRegistryCapabilities(t *testing.T) {
 		},
 		MirrorArchitectures: []string{testArchAmd64, "arm64", "ppc64le", "s390x"},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -102,7 +101,7 @@ func TestGetAppInfo(t *testing.T) {
 		ApplicationURI: "https://app.example.com",
 		RedirectURI:    "https://app.example.com/callback",
 	}
-	mockResponseJSON, _ := json.Marshal(mockApp)
+	mockResponseJSON := mustMarshal(t, mockApp)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -142,7 +141,7 @@ func TestGetEntities(t *testing.T) {
 			{Name: "testorg+bot", Kind: testKindRobot, IsRobot: true},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockEntities)
+	mockResponseJSON := mustMarshal(t, mockEntities)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {

@@ -41,7 +41,7 @@ func TestTagInfoCmd(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"name": "v1.0", "manifest_digest": "sha256:deadbeef", "size": 12345}`))
+		writeResponse(t, w, []byte(`{"name": "v1.0", "manifest_digest": "sha256:deadbeef", "size": 12345}`))
 	}))
 	defer server.Close()
 
@@ -63,7 +63,9 @@ func TestTagInfoCmd(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("io.Copy: %v", err)
+	}
 	output := buf.String()
 
 	if !strings.Contains(output, `"name": "v1.0"`) {
