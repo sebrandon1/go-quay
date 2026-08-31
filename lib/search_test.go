@@ -2,7 +2,6 @@ package lib
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -35,7 +34,7 @@ func TestSearchRepositories(t *testing.T) {
 		StartIndex:    0,
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockResult)
+	mockResponseJSON := mustMarshal(t, mockResult)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -86,7 +85,7 @@ func TestSearchRepositoriesWithPage(t *testing.T) {
 		StartIndex:    10,
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockResult)
+	mockResponseJSON := mustMarshal(t, mockResult)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("page") != "2" {
@@ -144,7 +143,7 @@ func TestSearchAll(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockResult)
+	mockResponseJSON := mustMarshal(t, mockResult)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -226,7 +225,7 @@ func TestSearchEmptyResults(t *testing.T) {
 		StartIndex:    0,
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockResult)
+	mockResponseJSON := mustMarshal(t, mockResult)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

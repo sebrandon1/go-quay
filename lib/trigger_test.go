@@ -20,7 +20,7 @@ func TestGetTriggers(t *testing.T) {
 			{ID: "trigger-uuid-456", Service: "gitlab", IsActive: false, BuildSource: "group/project"},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -66,7 +66,7 @@ func TestGetTrigger(t *testing.T) {
 		CanInvoke:     true,
 		Enabled:       true,
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -133,7 +133,7 @@ func TestUpdateTrigger(t *testing.T) {
 		IsActive: true,
 		Enabled:  false,
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPut {
@@ -175,7 +175,7 @@ func TestStartTriggerBuild(t *testing.T) {
 		ID:    "build-uuid-789",
 		Phase: "waiting",
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -217,7 +217,7 @@ func TestActivateTrigger(t *testing.T) {
 		IsActive: true,
 		Enabled:  true,
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -264,7 +264,7 @@ func TestGetTriggerBuilds(t *testing.T) {
 			{ID: "build-uuid-101", Phase: "building"},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {

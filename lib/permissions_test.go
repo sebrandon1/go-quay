@@ -36,7 +36,7 @@ func TestGetRepositoryPermissions(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockPermissions)
+	mockResponseJSON := mustMarshal(t, mockPermissions)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -177,7 +177,7 @@ func TestListUserPermissions(t *testing.T) {
 			{Name: testPermUserName, Kind: testKindUser, Role: testRoleWrite},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockPermissions)
+	mockResponseJSON := mustMarshal(t, mockPermissions)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -216,7 +216,7 @@ func TestGetUserPermission(t *testing.T) {
 		Kind: testKindUser,
 		Role: testRoleWrite,
 	}
-	mockResponseJSON, _ := json.Marshal(mockPermission)
+	mockResponseJSON := mustMarshal(t, mockPermission)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -300,7 +300,7 @@ func TestGetUserTransitivePermission(t *testing.T) {
 		Kind: testKindUser,
 		Role: roleAdmin,
 	}
-	mockResponseJSON, _ := json.Marshal(mockPermission)
+	mockResponseJSON := mustMarshal(t, mockPermission)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -336,7 +336,7 @@ func TestListTeamPermissions(t *testing.T) {
 			{Name: testPrototypeTeamName, Kind: testKindTeam, Role: testRoleRead},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockPermissions)
+	mockResponseJSON := mustMarshal(t, mockPermissions)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -375,7 +375,7 @@ func TestGetTeamPermission(t *testing.T) {
 		Kind: testKindTeam,
 		Role: testRoleRead,
 	}
-	mockResponseJSON, _ := json.Marshal(mockPermission)
+	mockResponseJSON := mustMarshal(t, mockPermission)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {

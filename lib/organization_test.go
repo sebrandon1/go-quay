@@ -17,7 +17,7 @@ func TestGetOrganization(t *testing.T) {
 		IsOrgAdmin:    true,
 		CanCreateRepo: true,
 	}
-	mockResponseJSON, _ := json.Marshal(mockOrg)
+	mockResponseJSON := mustMarshal(t, mockOrg)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -75,7 +75,7 @@ func TestCreateOrganization(t *testing.T) {
 		Name:  testOrgName,
 		Email: testEmailAddress,
 	}
-	mockResponseJSON, _ := json.Marshal(mockOrg)
+	mockResponseJSON := mustMarshal(t, mockOrg)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -120,7 +120,7 @@ func TestUpdateOrganization(t *testing.T) {
 		Name:  testOrgName,
 		Email: updatedEmail,
 	}
-	mockResponseJSON, _ := json.Marshal(mockOrg)
+	mockResponseJSON := mustMarshal(t, mockOrg)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPut {
@@ -190,7 +190,7 @@ func TestGetOrganizationMembers(t *testing.T) {
 			{Name: "janedoe", Kind: testKindUser},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockMembers)
+	mockResponseJSON := mustMarshal(t, mockMembers)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -296,7 +296,7 @@ func TestGetOrganizationMember(t *testing.T) {
 			{Name: testTeamName, Role: roleMember},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockMember)
+	mockResponseJSON := mustMarshal(t, mockMember)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -338,7 +338,7 @@ func TestGetOrganizationRepositories(t *testing.T) {
 			{Name: "private-repo", Namespace: testOrgName, IsPublic: false},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockRepos)
+	mockResponseJSON := mustMarshal(t, mockRepos)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -380,7 +380,7 @@ func TestGetOrganizationCollaborators(t *testing.T) {
 			{Name: "external-user", Kind: testKindUser},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockCollabs)
+	mockResponseJSON := mustMarshal(t, mockCollabs)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {

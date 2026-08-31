@@ -2,7 +2,6 @@ package lib
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,7 +15,7 @@ func TestGetMirrorConfig(t *testing.T) {
 		MirrorType:  "PULL",
 		ExternalRef: testExternalRef,
 	}
-	mockResponseJSON, _ := json.Marshal(mockConfig)
+	mockResponseJSON := mustMarshal(t, mockConfig)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -53,7 +52,7 @@ func TestCreateMirrorConfig(t *testing.T) {
 		IsEnabled:   true,
 		ExternalRef: testExternalRef,
 	}
-	mockResponseJSON, _ := json.Marshal(mockConfig)
+	mockResponseJSON := mustMarshal(t, mockConfig)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -94,7 +93,7 @@ func TestUpdateMirrorConfig(t *testing.T) {
 		IsEnabled:   enabled,
 		ExternalRef: testExternalRef,
 	}
-	mockResponseJSON, _ := json.Marshal(mockConfig)
+	mockResponseJSON := mustMarshal(t, mockConfig)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPut {
@@ -155,9 +154,12 @@ func TestMirrorConfigHTTPErrors(t *testing.T) {
 }
 
 func TestMirrorConfigValidation(t *testing.T) {
-	client, _ := NewClient(testTokenValue)
+	client, err := NewClient(testTokenValue)
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
 
-	_, err := client.GetMirrorConfig(context.Background(), "", testRepository)
+	_, err = client.GetMirrorConfig(context.Background(), "", testRepository)
 	if err == nil {
 		t.Error("Expected error for empty namespace")
 	}

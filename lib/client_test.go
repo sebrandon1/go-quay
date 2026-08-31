@@ -133,7 +133,7 @@ func TestGetRequest(t *testing.T) {
 	}
 
 	mockResponse := testResponse{Name: "test-item", Value: 42}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -292,7 +292,7 @@ func TestPostRequest(t *testing.T) {
 	}
 
 	mockResponse := postResponse{ID: "new-id-123", Name: "created-item"}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -383,7 +383,7 @@ func TestPutRequest(t *testing.T) {
 	}
 
 	mockResponse := putResponse{Updated: true, Name: testUpdatedItem}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPut {

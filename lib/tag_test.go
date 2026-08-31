@@ -27,7 +27,7 @@ func TestGetTag(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockTag)
+	mockResponseJSON := mustMarshal(t, mockTag)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -74,7 +74,7 @@ func TestUpdateTag(t *testing.T) {
 		LastModified: testTimestamp,
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockTag)
+	mockResponseJSON := mustMarshal(t, mockTag)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPut {
@@ -157,7 +157,7 @@ func TestGetTagHistory(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockHistory)
+	mockResponseJSON := mustMarshal(t, mockHistory)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -205,7 +205,7 @@ func TestRevertTag(t *testing.T) {
 		LastModified:   "2024-01-15T11:00:00Z",
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockTag)
+	mockResponseJSON := mustMarshal(t, mockTag)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {

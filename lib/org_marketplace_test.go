@@ -2,7 +2,6 @@ package lib
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -17,7 +16,7 @@ func TestGetOrganizationMarketplace(t *testing.T) {
 			{ID: testSubscriptionID, SKU: "premium-plan", Status: "active"},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockMarketplace)
+	mockResponseJSON := mustMarshal(t, mockMarketplace)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {

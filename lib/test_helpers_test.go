@@ -2,8 +2,19 @@ package lib
 
 import (
 	"context"
+	"encoding/json"
 	"sync/atomic"
+	"testing"
 )
+
+func mustMarshal(t *testing.T, v any) []byte {
+	t.Helper()
+	data, err := json.Marshal(v)
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	return data
+}
 
 type mockReader struct {
 	calls atomic.Int32

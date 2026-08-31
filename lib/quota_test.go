@@ -15,7 +15,7 @@ func TestGetQuota(t *testing.T) {
 		ID:         "quota-1",
 		LimitBytes: 1073741824,
 	}
-	mockResponseJSON, _ := json.Marshal(mockQuota)
+	mockResponseJSON := mustMarshal(t, mockQuota)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -51,7 +51,7 @@ func TestCreateQuota(t *testing.T) {
 		ID:         "quota-2",
 		LimitBytes: limitBytes,
 	}
-	mockResponseJSON, _ := json.Marshal(mockQuota)
+	mockResponseJSON := mustMarshal(t, mockQuota)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -97,7 +97,7 @@ func TestUpdateQuota(t *testing.T) {
 		ID:         "quota-1",
 		LimitBytes: limitBytes,
 	}
-	mockResponseJSON, _ := json.Marshal(mockQuota)
+	mockResponseJSON := mustMarshal(t, mockQuota)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPut {

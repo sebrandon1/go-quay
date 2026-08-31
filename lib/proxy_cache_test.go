@@ -16,7 +16,7 @@ func TestGetProxyCacheConfig(t *testing.T) {
 		Insecure:         false,
 		Expiration:       86400,
 	}
-	mockResponseJSON, _ := json.Marshal(mockConfig)
+	mockResponseJSON := mustMarshal(t, mockConfig)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -55,7 +55,7 @@ func TestCreateProxyCacheConfig(t *testing.T) {
 		Insecure:         true,
 		Expiration:       3600,
 	}
-	mockResponseJSON, _ := json.Marshal(mockConfig)
+	mockResponseJSON := mustMarshal(t, mockConfig)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {

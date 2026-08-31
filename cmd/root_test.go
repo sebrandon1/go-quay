@@ -13,9 +13,9 @@ func resetRootFlags(t *testing.T) {
 	t.Helper()
 	origCfg := appCfg
 	origFormat := outputFormat
-	resetTokenAndURLFlags()
+	resetTokenAndURLFlags(t)
 	t.Cleanup(func() {
-		resetTokenAndURLFlags()
+		resetTokenAndURLFlags(t)
 		outputFormat = origFormat
 		appCfg = origCfg
 		rootCmd.SetArgs([]string{})
@@ -29,7 +29,8 @@ func resetRootFlags(t *testing.T) {
 	appCfg = appConfig{}
 }
 
-func resetTokenAndURLFlags() {
+func resetTokenAndURLFlags(t *testing.T) {
+	t.Helper()
 	token = ""
 	quayURL = lib.DefaultQuayURL
 	for _, f := range []*pflag.Flag{
@@ -38,7 +39,9 @@ func resetTokenAndURLFlags() {
 	} {
 		if f != nil {
 			f.Changed = false
-			_ = f.Value.Set("")
+			if err := f.Value.Set(""); err != nil {
+				t.Fatalf("reset token flag: %v", err)
+			}
 		}
 	}
 	for _, f := range []*pflag.Flag{
@@ -47,7 +50,9 @@ func resetTokenAndURLFlags() {
 	} {
 		if f != nil {
 			f.Changed = false
-			_ = f.Value.Set(lib.DefaultQuayURL)
+			if err := f.Value.Set(lib.DefaultQuayURL); err != nil {
+				t.Fatalf("reset quay-url flag: %v", err)
+			}
 		}
 	}
 }

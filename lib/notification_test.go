@@ -2,7 +2,6 @@ package lib
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,7 +24,7 @@ func TestGetNotifications(t *testing.T) {
 			{UUID: "notification-uuid-456", Event: testNotificationEventBuild, Method: testNotificationMethodSlack, Title: "Build Slack"},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -66,7 +65,7 @@ func TestGetNotification(t *testing.T) {
 		Title:  "Push Webhook",
 		Config: map[string]interface{}{testNotificationConfigKeyURL: "https://example.com/webhook"},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -106,7 +105,7 @@ func TestCreateNotification(t *testing.T) {
 		Method: testNotificationMethod,
 		Title:  "New Webhook",
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -223,7 +222,7 @@ func TestUpdateNotification(t *testing.T) {
 		Method: testNotificationMethodSlack,
 		Title:  testNotificationTitleUpdated,
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {

@@ -17,7 +17,7 @@ func TestGetRobotAccounts(t *testing.T) {
 			{Name: "test-org+cibot", Description: "CI robot", Created: testTimestamp},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockRobots)
+	mockResponseJSON := mustMarshal(t, mockRobots)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -57,7 +57,7 @@ func TestCreateRobotAccount(t *testing.T) {
 		Token:       "new-robot-token",
 		Created:     testTimestamp,
 	}
-	mockResponseJSON, _ := json.Marshal(mockRobot)
+	mockResponseJSON := mustMarshal(t, mockRobot)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPut {
@@ -104,7 +104,7 @@ func TestGetRobotAccount(t *testing.T) {
 		Token:       "robot-token",
 		Created:     testTimestamp,
 	}
-	mockResponseJSON, _ := json.Marshal(mockRobot)
+	mockResponseJSON := mustMarshal(t, mockRobot)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -163,7 +163,7 @@ func TestRegenerateRobotToken(t *testing.T) {
 		Name:  testOrgName + "+" + testRobotShortname,
 		Token: "regenerated-token",
 	}
-	mockResponseJSON, _ := json.Marshal(mockRobot)
+	mockResponseJSON := mustMarshal(t, mockRobot)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -202,7 +202,7 @@ func TestGetRobotPermissions(t *testing.T) {
 			{Repository: Repository{Name: "other-repo"}, Role: testRoleRead},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockPerms)
+	mockResponseJSON := mustMarshal(t, mockPerms)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -298,7 +298,7 @@ func TestGetRobotFederation(t *testing.T) {
 			{Issuer: testFederationIssuer, Subject: testFederationSubject},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockFederation)
+	mockResponseJSON := mustMarshal(t, mockFederation)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
