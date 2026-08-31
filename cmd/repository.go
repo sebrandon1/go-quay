@@ -147,6 +147,9 @@ Use --table with --popularity for an enriched dashboard sorted by pull count:
 		if err != nil {
 			return fmt.Errorf("listing repositories: %w", err)
 		}
+		if repos == nil {
+			return fmt.Errorf("listing repositories: empty response")
+		}
 
 		if !repoTable && outputFormat != outputTable {
 			return printJSON(repos)
@@ -169,7 +172,7 @@ Use --table with --popularity for an enriched dashboard sorted by pull count:
 			recentPushes := 0
 
 			tags, err := client.ListTags(cmd.Context(), namespace, repo.Name, 100, true)
-			if err == nil && len(tags.Tags) > 0 {
+			if err == nil && tags != nil && len(tags.Tags) > 0 {
 				for _, tag := range tags.Tags {
 					if strings.HasPrefix(tag.Name, "sha256-") || strings.HasSuffix(tag.Name, ".sig") || strings.HasSuffix(tag.Name, ".att") || strings.HasSuffix(tag.Name, ".sbom") {
 						continue
