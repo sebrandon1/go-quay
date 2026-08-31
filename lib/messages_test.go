@@ -2,7 +2,6 @@ package lib
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,7 +24,7 @@ func TestGetMessages(t *testing.T) {
 			},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -62,7 +61,7 @@ func TestGetMessagesEmpty(t *testing.T) {
 	mockResponse := Messages{
 		Messages: []Message{},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -92,7 +91,7 @@ func TestCreateMessage(t *testing.T) {
 		Severity:  "warning",
 		MediaType: testMediaTypePlain,
 	}
-	mockResponseJSON, _ := json.Marshal(mockMessage)
+	mockResponseJSON := mustMarshal(t, mockMessage)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {

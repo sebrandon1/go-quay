@@ -36,7 +36,7 @@ func TestOrgInfoCmd(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"name": "` + testOrgName + `", "email": "admin@testorg.com", "is_org_admin": true}`))
+		writeResponse(t, w, []byte(`{"name": "`+testOrgName+`", "email": "admin@testorg.com", "is_org_admin": true}`))
 	}))
 	defer server.Close()
 
@@ -58,7 +58,9 @@ func TestOrgInfoCmd(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("io.Copy: %v", err)
+	}
 	output := buf.String()
 
 	if !strings.Contains(output, `"name": "`+testOrgName+`"`) {
@@ -82,7 +84,7 @@ func TestOrgMembersCmd(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"members": [{"name": "user1", "kind": "user"}, {"name": "user2", "kind": "user"}]}`))
+		writeResponse(t, w, []byte(`{"members": [{"name": "user1", "kind": "user"}, {"name": "user2", "kind": "user"}]}`))
 	}))
 	defer server.Close()
 
@@ -104,7 +106,9 @@ func TestOrgMembersCmd(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("io.Copy: %v", err)
+	}
 	output := buf.String()
 
 	if !strings.Contains(output, `"name": "user1"`) {

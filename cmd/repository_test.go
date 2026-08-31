@@ -51,13 +51,13 @@ func TestRepoInfoCmd(t *testing.T) {
 		case strings.Contains(r.URL.Path, "/repository/"+testNamespace+"/"+testRepository+"/tag/"):
 			// ListTags call made by GetRepository
 			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"tags": [{"name": "latest", "manifest_digest": "sha256:abc123"}]}`))
+			writeResponse(t, w, []byte(`{"tags": [{"name": "latest", "manifest_digest": "sha256:abc123"}]}`))
 		case strings.HasSuffix(r.URL.Path, "/repository/"+testNamespace+"/"+testRepository):
 			if r.Method != http.MethodGet {
 				t.Errorf("expected GET, got %s", r.Method)
 			}
 			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"namespace": "` + testNamespace + `", "name": "` + testRepository + `", "is_public": true}`))
+			writeResponse(t, w, []byte(`{"namespace": "`+testNamespace+`", "name": "`+testRepository+`", "is_public": true}`))
 		default:
 			t.Errorf("unexpected request path: %s", r.URL.Path)
 			w.WriteHeader(http.StatusNotFound)
@@ -83,7 +83,9 @@ func TestRepoInfoCmd(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("io.Copy: %v", err)
+	}
 	output := buf.String()
 
 	if !strings.Contains(output, `"namespace": "`+testNamespace+`"`) {
@@ -113,7 +115,7 @@ func TestRepoListCmd(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"repositories": [{"name": "repo1", "namespace": "` + testNamespace + `"}, {"name": "repo2", "namespace": "` + testNamespace + `"}]}`))
+		writeResponse(t, w, []byte(`{"repositories": [{"name": "repo1", "namespace": "`+testNamespace+`"}, {"name": "repo2", "namespace": "`+testNamespace+`"}]}`))
 	}))
 	defer server.Close()
 
@@ -135,7 +137,9 @@ func TestRepoListCmd(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("io.Copy: %v", err)
+	}
 	output := buf.String()
 
 	if !strings.Contains(output, `"name": "repo1"`) {
@@ -185,7 +189,7 @@ func TestRepoCreateCmd(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		_, _ = w.Write([]byte(`{"namespace": "` + testNamespace + `", "name": "newrepo", "is_public": false}`))
+		writeResponse(t, w, []byte(`{"namespace": "`+testNamespace+`", "name": "newrepo", "is_public": false}`))
 	}))
 	defer server.Close()
 
@@ -208,7 +212,9 @@ func TestRepoCreateCmd(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("io.Copy: %v", err)
+	}
 	output := buf.String()
 
 	if !strings.Contains(output, `"name": "newrepo"`) {
@@ -231,7 +237,7 @@ func TestVerbRepoCreateCmd(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		_, _ = w.Write([]byte(`{"namespace": "` + testNamespace + `", "name": "newrepo", "is_public": false}`))
+		writeResponse(t, w, []byte(`{"namespace": "`+testNamespace+`", "name": "newrepo", "is_public": false}`))
 	}))
 	defer server.Close()
 
@@ -254,7 +260,9 @@ func TestVerbRepoCreateCmd(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("io.Copy: %v", err)
+	}
 	output := buf.String()
 
 	if !strings.Contains(output, `"name": "newrepo"`) {
@@ -277,7 +285,7 @@ func TestVerbRepoListCmd(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"repositories": [{"name": "repo1", "namespace": "` + testNamespace + `"}]}`))
+		writeResponse(t, w, []byte(`{"repositories": [{"name": "repo1", "namespace": "`+testNamespace+`"}]}`))
 	}))
 	defer server.Close()
 
@@ -299,7 +307,9 @@ func TestVerbRepoListCmd(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("io.Copy: %v", err)
+	}
 	output := buf.String()
 
 	if !strings.Contains(output, `"name": "repo1"`) {
@@ -315,10 +325,10 @@ func TestVerbRepoInfoCmd(t *testing.T) {
 		switch {
 		case strings.Contains(r.URL.Path, "/repository/"+testNamespace+"/"+testRepository+"/tag/"):
 			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"tags": [{"name": "latest", "manifest_digest": "sha256:abc123"}]}`))
+			writeResponse(t, w, []byte(`{"tags": [{"name": "latest", "manifest_digest": "sha256:abc123"}]}`))
 		case strings.HasSuffix(r.URL.Path, "/repository/"+testNamespace+"/"+testRepository):
 			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"namespace": "` + testNamespace + `", "name": "` + testRepository + `", "is_public": true}`))
+			writeResponse(t, w, []byte(`{"namespace": "`+testNamespace+`", "name": "`+testRepository+`", "is_public": true}`))
 		default:
 			t.Errorf("unexpected request path: %s", r.URL.Path)
 			w.WriteHeader(http.StatusNotFound)
@@ -344,7 +354,9 @@ func TestVerbRepoInfoCmd(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("io.Copy: %v", err)
+	}
 	output := buf.String()
 
 	if !strings.Contains(output, `"name": "`+testRepository+`"`) {

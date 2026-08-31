@@ -25,7 +25,7 @@ func TestGetAggregatedLogs(t *testing.T) {
 			{Kind: "push_repo", Count: 2, Datetime: testDatetime},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -79,7 +79,7 @@ func TestGetLogs(t *testing.T) {
 			},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -116,7 +116,7 @@ func TestGetLogs(t *testing.T) {
 }
 
 func TestGetLogsWithDateRange(t *testing.T) {
-	mockResponseJSON, _ := json.Marshal(Logs{})
+	mockResponseJSON := mustMarshal(t, Logs{})
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("starttime") != testStartDate {
@@ -142,7 +142,7 @@ func TestGetLogsWithDateRange(t *testing.T) {
 }
 
 func TestGetLogsWithNextPage(t *testing.T) {
-	mockResponseJSON, _ := json.Marshal(Logs{})
+	mockResponseJSON := mustMarshal(t, Logs{})
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("next_page") != testNextPage {
@@ -165,7 +165,7 @@ func TestGetLogsWithNextPage(t *testing.T) {
 }
 
 func TestGetOrganizationLogsWithDateRange(t *testing.T) {
-	mockResponseJSON, _ := json.Marshal(Logs{})
+	mockResponseJSON := mustMarshal(t, Logs{})
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		expectedPath := "/api/v1/organization/testorg/logs"
@@ -195,7 +195,7 @@ func TestGetOrganizationLogsWithDateRange(t *testing.T) {
 }
 
 func TestGetUserLogsWithDateRange(t *testing.T) {
-	mockResponseJSON, _ := json.Marshal(Logs{})
+	mockResponseJSON := mustMarshal(t, Logs{})
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		expectedPath := "/api/v1/user/logs"
@@ -230,7 +230,7 @@ func TestGetOrganizationAggregatedLogs(t *testing.T) {
 			{Kind: testKindPullRepo, Count: 25, Datetime: testDatetime},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -305,7 +305,7 @@ func TestGetUserAggregatedLogs(t *testing.T) {
 			{Kind: testKindPullRepo, Count: 15, Datetime: testDatetime},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockResponse)
+	mockResponseJSON := mustMarshal(t, mockResponse)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {

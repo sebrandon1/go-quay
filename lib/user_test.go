@@ -2,7 +2,6 @@ package lib
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -30,7 +29,7 @@ func TestGetUser(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockUser)
+	mockResponseJSON := mustMarshal(t, mockUser)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -109,7 +108,7 @@ func TestGetStarredRepositories(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockStarred)
+	mockResponseJSON := mustMarshal(t, mockStarred)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -216,7 +215,7 @@ func TestGetUserByUsername(t *testing.T) {
 		Verified:      true,
 		CanCreateRepo: true,
 	}
-	mockResponseJSON, _ := json.Marshal(mockUser)
+	mockResponseJSON := mustMarshal(t, mockUser)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -256,7 +255,7 @@ func TestGetUserMarketplace(t *testing.T) {
 			{ID: "user-sub-123", SKU: "free-plan", Status: "active"},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockMarketplace)
+	mockResponseJSON := mustMarshal(t, mockMarketplace)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {

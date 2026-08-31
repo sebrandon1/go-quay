@@ -3,10 +3,29 @@ package cmd
 import (
 	"bytes"
 	"io"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
 )
+
+const testPrintFieldValue = "sample"
+
+func writeResponse(t *testing.T, w http.ResponseWriter, body []byte) {
+	t.Helper()
+	if _, err := w.Write(body); err != nil {
+		t.Errorf("response write: %v", err)
+	}
+}
+
+func copyStdout(t *testing.T, r io.Reader) string {
+	t.Helper()
+	var buf bytes.Buffer
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("io.Copy: %v", err)
+	}
+	return buf.String()
+}
 
 func captureStdout(t *testing.T, fn func()) string {
 	t.Helper()
@@ -21,15 +40,8 @@ func captureStdout(t *testing.T, fn func()) string {
 		t.Fatalf("close pipe writer: %v", err)
 	}
 	os.Stdout = oldStdout
-
-	var buf bytes.Buffer
-	if _, err := io.Copy(&buf, r); err != nil {
-		t.Fatalf("io.Copy: %v", err)
-	}
-	return buf.String()
+	return copyStdout(t, r)
 }
-
-const testPrintFieldValue = "sample"
 
 func TestPrintJSON(t *testing.T) {
 	testData := map[string]interface{}{

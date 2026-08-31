@@ -16,7 +16,7 @@ func TestGetAutoPrunePolicies(t *testing.T) {
 			{UUID: testPolicyUUID, Method: testAutoPruneMethodNumberOfTags, Value: 10, TagPattern: "v*"},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockPolicies)
+	mockResponseJSON := mustMarshal(t, mockPolicies)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -56,7 +56,7 @@ func TestCreateAutoPrunePolicy(t *testing.T) {
 		Value:      20,
 		TagPattern: testTagPatternRelease,
 	}
-	mockResponseJSON, _ := json.Marshal(mockPolicy)
+	mockResponseJSON := mustMarshal(t, mockPolicy)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -103,7 +103,7 @@ func TestGetAutoPrunePolicy(t *testing.T) {
 		Value:      10,
 		TagPattern: "v*",
 	}
-	mockResponseJSON, _ := json.Marshal(mockPolicy)
+	mockResponseJSON := mustMarshal(t, mockPolicy)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -143,7 +143,7 @@ func TestUpdateAutoPrunePolicy(t *testing.T) {
 		Value:      30,
 		TagPattern: testTagPatternRelease,
 	}
-	mockResponseJSON, _ := json.Marshal(mockPolicy)
+	mockResponseJSON := mustMarshal(t, mockPolicy)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPut {

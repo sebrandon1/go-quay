@@ -2,7 +2,6 @@ package lib
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -50,7 +49,7 @@ func TestGetManifestSecurity(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockSecurityScan)
+	mockResponseJSON := mustMarshal(t, mockSecurityScan)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -122,7 +121,7 @@ func TestGetManifestSecurityWithoutVulnerabilities(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockSecurityScan)
+	mockResponseJSON := mustMarshal(t, mockSecurityScan)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -161,7 +160,7 @@ func TestGetManifestSecurityQueued(t *testing.T) {
 		Status: "queued",
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockSecurityScan)
+	mockResponseJSON := mustMarshal(t, mockSecurityScan)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -213,7 +212,7 @@ func TestGetManifestSecurityUnsupported(t *testing.T) {
 		Status: "unsupported",
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockSecurityScan)
+	mockResponseJSON := mustMarshal(t, mockSecurityScan)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

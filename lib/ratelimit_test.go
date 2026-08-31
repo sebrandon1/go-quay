@@ -36,8 +36,10 @@ func TestRateLimitedClient_ContextCancelled(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Use the one burst token
-	_, _ = rl.GetRepository(ctx, testNamespace, testPlaceholder)
+	// Consume the one burst token before testing context cancellation.
+	if _, err := rl.GetRepository(ctx, testNamespace, testPlaceholder); err != nil {
+		t.Fatalf("GetRepository: %v", err)
+	}
 
 	// Next call should block; cancel the context
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
@@ -66,8 +68,10 @@ func TestRateLimitedClient_ListAllTags_ContextCanceled(t *testing.T) {
 	mock := &mockReader{}
 	rl := NewRateLimitedClient(mock, 0.001, 1)
 
-	// Use the one burst token
-	_, _ = rl.ListAllTags(context.Background(), testNamespace, testRepoName, true)
+	// Consume the one burst token before testing context cancellation.
+	if _, err := rl.ListAllTags(context.Background(), testNamespace, testRepoName, true); err != nil {
+		t.Fatalf("ListAllTags: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()

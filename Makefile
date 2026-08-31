@@ -22,6 +22,9 @@ test:
 integration-test: build
 	@./scripts/integration-test.sh
 
+examples-test:
+	@./scripts/examples-test.sh
+
 clean:
 	rm -f $(APP_NAME)
 
@@ -45,4 +48,4 @@ check-swagger-alignment:
 		--lib-path="./lib" \
 		--base-url-var="BaseURL"
 
-.PHONY: vet build lint test integration-test clean coverage govulncheck fmt ci check-swagger-alignment
+.PHONY: vet build lint test integration-test examples-test clean coverage govulncheck fmt ci check-swagger-alignment

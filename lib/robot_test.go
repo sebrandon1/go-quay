@@ -30,7 +30,7 @@ func TestGetUserRobotAccounts(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockRobots)
+	mockResponseJSON := mustMarshal(t, mockRobots)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -72,7 +72,7 @@ func TestGetUserRobotAccount(t *testing.T) {
 		Created:     testTimestamp,
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockRobot)
+	mockResponseJSON := mustMarshal(t, mockRobot)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -115,7 +115,7 @@ func TestCreateUserRobotAccount(t *testing.T) {
 		Created:     "2024-01-20T14:00:00Z",
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockRobot)
+	mockResponseJSON := mustMarshal(t, mockRobot)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPut {
@@ -191,7 +191,7 @@ func TestRegenerateUserRobotToken(t *testing.T) {
 		Created:     testTimestamp,
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockRobot)
+	mockResponseJSON := mustMarshal(t, mockRobot)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -237,7 +237,7 @@ func TestGetUserRobotPermissions(t *testing.T) {
 		},
 	}
 
-	mockResponseJSON, _ := json.Marshal(mockPermissions)
+	mockResponseJSON := mustMarshal(t, mockPermissions)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -327,7 +327,7 @@ func TestGetUserRobotFederation(t *testing.T) {
 			{Issuer: testFederationIssuer, Subject: testFederationSubject},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockFederation)
+	mockResponseJSON := mustMarshal(t, mockFederation)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {

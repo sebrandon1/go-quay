@@ -16,7 +16,7 @@ func TestGetApplications(t *testing.T) {
 			{ClientID: testClientID, Name: testAppName, Description: "A test app"},
 		},
 	}
-	mockResponseJSON, _ := json.Marshal(mockApps)
+	mockResponseJSON := mustMarshal(t, mockApps)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -57,7 +57,7 @@ func TestCreateApplication(t *testing.T) {
 		ApplicationURI: testAppURI,
 		RedirectURI:    testRedirectURI,
 	}
-	mockResponseJSON, _ := json.Marshal(mockApp)
+	mockResponseJSON := mustMarshal(t, mockApp)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
@@ -106,7 +106,7 @@ func TestGetApplication(t *testing.T) {
 		Name:        testAppName,
 		Description: "A test app",
 	}
-	mockResponseJSON, _ := json.Marshal(mockApp)
+	mockResponseJSON := mustMarshal(t, mockApp)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodGet {
@@ -144,7 +144,7 @@ func TestUpdateApplication(t *testing.T) {
 		ApplicationURI: testAppURI,
 		RedirectURI:    testRedirectURI,
 	}
-	mockResponseJSON, _ := json.Marshal(mockApp)
+	mockResponseJSON := mustMarshal(t, mockApp)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPut {
@@ -204,7 +204,7 @@ func TestResetApplicationClientSecret(t *testing.T) {
 		ClientSecret: "new-secret-456",
 		Name:         testAppName,
 	}
-	mockResponseJSON, _ := json.Marshal(mockApp)
+	mockResponseJSON := mustMarshal(t, mockApp)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != httpMethodPost {
