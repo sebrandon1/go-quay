@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"os"
 	"strings"
+	"time"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -12,6 +13,14 @@ import (
 var (
 	secScanManifestRef     string
 	includeVulnerabilities bool
+	secScanWatch           bool
+	secScanInterval        time.Duration
+	secScanWatchTimeout    time.Duration
+)
+
+const (
+	defaultSecScanInterval     = 3 * time.Second
+	defaultSecScanWatchTimeout = 5 * time.Minute
 )
 
 // secscanCmd represents the secscan command group
@@ -41,24 +50,86 @@ The scan status can be:
   - queued: Scan is queued and pending
   - scanning: Scan is currently in progress
   - unsupported: Image type is not supported for scanning
-  - failed: Scan failed`,
+  - failed: Scan failed
+
+Use --watch to poll until the scan reaches a terminal state.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		security, err := client.GetManifestSecurity(cmd.Context(), namespace, repository, secScanManifestRef, includeVulnerabilities)
+		var security *lib.SecurityScan
+		if secScanWatch {
+			security, err = waitForSecurityScan(cmd, client)
+		} else {
+			security, err = client.GetManifestSecurity(cmd.Context(), namespace, repository, secScanManifestRef, includeVulnerabilities)
+		}
 		if err != nil {
 			return fmt.Errorf("getting security scan: %w", err)
 		}
 
-		fmt.Fprintf(os.Stderr, "Security scan for %s/%s@%s\n", namespace, repository, secScanManifestRef)
+		fmt.Fprintf(cmd.ErrOrStderr(), "Security scan for %s/%s@%s\n", namespace, repository, secScanManifestRef)
 		if outputFormat == outputTable {
-			return printSecuritySummary(security)
+			err = printSecuritySummary(security)
+		} else {
+			err = printJSON(security)
 		}
-		return printJSON(security)
+		if err != nil {
+			return err
+		}
+		if secScanWatch && strings.EqualFold(strings.TrimSpace(security.Status), "failed") {
+			return fmt.Errorf("security scan failed with status %q", security.Status)
+		}
+		return nil
 	},
+}
+
+func waitForSecurityScan(cmd *cobra.Command, client *lib.Client) (*lib.SecurityScan, error) {
+	if secScanInterval <= 0 {
+		return nil, fmt.Errorf("--interval must be greater than 0")
+	}
+	if secScanWatchTimeout <= 0 {
+		return nil, fmt.Errorf("--watch-timeout must be greater than 0")
+	}
+
+	parentCtx := cmd.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, secScanWatchTimeout)
+	defer cancel()
+
+	for poll := 1; ; poll++ {
+		scan, err := client.GetManifestSecurity(ctx, namespace, repository, secScanManifestRef, includeVulnerabilities)
+		if err != nil {
+			if parentCtx.Err() != nil {
+				return nil, parentCtx.Err()
+			}
+			if ctx.Err() != nil {
+				return nil, fmt.Errorf("security scan watch timed out after %s: %w", secScanWatchTimeout, ctx.Err())
+			}
+			return nil, err
+		}
+
+		status := ""
+		if scan != nil {
+			status = strings.ToLower(strings.TrimSpace(scan.Status))
+		}
+		switch status {
+		case "scanned", "failed", "unsupported":
+			return scan, nil
+		}
+
+		fmt.Fprintf(cmd.ErrOrStderr(), "Security scan status %q (poll %d); waiting\n", status, poll)
+		timer := time.NewTimer(secScanInterval)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			if parentCtx.Err() != nil {
+				return nil, parentCtx.Err()
+			}
+			return nil, fmt.Errorf("security scan watch timed out after %s: %w", secScanWatchTimeout, ctx.Err())
+		case <-timer.C:
+		}
+	}
 }
 
 func printSecuritySummary(scan *lib.SecurityScan) error {
@@ -125,4 +196,7 @@ func init() {
 
 	// Info command specific flags
 	secscanInfoCmd.Flags().BoolVarP(&includeVulnerabilities, "vulnerabilities", "V", true, "Include vulnerability details in the response")
+	secscanInfoCmd.Flags().BoolVar(&secScanWatch, "watch", false, "Poll until the security scan reaches a terminal state")
+	secscanInfoCmd.Flags().DurationVar(&secScanInterval, "interval", defaultSecScanInterval, "Polling interval when --watch is enabled")
+	secscanInfoCmd.Flags().DurationVar(&secScanWatchTimeout, "watch-timeout", defaultSecScanWatchTimeout, "Maximum time to wait when --watch is enabled")
 }

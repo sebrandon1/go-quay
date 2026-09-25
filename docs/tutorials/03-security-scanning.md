@@ -26,6 +26,20 @@ Quay.io uses Clair to scan container images for vulnerabilities. When you push a
 | `unsupported` | Image type cannot be scanned |
 | `failed` | Scan encountered an error |
 
+## Wait for scan completion in a pipeline
+
+The CLI can poll until the scan reaches a terminal status. It checks immediately, then waits three seconds between requests, and stops after five minutes by default:
+
+```bash
+go-quay get secscan info \
+  --namespace myorg \
+  --repository myrepo \
+  --manifest sha256:abc123 \
+  --watch
+```
+
+Use `--interval` and `--watch-timeout` to change those limits. The command exits non-zero if the scan fails or the timeout expires.
+
 ## Getting Security Scan Results
 
 ### Basic Security Scan
