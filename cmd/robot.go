@@ -32,6 +32,8 @@ Available commands:
   delete     - Delete a robot account
   regenerate - Regenerate robot token
   permissions - Get robot repository permissions`,
+	Example: `  go-quay get robot list --token "$QUAY_TOKEN"
+  go-quay get robot info --name buildbot --token "$QUAY_TOKEN"`,
 }
 
 // Robot List

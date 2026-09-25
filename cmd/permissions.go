@@ -26,6 +26,8 @@ Available commands:
   remove - Remove permission for a user/robot
 
 Supported roles: read, write, admin`,
+	Example: `  go-quay get permissions list --namespace myorg --repository myapp --token "$QUAY_TOKEN"
+  go-quay get permissions set --namespace myorg --repository myapp --user alice --role read --token "$QUAY_TOKEN"`,
 }
 
 // Permissions List

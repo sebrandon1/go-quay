@@ -37,6 +37,8 @@ var triggerCmd = &cobra.Command{
 
 Build triggers allow automated image builds when code is pushed to
 connected source repositories like GitHub, GitLab, or Bitbucket.`,
+	Example: `  go-quay get trigger list --namespace myorg --repository myapp --token "$QUAY_TOKEN"
+  go-quay get trigger info --namespace myorg --repository myapp --uuid 12345 --token "$QUAY_TOKEN"`,
 }
 
 // triggerListCmd represents the trigger list command

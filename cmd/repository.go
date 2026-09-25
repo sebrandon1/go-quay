@@ -34,6 +34,8 @@ Available commands:
   create   - Create a new repository
   update   - Update repository settings
   delete   - Delete a repository`,
+	Example: `  go-quay get repository info --namespace myorg --repository myapp --token "$QUAY_TOKEN"
+  go-quay get repository list --namespace myorg --table --token "$QUAY_TOKEN"`,
 }
 
 // Repository Info (existing functionality)

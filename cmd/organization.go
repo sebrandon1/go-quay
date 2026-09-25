@@ -49,6 +49,8 @@ Available commands:
   quota        - Get organization quota
   auto-prune   - Get auto-prune policies
   applications - Get organization applications`,
+	Example: `  go-quay get organization info --organization myorg --token "$QUAY_TOKEN"
+  go-quay get organization members --organization myorg --token "$QUAY_TOKEN"`,
 }
 
 // Organization Info

@@ -23,6 +23,7 @@ severity levels, affected packages, and available fixes.
 
 Available commands:
   info - Get security scan results for a manifest`,
+	Example: `  go-quay get secscan info --namespace myorg --repository myapp --manifest sha256:abc123 --token "$QUAY_TOKEN"`,
 }
 
 // SecScan Info
