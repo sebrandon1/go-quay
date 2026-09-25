@@ -43,6 +43,13 @@ func getClient() (*lib.Client, error) {
 				entry.Method, entry.URL, entry.StatusCode, entry.Duration.Round(time.Millisecond), entry.Attempt)
 		}
 	}
+	if maxRetries > 0 && !dryRun {
+		client.Retry = &lib.RetryConfig{
+			MaxRetries:     maxRetries,
+			InitialBackoff: retryBackoff,
+			MaxBackoff:     retryMaxBackoff,
+		}
+	}
 	return client, nil
 }
 

@@ -20,6 +20,7 @@ const (
 	cmdRepository   = "repository"
 	cmdOrganization = "organization"
 	cmdTag          = "tag"
+	cmdUser         = "user"
 	cmdMembers      = "members"
 	flagHelp        = "--help"
 

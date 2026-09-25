@@ -6,15 +6,19 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
 
 var (
-	quayURL string
-	dryRun  bool
-	verbose bool
+	quayURL         string
+	dryRun          bool
+	verbose         bool
+	maxRetries      int
+	retryBackoff    = 500 * time.Millisecond
+	retryMaxBackoff = 5 * time.Second
 )
 
 var rootCmd = &cobra.Command{
@@ -34,6 +38,15 @@ var getCmd = &cobra.Command{
 func persistentPreRunE(cmd *cobra.Command, _ []string) error {
 	token = resolveFlag(flagChanged(cmd, "token"), token, os.Getenv("QUAY_TOKEN"), appCfg.Token)
 	quayURL = resolveFlag(flagChanged(cmd, "quay-url"), quayURL, os.Getenv("QUAY_URL"), appCfg.QuayURL, lib.DefaultQuayURL)
+	if maxRetries < 0 {
+		return fmt.Errorf("--max-retries must be zero or greater")
+	}
+	if retryBackoff < 0 {
+		return fmt.Errorf("--retry-backoff must be zero or greater")
+	}
+	if retryMaxBackoff < 0 {
+		return fmt.Errorf("--retry-max-backoff must be zero or greater")
+	}
 
 	if token == "" && !dryRun && !isAuthenticationExemptCommand(cmd) {
 		return fmt.Errorf(`authentication token required
@@ -91,6 +104,9 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Show API requests without sending them")
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, or table")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Log HTTP requests and responses to stderr")
+	rootCmd.PersistentFlags().IntVar(&maxRetries, "max-retries", 0, "Maximum retries after the initial request (0 disables retries)")
+	rootCmd.PersistentFlags().DurationVar(&retryBackoff, "retry-backoff", 500*time.Millisecond, "Initial delay between retry attempts")
+	rootCmd.PersistentFlags().DurationVar(&retryMaxBackoff, "retry-max-backoff", 5*time.Second, "Maximum delay between retry attempts")
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(completionCmd)
