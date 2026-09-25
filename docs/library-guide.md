@@ -551,6 +551,8 @@ config, err := client.UpdateMirrorConfig(ctx, namespace, repo, &lib.UpdateMirror
 })
 ```
 
+`GetMirrorConfig` returns the configured enabled state and schedule, including `SyncInterval` and `SyncStartDate`. The [public Quay API discovery document](https://quay.io/api/v1/discovery) does not define an immediate sync or live-run status operation, so this client exposes mirror configuration rather than current sync activity.
+
 ## Error Handling
 
 API errors that include a Quay JSON body are returned as `*lib.QuayError`:

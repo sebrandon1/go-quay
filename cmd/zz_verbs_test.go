@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/pflag"
 )
 
+const testTrueValue = "true"
+
 func subcommand(parent *cobra.Command, name string) *cobra.Command {
 	for _, c := range parent.Commands() {
 		if c.Name() == name {
@@ -105,7 +107,7 @@ func TestCopyFlagSetSkipsHelpAndExisting(t *testing.T) {
 func TestCopyOneFlagClonesAnnotations(t *testing.T) {
 	src := pflag.NewFlagSet("src", pflag.ContinueOnError)
 	src.String("ns", "", "namespace")
-	if err := src.SetAnnotation("ns", cobra.BashCompOneRequiredFlag, []string{"true"}); err != nil {
+	if err := src.SetAnnotation("ns", cobra.BashCompOneRequiredFlag, []string{testTrueValue}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -115,7 +117,7 @@ func TestCopyOneFlagClonesAnnotations(t *testing.T) {
 	srcAnn := src.Lookup("ns").Annotations[cobra.BashCompOneRequiredFlag]
 	srcAnn[0] = "mutated"
 	got := dst.Lookup("ns").Annotations[cobra.BashCompOneRequiredFlag]
-	if len(got) != 1 || got[0] != "true" {
+	if len(got) != 1 || got[0] != testTrueValue {
 		t.Errorf("dst annotations = %v, want [true] (independent of src)", got)
 	}
 }
