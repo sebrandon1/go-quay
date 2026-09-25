@@ -254,7 +254,7 @@ func init() {
 	}
 
 	// Create command specific flags
-	repoCreateCmd.Flags().StringVarP(&repoVisibility, "visibility", "v", "private", "Repository visibility (private/public)")
+	repoCreateCmd.Flags().StringVarP(&repoVisibility, "visibility", "v", repoVisibilityPrivate, "Repository visibility (private/public)")
 	repoCreateCmd.Flags().BoolVar(&verbose, "verbose", false, "Log HTTP requests and responses to stderr")
 	repoCreateCmd.Flags().StringVarP(&repoDescription, "description", "d", "", "Repository description")
 

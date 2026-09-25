@@ -1,0 +1,9 @@
+apiVersion: go-quay/v1alpha1
+items:
+  - action: create
+    namespace: myorg
+    repository: new-private-repo
+    description: Created from a batch file
+  - action: delete
+    namespace: myorg
+    repository: retired-repo

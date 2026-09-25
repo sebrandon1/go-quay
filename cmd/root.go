@@ -48,7 +48,7 @@ func persistentPreRunE(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("--retry-max-backoff must be zero or greater")
 	}
 
-	if token == "" && !dryRun && !isAuthenticationExemptCommand(cmd) {
+	if token == "" && !dryRun && commandRequiresAuthentication(cmd) {
 		return fmt.Errorf(`authentication token required
 
 Set QUAY_TOKEN environment variable, use --token/-t flag, or add to config file (%s).
@@ -72,6 +72,10 @@ func isAuthenticationExemptCommand(cmd *cobra.Command) bool {
 		}
 	}
 	return false
+}
+
+func commandRequiresAuthentication(cmd *cobra.Command) bool {
+	return !isAuthenticationExemptCommand(cmd) && (cmd != batchApplyCmd || !batchDryRun)
 }
 
 func flagChanged(cmd *cobra.Command, name string) bool {
@@ -111,6 +115,7 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(completionCmd)
 	rootCmd.AddCommand(diffCmd)
+	rootCmd.AddCommand(batchCmd)
 	getCmd.AddCommand(repositoryCmd)
 	getCmd.AddCommand(billingCmd)
 	getCmd.AddCommand(organizationCmd)
