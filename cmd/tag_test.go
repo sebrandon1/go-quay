@@ -14,6 +14,16 @@ import (
 // so that Cobra's persistent flag state does not leak between tests.
 func resetTagFlags(t *testing.T) {
 	t.Helper()
+	tagPage = 0
+	tagLimit = 0
+	for _, name := range []string{"page", "limit"} {
+		if flag := tagListCmd.Flags().Lookup(name); flag != nil {
+			flag.Changed = false
+			if err := flag.Value.Set("0"); err != nil {
+				t.Fatalf("reset %s flag: %v", name, err)
+			}
+		}
+	}
 	t.Cleanup(func() {
 		namespace = ""
 		repository = ""
@@ -21,11 +31,60 @@ func resetTagFlags(t *testing.T) {
 		quayURL = ""
 		tagName = ""
 		tagExpiration = ""
+		tagPage = 0
+		tagLimit = 0
+		for _, name := range []string{"page", "limit"} {
+			if flag := tagListCmd.Flags().Lookup(name); flag != nil {
+				flag.Changed = false
+				_ = flag.Value.Set("0")
+			}
+		}
 		manifestDigest = ""
 		confirmTagDeletion = false
 
 		rootCmd.SetArgs([]string{})
 	})
+}
+
+func TestTagListCmdPassesPagination(t *testing.T) {
+	tests := []struct {
+		name      string
+		flags     []string
+		wantPage  string
+		wantLimit string
+	}{
+		{name: "explicit page and limit", flags: []string{"--page", "2", "--limit", "25"}, wantPage: "2", wantLimit: "25"},
+		{name: "Quay API defaults", wantPage: "", wantLimit: ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resetTagFlags(t)
+			resetRootFlags(t)
+
+			var gotPage, gotLimit string
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				gotPage = r.URL.Query().Get("page")
+				gotLimit = r.URL.Query().Get("limit")
+				w.Header().Set("Content-Type", "application/json")
+				writeResponse(t, w, []byte(`{"tags": []}`))
+			}))
+			defer server.Close()
+
+			args := []string{
+				cmdGet, testTokenFlag, testTokenValue, testQuayURLFlag, server.URL,
+				cmdTag, subcmdList, "-n", testNamespace, "-r", testRepository,
+			}
+			rootCmd.SetArgs(append(args, tt.flags...))
+			var executeErr error
+			captureStdout(t, func() { executeErr = rootCmd.Execute() })
+			if executeErr != nil {
+				t.Fatalf("tag list: %v", executeErr)
+			}
+			if gotPage != tt.wantPage || gotLimit != tt.wantLimit {
+				t.Fatalf("pagination query = page %q, limit %q; want page %q, limit %q", gotPage, gotLimit, tt.wantPage, tt.wantLimit)
+			}
+		})
+	}
 }
 
 func TestRequireTagName(t *testing.T) {

@@ -10,6 +10,8 @@ import (
 var (
 	tagName            string
 	tagExpiration      string
+	tagPage            int
+	tagLimit           int
 	manifestDigest     string
 	confirmTagDeletion bool
 )
@@ -34,7 +36,7 @@ Available commands:
 var tagListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List repository tags",
-	Long: `List tags in a repository.
+	Long: `List tags in a repository. Use --page and --limit to select a page; leave them unset to use Quay's default.
 
 Table columns: TAG, DIGEST, SIZE, LAST MODIFIED, EXPIRATION.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -43,7 +45,7 @@ Table columns: TAG, DIGEST, SIZE, LAST MODIFIED, EXPIRATION.`,
 			return fmt.Errorf("creating client: %w", err)
 		}
 
-		tags, err := client.ListTags(cmd.Context(), namespace, repository, 0, false)
+		tags, err := client.ListTagsPage(cmd.Context(), namespace, repository, tagLimit, tagPage, false)
 		if err != nil {
 			return fmt.Errorf("listing tags: %w", err)
 		}
@@ -249,6 +251,10 @@ func init() {
 
 	// Update command specific flags
 	tagUpdateCmd.Flags().StringVarP(&tagExpiration, "expiration", "e", "", "Tag expiration date (ISO format)")
+
+	// Tag list pagination flags (0 leaves the API default in effect).
+	tagListCmd.Flags().IntVar(&tagPage, "page", 0, "Page number (default: Quay API default)")
+	tagListCmd.Flags().IntVar(&tagLimit, "limit", 0, "Maximum results per page (default: Quay API default)")
 
 	// Delete command specific flags
 	tagDeleteCmd.Flags().BoolVar(&confirmTagDeletion, "confirm", false, "Confirm tag deletion")
