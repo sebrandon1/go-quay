@@ -191,9 +191,9 @@ func configInitDefaults(cmd *cobra.Command) (appConfig, error) {
 
 func promptForConfig(reader io.Reader, writer io.Writer, cfg appConfig) (appConfig, error) {
 	input := bufio.NewReader(reader)
-	tokenPrompt := "Quay token: "
+	tokenPrompt := "Quay token: " // #nosec G101 -- this is a prompt label, not credential content
 	if cfg.Token != "" {
-		tokenPrompt = "Quay token (leave blank to keep current value): "
+		tokenPrompt = "Quay token (leave blank to keep current value): " // #nosec G101 -- this is a prompt label, not credential content
 	}
 	token, err := readConfigPrompt(input, writer, tokenPrompt, cfg.Token)
 	if err != nil {
@@ -262,10 +262,10 @@ func writeConfig(path string, cfg appConfig) error {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return fmt.Errorf("creating config directory: %w", err)
 	}
-	if err := os.Chmod(dir, 0o700); err != nil {
+	if err := os.Chmod(dir, 0o700); err != nil { // #nosec G302 -- directories need execute permission; 0700 is owner-only
 		return fmt.Errorf("restricting config directory permissions: %w", err)
 	}
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o600)
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o600) // #nosec G304 -- path comes from os.UserConfigDir()
 	if err != nil {
 		return fmt.Errorf("opening config file: %w", err)
 	}
