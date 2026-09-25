@@ -173,7 +173,7 @@ func scanSourceEndpoints(libPath, baseURLVar string) ([]ImplementedEndpoint, err
 	urlConcatPattern := regexp.MustCompile(baseURLVar + `\s*\+\s*"(/[^"]+)"`)
 	sprintfPattern := regexp.MustCompile(`fmt\.Sprintf\s*\(\s*"%s(/[^"]+)"`)
 	buildURLPattern := regexp.MustCompile(`buildURL\s*\(\s*"(/[^"]+)"`)
-	methodPattern := regexp.MustCompile(`(?:http\.NewRequest|newRequest|newRequestWithBody)\s*\(\s*(?:"(GET|POST|PUT|DELETE|PATCH)"|http\.Method(Get|Post|Put|Delete|Patch))`)
+	methodPattern := regexp.MustCompile(`(?:http\.NewRequest|newRequest|newRequestWithBody)\s*\(\s*(?:[^,]+,\s*)?(?:"(GET|POST|PUT|DELETE|PATCH)"|http\.Method(Get|Post|Put|Delete|Patch))`)
 	funcPattern := regexp.MustCompile(`func\s+(?:\([^)]+\)\s+)?(\w+)`)
 
 	err := filepath.Walk(libPath, func(path string, info os.FileInfo, err error) error {
@@ -198,6 +198,7 @@ func scanSourceEndpoints(libPath, baseURLVar string) ([]ImplementedEndpoint, err
 			line := scanner.Text()
 			if name := firstSubmatch(line, funcPattern); name != "" {
 				currentFunc = name
+				currentMethod = ""
 			}
 			if method := httpMethodFromLine(methodPattern, line); method != "" {
 				currentMethod = method
