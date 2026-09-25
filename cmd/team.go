@@ -40,6 +40,8 @@ Available commands:
   permissions  - List team repository permissions
   set-permission - Set repository permission for team
   remove-permission - Remove repository permission from team`,
+	Example: `  go-quay get team list --organization myorg --token "$QUAY_TOKEN"
+  go-quay get team info --organization myorg --name developers --token "$QUAY_TOKEN"`,
 }
 
 // Team List

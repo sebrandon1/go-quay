@@ -35,6 +35,8 @@ Available commands:
   logs    - Get build logs
   request - Request a new build
   cancel  - Cancel an ongoing build`,
+	Example: `  go-quay get build list --namespace myorg --repository myapp --token "$QUAY_TOKEN"
+  go-quay get build info --namespace myorg --repository myapp --uuid 12345 --token "$QUAY_TOKEN"`,
 }
 
 // Build List

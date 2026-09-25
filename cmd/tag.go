@@ -27,6 +27,8 @@ Available commands:
   delete   - Delete a tag
   history  - Get tag history
   revert   - Revert tag to a previous state`,
+	Example: `  go-quay get tag info --namespace myorg --repository myapp --tag latest --token "$QUAY_TOKEN"
+  go-quay get tag history --namespace myorg --repository myapp --tag latest --token "$QUAY_TOKEN"`,
 }
 
 var tagListCmd = &cobra.Command{
