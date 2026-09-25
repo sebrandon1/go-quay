@@ -101,3 +101,15 @@ func TestSecurityScanTableOutput(t *testing.T) {
 		t.Errorf("unexpected security summary counts: %s", output)
 	}
 }
+
+func TestSecuritySummaryWithoutScan(t *testing.T) {
+	var printErr error
+	output := captureStdout(t, func() { printErr = printSecuritySummary(nil) })
+	if printErr != nil {
+		t.Fatalf("printSecuritySummary: %v", printErr)
+	}
+	fields := strings.Fields(output)
+	if len(fields) < 9 || strings.Join(fields[9:], " ") != "0 0 0 0 0 0 0 0" {
+		t.Errorf("expected zero-valued summary for missing scan data, got: %s", output)
+	}
+}
