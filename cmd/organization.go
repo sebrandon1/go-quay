@@ -73,7 +73,9 @@ var orgInfoCmd = &cobra.Command{
 var orgMembersCmd = &cobra.Command{
 	Use:   cmdMembers,
 	Short: "Get organization members",
-	Long:  `Get list of all members in an organization.`,
+	Long: `Get list of all members in an organization.
+
+Table columns: NAME, KIND, TEAMS, REPOSITORIES.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -82,6 +84,21 @@ var orgMembersCmd = &cobra.Command{
 		members, err := client.GetOrganizationMembers(cmd.Context(), orgName)
 		if err != nil {
 			return fmt.Errorf("getting organization members: %w", err)
+		}
+		if outputFormat == outputTable {
+			var rows [][]string
+			if members != nil {
+				rows = make([][]string, 0, len(members.Members))
+				for _, member := range members.Members {
+					rows = append(rows, []string{
+						member.Name,
+						member.Kind,
+						fmt.Sprintf("%d", len(member.Teams)),
+						fmt.Sprintf("%d", len(member.Repositories)),
+					})
+				}
+			}
+			return printTable([]string{tableHeaderName, "KIND", "TEAMS", "REPOSITORIES"}, rows)
 		}
 		return printJSON(members)
 	},

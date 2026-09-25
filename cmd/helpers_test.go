@@ -10,6 +10,8 @@ import (
 )
 
 const testPrintFieldValue = "sample"
+const testLatestTagName = "latest"
+const testHeaderCount = "COUNT"
 
 func writeResponse(t *testing.T, w http.ResponseWriter, body []byte) {
 	t.Helper()
@@ -111,6 +113,54 @@ func TestPrintJSONTableFallback(t *testing.T) {
 
 	if !strings.Contains(output, `"name": "`+testPrintFieldValue+`"`) {
 		t.Errorf("expected JSON fallback for table mode, got: %s", output)
+	}
+}
+
+func TestPrintTable(t *testing.T) {
+	var printErr error
+	output := captureStdout(t, func() {
+		printErr = printTable([]string{tableHeaderName, testHeaderCount}, [][]string{{testLatestTagName, "2"}})
+	})
+	if printErr != nil {
+		t.Fatalf("printTable: %v", printErr)
+	}
+	if !strings.Contains(output, tableHeaderName) || !strings.Contains(output, testHeaderCount) || !strings.Contains(output, testLatestTagName) || !strings.Contains(output, "2") {
+		t.Errorf("expected aligned header and data row, got: %s", output)
+	}
+}
+
+func TestPrintTableRejectsMismatchedRows(t *testing.T) {
+	if err := printTable([]string{tableHeaderName, testHeaderCount}, [][]string{{testLatestTagName}}); err == nil {
+		t.Fatal("expected an error for a row with the wrong number of columns")
+	}
+}
+
+func TestPrintTableSanitizesCellSeparators(t *testing.T) {
+	var printErr error
+	output := captureStdout(t, func() {
+		printErr = printTable([]string{"NAME", "DESCRIPTION"}, [][]string{{"robot", "CI\tbuild\naccount"}})
+	})
+	if printErr != nil {
+		t.Fatalf("printTable: %v", printErr)
+	}
+	if !strings.Contains(output, "CI build account") {
+		t.Errorf("expected cell separators to be replaced with spaces, got: %s", output)
+	}
+	if len(strings.Split(strings.TrimSpace(output), "\n")) != 2 {
+		t.Errorf("expected one data row, got: %s", output)
+	}
+}
+
+func TestPrintTableWithNoRows(t *testing.T) {
+	var printErr error
+	output := captureStdout(t, func() {
+		printErr = printTable([]string{tableHeaderName, testHeaderCount}, nil)
+	})
+	if printErr != nil {
+		t.Fatalf("printTable: %v", printErr)
+	}
+	if !strings.Contains(output, tableHeaderName) || len(strings.Split(strings.TrimSpace(output), "\n")) != 1 {
+		t.Errorf("expected a header-only table, got: %s", output)
 	}
 }
 

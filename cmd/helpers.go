@@ -3,6 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"gopkg.in/yaml.v3"
@@ -11,6 +14,13 @@ import (
 // outputFormat holds the selected output format (json, yaml, or table).
 // Set via the --output/-O persistent flag on rootCmd.
 var outputFormat string
+
+const (
+	tableHeaderName      = "NAME"
+	tableSeverityUnknown = "UNKNOWN"
+)
+
+var tableCellReplacer = strings.NewReplacer("\t", " ", "\n", " ", "\r", " ")
 
 // getClient creates a Quay client with the configured token and URL.
 func getClient() (*lib.Client, error) {
@@ -55,4 +65,35 @@ func printAsJSON(data interface{}) error {
 	}
 	fmt.Println(string(output))
 	return nil
+}
+
+// printTable writes a tab-separated table with aligned columns to stdout.
+func printTable(headers []string, rows [][]string) error {
+	for i, row := range rows {
+		if len(row) != len(headers) {
+			return fmt.Errorf("table row %d has %d columns, want %d", i+1, len(row), len(headers))
+		}
+	}
+
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	if _, err := fmt.Fprintln(w, joinTableCells(headers)); err != nil {
+		return fmt.Errorf("writing table header: %w", err)
+	}
+	for _, row := range rows {
+		if _, err := fmt.Fprintln(w, joinTableCells(row)); err != nil {
+			return fmt.Errorf("writing table row: %w", err)
+		}
+	}
+	if err := w.Flush(); err != nil {
+		return fmt.Errorf("flushing table output: %w", err)
+	}
+	return nil
+}
+
+func joinTableCells(cells []string) string {
+	clean := make([]string, len(cells))
+	for i, cell := range cells {
+		clean[i] = tableCellReplacer.Replace(cell)
+	}
+	return strings.Join(clean, "\t")
 }

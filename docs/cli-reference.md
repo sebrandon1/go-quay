@@ -41,6 +41,17 @@ Every command inherits these flags:
 
 Precedence: flags > environment variables > config file > built-in defaults.
 
+`--output table` is supported by these commands; other commands keep their JSON fallback:
+
+| Command | Table columns |
+|---------|---------------|
+| `get repository list` | Repository, pulls, recent pushes, tags, latest tag, last push, multi-arch |
+| `get tag list` | Tag, digest, size, last modified, expiration |
+| `get robot list` | Name, description, created, last accessed (tokens omitted) |
+| `get organization members` | Name, kind, team count, repository count |
+| `get team list` | Name, role, member count, repository count |
+| `get secscan info` | Status, feature and vulnerability totals, severity counts |
+
 Optional config file (YAML):
 
 - Linux: `~/.config/go-quay/config.yaml`
@@ -585,6 +596,11 @@ go-quay get permissions delete-team-permission \
 
 Tag management with detailed metadata, history, and operations.
 
+### List repository tags
+```bash
+go-quay get tag list --namespace myorg --repository myapp --output table --token YOUR_TOKEN
+```
+
 ### Get detailed tag information
 ```bash
 go-quay get tag info \
@@ -736,6 +752,8 @@ go-quay get secscan info \
   --vulnerabilities=false \
   -t YOUR_TOKEN
 ```
+
+Use `--output table` for a one-row summary with feature count, vulnerability total, and counts by severity.
 
 **Scan Status Values:**
 - `scanned`: Scan completed successfully, results available

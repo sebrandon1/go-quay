@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -31,6 +33,8 @@ var secscanInfoCmd = &cobra.Command{
 	Short: "Get security scan results for a manifest",
 	Long: `Get security scan results for a specific manifest including vulnerability information.
 
+Table columns: STATUS, FEATURES, VULNERABILITIES, CRITICAL, HIGH, MEDIUM, LOW, NEGLIGIBLE, UNKNOWN.
+
 The scan status can be:
   - scanned: Scan completed successfully
   - queued: Scan is queued and pending
@@ -49,8 +53,57 @@ The scan status can be:
 		}
 
 		fmt.Fprintf(os.Stderr, "Security scan for %s/%s@%s\n", namespace, repository, secScanManifestRef)
+		if outputFormat == outputTable {
+			return printSecuritySummary(security)
+		}
 		return printJSON(security)
 	},
+}
+
+func printSecuritySummary(scan *lib.SecurityScan) error {
+	counts := map[string]int{
+		"CRITICAL":           0,
+		"HIGH":               0,
+		"MEDIUM":             0,
+		"LOW":                0,
+		"NEGLIGIBLE":         0,
+		tableSeverityUnknown: 0,
+	}
+	features := 0
+	if scan != nil && scan.Data != nil && scan.Data.Layer != nil {
+		features = len(scan.Data.Layer.Features)
+		for _, feature := range scan.Data.Layer.Features {
+			for _, vulnerability := range feature.Vulnerabilities {
+				severity := strings.ToUpper(strings.TrimSpace(vulnerability.Severity))
+				if _, found := counts[severity]; !found {
+					severity = tableSeverityUnknown
+				}
+				counts[severity]++
+			}
+		}
+	}
+	status := ""
+	if scan != nil {
+		status = scan.Status
+	}
+	total := 0
+	for _, count := range counts {
+		total += count
+	}
+	rows := [][]string{{
+		status,
+		fmt.Sprintf("%d", features),
+		fmt.Sprintf("%d", total),
+		fmt.Sprintf("%d", counts["CRITICAL"]),
+		fmt.Sprintf("%d", counts["HIGH"]),
+		fmt.Sprintf("%d", counts["MEDIUM"]),
+		fmt.Sprintf("%d", counts["LOW"]),
+		fmt.Sprintf("%d", counts["NEGLIGIBLE"]),
+		fmt.Sprintf("%d", counts[tableSeverityUnknown]),
+	}}
+	return printTable([]string{
+		"STATUS", "FEATURES", "VULNERABILITIES", "CRITICAL", "HIGH", "MEDIUM", "LOW", "NEGLIGIBLE", tableSeverityUnknown,
+	}, rows)
 }
 
 func init() {

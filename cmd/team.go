@@ -46,7 +46,9 @@ Available commands:
 var teamListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List all teams in an organization",
-	Long:  `List all teams within the specified organization.`,
+	Long: `List all teams within the specified organization.
+
+Table columns: NAME, ROLE, MEMBERS, REPOSITORIES.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -59,6 +61,18 @@ var teamListCmd = &cobra.Command{
 		}
 
 		fmt.Fprintf(os.Stderr, "Teams in organization '%s':\n", teamCmdOrgname)
+		if outputFormat == outputTable {
+			rows := make([][]string, 0, len(teams))
+			for _, team := range teams {
+				rows = append(rows, []string{
+					team.Name,
+					team.Role,
+					fmt.Sprintf("%d", team.MemberCount),
+					fmt.Sprintf("%d", team.RepoCount),
+				})
+			}
+			return printTable([]string{tableHeaderName, "ROLE", "MEMBERS", "REPOSITORIES"}, rows)
+		}
 		return printJSON(teams)
 	},
 }
