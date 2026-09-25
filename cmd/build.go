@@ -194,6 +194,7 @@ func init() {
 
 	initBuildListFlags()
 	initBuildInfoFlags()
+	initBuildLogsFlags()
 	initBuildRequestFlags()
 	initBuildCancelFlags()
 	initBuildStatusFlags()
@@ -211,6 +212,11 @@ func initBuildListFlags() {
 func initBuildInfoFlags() {
 	buildInfoCmd.Flags().StringVarP(&buildUUID, "uuid", "u", "", "Build UUID")
 	_ = buildInfoCmd.MarkFlagRequired("uuid")
+}
+
+func initBuildLogsFlags() {
+	buildLogsCmd.Flags().StringVarP(&buildUUID, "uuid", "u", "", "Build UUID")
+	_ = buildLogsCmd.MarkFlagRequired("uuid")
 }
 
 func initBuildRequestFlags() {
