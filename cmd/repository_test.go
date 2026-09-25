@@ -13,6 +13,8 @@ import (
 const (
 	testQuayURLFlag       = "--quay-url"
 	testTokenFlag         = "--token"
+	testManifestFlag      = "--manifest"
+	testWatchFlag         = "--watch"
 	testTokenValue        = "test-token"
 	testDescriptionFlag   = "--description"
 	testVisibilityFlag    = "--visibility"

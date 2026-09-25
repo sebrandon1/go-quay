@@ -170,7 +170,7 @@ func TestTagChangeCmd(t *testing.T) {
 	rootCmd.SetArgs([]string{
 		cmdGet, testTokenFlag, testTokenValue, testQuayURLFlag, server.URL,
 		cmdTag, "change", "-n", testNamespace, "-r", testRepository, "-T", testLatestTagName,
-		"--manifest", "sha256:abc123",
+		testManifestFlag, "sha256:abc123",
 	})
 	err := rootCmd.Execute()
 

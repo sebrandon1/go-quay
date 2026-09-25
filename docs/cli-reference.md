@@ -781,9 +781,20 @@ go-quay get secscan info \
   -m sha256:abc123def456... \
   --vulnerabilities=false \
   -t YOUR_TOKEN
+
+# Wait for a terminal scan status (default interval: 3s, timeout: 5m)
+go-quay get secscan info \
+  -n myorg \
+  -r myrepo \
+  -m sha256:abc123def456... \
+  --watch \
+  --interval 3s \
+  --watch-timeout 5m \
+  -t YOUR_TOKEN
 ```
 
 Use `--output table` for a one-row summary with feature count, vulnerability total, and counts by severity.
+With `--watch`, polling starts immediately and continues at `--interval` until the status is terminal or `--watch-timeout` is reached. `scanned` and `unsupported` finish successfully; `failed` and timeout return a non-zero exit status. Without `--watch`, the command still makes one request.
 
 **Scan Status Values:**
 - `scanned`: Scan completed successfully, results available
