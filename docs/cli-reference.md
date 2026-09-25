@@ -41,6 +41,8 @@ Every command inherits these flags:
 
 Precedence: flags > environment variables > config file > built-in defaults.
 
+List commands expose the pagination parameters supported by their Quay endpoint: repository and tag lists accept `--page` / `--limit`, repository search accepts `--page`, and build and trigger-build lists accept `--limit`. Log list commands use the API's `--next-page` cursor. Unset pagination flags preserve the endpoint's default behavior.
+
 `--output table` is supported by these commands; other commands keep their JSON fallback:
 
 | Command | Table columns |
@@ -622,8 +624,10 @@ Tag management with detailed metadata, history, and operations.
 
 ### List repository tags
 ```bash
-go-quay get tag list --namespace myorg --repository myapp --output table --token YOUR_TOKEN
+go-quay get tag list --namespace myorg --repository myapp --page 1 --limit 50 --output table --token YOUR_TOKEN
 ```
+
+Omit `--page` and `--limit` to use Quay's default page and result count.
 
 ### Get detailed tag information
 ```bash

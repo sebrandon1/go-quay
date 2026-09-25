@@ -113,6 +113,9 @@ func TestRepoListCmd(t *testing.T) {
 		if q.Get("namespace") != testNamespace {
 			t.Errorf("expected namespace=%s, got %s", testNamespace, q.Get("namespace"))
 		}
+		if q.Get("page") != "2" || q.Get("limit") != "5" {
+			t.Errorf("expected page=2 and limit=5, got page=%s limit=%s", q.Get("page"), q.Get("limit"))
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		writeResponse(t, w, []byte(`{"repositories": [{"name": "repo1", "namespace": "`+testNamespace+`"}, {"name": "repo2", "namespace": "`+testNamespace+`"}]}`))
@@ -125,7 +128,7 @@ func TestRepoListCmd(t *testing.T) {
 
 	rootCmd.SetArgs([]string{
 		cmdGet, testTokenFlag, testTokenValue, testQuayURLFlag, server.URL,
-		cmdRepository, subcmdList, "-n", testNamespace,
+		cmdRepository, subcmdList, "-n", testNamespace, "--page", "2", "--limit", "5",
 	})
 	err := rootCmd.Execute()
 
