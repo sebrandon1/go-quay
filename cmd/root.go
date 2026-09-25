@@ -14,6 +14,7 @@ import (
 var (
 	quayURL string
 	dryRun  bool
+	verbose bool
 )
 
 var rootCmd = &cobra.Command{
@@ -89,6 +90,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&quayURL, "quay-url", lib.DefaultQuayURL, "Quay API base URL ($QUAY_URL or config file)")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Show API requests without sending them")
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, or table")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Log HTTP requests and responses to stderr")
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(completionCmd)

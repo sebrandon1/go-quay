@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"gopkg.in/yaml.v3"
@@ -35,6 +36,12 @@ func getClient() (*lib.Client, error) {
 	if dryRun {
 		client.HTTPClient.Transport = dryRunTransport{}
 		client.Retry = nil
+	}
+	if verbose {
+		client.RequestLogger = func(entry lib.RequestLogEntry) {
+			fmt.Fprintf(rootCmd.ErrOrStderr(), "HTTP %s %s status=%d duration=%s attempt=%d\n",
+				entry.Method, entry.URL, entry.StatusCode, entry.Duration.Round(time.Millisecond), entry.Attempt)
+		}
 	}
 	return client, nil
 }
