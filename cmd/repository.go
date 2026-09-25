@@ -255,10 +255,12 @@ func init() {
 
 	// Create command specific flags
 	repoCreateCmd.Flags().StringVarP(&repoVisibility, "visibility", "v", "private", "Repository visibility (private/public)")
+	repoCreateCmd.Flags().BoolVar(&verbose, "verbose", false, "Log HTTP requests and responses to stderr")
 	repoCreateCmd.Flags().StringVarP(&repoDescription, "description", "d", "", "Repository description")
 
 	// Update command specific flags
 	repoUpdateCmd.Flags().StringVarP(&repoVisibility, "visibility", "v", "", "Repository visibility (private/public)")
+	repoUpdateCmd.Flags().BoolVar(&verbose, "verbose", false, "Log HTTP requests and responses to stderr")
 	repoUpdateCmd.Flags().StringVarP(&repoDescription, "description", "d", "", "Repository description")
 
 	// Delete command specific flags
@@ -274,5 +276,6 @@ func init() {
 
 	// Change-visibility command specific flags
 	repoChangeVisibilityCmd.Flags().StringVarP(&repoVisibility, "visibility", "v", "", "New visibility (private/public)")
+	repoChangeVisibilityCmd.Flags().BoolVar(&verbose, "verbose", false, "Log HTTP requests and responses to stderr")
 	_ = repoChangeVisibilityCmd.MarkFlagRequired("visibility")
 }

@@ -36,6 +36,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -52,12 +53,22 @@ type RetryConfig struct {
 	MaxBackoff     time.Duration
 }
 
+// RequestLogEntry describes one HTTP attempt made by Client.
+type RequestLogEntry struct {
+	Method     string
+	URL        string
+	Attempt    int
+	StatusCode int
+	Duration   time.Duration
+}
+
 type Client struct {
-	BearerToken string
-	BaseURL     string
-	Version     string
-	Retry       *RetryConfig
-	HTTPClient  *http.Client
+	BearerToken   string
+	BaseURL       string
+	Version       string
+	Retry         *RetryConfig
+	HTTPClient    *http.Client
+	RequestLogger func(RequestLogEntry)
 }
 
 var _ RepositoryReader = (*Client)(nil)
@@ -107,7 +118,7 @@ func (c *Client) do(req *http.Request, v any, acceptedStatuses ...int) error {
 
 	var lastErr error
 	for attempt := range maxAttempts {
-		result, err := c.doOnce(req, v, acceptedStatuses)
+		result, err := c.doOnce(req, v, acceptedStatuses, attempt+1)
 		if err == nil {
 			return result
 		}
@@ -146,8 +157,24 @@ type retryableError struct {
 func (e *retryableError) Error() string { return e.err.Error() }
 func (e *retryableError) Unwrap() error { return e.err }
 
-func (c *Client) doOnce(req *http.Request, v any, acceptedStatuses []int) (error, error) {
+func (c *Client) doOnce(req *http.Request, v any, acceptedStatuses []int, attempt int) (error, error) {
+	start := time.Now()
+	entry := RequestLogEntry{
+		Method:  req.Method,
+		URL:     redactRequestURL(req.URL),
+		Attempt: attempt,
+	}
+	defer func() {
+		entry.Duration = time.Since(start)
+		if c.RequestLogger != nil {
+			c.RequestLogger(entry)
+		}
+	}()
+
 	resp, err := c.HTTPClient.Do(req)
+	if resp != nil {
+		entry.StatusCode = resp.StatusCode
+	}
 	if err != nil {
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 			return nil, err
@@ -174,6 +201,26 @@ func (c *Client) doOnce(req *http.Request, v any, acceptedStatuses []int) (error
 	}
 
 	return nil, apiErr
+}
+
+func redactRequestURL(requestURL *url.URL) string {
+	if requestURL == nil {
+		return "<unknown>"
+	}
+
+	redacted := *requestURL
+	redacted.User = nil
+	query := redacted.Query()
+	for key := range query {
+		lowerKey := strings.ToLower(key)
+		if strings.Contains(lowerKey, "token") || strings.Contains(lowerKey, "secret") ||
+			strings.Contains(lowerKey, "password") || strings.Contains(lowerKey, "auth") ||
+			strings.Contains(lowerKey, "api_key") || strings.Contains(lowerKey, "apikey") {
+			query[key] = []string{"[REDACTED]"}
+		}
+	}
+	redacted.RawQuery = query.Encode()
+	return redacted.String()
 }
 
 func isAccepted(status int, accepted []int) bool {

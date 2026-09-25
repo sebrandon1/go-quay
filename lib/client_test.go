@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -123,6 +125,89 @@ func TestUserAgentHeader(t *testing.T) {
 	err = client.get(req, &result)
 	if err != nil {
 		t.Fatalf("get returned error: %v", err)
+	}
+}
+
+func TestRequestLoggerReportsAttemptAndRedactsCredentials(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL)
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+	var entries []RequestLogEntry
+	client.RequestLogger = func(entry RequestLogEntry) {
+		entries = append(entries, entry)
+	}
+
+	req, err := newRequest(context.Background(), http.MethodGet, server.URL+"/user?access_token=secret-token&format=json", nil)
+	if err != nil {
+		t.Fatalf("create request: %v", err)
+	}
+	if err := client.get(req, nil); err != nil {
+		t.Fatalf("GET request: %v", err)
+	}
+
+	if len(entries) != 1 {
+		t.Fatalf("got %d log entries, want 1", len(entries))
+	}
+	entry := entries[0]
+	if entry.Method != http.MethodGet || entry.StatusCode != http.StatusOK || entry.Attempt != 1 {
+		t.Errorf("unexpected request log entry: %+v", entry)
+	}
+	if strings.Contains(entry.URL, "secret-token") || strings.Contains(entry.URL, testTokenValue) {
+		t.Errorf("request log URL leaked token: %q", entry.URL)
+	}
+	if !strings.Contains(entry.URL, "access_token=%5BREDACTED%5D") || !strings.Contains(entry.URL, "format=json") {
+		t.Errorf("request log URL missing sanitized query: %q", entry.URL)
+	}
+}
+
+func TestRequestLoggerReportsTransportFailure(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL)
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+	var entries []RequestLogEntry
+	client.RequestLogger = func(entry RequestLogEntry) {
+		entries = append(entries, entry)
+	}
+	req, err := newRequest(context.Background(), http.MethodGet, server.URL+"/user", nil)
+	if err != nil {
+		t.Fatalf("create request: %v", err)
+	}
+
+	if err := client.get(req, nil); err == nil {
+		t.Fatal("GET request unexpectedly succeeded after server closed")
+	}
+	if len(entries) != 1 {
+		t.Fatalf("got %d request log entries, want 1", len(entries))
+	}
+	if entries[0].Attempt != 1 || entries[0].StatusCode != 0 {
+		t.Errorf("transport failure log = %+v, want attempt 1 and status 0", entries[0])
+	}
+}
+
+func TestRedactRequestURLRemovesUserInfoAndSensitiveQueryValues(t *testing.T) {
+	requestURL, err := url.Parse("https://user:password@example.com/path?access_token=secret-token&format=json")
+	if err != nil {
+		t.Fatalf("parse URL: %v", err)
+	}
+
+	got := redactRequestURL(requestURL)
+	for _, secret := range []string{"user", "password", "secret-token"} {
+		if strings.Contains(got, secret) {
+			t.Errorf("redacted URL %q contains secret %q", got, secret)
+		}
+	}
+	if !strings.Contains(got, "access_token=%5BREDACTED%5D") || !strings.Contains(got, "format=json") {
+		t.Errorf("redacted URL did not preserve sanitized query values: %q", got)
 	}
 }
 
@@ -536,6 +621,10 @@ func TestRetryOn429(t *testing.T) {
 		InitialBackoff: 1 * time.Millisecond,
 		MaxBackoff:     10 * time.Millisecond,
 	}
+	var requestLogs []RequestLogEntry
+	client.RequestLogger = func(entry RequestLogEntry) {
+		requestLogs = append(requestLogs, entry)
+	}
 
 	req, err := newRequest(context.Background(), httpMethodGet, server.URL+"/api/v1/test", nil)
 	if err != nil {
@@ -554,6 +643,16 @@ func TestRetryOn429(t *testing.T) {
 
 	if attempts.Load() != 3 {
 		t.Errorf("Expected 3 attempts, got %d", attempts.Load())
+	}
+	wantStatuses := []int{http.StatusTooManyRequests, http.StatusTooManyRequests, http.StatusOK}
+	if len(requestLogs) != len(wantStatuses) {
+		t.Fatalf("got %d request log entries, want %d", len(requestLogs), len(wantStatuses))
+	}
+	for i, entry := range requestLogs {
+		if entry.Attempt != i+1 || entry.StatusCode != wantStatuses[i] {
+			t.Errorf("request log %d = attempt %d status %d, want attempt %d status %d",
+				i+1, entry.Attempt, entry.StatusCode, i+1, wantStatuses[i])
+		}
 	}
 }
 

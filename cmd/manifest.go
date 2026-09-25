@@ -192,6 +192,7 @@ func init() {
 	// Add label command specific flags
 	manifestAddLabelCmd.Flags().StringVarP(&labelKey, "key", "k", "", "Label key")
 	manifestAddLabelCmd.Flags().StringVarP(&labelValue, "value", "v", "", "Label value")
+	manifestAddLabelCmd.Flags().BoolVar(&verbose, "verbose", false, "Log HTTP requests and responses to stderr")
 	manifestAddLabelCmd.Flags().StringVar(&labelMediaType, "media-type", "", "Label media type (optional, defaults to text/plain)")
 	_ = manifestAddLabelCmd.MarkFlagRequired("key")
 	_ = manifestAddLabelCmd.MarkFlagRequired("value")

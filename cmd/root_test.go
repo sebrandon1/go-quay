@@ -3,6 +3,8 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -15,10 +17,14 @@ func resetRootFlags(t *testing.T) {
 	t.Helper()
 	origCfg := appCfg
 	origFormat := outputFormat
+	origVerbose := verbose
 	resetTokenAndURLFlags(t)
+	resetVerboseFlag(t)
 	t.Cleanup(func() {
 		resetTokenAndURLFlags(t)
+		resetVerboseFlag(t)
 		outputFormat = origFormat
+		verbose = origVerbose
 		appCfg = origCfg
 		rootCmd.SetArgs([]string{})
 		rootCmd.SetOut(nil)
@@ -29,6 +35,26 @@ func resetRootFlags(t *testing.T) {
 	})
 	outputFormat = outputJSON
 	appCfg = appConfig{}
+}
+
+func resetVerboseFlag(t *testing.T) {
+	t.Helper()
+	verbose = false
+	for _, f := range []*pflag.Flag{
+		rootCmd.PersistentFlags().Lookup("verbose"),
+		repoCreateCmd.Flags().Lookup("verbose"),
+		repoUpdateCmd.Flags().Lookup("verbose"),
+		repoChangeVisibilityCmd.Flags().Lookup("verbose"),
+		manifestAddLabelCmd.Flags().Lookup("verbose"),
+	} {
+		if f == nil {
+			continue
+		}
+		f.Changed = false
+		if err := f.Value.Set("false"); err != nil {
+			t.Fatalf("reset verbose flag: %v", err)
+		}
+	}
 }
 
 func resetTokenAndURLFlags(t *testing.T) {
@@ -157,6 +183,41 @@ func TestHelpDoesNotLeakToken(t *testing.T) {
 	}
 	if strings.Contains(out, cfgSecret) {
 		t.Error("help output leaked config file token")
+	}
+}
+
+func TestVerboseFlagLogsRedactedRequestToStderrAndKeepsJSONOnStdout(t *testing.T) {
+	resetRootFlags(t)
+	const secretToken = "verbose-test-secret-token"
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("Authorization"); got != "Bearer "+secretToken {
+			t.Errorf("Authorization header = %q, want bearer token", got)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"username":"test-user"}`))
+	}))
+	defer server.Close()
+
+	var stderr bytes.Buffer
+	rootCmd.SetErr(&stderr)
+	rootCmd.SetArgs([]string{"-v", "info", "user", testTokenFlag, secretToken, "--quay-url", server.URL})
+	stdout := captureStdout(t, func() {
+		if err := rootCmd.Execute(); err != nil {
+			t.Fatalf("execute verbose user info: %v", err)
+		}
+	})
+
+	if !strings.Contains(stderr.String(), "HTTP GET "+server.URL+"/user status=200") {
+		t.Fatalf("stderr missing request log: %q", stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "attempt=1") {
+		t.Errorf("stderr missing attempt number: %q", stderr.String())
+	}
+	if strings.Contains(stderr.String(), secretToken) {
+		t.Errorf("stderr leaked token: %q", stderr.String())
+	}
+	if !strings.Contains(stdout, `"username": "test-user"`) {
+		t.Errorf("stdout missing user JSON: %q", stdout)
 	}
 }
 

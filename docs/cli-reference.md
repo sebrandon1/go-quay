@@ -39,6 +39,9 @@ Every command inherits these flags:
 | `--quay-url` | `QUAY_URL` or config `quay-url` | API base URL (default `https://quay.io/api/v1`) |
 | `--output` / `-O` | — | `json` (default), `yaml`, or `table` |
 | `--dry-run` | — | Show API requests without sending them |
+| `--verbose` / `-v` | — | Log HTTP method, URL, status, duration, and attempt to stderr; credentials and request/response bodies are not logged |
+
+The `-v` shorthand is already used by repository visibility options and manifest label values. On those four commands, use `--verbose` if request logging is needed; `-v` keeps its existing meaning.
 
 Precedence: flags > environment variables > config file > built-in defaults.
 
