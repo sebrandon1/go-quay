@@ -217,7 +217,7 @@ func registerVerbCommands() {
 		verbSpec{cmdTeam, teamCmdInfoCmd},
 		verbSpec{"org-team", teamInfoCmd},
 		verbSpec{cmdTag, tagInfoCmd},
-		verbSpec{"user", userInfoCmd},
+		verbSpec{cmdUser, userInfoCmd},
 		verbSpec{cmdManifest, manifestInfoCmd},
 		verbSpec{"secscan", secscanInfoCmd},
 		verbSpec{cmdRobot, robotInfoCmd},

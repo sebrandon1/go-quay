@@ -9,7 +9,7 @@ import (
 
 // userCmd represents the user command group
 var userCmd = &cobra.Command{
-	Use:   "user",
+	Use:   cmdUser,
 	Short: "User account management commands",
 	Long: `Commands for managing user account information and starred repositories.
 

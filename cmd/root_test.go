@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/pflag"
@@ -18,13 +19,21 @@ func resetRootFlags(t *testing.T) {
 	origCfg := appCfg
 	origFormat := outputFormat
 	origVerbose := verbose
+	origMaxRetries := maxRetries
+	origRetryBackoff := retryBackoff
+	origRetryMaxBackoff := retryMaxBackoff
 	resetTokenAndURLFlags(t)
 	resetVerboseFlag(t)
+	resetRetryFlags(t)
 	t.Cleanup(func() {
 		resetTokenAndURLFlags(t)
 		resetVerboseFlag(t)
+		resetRetryFlags(t)
 		outputFormat = origFormat
 		verbose = origVerbose
+		maxRetries = origMaxRetries
+		retryBackoff = origRetryBackoff
+		retryMaxBackoff = origRetryMaxBackoff
 		appCfg = origCfg
 		rootCmd.SetArgs([]string{})
 		rootCmd.SetOut(nil)
@@ -53,6 +62,25 @@ func resetVerboseFlag(t *testing.T) {
 		f.Changed = false
 		if err := f.Value.Set("false"); err != nil {
 			t.Fatalf("reset verbose flag: %v", err)
+		}
+	}
+}
+
+func resetRetryFlags(t *testing.T) {
+	t.Helper()
+	maxRetries = 0
+	retryBackoff = 500 * time.Millisecond
+	retryMaxBackoff = 5 * time.Second
+	for name, value := range map[string]string{
+		"max-retries":       "0",
+		"retry-backoff":     "500ms",
+		"retry-max-backoff": "5s",
+	} {
+		if f := rootCmd.PersistentFlags().Lookup(name); f != nil {
+			f.Changed = false
+			if err := f.Value.Set(value); err != nil {
+				t.Fatalf("reset %s flag: %v", name, err)
+			}
 		}
 	}
 }
@@ -200,7 +228,7 @@ func TestVerboseFlagLogsRedactedRequestToStderrAndKeepsJSONOnStdout(t *testing.T
 
 	var stderr bytes.Buffer
 	rootCmd.SetErr(&stderr)
-	rootCmd.SetArgs([]string{"-v", "info", "user", testTokenFlag, secretToken, "--quay-url", server.URL})
+	rootCmd.SetArgs([]string{"-v", "info", cmdUser, testTokenFlag, secretToken, testQuayURLFlag, server.URL})
 	stdout := captureStdout(t, func() {
 		if err := rootCmd.Execute(); err != nil {
 			t.Fatalf("execute verbose user info: %v", err)
