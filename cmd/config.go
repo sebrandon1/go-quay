@@ -77,7 +77,7 @@ var configShowCmd = &cobra.Command{
 var configInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize the CLI configuration file",
-Long: `Create or update the CLI configuration file.
+	Long: `Create or update the CLI configuration file.
 
 Use --token and --namespace for non-interactive setup; --quay-url is optional. When stdin is not a terminal, --token and --namespace are required.`,
 	RunE: func(cmd *cobra.Command, args []string) error {

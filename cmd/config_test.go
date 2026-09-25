@@ -320,6 +320,18 @@ func TestPromptForConfigUsesDefaultsWithoutPrintingToken(t *testing.T) {
 	}
 }
 
+func TestIsTerminalRejectsPipeInput(t *testing.T) {
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("os.Pipe: %v", err)
+	}
+	defer reader.Close()
+	defer writer.Close()
+	if isTerminal(reader) {
+		t.Fatal("pipe input must not be treated as a terminal")
+	}
+}
+
 func TestConfigShowRejectsInvalidYAML(t *testing.T) {
 	resetConfigCommandState(t)
 	setConfigTestDir(t, t.TempDir())
