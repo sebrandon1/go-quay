@@ -23,6 +23,10 @@ const (
 	cmdUser         = "user"
 	cmdMembers      = "members"
 	flagHelp        = "--help"
+	cmdBatch        = "batch"
+	subcmdApply     = "apply"
+
+	repoVisibilityPrivate = "private"
 
 	// Verb-first resource names (also used as Cobra Use strings in domain files).
 	cmdQuota          = "quota"

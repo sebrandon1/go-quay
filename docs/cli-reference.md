@@ -112,6 +112,20 @@ go-quay completion powershell
 
 Source the output in your shell or install it using that shell's standard completion setup. Completion generation does not require an API token.
 
+## Batch repository operations
+
+Apply repository create and delete operations from a YAML or JSON file, or pass `-f -` to read stdin. The document is validated before any API request is sent. Items run sequentially; by default the command continues after a failure, prints a result for each item, and exits with an error if any operation failed. Use `--fail-fast` to stop after the first failure. Batch deletes require `--confirm`.
+
+```bash
+go-quay batch apply --file examples/batch/repos.yaml --confirm --token "$QUAY_TOKEN"
+cat examples/batch/repos.yaml | go-quay batch apply -f - --confirm --token "$QUAY_TOKEN"
+go-quay batch apply -f examples/batch/repos.yaml --dry-run
+```
+
+The file schema is versioned with `apiVersion: go-quay/v1alpha1`. Each item has an `action`, `namespace`, and `repository`. Create items may also specify `visibility` (`private` by default) and `description`. Only `create` and `delete` actions are supported in this version. See [`examples/batch/repos.yaml`](../examples/batch/repos.yaml) for a complete file.
+
+Results use the selected global output format (JSON by default) with `succeeded`, `failed`, `not_run`, or `dry_run` status for each item. A partial failure still produces the full result list before returning a non-zero exit status.
+
 ## Billing API
 
 The billing API provides access to subscription plans, billing information, and invoices.
