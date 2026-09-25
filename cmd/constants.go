@@ -16,10 +16,12 @@ const (
 	cmdUpdate       = "update"
 	cmdList         = "list"
 	cmdInfo         = "info"
+	cmdCompletion   = "completion"
 	cmdRepository   = "repository"
 	cmdOrganization = "organization"
 	cmdTag          = "tag"
 	cmdMembers      = "members"
+	flagHelp        = "--help"
 
 	// Verb-first resource names (also used as Cobra Use strings in domain files).
 	cmdQuota          = "quota"

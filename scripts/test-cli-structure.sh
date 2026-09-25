@@ -20,6 +20,8 @@ echo "Testing CLI command structure..."
 
 echo "Testing main commands..."
 $BINARY get --help
+$BINARY completion --help
+$BINARY completion bash >/dev/null
 $BINARY create --help
 $BINARY delete --help
 $BINARY update --help
