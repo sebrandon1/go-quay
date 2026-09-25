@@ -35,6 +35,7 @@ func resetTokenAndURLFlags(t *testing.T) {
 	t.Helper()
 	token = ""
 	quayURL = lib.DefaultQuayURL
+	dryRun = false
 	for _, f := range []*pflag.Flag{
 		rootCmd.Flag("token"),
 		rootCmd.PersistentFlags().Lookup("token"),
@@ -54,6 +55,17 @@ func resetTokenAndURLFlags(t *testing.T) {
 			f.Changed = false
 			if err := f.Value.Set(lib.DefaultQuayURL); err != nil {
 				t.Fatalf("reset quay-url flag: %v", err)
+			}
+		}
+	}
+	for _, f := range []*pflag.Flag{
+		rootCmd.Flag("dry-run"),
+		rootCmd.PersistentFlags().Lookup("dry-run"),
+	} {
+		if f != nil {
+			f.Changed = false
+			if err := f.Value.Set("false"); err != nil {
+				t.Fatalf("reset dry-run flag: %v", err)
 			}
 		}
 	}

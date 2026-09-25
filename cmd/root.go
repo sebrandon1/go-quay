@@ -11,7 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var quayURL string
+var (
+	quayURL string
+	dryRun  bool
+)
 
 var rootCmd = &cobra.Command{
 	Use:   cliName,
@@ -31,7 +34,7 @@ func persistentPreRunE(cmd *cobra.Command, _ []string) error {
 	token = resolveFlag(flagChanged(cmd, "token"), token, os.Getenv("QUAY_TOKEN"), appCfg.Token)
 	quayURL = resolveFlag(flagChanged(cmd, "quay-url"), quayURL, os.Getenv("QUAY_URL"), appCfg.QuayURL, lib.DefaultQuayURL)
 
-	if token == "" && !isAuthenticationExemptCommand(cmd) {
+	if token == "" && !dryRun && !isAuthenticationExemptCommand(cmd) {
 		return fmt.Errorf(`authentication token required
 
 Set QUAY_TOKEN environment variable, use --token/-t flag, or add to config file (%s).
@@ -84,6 +87,7 @@ func init() {
 	rootCmd.PersistentPreRunE = persistentPreRunE
 	rootCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Quay.io API token ($QUAY_TOKEN or config file)")
 	rootCmd.PersistentFlags().StringVar(&quayURL, "quay-url", lib.DefaultQuayURL, "Quay API base URL ($QUAY_URL or config file)")
+	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Show API requests without sending them")
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, or table")
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(configCmd)

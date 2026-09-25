@@ -11,12 +11,15 @@ import (
 )
 
 const (
-	testQuayURLFlag = "--quay-url"
-	testTokenFlag   = "--token"
-	testTokenValue  = "test-token"
-	testNamespace   = "testns"
-	testRepository  = "testrepo"
-	testOrgName     = "testorg"
+	testQuayURLFlag       = "--quay-url"
+	testTokenFlag         = "--token"
+	testTokenValue        = "test-token"
+	testDescriptionFlag   = "--description"
+	testVisibilityFlag    = "--visibility"
+	testPrivateVisibility = "private"
+	testNamespace         = "testns"
+	testRepository        = "testrepo"
+	testOrgName           = "testorg"
 )
 
 // resetRepositoryFlags resets all repository-related flags to their zero values
@@ -203,7 +206,7 @@ func TestRepoCreateCmd(t *testing.T) {
 	rootCmd.SetArgs([]string{
 		cmdGet, testTokenFlag, testTokenValue, testQuayURLFlag, server.URL,
 		cmdRepository, subcmdCreate, "-n", testNamespace, "-r", "newrepo",
-		"--visibility", "private", "--description", "a test repo",
+		testVisibilityFlag, testPrivateVisibility, testDescriptionFlag, "a test repo",
 	})
 	err := rootCmd.Execute()
 
@@ -251,7 +254,7 @@ func TestVerbRepoCreateCmd(t *testing.T) {
 	rootCmd.SetArgs([]string{
 		cmdCreate, testTokenFlag, testTokenValue, testQuayURLFlag, server.URL,
 		cmdRepository, "-n", testNamespace, "-r", "newrepo",
-		"--visibility", "private", "--description", "a test repo",
+		testVisibilityFlag, testPrivateVisibility, testDescriptionFlag, "a test repo",
 	})
 	err := rootCmd.Execute()
 

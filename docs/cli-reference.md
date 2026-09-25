@@ -38,10 +38,12 @@ Every command inherits these flags:
 | `--token` / `-t` | `QUAY_TOKEN` or config `token` | Quay.io API token |
 | `--quay-url` | `QUAY_URL` or config `quay-url` | API base URL (default `https://quay.io/api/v1`) |
 | `--output` / `-O` | — | `json` (default), `yaml`, or `table` |
+| `--dry-run` | — | Show API requests without sending them |
 
 Precedence: flags > environment variables > config file > built-in defaults.
 
 List commands expose the pagination parameters supported by their Quay endpoint: repository and tag lists accept `--page` / `--limit`, repository search accepts `--page`, and build and trigger-build lists accept `--limit`. Log list commands use the API's `--next-page` cursor. Unset pagination flags preserve the endpoint's default behavior.
+`--dry-run` blocks all Quay API requests and reports the method and URL; request bodies are omitted. Commands return a dry-run error because no API response is available. Read-only commands show their GET request without returning data. Local config commands are not affected.
 
 `--output table` is supported by these commands; other commands keep their JSON fallback:
 

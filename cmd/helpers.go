@@ -32,6 +32,10 @@ func getClient() (*lib.Client, error) {
 		return nil, fmt.Errorf("unexpected nil client")
 	}
 	client.Version = rootCmd.Version
+	if dryRun {
+		client.HTTPClient.Transport = dryRunTransport{}
+		client.Retry = nil
+	}
 	return client, nil
 }
 

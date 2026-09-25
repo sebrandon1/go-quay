@@ -153,7 +153,7 @@ func TestConfigFilePath(t *testing.T) {
 func TestConfigInitNonInteractive(t *testing.T) {
 	resetConfigCommandState(t)
 	setConfigTestDir(t, t.TempDir())
-	rootCmd.SetArgs([]string{testConfigRootCommand, testConfigInitCommand, "--non-interactive", "--token", testConfigToken, testConfigNamespaceFlag, testConfigNamespace})
+	rootCmd.SetArgs([]string{testConfigRootCommand, testConfigInitCommand, "--non-interactive", testTokenFlag, testConfigToken, testConfigNamespaceFlag, testConfigNamespace})
 	var runErr error
 	output := captureStdout(t, func() { runErr = rootCmd.Execute() })
 	if runErr != nil {
