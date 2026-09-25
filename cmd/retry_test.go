@@ -91,7 +91,7 @@ func TestRetryFlagsRejectNegativeValues(t *testing.T) {
 			resetRootFlags(t)
 			var stderr bytes.Buffer
 			rootCmd.SetErr(&stderr)
-			rootCmd.SetArgs([]string{cmdInfo, cmdUser, testTokenFlag, "retry-test-token", testQuayURLFlag, "http://127.0.0.1:1", tt.flag, tt.value})
+			rootCmd.SetArgs([]string{cmdInfo, cmdUser, testTokenFlag, "retry-test-token", testQuayURLFlag, testUnreachableURL, tt.flag, tt.value})
 			err := rootCmd.Execute()
 			if err == nil || !strings.Contains(err.Error(), "zero or greater") {
 				t.Fatalf("error = %v, want validation error for %s", err, tt.flag)

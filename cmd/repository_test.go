@@ -12,6 +12,7 @@ import (
 
 const (
 	testQuayURLFlag       = "--quay-url"
+	testUnreachableURL    = "http://127.0.0.1:1"
 	testTokenFlag         = "--token"
 	testManifestFlag      = "--manifest"
 	testWatchFlag         = "--watch"
@@ -376,7 +377,7 @@ func TestVerbRepoDeleteRequiresConfirm(t *testing.T) {
 	resetRepositoryFlags(t)
 
 	rootCmd.SetArgs([]string{
-		cmdDelete, testTokenFlag, testTokenValue, testQuayURLFlag, "http://127.0.0.1:1",
+		cmdDelete, testTokenFlag, testTokenValue, testQuayURLFlag, testUnreachableURL,
 		cmdRepository, "-n", testNamespace, "-r", testRepository,
 	})
 	err := rootCmd.Execute()

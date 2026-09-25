@@ -53,6 +53,16 @@ Precedence: flags > environment variables > config file > built-in defaults.
 List commands expose the pagination parameters supported by their Quay endpoint: repository and tag lists accept `--page` / `--limit`, repository search accepts `--page`, and build and trigger-build lists accept `--limit`. Log list commands use the API's `--next-page` cursor. Unset pagination flags preserve the endpoint's default behavior.
 `--dry-run` blocks all Quay API requests and reports the method and URL; request bodies are omitted. Commands return a dry-run error because no API response is available. Read-only commands show their GET request without returning data. Local config commands are not affected.
 
+## Compare tags
+
+Compare two tags' manifest labels and vulnerability IDs. Added and removed entries describe the change from tag A to tag B. Security scan status is included for each tag so empty vulnerability deltas can be distinguished from scans without data.
+
+```bash
+go-quay diff tag -n myorg -r myrepo --tag-a previous --tag-b candidate
+```
+
+The command resolves each tag to a manifest digest, then fetches labels and security scan results for both manifests. This makes six API requests and can be affected by Quay rate limits.
+
 `--output table` is supported by these commands; other commands keep their JSON fallback:
 
 | Command | Table columns |

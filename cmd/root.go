@@ -110,6 +110,7 @@ func init() {
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(completionCmd)
+	rootCmd.AddCommand(diffCmd)
 	getCmd.AddCommand(repositoryCmd)
 	getCmd.AddCommand(billingCmd)
 	getCmd.AddCommand(organizationCmd)
