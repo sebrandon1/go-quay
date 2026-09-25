@@ -57,6 +57,8 @@ Every API domain follows the same pattern:
 
 Preferred: `go-quay <verb> <resource>` with verbs `create`, `delete`, `update`, `list`, `info`.
 
+Configuration commands live at the root: `go-quay config init`, `go-quay config path`, and `go-quay config show`.
+
 Legacy: all API commands still hang off `go-quay get` (`repository`, `billing`, `organization`, `permissions`, `tag`, `user`, `manifest`, `secscan`, `robot`, `search`, `team`, `build`, `notification`, `trigger`, `discovery`, `error`, `messages`, `prototype`, `repotoken`, `logs`, `mirror`). Mutating `get` subcommands are deprecated.
 
 ## Configuration

@@ -32,6 +32,16 @@ Alternatively, create a **Robot Account** for automation:
 2. Click **Robot Accounts**
 3. Create a new robot with the required permissions
 
+## Configure the CLI
+
+Initialize the CLI configuration interactively:
+
+```bash
+go-quay config init
+```
+
+The command saves the token, default namespace, and API URL in the platform config directory with owner-only file permissions. For scripts, use `go-quay config init --non-interactive --token "$QUAY_TOKEN" --namespace myorg`. Check the file path with `go-quay config path`; `go-quay config show` redacts the token unless you pass `--show-token`.
+
 ## Step 3: Initialize the Client
 
 Create a new Go file and initialize the client:

@@ -66,6 +66,17 @@ quay-url: https://quay.io/api/v1
 
 `namespace` supplies the default for `--namespace` / `-n` on commands that use it.
 
+Manage the CLI configuration:
+
+```bash
+go-quay config init
+go-quay config path
+go-quay config show
+go-quay config show --show-token
+```
+
+`config init` prompts for the token, default namespace, and API URL. For automation, pass `--non-interactive --token TOKEN --namespace NAMESPACE`; `--quay-url` is optional. The config file and its directory are created with owner-only permissions. `config show` redacts the token unless `--show-token` is supplied.
+
 ## Billing API
 
 The billing API provides access to subscription plans, billing information, and invoices.
