@@ -8,6 +8,8 @@ import (
 )
 
 func TestScanSourceEndpointsHTTPMethods(t *testing.T) {
+	const sourceFile = "fixture.go"
+
 	libPath := t.TempDir()
 	source := `package fixture
 
@@ -33,7 +35,7 @@ func StandardLibraryRequest(ctx context.Context) {
 	_, _ = http.NewRequest("PATCH", c.buildURL("/patch"), nil)
 }
 `
-	if err := os.WriteFile(filepath.Join(libPath, "fixture.go"), []byte(source), 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(libPath, sourceFile), []byte(source), 0600); err != nil {
 		t.Fatalf("write fixture: %v", err)
 	}
 
@@ -43,11 +45,11 @@ func StandardLibraryRequest(ctx context.Context) {
 	}
 
 	want := []ImplementedEndpoint{
-		{Method: "GET", Path: "/get", SourceFile: "fixture.go", Function: "Get"},
-		{Method: "POST", Path: "/create", SourceFile: "fixture.go", Function: "Create"},
-		{Method: "DELETE", Path: "/delete", SourceFile: "fixture.go", Function: "Delete"},
-		{Method: "GET", Path: "/default", SourceFile: "fixture.go", Function: "DefaultMethod"},
-		{Method: "PATCH", Path: "/patch", SourceFile: "fixture.go", Function: "StandardLibraryRequest"},
+		{Method: "GET", Path: "/get", SourceFile: sourceFile, Function: "Get"},
+		{Method: "POST", Path: "/create", SourceFile: sourceFile, Function: "Create"},
+		{Method: "DELETE", Path: "/delete", SourceFile: sourceFile, Function: "Delete"},
+		{Method: "GET", Path: "/default", SourceFile: sourceFile, Function: "DefaultMethod"},
+		{Method: "PATCH", Path: "/patch", SourceFile: sourceFile, Function: "StandardLibraryRequest"},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("scanSourceEndpoints() = %#v, want %#v", got, want)
