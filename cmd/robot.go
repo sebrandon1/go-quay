@@ -38,7 +38,9 @@ Available commands:
 var robotListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List all robot accounts",
-	Long:  `List all robot accounts associated with your user account.`,
+	Long: `List all robot accounts associated with your user account.
+
+Table columns: NAME, DESCRIPTION, CREATED, LAST ACCESSED. Robot tokens are omitted.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -51,6 +53,17 @@ var robotListCmd = &cobra.Command{
 		}
 
 		fmt.Fprintln(os.Stderr, "User robot accounts:")
+		if outputFormat == outputTable {
+			var accounts []lib.RobotAccount
+			if robots != nil {
+				accounts = robots.Robots
+			}
+			rows := make([][]string, 0, len(accounts))
+			for _, robot := range accounts {
+				rows = append(rows, []string{robot.Name, robot.Description, robot.Created, robot.LastAccessed})
+			}
+			return printTable([]string{tableHeaderName, "DESCRIPTION", "CREATED", "LAST ACCESSED"}, rows)
+		}
 		return printJSON(robots)
 	},
 }

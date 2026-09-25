@@ -28,6 +28,19 @@ func resetTagFlags(t *testing.T) {
 	})
 }
 
+func TestRequireTagName(t *testing.T) {
+	original := tagName
+	t.Cleanup(func() { tagName = original })
+	tagName = ""
+	if err := requireTagName(nil, nil); err == nil {
+		t.Fatal("expected missing tag name to be rejected")
+	}
+	tagName = testLatestTagName
+	if err := requireTagName(nil, nil); err != nil {
+		t.Fatalf("expected tag name to be accepted: %v", err)
+	}
+}
+
 func TestTagInfoCmd(t *testing.T) {
 	resetTagFlags(t)
 
@@ -97,7 +110,7 @@ func TestTagChangeCmd(t *testing.T) {
 
 	rootCmd.SetArgs([]string{
 		cmdGet, testTokenFlag, testTokenValue, testQuayURLFlag, server.URL,
-		cmdTag, "change", "-n", testNamespace, "-r", testRepository, "-T", "latest",
+		cmdTag, "change", "-n", testNamespace, "-r", testRepository, "-T", testLatestTagName,
 		"--manifest", "sha256:abc123",
 	})
 	err := rootCmd.Execute()

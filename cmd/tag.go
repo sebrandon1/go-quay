@@ -21,6 +21,7 @@ var tagCmd = &cobra.Command{
 	Long: `Commands for managing repository tags including detailed information, updates, deletion, and history.
 
 Available commands:
+  list     - List repository tags
   info     - Get detailed tag information
   update   - Update tag metadata
   delete   - Delete a tag
@@ -28,11 +29,49 @@ Available commands:
   revert   - Revert tag to a previous state`,
 }
 
+var tagListCmd = &cobra.Command{
+	Use:   subcmdList,
+	Short: "List repository tags",
+	Long: `List tags in a repository.
+
+Table columns: TAG, DIGEST, SIZE, LAST MODIFIED, EXPIRATION.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := getClient()
+		if err != nil {
+			return fmt.Errorf("creating client: %w", err)
+		}
+
+		tags, err := client.ListTags(cmd.Context(), namespace, repository, 0, false)
+		if err != nil {
+			return fmt.Errorf("listing tags: %w", err)
+		}
+		if outputFormat != outputTable {
+			return printJSON(tags)
+		}
+
+		var rows [][]string
+		if tags != nil {
+			rows = make([][]string, 0, len(tags.Tags))
+			for _, tag := range tags.Tags {
+				rows = append(rows, []string{
+					tag.Name,
+					tag.ManifestDigest,
+					fmt.Sprintf("%d", tag.Size),
+					tag.LastModified,
+					tag.Expiration,
+				})
+			}
+		}
+		return printTable([]string{"TAG", "DIGEST", "SIZE", "LAST MODIFIED", "EXPIRATION"}, rows)
+	},
+}
+
 // Tag Info
 var tagInfoCmd = &cobra.Command{
-	Use:   subcmdInfo,
-	Short: "Get detailed tag information",
-	Long:  `Get detailed information about a specific tag including metadata, manifest digest, and size.`,
+	Use:     subcmdInfo,
+	Short:   "Get detailed tag information",
+	Long:    `Get detailed information about a specific tag including metadata, manifest digest, and size.`,
+	PreRunE: requireTagName,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -51,9 +90,10 @@ var tagInfoCmd = &cobra.Command{
 
 // Tag Update
 var tagUpdateCmd = &cobra.Command{
-	Use:   subcmdUpdate,
-	Short: "Update tag metadata",
-	Long:  `Update tag metadata such as expiration date.`,
+	Use:     subcmdUpdate,
+	Short:   "Update tag metadata",
+	Long:    `Update tag metadata such as expiration date.`,
+	PreRunE: requireTagName,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -72,9 +112,10 @@ var tagUpdateCmd = &cobra.Command{
 
 // Tag Delete
 var tagDeleteCmd = &cobra.Command{
-	Use:   subcmdDelete,
-	Short: "Delete a tag",
-	Long:  `Delete a specific tag from the repository. This action cannot be undone.`,
+	Use:     subcmdDelete,
+	Short:   "Delete a tag",
+	Long:    `Delete a specific tag from the repository. This action cannot be undone.`,
+	PreRunE: requireTagName,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirmTagDeletion {
 			return fmt.Errorf("are you sure you want to delete tag %s/%s:%s? This action cannot be undone.\nUse --confirm to proceed with deletion", namespace, repository, tagName)
@@ -97,9 +138,10 @@ var tagDeleteCmd = &cobra.Command{
 
 // Tag History
 var tagHistoryCmd = &cobra.Command{
-	Use:   "history",
-	Short: "Get tag history",
-	Long:  `Get the history of changes for a specific tag, including previous versions and modifications.`,
+	Use:     "history",
+	Short:   "Get tag history",
+	Long:    `Get the history of changes for a specific tag, including previous versions and modifications.`,
+	PreRunE: requireTagName,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -118,9 +160,10 @@ var tagHistoryCmd = &cobra.Command{
 
 // Tag Revert
 var tagRevertCmd = &cobra.Command{
-	Use:   "revert",
-	Short: "Revert tag to a previous state",
-	Long:  `Revert a tag to a previous state using its manifest digest.`,
+	Use:     "revert",
+	Short:   "Revert tag to a previous state",
+	Long:    `Revert a tag to a previous state using its manifest digest.`,
+	PreRunE: requireTagName,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -139,9 +182,10 @@ var tagRevertCmd = &cobra.Command{
 
 // Tag Change (create/move)
 var tagChangeCmd = &cobra.Command{
-	Use:   "change",
-	Short: "Create or move a tag to a manifest",
-	Long:  `Create a new tag or move an existing tag to point at a specific manifest digest.`,
+	Use:     "change",
+	Short:   "Create or move a tag to a manifest",
+	Long:    `Create a new tag or move an existing tag to point at a specific manifest digest.`,
+	PreRunE: requireTagName,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -159,9 +203,10 @@ var tagChangeCmd = &cobra.Command{
 }
 
 var tagRestoreCmd = &cobra.Command{
-	Use:   "restore",
-	Short: "Restore a tag from a previous state",
-	Long:  `Restore a previously deleted or modified tag using its manifest digest.`,
+	Use:     "restore",
+	Short:   "Restore a tag from a previous state",
+	Long:    `Restore a previously deleted or modified tag using its manifest digest.`,
+	PreRunE: requireTagName,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -180,6 +225,7 @@ var tagRestoreCmd = &cobra.Command{
 
 func init() {
 	// Add subcommands to tag command
+	tagCmd.AddCommand(tagListCmd)
 	tagCmd.AddCommand(tagInfoCmd)
 	tagCmd.AddCommand(tagUpdateCmd)
 	tagCmd.AddCommand(tagDeleteCmd)
@@ -198,7 +244,6 @@ func init() {
 		_ = tagCmd.MarkPersistentFlagRequired("namespace")
 	}
 	_ = tagCmd.MarkPersistentFlagRequired("repository")
-	_ = tagCmd.MarkPersistentFlagRequired("tag")
 
 	// Update command specific flags
 	tagUpdateCmd.Flags().StringVarP(&tagExpiration, "expiration", "e", "", "Tag expiration date (ISO format)")
@@ -217,4 +262,11 @@ func init() {
 	// Change command specific flags
 	tagChangeCmd.Flags().StringVarP(&manifestDigest, "manifest", "m", "", "Manifest digest to assign to the tag")
 	_ = tagChangeCmd.MarkFlagRequired("manifest")
+}
+
+func requireTagName(_ *cobra.Command, _ []string) error {
+	if tagName == "" {
+		return fmt.Errorf("tag is required; provide --tag")
+	}
+	return nil
 }
