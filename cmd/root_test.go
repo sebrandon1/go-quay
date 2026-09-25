@@ -134,7 +134,7 @@ func TestHelpDoesNotLeakToken(t *testing.T) {
 	var buf bytes.Buffer
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
-	rootCmd.SetArgs([]string{cmdGet, "--help"})
+	rootCmd.SetArgs([]string{cmdGet, flagHelp})
 	if err := rootCmd.Execute(); err != nil {
 		t.Fatalf("help should not error: %v", err)
 	}
@@ -247,6 +247,21 @@ func TestPersistentPreRunRequiresToken(t *testing.T) {
 	}
 }
 
+func TestIsAuthenticationExemptCommand(t *testing.T) {
+	if !isAuthenticationExemptCommand(configCmd) {
+		t.Error("config command should be exempt from authentication")
+	}
+	if !isAuthenticationExemptCommand(completionCmd) {
+		t.Error("completion command should be exempt from authentication")
+	}
+	if isAuthenticationExemptCommand(getCmd) {
+		t.Error("get command should require authentication")
+	}
+	if isAuthenticationExemptCommand(nil) {
+		t.Error("nil command should not be exempt from authentication")
+	}
+}
+
 func TestPersistentPreRunInvalidOutputFormat(t *testing.T) {
 	resetRootFlags(t)
 	t.Setenv("QUAY_TOKEN", "from-env")
@@ -265,7 +280,7 @@ func TestExecuteHelp(t *testing.T) {
 	resetRootFlags(t)
 
 	oldArgs := os.Args
-	os.Args = []string{cliName, "--help"}
+	os.Args = []string{cliName, flagHelp}
 	t.Cleanup(func() {
 		os.Args = oldArgs
 		rootCmd.SetArgs([]string{})

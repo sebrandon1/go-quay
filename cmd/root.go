@@ -31,7 +31,7 @@ func persistentPreRunE(cmd *cobra.Command, _ []string) error {
 	token = resolveFlag(flagChanged(cmd, "token"), token, os.Getenv("QUAY_TOKEN"), appCfg.Token)
 	quayURL = resolveFlag(flagChanged(cmd, "quay-url"), quayURL, os.Getenv("QUAY_URL"), appCfg.QuayURL, lib.DefaultQuayURL)
 
-	if token == "" && !isConfigCommand(cmd) {
+	if token == "" && !isAuthenticationExemptCommand(cmd) {
 		return fmt.Errorf(`authentication token required
 
 Set QUAY_TOKEN environment variable, use --token/-t flag, or add to config file (%s).
@@ -48,9 +48,9 @@ Get your token at https://quay.io/organization/<org>?tab=applications`, configFi
 	return nil
 }
 
-func isConfigCommand(cmd *cobra.Command) bool {
+func isAuthenticationExemptCommand(cmd *cobra.Command) bool {
 	for current := cmd; current != nil; current = current.Parent() {
-		if current == configCmd {
+		if current == configCmd || current == completionCmd {
 			return true
 		}
 	}
@@ -87,6 +87,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, or table")
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(configCmd)
+	rootCmd.AddCommand(completionCmd)
 	getCmd.AddCommand(repositoryCmd)
 	getCmd.AddCommand(billingCmd)
 	getCmd.AddCommand(organizationCmd)

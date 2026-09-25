@@ -77,6 +77,19 @@ go-quay config show --show-token
 
 `config init` prompts for the token, default namespace, and API URL. For automation, pass `--non-interactive --token TOKEN --namespace NAMESPACE`; `--quay-url` is optional. The config file and its directory are created with owner-only permissions. `config show` redacts the token unless `--show-token` is supplied.
 
+## Shell completion
+
+Generate completion scripts for Bash, Zsh, Fish, or PowerShell:
+
+```bash
+go-quay completion bash
+go-quay completion zsh
+go-quay completion fish
+go-quay completion powershell
+```
+
+Source the output in your shell or install it using that shell's standard completion setup. Completion generation does not require an API token.
+
 ## Billing API
 
 The billing API provides access to subscription plans, billing information, and invoices.
