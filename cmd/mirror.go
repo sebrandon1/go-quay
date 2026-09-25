@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -41,8 +42,41 @@ var mirrorInfoCmd = &cobra.Command{
 			return fmt.Errorf("getting mirror config: %w", err)
 		}
 
+		if outputFormat == outputTable {
+			return printMirrorSummary(config)
+		}
 		return printJSON(config)
 	},
+}
+
+func printMirrorSummary(config *lib.MirrorConfig) error {
+	if config == nil {
+		return fmt.Errorf("empty mirror config response")
+	}
+	interval := "-"
+	if config.SyncInterval > 0 {
+		interval = strconv.Itoa(config.SyncInterval)
+	}
+	return printTable(
+		[]string{"ENABLED", "MIRROR TYPE", "EXTERNAL REF", "SYNC INTERVAL (SEC)", "SYNC START DATE", "ROBOT", "TAG RULE", "TAG RULE KIND"},
+		[][]string{{
+			strconv.FormatBool(config.IsEnabled),
+			valueOrDash(config.MirrorType),
+			valueOrDash(config.ExternalRef),
+			interval,
+			valueOrDash(config.SyncStartDate),
+			valueOrDash(config.RobotUsername),
+			valueOrDash(config.RootRule.Rule),
+			valueOrDash(config.RootRule.RuleKind),
+		}},
+	)
+}
+
+func valueOrDash(value string) string {
+	if value == "" {
+		return "-"
+	}
+	return value
 }
 
 var mirrorCreateCmd = &cobra.Command{

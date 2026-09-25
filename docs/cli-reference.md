@@ -1318,11 +1318,19 @@ Configure a repository to pull tags from an external registry on a schedule.
 
 ### Get mirror configuration
 ```bash
-go-quay get mirror info \
+go-quay info mirror \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --token YOUR_TOKEN
+
+go-quay info mirror \
+  --namespace NAMESPACE \
+  --repository REPOSITORY \
+  --output table \
+  --token YOUR_TOKEN
 ```
+
+The table shows the mirror's enabled setting, source, schedule, robot, and tag rule. These are configuration values, not live sync-run status. The [public Quay API discovery document](https://quay.io/api/v1/discovery) does not define a sync-now operation or live-run status endpoint, so this CLI reports the scheduled configuration only.
 
 ### Create mirror configuration
 ```bash
