@@ -5,15 +5,17 @@ import (
 	"testing"
 )
 
+const testManifestRef = "sha256:abc"
+
 func TestManifestCommands(t *testing.T) {
-	const manifestPath = "/repository/testns/testrepo/manifest/sha256:abc"
+	const manifestPath = "/repository/testns/testrepo/manifest/" + testManifestRef
 	baseSetup := func(t *testing.T) {
 		setCommandTestValue(t, &namespace, testNamespace)
 		setCommandTestValue(t, &repository, testRepository)
-		setCommandTestValue(t, &manifestRef, "sha256:abc")
+		setCommandTestValue(t, &manifestRef, testManifestRef)
 	}
 	tests := []commandDomainCase{
-		{name: subcmdInfo, run: manifestInfoCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: manifestPath}, response: `{"digest":"sha256:abc"}`, wantOutput: "sha256:abc", setup: baseSetup},
+		{name: subcmdInfo, executeArgs: []string{subcmdInfo, cmdManifest, testConfigNamespaceFlag, testNamespace, testDiffRepositoryFlag, testRepository, "--manifest", testManifestRef}, request: commandRequestExpectation{method: testHTTPGet, path: manifestPath}, response: `{"digest":"` + testManifestRef + `"}`, wantOutput: testManifestRef},
 		{name: subcmdDelete, run: manifestDeleteCmd.RunE, request: commandRequestExpectation{method: testHTTPDelete, path: manifestPath}, setup: func(t *testing.T) { baseSetup(t); setCommandTestValue(t, &confirmManifestDeletion, true) }},
 		{name: "labels", run: manifestLabelsCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: manifestPath + "/labels"}, response: `{"labels":[{"id":"label-1","key":"owner","value":"` + testManifestLabelValue + `"}]}`, wantOutput: testManifestLabelValue, setup: baseSetup},
 		{name: "label", run: manifestLabelCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: manifestPath + "/labels/label-1"}, response: `{"id":"label-1","key":"owner","value":"` + testManifestLabelValue + `"}`, wantOutput: "label-1", setup: func(t *testing.T) { baseSetup(t); setCommandTestValue(t, &labelID, "label-1") }},

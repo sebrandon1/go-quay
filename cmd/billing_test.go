@@ -11,7 +11,7 @@ func TestBillingCommands(t *testing.T) {
 	setupOrg := func(t *testing.T) { setCommandTestValue(t, &billingOrgName, testOrgName) }
 	tests := []commandDomainCase{
 		{name: "organization info", run: orgBillingCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: "/organization/testorg/plan"}, response: `{"plan":"enterprise"}`, wantOutput: "enterprise", setup: setupOrg},
-		{name: "user info", run: userBillingCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: "/user/plan"}, response: `{"plan":"free"}`, wantOutput: "free"},
+		{name: "user info", executeArgs: []string{cmdGet, billingCmd.Use, userBillingCmd.Use}, request: commandRequestExpectation{method: testHTTPGet, path: "/user/plan"}, response: `{"plan":"free"}`, wantOutput: "free"},
 		{name: "organization subscription", run: orgSubscriptionCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: "/organization/testorg/plan"}, response: `{"name":"enterprise"}`, wantOutput: "enterprise", setup: setupOrg},
 		{name: "user subscription", run: userSubscriptionCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: "/user/plan"}, response: `{"name":"free"}`, wantOutput: "free"},
 		{name: "organization invoices", run: orgInvoicesCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: "/organization/testorg/invoices"}, response: `{"invoices":[{"id":"invoice-1"}]}`, wantOutput: "invoice-1", setup: setupOrg},

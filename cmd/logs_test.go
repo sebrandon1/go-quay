@@ -13,23 +13,19 @@ func TestLogsCommands(t *testing.T) {
 		setCommandTestValue(t, &enddate, testLogsEndDate)
 	}
 	setupExport := func(t *testing.T) {
-		setCommandTestValue(t, &starttime, "2026-01-01T00:00:00Z")
+		setCommandTestValue(t, &starttime, testStartTime)
 		setCommandTestValue(t, &endtime, "2026-01-31T23:59:59Z")
 		setCommandTestValue(t, &callbackURL, "https://example.test/export")
 		setCommandTestValue(t, &callbackEmail, "logs@example.test")
 	}
 	exportBody := map[string]interface{}{
-		testLogsStartTimeParam: "2026-01-01T00:00:00Z", testLogsEndTimeParam: "2026-01-31T23:59:59Z",
+		testLogsStartTimeParam: testStartTime, testLogsEndTimeParam: "2026-01-31T23:59:59Z",
 		"callback_url": "https://example.test/export", "callback_email": "logs@example.test",
 	}
 	logResponse := `{"logs":[{"kind":"push"}],"next_page":"` + testLogsNextPageResult + `"}`
 	aggregatedResponse := `{"aggregated":[{"kind":"push","count":2,"datetime":"2026-01-05"}]}`
 	tests := []commandDomainCase{
-		{name: "repository logs", run: repoLogsCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: "/repository/testns/testrepo/logs", query: map[string]string{testLogsNextPageParam: testLogsNextPage, testLogsStartTimeParam: testLogsStartDate, testLogsEndTimeParam: testLogsEndDate}}, response: logResponse, wantOutput: testLogsNextPageResult, setup: func(t *testing.T) {
-			setupRepository(t)
-			setupRange(t)
-			setCommandTestValue(t, &nextPage, testLogsNextPage)
-		}},
+		{name: "repository logs", executeArgs: []string{cmdGet, logsCmd.Use, repoLogsCmd.Use, testConfigNamespaceFlag, testNamespace, testDiffRepositoryFlag, testRepository, "--next-page", testLogsNextPage, "--startdate", testLogsStartDate, "--enddate", testLogsEndDate}, request: commandRequestExpectation{method: testHTTPGet, path: "/repository/testns/testrepo/logs", query: map[string]string{testLogsNextPageParam: testLogsNextPage, testLogsStartTimeParam: testLogsStartDate, testLogsEndTimeParam: testLogsEndDate}}, response: logResponse, wantOutput: testLogsNextPageResult},
 		{name: "repository aggregated logs", run: repoAggregatedLogsCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: "/repository/testns/testrepo/aggregatelogs", query: map[string]string{testLogsStartTimeParam: testLogsStartDate, testLogsEndTimeParam: testLogsEndDate}}, response: aggregatedResponse, wantOutput: testLogsPushKind, setup: func(t *testing.T) { setupRepository(t); setupRange(t) }},
 		{name: "organization logs", run: orgLogsCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: "/organization/testorg/logs", query: map[string]string{testLogsNextPageParam: testLogsNextPage, testLogsStartTimeParam: testLogsStartDate, testLogsEndTimeParam: testLogsEndDate}}, response: logResponse, wantOutput: testLogsNextPageResult, setup: func(t *testing.T) {
 			setupOrganization(t)

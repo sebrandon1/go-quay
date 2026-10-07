@@ -13,7 +13,7 @@ func TestRobotCommands(t *testing.T) {
 		setCommandTestValue(t, &federationSubject, "repo:team/project")
 	}
 	tests := []commandDomainCase{
-		{name: subcmdList, run: robotListCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: "/user/robots"}, response: `{"robots":[{"name":"buildbot"}]}`, wantOutput: "buildbot"},
+		{name: subcmdList, executeArgs: []string{subcmdList, cmdRobot + "s"}, request: commandRequestExpectation{method: testHTTPGet, path: "/user/robots"}, response: `{"robots":[{"name":"buildbot"}]}`, wantOutput: "buildbot"},
 		{name: subcmdInfo, run: robotInfoCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: testRobotPath}, response: `{"name":"buildbot"}`, wantOutput: "buildbot", setup: setupName},
 		{name: subcmdCreate, run: robotCreateCmd.RunE, request: commandRequestExpectation{method: testHTTPPut, path: testRobotPath, body: map[string]interface{}{"description": "build worker"}}, response: `{"name":"buildbot","token":"robot-token"}`, wantOutput: "robot-token", setup: func(t *testing.T) { setupName(t); setCommandTestValue(t, &robotDescription, "build worker") }},
 		{name: subcmdDelete, run: robotDeleteCmd.RunE, request: commandRequestExpectation{method: testHTTPDelete, path: testRobotPath}, setup: func(t *testing.T) { setupName(t); setCommandTestValue(t, &confirmRobotDelete, true) }},

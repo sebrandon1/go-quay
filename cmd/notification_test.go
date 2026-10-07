@@ -31,7 +31,7 @@ func TestNotificationCommands(t *testing.T) {
 		testNotificationEventKey: "build_success", testNotificationMethodKey: "slack", testConfigRootCommand: map[string]interface{}{"url": "https://hooks.slack.test/quay"},
 	}
 	tests := []commandDomainCase{
-		{name: subcmdList, run: notificationListCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: basePath}, response: `{"notifications":[` + testNotificationResponse + `]}`, wantOutput: testNotificationUUID, setup: setupRepository},
+		{name: subcmdList, executeArgs: []string{subcmdList, "notifications", testConfigNamespaceFlag, testNamespace, testDiffRepositoryFlag, testRepository}, request: commandRequestExpectation{method: testHTTPGet, path: basePath}, response: `{"notifications":[` + testNotificationResponse + `]}`, wantOutput: testNotificationUUID},
 		{name: subcmdInfo, run: notificationInfoCmd.RunE, request: commandRequestExpectation{method: testHTTPGet, path: basePath + testNotificationUUID}, response: testNotificationResponse, wantOutput: testNotificationUUID, setup: setupUUID},
 		{name: subcmdCreate, run: notificationCreateCmd.RunE, request: commandRequestExpectation{method: testHTTPPost, path: basePath, body: requestBody}, response: testNotificationResponse, wantOutput: testNotificationUUID, setup: func(t *testing.T) { setupRepository(t); setupWebhook(t) }},
 		{name: "create email", run: notificationCreateCmd.RunE, request: commandRequestExpectation{method: testHTTPPost, path: basePath, body: emailBody}, response: `{"uuid":"notice-2"}`, wantOutput: "notice-2", setup: func(t *testing.T) {
