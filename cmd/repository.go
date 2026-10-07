@@ -8,8 +8,12 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 )
+
+const repositoryTagFetchConcurrency = 5
 
 var (
 	repoVisibility  string
@@ -165,16 +169,32 @@ Use --table with --popularity for an enriched dashboard sorted by pull count:
 		fmt.Fprintln(w, "REPOSITORY\tPULLS\tPUSHES (30d)\tTAGS\tLATEST TAG\tLAST PUSH\tMULTI-ARCH")
 
 		thirtyDaysAgo := time.Now().UTC().AddDate(0, 0, -30).Unix()
+		tagResults := make([]*lib.RepositoryTags, len(repos.Repositories))
+		group, ctx := errgroup.WithContext(cmd.Context())
+		group.SetLimit(repositoryTagFetchConcurrency)
+		for i, repo := range repos.Repositories {
+			i, repo := i, repo
+			group.Go(func() error {
+				tags, err := client.ListTags(ctx, namespace, repo.Name, 100, true)
+				if err == nil {
+					tagResults[i] = tags
+				}
+				return nil
+			})
+		}
+		if err := group.Wait(); err != nil {
+			return fmt.Errorf("fetching repository tags: %w", err)
+		}
 
-		for _, repo := range repos.Repositories {
+		for i, repo := range repos.Repositories {
 			latestTag := "-"
 			lastPush := "-"
 			multiArch := "-"
 			tagDisplay := "0"
 			recentPushes := 0
 
-			tags, err := client.ListTags(cmd.Context(), namespace, repo.Name, 100, true)
-			if err == nil && tags != nil && len(tags.Tags) > 0 {
+			tags := tagResults[i]
+			if tags != nil && len(tags.Tags) > 0 {
 				for _, tag := range tags.Tags {
 					if strings.HasPrefix(tag.Name, "sha256-") || strings.HasSuffix(tag.Name, ".sig") || strings.HasSuffix(tag.Name, ".att") || strings.HasSuffix(tag.Name, ".sbom") {
 						continue
