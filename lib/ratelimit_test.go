@@ -2,6 +2,7 @@ package lib
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 )
@@ -61,6 +62,89 @@ func TestRateLimitedClient_ListTags(t *testing.T) {
 	}
 	if tags == nil {
 		t.Fatal("expected non-nil tags")
+	}
+}
+
+func TestRateLimitedClient_ManifestPassthroughs(t *testing.T) {
+	mock := &mockReader{}
+	client := NewRateLimitedClient(mock, 100, 100)
+	ctx := context.Background()
+	if _, err := client.GetManifestSecurity(ctx, testNamespace, testRepoName, "latest", true); err != nil {
+		t.Fatalf("GetManifestSecurity: %v", err)
+	}
+	if _, err := client.GetManifest(ctx, testNamespace, testRepoName, "latest"); err != nil {
+		t.Fatalf("GetManifest: %v", err)
+	}
+	if _, err := client.GetManifestLabels(ctx, testNamespace, testRepoName, "latest"); err != nil {
+		t.Fatalf("GetManifestLabels: %v", err)
+	}
+	if got := mock.calls.Load(); got != 3 {
+		t.Errorf("inner call count = %d, want 3", got)
+	}
+}
+
+func TestRateLimitedClient_CancelledContext(t *testing.T) {
+	mock := &mockReader{}
+	client := NewRateLimitedClient(mock, 100, 100)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	tests := []struct {
+		name string
+		call func() error
+	}{
+		{
+			name: "GetRepository",
+			call: func() error {
+				_, err := client.GetRepository(ctx, testNamespace, testRepoName)
+				return err
+			},
+		},
+		{
+			name: "ListTags",
+			call: func() error {
+				_, err := client.ListTags(ctx, testNamespace, testRepoName, 10, true)
+				return err
+			},
+		},
+		{
+			name: "ListAllTags",
+			call: func() error {
+				_, err := client.ListAllTags(ctx, testNamespace, testRepoName, true)
+				return err
+			},
+		},
+		{
+			name: "GetManifestSecurity",
+			call: func() error {
+				_, err := client.GetManifestSecurity(ctx, testNamespace, testRepoName, "latest", true)
+				return err
+			},
+		},
+		{
+			name: "GetManifest",
+			call: func() error {
+				_, err := client.GetManifest(ctx, testNamespace, testRepoName, "latest")
+				return err
+			},
+		},
+		{
+			name: "GetManifestLabels",
+			call: func() error {
+				_, err := client.GetManifestLabels(ctx, testNamespace, testRepoName, "latest")
+				return err
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.call(); !errors.Is(err, context.Canceled) {
+				t.Errorf("call error = %v, want context.Canceled", err)
+			}
+		})
+	}
+	if got := mock.calls.Load(); got != 0 {
+		t.Errorf("inner calls = %d, want 0 for canceled contexts", got)
 	}
 }
 
