@@ -2,12 +2,16 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 )
 
 const (
@@ -156,6 +160,126 @@ func TestRepoListCmd(t *testing.T) {
 	}
 	if !strings.Contains(output, `"name": "repo2"`) {
 		t.Errorf("expected repo2 in output, got: %s", output)
+	}
+}
+
+func TestRepoListTableParallelTagFetches(t *testing.T) {
+	resetRepositoryFlags(t)
+
+	repositories, repositoryJSON := repositoryListTestData(9)
+	var maxActiveRequests atomic.Int32
+	server := newRepositoryListTableTestServer(t, repositoryJSON, &maxActiveRequests)
+	defer server.Close()
+
+	output := executeRepositoryListTableCommand(t, server.URL)
+	assertRepositoryListTableOutput(t, output, repositories)
+
+	if got := maxActiveRequests.Load(); got < 2 || got > repositoryTagFetchConcurrency {
+		t.Errorf("maximum concurrent tag requests = %d, want between 2 and %d", got, repositoryTagFetchConcurrency)
+	}
+}
+
+func repositoryListTestData(count int) ([]string, string) {
+	repositories := make([]string, count)
+	entries := make([]string, count)
+	for i := range repositories {
+		name := "repo" + strconv.Itoa(i+1)
+		repositories[i] = name
+		// Descending popularity keeps the expected table order explicit.
+		entries[i] = fmt.Sprintf(`{"name":%q,"popularity":%d}`, name, count-i)
+	}
+	return repositories, `{"repositories":[` + strings.Join(entries, ",") + `]}`
+}
+
+func newRepositoryListTableTestServer(t *testing.T, repositoryJSON string, maxActiveRequests *atomic.Int32) *httptest.Server {
+	t.Helper()
+	var activeRequests atomic.Int32
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/repository" {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(repositoryJSON))
+			return
+		}
+
+		pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+		if len(pathParts) < 2 || pathParts[len(pathParts)-1] != "tag" {
+			t.Errorf("unexpected request path: %s", r.URL.Path)
+			http.NotFound(w, r)
+			return
+		}
+		repoName := pathParts[len(pathParts)-2]
+		active := activeRequests.Add(1)
+		defer activeRequests.Add(-1)
+		recordMaximumConcurrency(maxActiveRequests, active)
+
+		// Keep requests in flight long enough to observe overlapping fetches.
+		time.Sleep(20 * time.Millisecond)
+		if repoName == "repo5" {
+			http.Error(w, "tag lookup failed", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"tags":[{"name":"v1","start_ts":1780000000,"is_manifest_list":true}]}`))
+	}))
+}
+
+func recordMaximumConcurrency(maximum *atomic.Int32, active int32) {
+	for previous := maximum.Load(); active > previous; previous = maximum.Load() {
+		if maximum.CompareAndSwap(previous, active) {
+			return
+		}
+	}
+}
+
+func executeRepositoryListTableCommand(t *testing.T, serverURL string) string {
+	t.Helper()
+	oldStdout := os.Stdout
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("create stdout pipe: %v", err)
+	}
+	os.Stdout = w
+	rootCmd.SetArgs([]string{
+		cmdGet, testTokenFlag, testTokenValue, testQuayURLFlag, serverURL,
+		cmdRepository, subcmdList, "-n", testNamespace, "--popularity", "--table",
+	})
+	execErr := rootCmd.Execute()
+	if closeErr := w.Close(); closeErr != nil {
+		t.Errorf("close stdout pipe: %v", closeErr)
+	}
+	os.Stdout = oldStdout
+	if execErr != nil {
+		t.Fatalf("expected no error, got: %v", execErr)
+	}
+
+	var output bytes.Buffer
+	if _, err := io.Copy(&output, r); err != nil {
+		t.Fatalf("read captured stdout: %v", err)
+	}
+	if err := r.Close(); err != nil {
+		t.Errorf("close stdout reader: %v", err)
+	}
+	return output.String()
+}
+
+func assertRepositoryListTableOutput(t *testing.T, output string, repositories []string) {
+	t.Helper()
+	lines := strings.Split(strings.TrimSpace(output), "\n")
+	if len(lines) != len(repositories)+1 {
+		t.Fatalf("expected header and %d repository rows, got %d lines: %s", len(repositories), len(lines)-1, output)
+	}
+	for i, expectedName := range repositories {
+		fields := strings.Fields(lines[i+1])
+		if len(fields) == 0 || fields[0] != expectedName {
+			t.Errorf("row %d repository = %q, want %q", i+1, lines[i+1], expectedName)
+		}
+		if expectedName == "repo5" {
+			if len(fields) < 7 || strings.Join(fields[1:], " ") != "5 0 0 - - -" {
+				t.Errorf("failed tag lookup row should retain placeholder values, got %q", lines[i+1])
+			}
+		} else if len(fields) < 7 || fields[3] != "1" || fields[4] != "v1" || fields[6] != "yes" {
+			t.Errorf("successful tag lookup row has unexpected values: %q", lines[i+1])
+		}
 	}
 }
 
