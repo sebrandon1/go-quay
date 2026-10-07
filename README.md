@@ -2,7 +2,7 @@
 
 [![Pre-Main Checks](https://github.com/sebrandon1/go-quay/actions/workflows/pre-main.yaml/badge.svg)](https://github.com/sebrandon1/go-quay/actions/workflows/pre-main.yaml)
 [![Quay API Verified Nightly](https://github.com/sebrandon1/go-quay/actions/workflows/nightly.yaml/badge.svg)](https://github.com/sebrandon1/go-quay/actions/workflows/nightly.yaml)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/sebrandon1/go-quay)](https://golang.org/)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/sebrandon1/go-quay)](https://go.dev/)
 [![License](https://img.shields.io/github/license/sebrandon1/go-quay)](https://github.com/sebrandon1/go-quay/blob/main/LICENSE)
 
 A Go wrapper around the [Quay.io REST API](https://docs.quay.io/api/swagger/).
@@ -124,8 +124,10 @@ Each API links to the corresponding [Quay.io Swagger documentation](https://docs
 | [Logs](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--aggregatelogs-get) | Yes | Yes | /api/v1/repository/{namespace}/{repository}/aggregatelogs, /api/v1/repository/{namespace}/{repository}/logs, /api/v1/organization/{orgname}/logs, /api/v1/organization/{orgname}/aggregatelogs, /api/v1/user/logs, /api/v1/user/aggregatelogs |
 | [Manifest](https://docs.quay.io/api/swagger/#Manifest) | Yes | Yes | /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}, /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels, /api/v1/repository/{namespace}/{repository}/manifest/{manifestref}/labels/{labelid} |
 | Mirror | Yes | Yes | /api/v1/repository/{namespace}/{repository}/mirror (configuration CRUD; the public discovery spec has no sync trigger or live-run status endpoint) |
+| [Marketplace](https://docs.quay.io/api/swagger/) | Yes | Yes | /api/v1/user/marketplace, /api/v1/organization/{orgname}/marketplace, /api/v1/organization/{orgname}/marketplace/{subscription_id}, /api/v1/organization/{orgname}/marketplace/batchremove |
 | [Organization](https://docs.quay.io/api/swagger/#operation--api-v1-organization--orgname--get) | Yes | Yes | /api/v1/organization/{orgname}, /api/v1/organization/{orgname}/members, /api/v1/organization/{orgname}/teams, /api/v1/organization/{orgname}/team/{teamname}, /api/v1/organization/{orgname}/robots, /api/v1/organization/{orgname}/quota, /api/v1/organization/{orgname}/autoprunepolicy, /api/v1/organization/{orgname}/applications |
 | [Permission](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--permissions-get) | Yes | Yes | /api/v1/repository/{namespace}/{repository}/permissions, /api/v1/repository/{namespace}/{repository}/permissions/{username} |
+| [Proxy Cache](https://docs.quay.io/api/swagger/) | Yes | Yes | /api/v1/organization/{orgname}/proxycache |
 | [Prototype](https://docs.quay.io/api/swagger/#Prototype) | Yes | Yes | /api/v1/organization/{orgname}/prototypes, /api/v1/organization/{orgname}/prototypes/{uuid} |
 | [Repository](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--get) | Yes | Yes | /api/v1/repository/{namespace}/{repository}, /api/v1/repository/{namespace}/{repository}/tag, /api/v1/repository, /api/v1/repository/{namespace}/{repository} (CRUD) |
 | [RepositoryNotification](https://docs.quay.io/api/swagger/#RepositoryNotification) | Yes | Yes | /api/v1/repository/{namespace}/{repository}/notification/, /api/v1/repository/{namespace}/{repository}/notification/{uuid}, /api/v1/repository/{namespace}/{repository}/notification/{uuid}/test |
@@ -159,7 +161,7 @@ make ci        # lint + vet + test + build
 
 ## Prerequisites
 
-- Go 1.26+
+- Go 1.27+
 - golangci-lint (for `make lint`)
 
 ## Contributing

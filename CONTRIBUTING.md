@@ -4,7 +4,7 @@ Thank you for contributing! This guide covers setup, development workflow, and h
 
 ## Prerequisites
 
-- Go 1.26+
+- Go 1.27+
 - golangci-lint (for `make lint`)
 - Quay.io API token (`QUAY_TOKEN`) and organization (`QUAY_ORG`) for integration tests
 

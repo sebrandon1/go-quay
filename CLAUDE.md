@@ -59,6 +59,8 @@ Preferred: `go-quay <verb> <resource>` with verbs `create`, `delete`, `update`, 
 
 Configuration commands live at the root: `go-quay config init`, `go-quay config path`, and `go-quay config show`.
 
+Other root commands: `go-quay batch apply`, `go-quay completion`, and `go-quay diff tag`.
+
 Legacy: all API commands still hang off `go-quay get` (`repository`, `billing`, `organization`, `permissions`, `tag`, `user`, `manifest`, `secscan`, `robot`, `search`, `team`, `build`, `notification`, `trigger`, `discovery`, `error`, `messages`, `prototype`, `repotoken`, `logs`, `mirror`). Mutating `get` subcommands are deprecated.
 
 ## Configuration
@@ -80,5 +82,5 @@ CLI flag precedence: flags > environment variables > config file > built-in defa
 
 ## Requirements
 
-- Go 1.26+
+- Go 1.27+
 - golangci-lint (for `make lint`)
