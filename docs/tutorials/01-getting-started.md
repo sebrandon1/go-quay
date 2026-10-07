@@ -4,7 +4,7 @@ This tutorial walks you through the basics of using the go-quay library to inter
 
 ## Prerequisites
 
-- Go 1.26+
+- Go 1.27+
 - A Quay.io account with API access
 - An API token from Quay.io
 
