@@ -105,6 +105,22 @@ func TestFetchSwaggerEndpoints(t *testing.T) {
 	}
 }
 
+func TestFetchSwaggerEndpointsSkipsUnsupportedAndMalformedOperations(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"paths":{"/example":{"options":{"summary":"ignored"},"get":"malformed","patch":{"summary":"Update"}}}}`))
+	}))
+	t.Cleanup(server.Close)
+
+	got, err := fetchSwaggerEndpoints(context.Background(), server.URL)
+	if err != nil {
+		t.Fatalf("fetchSwaggerEndpoints() error = %v", err)
+	}
+	want := []Endpoint{{Method: http.MethodPatch, Path: "/example", Summary: "Update"}}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("fetchSwaggerEndpoints() = %#v, want %#v", got, want)
+	}
+}
+
 func TestScanSourceEndpointsHTTPMethods(t *testing.T) {
 	const sourceFile = "fixture.go"
 
@@ -143,11 +159,11 @@ func StandardLibraryRequest(ctx context.Context) {
 	}
 
 	want := []ImplementedEndpoint{
-		{Method: "GET", Path: "/get", SourceFile: sourceFile, Function: "Get"},
-		{Method: "POST", Path: "/create", SourceFile: sourceFile, Function: "Create"},
-		{Method: "DELETE", Path: "/delete", SourceFile: sourceFile, Function: "Delete"},
-		{Method: "GET", Path: "/default", SourceFile: sourceFile, Function: "DefaultMethod"},
-		{Method: "PATCH", Path: "/patch", SourceFile: sourceFile, Function: "StandardLibraryRequest"},
+		{Method: http.MethodGet, Path: "/get", SourceFile: sourceFile, Function: "Get"},
+		{Method: http.MethodPost, Path: "/create", SourceFile: sourceFile, Function: "Create"},
+		{Method: http.MethodDelete, Path: "/delete", SourceFile: sourceFile, Function: "Delete"},
+		{Method: http.MethodGet, Path: "/default", SourceFile: sourceFile, Function: "DefaultMethod"},
+		{Method: http.MethodPatch, Path: "/patch", SourceFile: sourceFile, Function: "StandardLibraryRequest"},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("scanSourceEndpoints() = %#v, want %#v", got, want)
