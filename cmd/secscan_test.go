@@ -38,9 +38,9 @@ func resetSecscanCommandState(t *testing.T) {
 			}
 		}
 		for name, value := range map[string]string{
-			"namespace":  appCfg.Namespace,
-			"repository": "",
-			"manifest":   "",
+			testNamespaceFlagName: appCfg.Namespace,
+			cmdRepository:         "",
+			"manifest":            "",
 		} {
 			if flag := secscanCmd.PersistentFlags().Lookup(name); flag != nil {
 				flag.Changed = false

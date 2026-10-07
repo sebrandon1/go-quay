@@ -13,7 +13,7 @@ func resetMirrorCommandState(t *testing.T) {
 	t.Helper()
 	namespace = ""
 	repository = ""
-	for _, name := range []string{"namespace", "repository"} {
+	for _, name := range []string{testNamespaceFlagName, cmdRepository} {
 		if flag := mirrorCmd.PersistentFlags().Lookup(name); flag != nil {
 			flag.Changed = false
 			if err := flag.Value.Set(""); err != nil {

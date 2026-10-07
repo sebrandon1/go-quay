@@ -42,7 +42,7 @@ func TestCreateRepositoryHasResourceFlags(t *testing.T) {
 	if leaf == nil {
 		t.Fatal("create repository not registered")
 	}
-	for _, name := range []string{"namespace", "repository", "visibility", "description"} {
+	for _, name := range []string{testNamespaceFlagName, cmdRepository, "visibility", "description"} {
 		if leaf.Flags().Lookup(name) == nil {
 			t.Errorf("create repository missing --%s flag", name)
 		}

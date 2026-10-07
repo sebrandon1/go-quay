@@ -1,10 +1,12 @@
 version: "2"
 linters:
   enable:
+    - bodyclose
     - goconst
     - gocritic
     - gocyclo
     - misspell
+    - noctx
     - unparam
   settings:
     gocyclo:

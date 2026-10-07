@@ -8,6 +8,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -60,7 +61,7 @@ func main() {
 
 	// Fetch and parse swagger spec
 	fmt.Println("Fetching Swagger spec from", *swaggerURL, "...")
-	specEndpoints, err := fetchSwaggerEndpoints(*swaggerURL)
+	specEndpoints, err := fetchSwaggerEndpoints(context.Background(), *swaggerURL)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error fetching swagger spec: %v\n", err)
 		os.Exit(1)
@@ -87,8 +88,13 @@ func main() {
 	}
 }
 
-func fetchSwaggerEndpoints(url string) ([]Endpoint, error) {
-	resp, err := http.Get(url)
+func fetchSwaggerEndpoints(ctx context.Context, url string) ([]Endpoint, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +179,7 @@ func scanSourceEndpoints(libPath, baseURLVar string) ([]ImplementedEndpoint, err
 	urlConcatPattern := regexp.MustCompile(baseURLVar + `\s*\+\s*"(/[^"]+)"`)
 	sprintfPattern := regexp.MustCompile(`fmt\.Sprintf\s*\(\s*"%s(/[^"]+)"`)
 	buildURLPattern := regexp.MustCompile(`buildURL\s*\(\s*"(/[^"]+)"`)
-	methodPattern := regexp.MustCompile(`(?:http\.NewRequest|newRequest|newRequestWithBody)\s*\(\s*(?:[^,]+,\s*)?(?:"(GET|POST|PUT|DELETE|PATCH)"|http\.Method(Get|Post|Put|Delete|Patch))`)
+	methodPattern := regexp.MustCompile(`(?:http\.NewRequestWithContext|http\.NewRequest|newRequest|newRequestWithBody)\s*\(\s*(?:[^,]+,\s*)?(?:"(GET|POST|PUT|DELETE|PATCH)"|http\.Method(Get|Post|Put|Delete|Patch))`)
 	funcPattern := regexp.MustCompile(`func\s+(?:\([^)]+\)\s+)?(\w+)`)
 
 	err := filepath.Walk(libPath, func(path string, info os.FileInfo, err error) error {

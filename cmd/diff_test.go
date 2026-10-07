@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	testDiffNamespaceFlagName   = "namespace"
+	testNamespaceFlagName       = "namespace"
 	testDiffRepositoryFlagName  = "repository"
 	testDiffRepositoryFlag      = "--repository"
 	testDiffTagAFlagName        = "tag-a"
@@ -32,11 +32,11 @@ func resetTagDiffFlags(t *testing.T) {
 	diffRepository = ""
 	diffTagA = ""
 	diffTagB = ""
-	for _, name := range []string{testDiffNamespaceFlagName, testDiffRepositoryFlagName, testDiffTagAFlagName, testDiffTagBFlagName} {
+	for _, name := range []string{testNamespaceFlagName, testDiffRepositoryFlagName, testDiffTagAFlagName, testDiffTagBFlagName} {
 		if f := diffTagCmd.Flags().Lookup(name); f != nil {
 			f.Changed = false
 			value := ""
-			if name == testDiffNamespaceFlagName {
+			if name == testNamespaceFlagName {
 				value = appCfg.Namespace
 			}
 			if err := f.Value.Set(value); err != nil {
