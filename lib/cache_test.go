@@ -162,6 +162,77 @@ func TestCachedClient_ListTagsPassthrough(t *testing.T) {
 	}
 }
 
+func TestCachedClient_ReaderPassthroughs(t *testing.T) {
+	mock := &mockReader{}
+	cached := NewCachedClient(mock)
+	ctx := context.Background()
+	tests := []struct {
+		name string
+		call func() error
+	}{
+		{
+			name: "ListAllTags",
+			call: func() error {
+				_, err := cached.ListAllTags(ctx, testNamespace, testRepoName, true)
+				return err
+			},
+		},
+		{
+			name: "GetManifestSecurity",
+			call: func() error {
+				_, err := cached.GetManifestSecurity(ctx, testNamespace, testRepoName, "latest", true)
+				return err
+			},
+		},
+		{
+			name: "GetManifest",
+			call: func() error {
+				_, err := cached.GetManifest(ctx, testNamespace, testRepoName, "latest")
+				return err
+			},
+		},
+		{
+			name: "GetManifestLabels",
+			call: func() error {
+				_, err := cached.GetManifestLabels(ctx, testNamespace, testRepoName, "latest")
+				return err
+			},
+		},
+	}
+
+	for i, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.call(); err != nil {
+				t.Fatalf("passthrough returned error: %v", err)
+			}
+			if got := mock.calls.Load(); got != int32(i+1) {
+				t.Errorf("inner call count = %d, want %d", got, i+1)
+			}
+		})
+	}
+}
+
+func TestCachedClient_StartCleanupLoop(t *testing.T) {
+	cached := NewCachedClient(&mockReader{}, WithCacheTTL(time.Hour))
+	cached.cache["expired"] = cacheEntry{timestamp: time.Now().Add(-time.Hour)}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cached.StartCleanupLoop(ctx, 10*time.Millisecond)
+	t.Cleanup(cancel)
+
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		cached.mu.RLock()
+		_, exists := cached.cache["expired"]
+		cached.mu.RUnlock()
+		if !exists {
+			return
+		}
+		time.Sleep(time.Millisecond)
+	}
+	t.Fatal("cleanup loop did not remove the expired entry")
+}
+
 func TestCachedClient_DifferentKeys(t *testing.T) {
 	mock := &mockReader{
 		repo: RepositoryWithTags{
