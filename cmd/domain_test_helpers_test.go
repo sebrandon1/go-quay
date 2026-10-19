@@ -294,4 +294,19 @@ const (
 	testFlagTeam        = "team"
 	testFlagUser        = "user"
 	testFlagValue       = "value"
+	testFlagUUID        = "uuid"
+	testFlagEmail       = "email"
 )
+
+// apiErrorCase builds a case where the API answers with a Quay JSON error and
+// the command is expected to wrap it with wantError.
+func apiErrorCase(name string, run func(*cobra.Command, []string) error, method, path string, status int, wantError string, setup func(*testing.T)) commandDomainCase {
+	return commandDomainCase{
+		name:      name + " " + testAPIErrorCase,
+		run:       run,
+		request:   commandRequestExpectation{method: method, path: path, status: status},
+		response:  testAPIErrorResponse,
+		wantError: wantError,
+		setup:     setup,
+	}
+}
