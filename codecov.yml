@@ -1,0 +1,9 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 75%
+    patch: false
+
+comment:
+  layout: "diff,flags,files"
