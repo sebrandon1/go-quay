@@ -164,7 +164,7 @@ func TestCommandDomainExecuteValidation(t *testing.T) {
 		want  []string
 		setup func(*testing.T)
 	}{
-		{name: billingCmd.Use, args: []string{cmdGet, billingCmd.Use, orgBillingCmd.Use}, want: []string{testRequiredFlagError, "organization"}},
+		{name: billingCmd.Use, args: []string{cmdGet, billingCmd.Use, orgBillingCmd.Use}, want: []string{testRequiredFlagError, cmdOrganization}},
 		{name: cmdBuild, args: []string{subcmdList, testBuildsCommand}, want: []string{testRequiredFlagError, testNamespaceFlagName, cmdRepository}},
 		{name: logsCmd.Use, args: []string{cmdGet, logsCmd.Use, repoLogsCmd.Use}, want: []string{"namespace is required"}, setup: func(t *testing.T) {
 			setCommandTestValue(t, &namespace, "")
