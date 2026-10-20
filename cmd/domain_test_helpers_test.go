@@ -238,3 +238,60 @@ func checkCommandTestResult(t *testing.T, output string, err error, wantOutput, 
 		t.Errorf("command output %q does not contain %q", output, wantOutput)
 	}
 }
+
+// runCommandExpectingNoRequest runs a command that must fail validation
+// before any HTTP request is made, and returns its error.
+func runCommandExpectingNoRequest(t *testing.T, run func(*cobra.Command, []string) error) error {
+	t.Helper()
+	setCommandTestValue(t, &token, testTokenValue)
+	setCommandTestValue(t, &quayURL, testUnreachableURL+"/api/v1")
+	command := &cobra.Command{}
+	command.SetContext(context.Background())
+	return run(command, nil)
+}
+
+// runExecuteValidationCases runs each case through the root command and
+// asserts the returned error contains every wanted substring.
+func runExecuteValidationCases(t *testing.T, tests []executeValidationCase) {
+	t.Helper()
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			resetRootFlags(t)
+			resetCommandFlagChanges(rootCmd)
+			rootCmd.SetArgs(append([]string{testTokenFlag, testTokenValue, testQuayURLFlag, testUnreachableURL}, test.args...))
+			rootCmd.SetErr(io.Discard)
+			var runErr error
+			captureStdout(t, func() { runErr = rootCmd.Execute() })
+			if runErr == nil {
+				t.Fatal("root command returned no validation error")
+			}
+			for _, want := range test.want {
+				if !strings.Contains(runErr.Error(), want) {
+					t.Errorf("root command error = %v, want it to contain %q", runErr, want)
+				}
+			}
+		})
+	}
+}
+
+type executeValidationCase struct {
+	name string
+	args []string
+	want []string
+}
+
+const (
+	testFlagCode        = "code"
+	testFlagDescription = "description"
+	testFlagIssuer      = "issuer"
+	testFlagMethod      = "method"
+	testFlagName        = "name"
+	testFlagPolicyUUID  = "policy-uuid"
+	testFlagRepository  = "repository"
+	testFlagRobot       = "robot"
+	testFlagRole        = "role"
+	testFlagSubject     = "subject"
+	testFlagTeam        = "team"
+	testFlagUser        = "user"
+	testFlagValue       = "value"
+)
