@@ -74,4 +74,10 @@ $BINARY get logs repo-aggregated-logs --help
 $BINARY get mirror --help
 $BINARY get mirror info --help
 
+echo "Checking docs for deprecated mutating get examples..."
+if grep -rnE 'go-quay get [a-z]+ (create|delete|update|regenerate|add|remove|set|change|test|reset|cancel|request|star|unstar|activate|start|enable|disable|revert|restore|invite|batch-remove|export|federation-(create|delete)|robot-federation-(create|delete))([[:space:]\\]|$)' docs/; then
+    echo "❌ Deprecated mutating 'go-quay get' examples found in docs/; use the verb-first form"
+    exit 1
+fi
+
 echo "✅ All CLI commands structure tests passed!"

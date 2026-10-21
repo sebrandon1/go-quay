@@ -27,7 +27,9 @@ go-quay info repository -n myorg -r myapp
 go-quay delete repository -n myorg -r myapp --confirm
 ```
 
-`go-quay get <resource> <action>` still works. Mutating actions under `get` print a deprecation warning pointing at the verb-first command. Read-only groups that do not map to a single resource (`billing`, `logs`, `search`, `discovery`) remain under `get` only.
+### Legacy `get` aliases
+
+`go-quay get <resource> <action>` still works, but mutating actions under `get` are deprecated: they print a warning pointing at the verb-first command, and every example below uses the verb-first form. Read-only groups that do not map to a single resource (`billing`, `logs`, `search`, `discovery`) remain under `get` only.
 
 ## Global flags and configuration
 
@@ -184,7 +186,7 @@ go-quay get build logs \
 
 ### Request a new build
 ```bash
-go-quay get build request \
+go-quay create build \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --archive-url "https://example.com/archive.tar.gz" \
@@ -203,7 +205,7 @@ go-quay get build status \
 
 ### Cancel a build
 ```bash
-go-quay get build cancel \
+go-quay delete build \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid BUILD_UUID \
@@ -242,7 +244,7 @@ go-quay get trigger info \
 
 ### Delete a trigger
 ```bash
-go-quay get trigger delete \
+go-quay delete trigger \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid TRIGGER_UUID \
@@ -251,7 +253,7 @@ go-quay get trigger delete \
 
 ### Enable a trigger
 ```bash
-go-quay get trigger enable \
+go-quay update trigger-enable \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid TRIGGER_UUID \
@@ -260,7 +262,7 @@ go-quay get trigger enable \
 
 ### Disable a trigger
 ```bash
-go-quay get trigger disable \
+go-quay update trigger-disable \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid TRIGGER_UUID \
@@ -269,14 +271,14 @@ go-quay get trigger disable \
 
 ### Manually start a build from trigger
 ```bash
-go-quay get trigger start \
+go-quay create trigger-build \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid TRIGGER_UUID \
   --token YOUR_TOKEN
 
 # Optionally specify a commit SHA
-go-quay get trigger start \
+go-quay create trigger-build \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid TRIGGER_UUID \
@@ -286,7 +288,7 @@ go-quay get trigger start \
 
 ### Activate a trigger
 ```bash
-go-quay get trigger activate \
+go-quay create trigger \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid TRIGGER_UUID \
@@ -333,7 +335,7 @@ go-quay get notification info \
 
 ### Create a webhook notification
 ```bash
-go-quay get notification create \
+go-quay create notification \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --event repo_push \
@@ -345,7 +347,7 @@ go-quay get notification create \
 
 ### Create a Slack notification
 ```bash
-go-quay get notification create \
+go-quay create notification \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --event build_success \
@@ -357,7 +359,7 @@ go-quay get notification create \
 
 ### Test a notification
 ```bash
-go-quay get notification test \
+go-quay update notification-test \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid NOTIFICATION_UUID \
@@ -366,7 +368,7 @@ go-quay get notification test \
 
 ### Reset notification failure count
 ```bash
-go-quay get notification reset \
+go-quay update notification-reset \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid NOTIFICATION_UUID \
@@ -375,7 +377,7 @@ go-quay get notification reset \
 
 ### Update a notification
 ```bash
-go-quay get notification update \
+go-quay update notification \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid NOTIFICATION_UUID \
@@ -388,7 +390,7 @@ go-quay get notification update \
 
 ### Delete a notification
 ```bash
-go-quay get notification delete \
+go-quay delete notification \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --uuid NOTIFICATION_UUID \
@@ -452,7 +454,7 @@ go-quay get logs user-aggregated-logs -s "2024-01-01" -e "2024-01-31" -t YOUR_TO
 ### Export logs
 ```bash
 # Export repository logs
-go-quay get logs export-repo-logs \
+go-quay create repo-logs-export \
   -n NAMESPACE \
   -r REPOSITORY \
   --start-time "2024-01-01T00:00:00Z" \
@@ -461,7 +463,7 @@ go-quay get logs export-repo-logs \
   -t YOUR_TOKEN
 
 # Export organization logs
-go-quay get logs export-org-logs \
+go-quay create org-logs-export \
   -o ORG_NAME \
   --start-time "2024-01-01T00:00:00Z" \
   --end-time "2024-01-31T23:59:59Z" \
@@ -469,7 +471,7 @@ go-quay get logs export-org-logs \
   -t YOUR_TOKEN
 
 # Export user logs
-go-quay get logs export-user-logs \
+go-quay create user-logs-export \
   --start-time "2024-01-01T00:00:00Z" \
   --end-time "2024-01-31T23:59:59Z" \
   --callback-email "user@example.com" \
@@ -559,7 +561,7 @@ go-quay get permissions list \
 
 ### Set user/robot permissions
 ```bash
-go-quay get permissions set \
+go-quay update permission \
   --namespace myorg \
   --repository myrepo \
   --user john.doe \
@@ -569,7 +571,7 @@ go-quay get permissions set \
 
 ### Remove permissions
 ```bash
-go-quay get permissions remove \
+go-quay delete permission \
   --namespace myorg \
   --repository myrepo \
   --user john.doe \
@@ -592,7 +594,7 @@ go-quay get permissions user-permission \
   --token YOUR_TOKEN
 
 # Set user permission
-go-quay get permissions set-user-permission \
+go-quay update user-permission \
   --namespace myorg \
   --repository myrepo \
   --user john.doe \
@@ -600,7 +602,7 @@ go-quay get permissions set-user-permission \
   --token YOUR_TOKEN
 
 # Delete user permission
-go-quay get permissions delete-user-permission \
+go-quay delete user-permission \
   --namespace myorg \
   --repository myrepo \
   --user john.doe \
@@ -631,7 +633,7 @@ go-quay get permissions team-permission \
   --token YOUR_TOKEN
 
 # Set team permission
-go-quay get permissions set-team-permission \
+go-quay update team-permission \
   --namespace myorg \
   --repository myrepo \
   --team developers \
@@ -639,7 +641,7 @@ go-quay get permissions set-team-permission \
   --token YOUR_TOKEN
 
 # Delete team permission
-go-quay get permissions delete-team-permission \
+go-quay delete team-permission \
   --namespace myorg \
   --repository myrepo \
   --team developers \
@@ -674,7 +676,7 @@ go-quay get tag info \
 
 ### Update tag metadata
 ```bash
-go-quay get tag update \
+go-quay update tag \
   --namespace myorg \
   --repository myrepo \
   --tag v1.0.0 \
@@ -684,7 +686,7 @@ go-quay get tag update \
 
 ### Delete a specific tag
 ```bash
-go-quay get tag delete \
+go-quay delete tag \
   --namespace myorg \
   --repository myrepo \
   --tag old-version \
@@ -703,7 +705,7 @@ go-quay get tag history \
 
 ### Revert tag to previous state
 ```bash
-go-quay get tag revert \
+go-quay update tag-revert \
   --namespace myorg \
   --repository myrepo \
   --tag latest \
@@ -713,7 +715,7 @@ go-quay get tag revert \
 
 ### Restore a deleted tag
 ```bash
-go-quay get tag restore \
+go-quay update tag-restore \
   --namespace myorg \
   --repository myrepo \
   --tag deleted-tag \
@@ -723,7 +725,7 @@ go-quay get tag restore \
 
 ### Create or move a tag to a manifest
 ```bash
-go-quay get tag change \
+go-quay update tag-change \
   --namespace myorg \
   --repository myrepo \
   --tag latest \
@@ -746,7 +748,7 @@ go-quay get manifest info \
 
 ### Delete a manifest
 ```bash
-go-quay get manifest delete \
+go-quay delete manifest \
   --namespace myorg \
   --repository myrepo \
   --manifest sha256:abc123def456... \
@@ -775,7 +777,7 @@ go-quay get manifest label \
 
 ### Add a label to a manifest
 ```bash
-go-quay get manifest add-label \
+go-quay create manifest-label \
   --namespace myorg \
   --repository myrepo \
   --manifest sha256:abc123def456... \
@@ -786,7 +788,7 @@ go-quay get manifest add-label \
 
 ### Remove a label from a manifest
 ```bash
-go-quay get manifest remove-label \
+go-quay delete manifest-label \
   --namespace myorg \
   --repository myrepo \
   --manifest sha256:abc123def456... \
@@ -859,7 +861,7 @@ go-quay get robot info --name deploybot --token YOUR_TOKEN
 
 ### Create a new robot account
 ```bash
-go-quay get robot create \
+go-quay create robot \
   --name mybot \
   --description "CI/CD automation robot" \
   --token YOUR_TOKEN
@@ -867,12 +869,12 @@ go-quay get robot create \
 
 ### Delete a robot account
 ```bash
-go-quay get robot delete --name oldbot --confirm --token YOUR_TOKEN
+go-quay delete robot --name oldbot --confirm --token YOUR_TOKEN
 ```
 
 ### Regenerate robot token
 ```bash
-go-quay get robot regenerate --name deploybot --token YOUR_TOKEN
+go-quay update robot --name deploybot --token YOUR_TOKEN
 ```
 
 ### Get robot permissions
@@ -887,7 +889,7 @@ go-quay get robot federation-get --name deploybot --token YOUR_TOKEN
 
 ### Create robot federation config
 ```bash
-go-quay get robot federation-create \
+go-quay create robot-federation \
   --name deploybot \
   --issuer "https://token.actions.githubusercontent.com" \
   --subject "repo:org/repo:ref:refs/heads/main" \
@@ -896,7 +898,7 @@ go-quay get robot federation-create \
 
 ### Delete robot federation config
 ```bash
-go-quay get robot federation-delete --name deploybot --token YOUR_TOKEN
+go-quay delete robot-federation --name deploybot --token YOUR_TOKEN
 ```
 
 ## Search API
@@ -929,7 +931,7 @@ go-quay get team info --organization myorg --name developers --token YOUR_TOKEN
 
 ### Create a new team
 ```bash
-go-quay get team create \
+go-quay create team \
   --organization myorg \
   --name developers \
   --description "Development team" \
@@ -939,7 +941,7 @@ go-quay get team create \
 
 ### Update team settings
 ```bash
-go-quay get team update \
+go-quay update team \
   --organization myorg \
   --name developers \
   --description "Updated description" \
@@ -949,7 +951,7 @@ go-quay get team update \
 
 ### Delete a team
 ```bash
-go-quay get team delete --organization myorg --name developers --confirm --token YOUR_TOKEN
+go-quay delete team --organization myorg --name developers --confirm --token YOUR_TOKEN
 ```
 
 ### Manage team members
@@ -958,10 +960,10 @@ go-quay get team delete --organization myorg --name developers --confirm --token
 go-quay get team members --organization myorg --name developers --token YOUR_TOKEN
 
 # Add a member
-go-quay get team add-member --organization myorg --name developers --member username --token YOUR_TOKEN
+go-quay create team-member --organization myorg --name developers --member username --token YOUR_TOKEN
 
 # Remove a member
-go-quay get team remove-member --organization myorg --name developers --member username --confirm --token YOUR_TOKEN
+go-quay delete team-member --organization myorg --name developers --member username --confirm --token YOUR_TOKEN
 ```
 
 ### Manage team repository permissions
@@ -970,7 +972,7 @@ go-quay get team remove-member --organization myorg --name developers --member u
 go-quay get team permissions --organization myorg --name developers --token YOUR_TOKEN
 
 # Set repository permission for a team
-go-quay get team set-permission \
+go-quay update team-repo-permission \
   --organization myorg \
   --name developers \
   --repository myrepo \
@@ -978,7 +980,7 @@ go-quay get team set-permission \
   --token YOUR_TOKEN
 
 # Remove repository permission from a team
-go-quay get team remove-permission \
+go-quay delete team-repo-permission \
   --organization myorg \
   --name developers \
   --repository myrepo \
@@ -1007,8 +1009,8 @@ go-quay get user starred --token YOUR_TOKEN
 
 ### Star / unstar a repository
 ```bash
-go-quay get user star --namespace quay --repository quay --token YOUR_TOKEN
-go-quay get user unstar --namespace quay --repository quay --token YOUR_TOKEN
+go-quay create star --namespace quay --repository quay --token YOUR_TOKEN
+go-quay delete star --namespace quay --repository quay --token YOUR_TOKEN
 ```
 
 ### Look up a user by username
@@ -1054,13 +1056,13 @@ go-quay get organization robots -o myorg -t YOUR_TOKEN
 ### Create, update, delete organization
 ```bash
 # Create
-go-quay get organization create-org -o neworg --email admin@example.com -t YOUR_TOKEN
+go-quay create organization -o neworg --email admin@example.com -t YOUR_TOKEN
 
 # Update
-go-quay get organization update-org -o myorg --email newemail@example.com -t YOUR_TOKEN
+go-quay update organization -o myorg --email newemail@example.com -t YOUR_TOKEN
 
 # Delete
-go-quay get organization delete-org -o myorg --confirm -t YOUR_TOKEN
+go-quay delete organization -o myorg --confirm -t YOUR_TOKEN
 ```
 
 ### Manage members
@@ -1069,10 +1071,10 @@ go-quay get organization delete-org -o myorg --confirm -t YOUR_TOKEN
 go-quay get organization member -o myorg --member johndoe -t YOUR_TOKEN
 
 # Add member
-go-quay get organization add-member -o myorg --member johndoe -t YOUR_TOKEN
+go-quay create org-member -o myorg --member johndoe -t YOUR_TOKEN
 
 # Remove member
-go-quay get organization remove-member -o myorg --member johndoe --confirm -t YOUR_TOKEN
+go-quay delete org-member -o myorg --member johndoe --confirm -t YOUR_TOKEN
 
 # List collaborators
 go-quay get organization collaborators -o myorg -t YOUR_TOKEN
@@ -1089,23 +1091,23 @@ go-quay get organization repositories -o myorg -t YOUR_TOKEN
 go-quay get organization robot -o myorg --robot deploybot -t YOUR_TOKEN
 
 # Create robot
-go-quay get organization create-robot -o myorg --robot deploybot --description "CI bot" -t YOUR_TOKEN
+go-quay create org-robot -o myorg --robot deploybot --description "CI bot" -t YOUR_TOKEN
 
 # Delete robot
-go-quay get organization delete-robot -o myorg --robot deploybot --confirm -t YOUR_TOKEN
+go-quay delete org-robot -o myorg --robot deploybot --confirm -t YOUR_TOKEN
 
 # Regenerate robot token
-go-quay get organization regenerate-robot -o myorg --robot deploybot -t YOUR_TOKEN
+go-quay update org-robot -o myorg --robot deploybot -t YOUR_TOKEN
 
 # Get robot permissions
 go-quay get organization robot-permissions -o myorg --robot deploybot -t YOUR_TOKEN
 
 # Set robot repository permission
-go-quay get organization set-robot-permission \
+go-quay update org-robot-permission \
   -o myorg --robot deploybot --repository myrepo --role write -t YOUR_TOKEN
 
 # Remove robot repository permission
-go-quay get organization remove-robot-permission \
+go-quay delete org-robot-permission \
   -o myorg --robot deploybot --repository myrepo --confirm -t YOUR_TOKEN
 ```
 
@@ -1115,14 +1117,14 @@ go-quay get organization remove-robot-permission \
 go-quay get organization robot-federation-get -o myorg --robot deploybot -t YOUR_TOKEN
 
 # Create federation config
-go-quay get organization robot-federation-create \
+go-quay create org-robot-federation \
   -o myorg --robot deploybot \
   --issuer "https://token.actions.githubusercontent.com" \
   --subject "repo:org/repo:ref:refs/heads/main" \
   -t YOUR_TOKEN
 
 # Delete federation config
-go-quay get organization robot-federation-delete -o myorg --robot deploybot -t YOUR_TOKEN
+go-quay delete org-robot-federation -o myorg --robot deploybot -t YOUR_TOKEN
 ```
 
 ### Organization applications
@@ -1134,22 +1136,22 @@ go-quay get organization applications -o myorg -t YOUR_TOKEN
 go-quay get organization application -o myorg --client-id CLIENT_ID -t YOUR_TOKEN
 
 # Create application
-go-quay get organization create-application \
+go-quay create application \
   -o myorg --name "My App" --description "Description" \
   --application-uri "https://example.com" \
   --redirect-uri "https://example.com/callback" \
   -t YOUR_TOKEN
 
 # Update application
-go-quay get organization update-application \
+go-quay update application \
   -o myorg --client-id CLIENT_ID --name "Updated App" \
   -t YOUR_TOKEN
 
 # Delete application
-go-quay get organization delete-application -o myorg --client-id CLIENT_ID --confirm -t YOUR_TOKEN
+go-quay delete application -o myorg --client-id CLIENT_ID --confirm -t YOUR_TOKEN
 
 # Reset client secret
-go-quay get organization reset-application-secret -o myorg --client-id CLIENT_ID -t YOUR_TOKEN
+go-quay update application-secret -o myorg --client-id CLIENT_ID -t YOUR_TOKEN
 ```
 
 ### Organization marketplace
@@ -1158,14 +1160,14 @@ go-quay get organization reset-application-secret -o myorg --client-id CLIENT_ID
 go-quay get organization marketplace -o myorg -t YOUR_TOKEN
 
 # Create subscription
-go-quay get organization create-marketplace-subscription -o myorg --sku SKU_ID -t YOUR_TOKEN
+go-quay create marketplace-subscription -o myorg --sku SKU_ID -t YOUR_TOKEN
 
 # Delete subscription
-go-quay get organization delete-marketplace-subscription \
+go-quay delete marketplace-subscription \
   -o myorg --subscription-id SUB_ID --confirm -t YOUR_TOKEN
 
 # Batch remove subscriptions
-go-quay get organization batch-remove-subscriptions \
+go-quay delete subscriptions \
   -o myorg --subscription-ids "id1,id2,id3" --confirm -t YOUR_TOKEN
 ```
 
@@ -1175,11 +1177,11 @@ go-quay get organization batch-remove-subscriptions \
 go-quay get organization proxy-cache -o myorg -t YOUR_TOKEN
 
 # Create proxy cache config
-go-quay get organization create-proxy-cache \
+go-quay create proxy-cache \
   -o myorg --upstream-registry "docker.io" --expiration 86400 -t YOUR_TOKEN
 
 # Delete proxy cache config
-go-quay get organization delete-proxy-cache -o myorg --confirm -t YOUR_TOKEN
+go-quay delete proxy-cache -o myorg --confirm -t YOUR_TOKEN
 ```
 
 ### Organization quota and auto-prune
@@ -1188,13 +1190,13 @@ go-quay get organization delete-proxy-cache -o myorg --confirm -t YOUR_TOKEN
 go-quay get organization quota -o myorg -t YOUR_TOKEN
 
 # Create quota
-go-quay get organization create-quota -o myorg --limit-bytes 10737418240 -t YOUR_TOKEN
+go-quay create quota -o myorg --limit-bytes 10737418240 -t YOUR_TOKEN
 
 # Update quota
-go-quay get organization update-quota -o myorg --limit-bytes 21474836480 -t YOUR_TOKEN
+go-quay update quota -o myorg --limit-bytes 21474836480 -t YOUR_TOKEN
 
 # Delete quota
-go-quay get organization delete-quota -o myorg --confirm -t YOUR_TOKEN
+go-quay delete quota -o myorg --confirm -t YOUR_TOKEN
 
 # Get auto-prune policies
 go-quay get organization auto-prune -o myorg -t YOUR_TOKEN
@@ -1203,24 +1205,24 @@ go-quay get organization auto-prune -o myorg -t YOUR_TOKEN
 go-quay get organization auto-prune-policy -o myorg --policy-uuid POLICY_UUID -t YOUR_TOKEN
 
 # Create auto-prune policy
-go-quay get organization create-auto-prune \
+go-quay create auto-prune \
   -o myorg --method "number_of_tags" --value 10 --tag-pattern "dev-*" -t YOUR_TOKEN
 
 # Update auto-prune policy
-go-quay get organization update-auto-prune \
+go-quay update auto-prune \
   -o myorg --policy-uuid POLICY_UUID --method "number_of_tags" --value 20 -t YOUR_TOKEN
 
 # Delete auto-prune policy
-go-quay get organization delete-auto-prune -o myorg --policy-uuid POLICY_UUID --confirm -t YOUR_TOKEN
+go-quay delete auto-prune -o myorg --policy-uuid POLICY_UUID --confirm -t YOUR_TOKEN
 ```
 
 ### Team invitations
 ```bash
 # Invite member to team via email
-go-quay get organization invite-member -o myorg --team developers --email user@example.com -t YOUR_TOKEN
+go-quay create invite -o myorg --team developers --email user@example.com -t YOUR_TOKEN
 
 # Cancel team invitation
-go-quay get organization cancel-invite -o myorg --team developers --email user@example.com --confirm -t YOUR_TOKEN
+go-quay delete invite -o myorg --team developers --email user@example.com --confirm -t YOUR_TOKEN
 ```
 
 ## Discovery API
@@ -1270,7 +1272,7 @@ go-quay get messages list --token YOUR_TOKEN
 
 ### Create a message
 ```bash
-go-quay get messages create \
+go-quay create message \
   --content "System maintenance scheduled" \
   --severity warning \
   --media-type text/plain \
@@ -1293,7 +1295,7 @@ go-quay get prototype info --organization myorg --uuid PROTOTYPE_UUID --token YO
 
 ### Create a prototype
 ```bash
-go-quay get prototype create \
+go-quay create prototype \
   --organization myorg \
   --delegate-name devteam \
   --delegate-kind team \
@@ -1303,7 +1305,7 @@ go-quay get prototype create \
 
 ### Update a prototype
 ```bash
-go-quay get prototype update \
+go-quay update prototype \
   --organization myorg \
   --uuid PROTOTYPE_UUID \
   --role admin \
@@ -1312,7 +1314,7 @@ go-quay get prototype update \
 
 ### Delete a prototype
 ```bash
-go-quay get prototype delete \
+go-quay delete prototype \
   --organization myorg \
   --uuid PROTOTYPE_UUID \
   --confirm \
@@ -1347,7 +1349,7 @@ go-quay get repotoken info \
 
 ### Create a token
 ```bash
-go-quay get repotoken create \
+go-quay create repotoken \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --name "CI Token" \
@@ -1356,7 +1358,7 @@ go-quay get repotoken create \
 
 ### Update a token
 ```bash
-go-quay get repotoken update \
+go-quay update repotoken \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --code TOKEN_CODE \
@@ -1366,7 +1368,7 @@ go-quay get repotoken update \
 
 ### Delete a token
 ```bash
-go-quay get repotoken delete \
+go-quay delete repotoken \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --code TOKEN_CODE \
@@ -1396,7 +1398,7 @@ The table shows the mirror's enabled setting, source, schedule, robot, and tag r
 
 ### Create mirror configuration
 ```bash
-go-quay get mirror create \
+go-quay create mirror \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --external-ref docker.io/library/nginx \
@@ -1408,7 +1410,7 @@ go-quay get mirror create \
 
 ### Update mirror configuration
 ```bash
-go-quay get mirror update \
+go-quay update mirror \
   --namespace NAMESPACE \
   --repository REPOSITORY \
   --enabled \
