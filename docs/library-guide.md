@@ -594,7 +594,44 @@ client.Retry = &lib.RetryConfig{
 }
 ```
 
-Retries apply to HTTP 429 and 5xx. `NewClient` leaves `Retry` nil until you set it.
+Retries apply to HTTP 429 and 5xx. `NewClient` leaves `Retry` nil until you set it. The CLI exposes the same behavior through `--max-retries` and `--retry-backoff`.
+
+### Client-side rate limiting and caching
+
+Retries are reactive: they kick in after Quay returns 429 or 5xx. To throttle proactively or avoid repeat lookups, wrap a client in the decorators below. They all implement `lib.RepositoryReader`, the read-only interface covering `GetRepository`, `ListTags`, `ListAllTags`, `GetManifestSecurity`, `GetManifest`, and `GetManifestLabels`. `*lib.Client` satisfies it, so wrappers can be stacked or swapped for a test double. Only these read paths are wrapped; other operations (mutations, builds, teams, and so on) still go straight through `*lib.Client`.
+
+**Rate limiter** (token bucket; each call waits for a token or returns the context error):
+
+```go
+// Allow 5 requests/second with bursts of up to 10.
+limited := lib.NewRateLimitedClient(client, lib.DefaultRateLimit, lib.DefaultRateBurst)
+
+repo, err := limited.GetRepository(ctx, "myorg", "myrepo")
+```
+
+**Cache** (in-memory TTL cache with singleflight, so concurrent requests for the same repository share one fetch):
+
+```go
+cached := lib.NewCachedClient(client, lib.WithCacheTTL(10*time.Minute)) // default TTL: lib.DefaultCacheTTL (1h)
+
+repo, err := cached.GetRepository(ctx, "myorg", "myrepo") // first call hits Quay
+repo, err = cached.GetRepository(ctx, "myorg", "myrepo")  // served from cache until the TTL expires
+
+cached.ClearCache()                                  // drop all entries
+cached.CleanupExpired()                              // drop only expired entries
+cached.StartCleanupLoop(ctx, time.Minute)            // purge expired entries periodically until ctx is canceled
+```
+
+Only `GetRepository` results are cached. `ListTags`, `ListAllTags`, and the manifest methods always pass through to the wrapped client.
+
+**Both together:**
+
+```go
+// Cache for 10 minutes; cache misses are limited to 5 requests/second, burst 10.
+reader := lib.NewCachedRateLimitedClient(client, 10*time.Minute, 5, 10)
+```
+
+`NewCachedRateLimitedClient` returns a `*lib.CachedClient` wrapping a rate-limited client, so cache hits never consume rate-limit tokens.
 
 ## Best Practices
 
