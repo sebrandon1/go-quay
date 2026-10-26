@@ -116,6 +116,8 @@ Each API links to the corresponding [Quay.io Swagger documentation](https://docs
 
 | API | Cmd | Lib | Covered |
 | --- | --- | --- | ------- |
+| [Application](https://docs.quay.io/api/swagger/) | Yes | Yes | /api/v1/organization/{orgname}/applications, /api/v1/organization/{orgname}/applications/{client_id}, /api/v1/organization/{orgname}/applications/{client_id}/resetclientsecret |
+| [Auto-Prune](https://docs.quay.io/api/swagger/) | Yes | Yes | /api/v1/organization/{orgname}/autoprunepolicy, /api/v1/organization/{orgname}/autoprunepolicy/{policy_uuid} |
 | [Billing](https://docs.quay.io/api/swagger/#operation--api-v1-user-plan-get) | Yes | Yes | /api/v1/user/plan, /api/v1/organization/{orgname}/plan, /api/v1/organization/{orgname}/invoices, /api/v1/plans/ |
 | [Build](https://docs.quay.io/api/swagger/#Build) | Yes | Yes | /api/v1/repository/{namespace}/{repository}/build/, /api/v1/repository/{namespace}/{repository}/build/{build_uuid}, /api/v1/repository/{namespace}/{repository}/build/{build_uuid}/logs |
 | [Discovery](https://docs.quay.io/api/swagger/#Discovery) | Yes | Yes | /api/v1/discovery |
@@ -128,6 +130,7 @@ Each API links to the corresponding [Quay.io Swagger documentation](https://docs
 | [Organization](https://docs.quay.io/api/swagger/#operation--api-v1-organization--orgname--get) | Yes | Yes | /api/v1/organization/{orgname}, /api/v1/organization/{orgname}/members, /api/v1/organization/{orgname}/teams, /api/v1/organization/{orgname}/team/{teamname}, /api/v1/organization/{orgname}/robots, /api/v1/organization/{orgname}/quota, /api/v1/organization/{orgname}/autoprunepolicy, /api/v1/organization/{orgname}/applications |
 | [Permission](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--permissions-get) | Yes | Yes | /api/v1/repository/{namespace}/{repository}/permissions, /api/v1/repository/{namespace}/{repository}/permissions/{username} |
 | [Proxy Cache](https://docs.quay.io/api/swagger/) | Yes | Yes | /api/v1/organization/{orgname}/proxycache |
+| [Quota](https://docs.quay.io/api/swagger/) | Yes | Yes | /api/v1/organization/{orgname}/quota |
 | [Prototype](https://docs.quay.io/api/swagger/#Prototype) | Yes | Yes | /api/v1/organization/{orgname}/prototypes, /api/v1/organization/{orgname}/prototypes/{uuid} |
 | [Repository](https://docs.quay.io/api/swagger/#operation--api-v1-repository--namespace---repository--get) | Yes | Yes | /api/v1/repository/{namespace}/{repository}, /api/v1/repository/{namespace}/{repository}/tag, /api/v1/repository, /api/v1/repository/{namespace}/{repository} (CRUD) |
 | [RepositoryNotification](https://docs.quay.io/api/swagger/#RepositoryNotification) | Yes | Yes | /api/v1/repository/{namespace}/{repository}/notification/, /api/v1/repository/{namespace}/{repository}/notification/{uuid}, /api/v1/repository/{namespace}/{repository}/notification/{uuid}/test |

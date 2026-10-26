@@ -14,6 +14,7 @@ go get github.com/sebrandon1/go-quay
 package main
 
 import (
+    "fmt"
     "log"
     "os"
 
@@ -40,7 +41,8 @@ func main() {
     //     MaxBackoff:     30 * time.Second,
     // }
 
-    // Use client...
+    // Use client for the API calls below.
+    fmt.Printf("Client ready for %s\n", client.BaseURL)
 }
 ```
 
