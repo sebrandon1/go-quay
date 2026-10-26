@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"io"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -129,6 +131,113 @@ func TestVerbLeafNilFlagSet(t *testing.T) {
 	dst.VisitAll(func(*pflag.Flag) { n++ })
 	if n != 0 {
 		t.Errorf("copyFlagSet(nil) added %d flags, want 0", n)
+	}
+}
+
+// TestVerbLeafCopiesPreRunE compares against the source rather than asserting a
+// non-nil hook, so it keeps passing if the source command later gains or drops
+// its PreRunE.
+func TestVerbLeafCopiesPreRunE(t *testing.T) {
+	tests := []struct {
+		parent *cobra.Command
+		use    string
+		src    *cobra.Command
+	}{
+		{deleteCmd, cmdTag, tagDeleteCmd},
+		{updateCmd, cmdTag, tagUpdateCmd},
+		{infoCmd, cmdTag, tagInfoCmd},
+		{infoCmd, cmdRepository, repoInfoCmd},
+	}
+
+	for _, test := range tests {
+		leaf := subcommand(test.parent, test.use)
+		if leaf == nil {
+			t.Fatalf("%s %s not registered", test.parent.Use, test.use)
+		}
+		if funcPointer(leaf.PreRunE) != funcPointer(test.src.PreRunE) {
+			t.Errorf("%s %s: PreRunE differs from its source, so local validation behaves differently on the verb-first path", test.parent.Use, leaf.Use)
+		}
+	}
+
+	if funcPointer(tagInfoCmd.PreRunE) == 0 {
+		t.Fatal("tag info no longer has a PreRunE; this test no longer proves hook copying")
+	}
+}
+
+func funcPointer(fn any) uintptr {
+	if reflect.ValueOf(fn).IsNil() {
+		return 0
+	}
+	return reflect.ValueOf(fn).Pointer()
+}
+
+// TestVerbLeafExamplesMatchCommandPath guards the example prefix that addVerbs
+// builds from the parent verb and the leaf name.
+func TestVerbLeafExamplesMatchCommandPath(t *testing.T) {
+	var checked int
+	for _, parent := range []*cobra.Command{createCmd, deleteCmd, updateCmd, listCmd, infoCmd} {
+		for _, leaf := range parent.Commands() {
+			if leaf.Example == "" {
+				continue
+			}
+			checked++
+			want := "  " + cliName + " " + parent.Use + " " + leaf.Use + " "
+			if !strings.HasPrefix(leaf.Example, want) {
+				t.Errorf("%s %s example = %q, want prefix %q", parent.Use, leaf.Use, leaf.Example, want)
+			}
+			if strings.Contains(leaf.Example, cliName+" "+cmdGet) {
+				t.Errorf("%s %s example advertises the legacy get path: %q", parent.Use, leaf.Use, leaf.Example)
+			}
+		}
+	}
+	if checked == 0 {
+		t.Fatal("no verb leaf carries an example; the check proved nothing")
+	}
+}
+
+// TestVerbLeafUsageShowsExample inspects UsageString rather than executing
+// --help: Cobra's help flag keeps its parsed value, so a command that once saw
+// --help returns ErrHelp on every later execution in the same process.
+func TestVerbLeafUsageShowsExample(t *testing.T) {
+	tests := []struct {
+		verb     string
+		resource string
+		want     string
+	}{
+		{cmdInfo, cmdTag, `go-quay info tag --namespace`},
+		{cmdInfo, cmdRepository, `go-quay info repository --namespace`},
+	}
+	for _, test := range tests {
+		t.Run(test.verb+" "+test.resource, func(t *testing.T) {
+			leaf := subcommand(subcommand(rootCmd, test.verb), test.resource)
+			if leaf == nil {
+				t.Fatalf("%s %s not registered", test.verb, test.resource)
+			}
+			got := leaf.UsageString()
+			if !strings.Contains(got, "Examples:") || !strings.Contains(got, test.want) {
+				t.Errorf("usage missing %q:\n%s", test.want, got)
+			}
+			if strings.Contains(got, cliName+" "+cmdGet) {
+				t.Errorf("verb-first usage advertises the legacy get path:\n%s", got)
+			}
+		})
+	}
+}
+
+func TestVerbLeafValidatesTagBeforeBuildingClient(t *testing.T) {
+	resetRootFlags(t)
+	rootCmd.SetArgs([]string{
+		cmdInfo, cmdTag, "-n", "ns", "-r", "repo",
+		testTokenFlag, testTokenValue, testQuayURLFlag, testUnreachableURL,
+	})
+	rootCmd.SetErr(io.Discard)
+
+	err := rootCmd.Execute()
+	if err == nil {
+		t.Fatal("expected tag validation to fail")
+	}
+	if err.Error() != "tag is required; provide --tag" {
+		t.Errorf("error = %q, want the local validation %q (not a client error)", err.Error(), "tag is required; provide --tag")
 	}
 }
 
