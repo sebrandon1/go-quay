@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/sebrandon1/go-quay/lib"
+	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
@@ -25,10 +26,12 @@ func resetRootFlags(t *testing.T) {
 	resetTokenAndURLFlags(t)
 	resetVerboseFlag(t)
 	resetRetryFlags(t)
+	clearSilenceUsage(rootCmd)
 	t.Cleanup(func() {
 		resetTokenAndURLFlags(t)
 		resetVerboseFlag(t)
 		resetRetryFlags(t)
+		clearSilenceUsage(rootCmd)
 		outputFormat = origFormat
 		verbose = origVerbose
 		maxRetries = origMaxRetries
@@ -390,6 +393,81 @@ func TestExecuteHelp(t *testing.T) {
 
 	if err := Execute(); err != nil {
 		t.Fatalf("Execute: %v", err)
+	}
+}
+
+// clearSilenceUsage restores the default on every command. persistentPreRunE
+// silences usage on the command it runs for and nothing unsets it, so without
+// this a test that ran a command would suppress the usage block a later test
+// expects to see.
+func clearSilenceUsage(command *cobra.Command) {
+	command.SilenceUsage = false
+	for _, child := range command.Commands() {
+		clearSilenceUsage(child)
+	}
+}
+
+// executeCapturingAll runs the root command with out and err pointed at one
+// buffer so a test can see both the Error line and any usage block.
+func executeCapturingAll(t *testing.T, args []string) (string, error) {
+	t.Helper()
+	resetRootFlags(t)
+
+	var output bytes.Buffer
+	rootCmd.SetOut(&output)
+	rootCmd.SetErr(&output)
+	rootCmd.SetArgs(args)
+	err := rootCmd.Execute()
+	return output.String(), err
+}
+
+func TestRuntimeErrorsOmitUsage(t *testing.T) {
+	tests := []struct {
+		name    string
+		args    []string
+		wantErr string
+	}{
+		{
+			name: "API failure",
+			args: []string{
+				cmdInfo, cmdRepository,
+				"-n", "namespace-under-test", "-r", "repository-under-test",
+				testTokenFlag, testTokenValue,
+				testQuayURLFlag, testUnreachableURL,
+			},
+			wantErr: "getting repository",
+		},
+		{
+			name:    "missing authentication token",
+			args:    []string{cmdInfo, cmdRepository, "-n", "namespace-under-test", "-r", "repository-under-test"},
+			wantErr: "authentication token required",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Setenv("QUAY_TOKEN", "")
+			output, err := executeCapturingAll(t, test.args)
+			if err == nil || !strings.Contains(err.Error(), test.wantErr) {
+				t.Fatalf("error = %v, want it to contain %q", err, test.wantErr)
+			}
+			if !strings.Contains(output, "Error:") {
+				t.Errorf("output = %q, want an Error line", output)
+			}
+			if strings.Contains(output, "Usage:") {
+				t.Errorf("output = %q, want no usage block", output)
+			}
+		})
+	}
+}
+
+func TestFlagErrorStillPrintsUsage(t *testing.T) {
+	output, err := executeCapturingAll(t, []string{cmdInfo, cmdRepository, "--bogus-flag"})
+	if err == nil {
+		t.Fatal("expected an unknown-flag error")
+	}
+	if !strings.Contains(output, "Usage:") {
+		t.Errorf("flag error output = %q, want a usage block", output)
 	}
 }
 
