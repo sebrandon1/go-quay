@@ -70,7 +70,7 @@ func main() {
         log.Fatalf("Failed to create client: %v", err)
     }
 
-    fmt.Println("Client initialized successfully!")
+    fmt.Printf("Client initialized for %s\n", client.BaseURL)
 }
 ```
 

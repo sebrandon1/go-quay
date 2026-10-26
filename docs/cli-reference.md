@@ -29,7 +29,7 @@ go-quay delete repository -n myorg -r myapp --confirm
 
 ### Legacy `get` aliases
 
-`go-quay get <resource> <action>` still works, but mutating actions under `get` are deprecated: they print a warning pointing at the verb-first command, and every example below uses the verb-first form. Read-only groups that do not map to a single resource (`billing`, `logs`, `search`, `discovery`) remain under `get` only.
+`go-quay get <resource> <action>` still works, but mutating actions under `get` are deprecated: they print a warning pointing at the verb-first command, and every mutating example below uses the verb-first form. Read-only groups that do not map to a single resource (`billing`, `logs`, `search`, `discovery`) remain under `get` only. The read-only examples below use the `get` form; `list` and `info` aliases exist for many of them and behave identically.
 
 ## Global flags and configuration
 
@@ -42,11 +42,11 @@ Every command inherits these flags:
 | `--output` / `-O` | — | `json` (default), `yaml`, or `table` |
 | `--dry-run` | — | Show API requests without sending them |
 | `--verbose` / `-v` | — | Log HTTP method, URL, status, duration, and attempt to stderr; credentials and request/response bodies are not logged |
-
-The `-v` shorthand is already used by repository visibility options and manifest label values. On those four commands, use `--verbose` if request logging is needed; `-v` keeps its existing meaning.
 | `--max-retries` | — | Retry failed requests this many times after the initial attempt (default `0`, disabled) |
 | `--retry-backoff` | — | Initial delay between retry attempts (default `500ms`) |
 | `--retry-max-backoff` | — | Maximum delay between retry attempts (default `5s`) |
+
+The `-v` shorthand is already used by repository visibility options and manifest label values. On those four commands, use `--verbose` if request logging is needed; `-v` keeps its existing meaning.
 
 Retries apply to HTTP 429 and 5xx responses, plus retryable network errors. `--max-retries` counts attempts after the initial request and defaults to `0`, which disables retries. The backoff starts at `--retry-backoff`, doubles after each retryable failure, and is capped by `--retry-max-backoff`. A positive integer `Retry-After` value overrides the calculated delay; request context cancellation stops the wait.
 
@@ -69,12 +69,13 @@ The command resolves each tag to a manifest digest, then fetches labels and secu
 
 | Command | Table columns |
 |---------|---------------|
-| `get repository list` | Repository, pulls, recent pushes, tags, latest tag, last push, multi-arch |
+| `get repository list` / `list repository` | Repository, pulls, recent pushes, tags, latest tag, last push, multi-arch |
 | `get tag list` | Tag, digest, size, last modified, expiration |
-| `get robot list` | Name, description, created, last accessed (tokens omitted) |
-| `get organization members` | Name, kind, team count, repository count |
-| `get team list` | Name, role, member count, repository count |
-| `get secscan info` | Status, feature and vulnerability totals, severity counts |
+| `get robot list` / `list robots` | Name, description, created, last accessed (tokens omitted) |
+| `get organization members` / `list org-members` | Name, kind, team count, repository count |
+| `get team list` / `list teams` | Name, role, member count, repository count |
+| `get secscan info` / `info secscan` | Status, feature and vulnerability totals, severity counts |
+| `get mirror info` / `info mirror` | Enabled, mirror type, external ref, sync interval, sync start date, robot, tag rule, tag rule kind |
 
 Every command accepts `--output table`, but only the commands above render columns. For the rest, the requested format is reported on stderr — `note: table output is not available for <command>; printing json` — and stdout still carries JSON, so a script expecting columns fails visibly instead of parsing a different shape.
 
