@@ -20,7 +20,7 @@ func writeResponse(t *testing.T, w http.ResponseWriter, body []byte) {
 	}
 }
 
-func copyStdout(t *testing.T, r io.Reader) string {
+func copyStream(t *testing.T, r io.Reader) string {
 	t.Helper()
 	var buf bytes.Buffer
 	if _, err := io.Copy(&buf, r); err != nil {
@@ -29,20 +29,39 @@ func copyStdout(t *testing.T, r io.Reader) string {
 	return buf.String()
 }
 
-func captureStdout(t *testing.T, fn func()) string {
+// captureStream redirects stream for the duration of fn and returns everything
+// written to it. The restore after fn keeps the swap scoped to the call; the
+// t.Cleanup is a safety net for fn calling t.Fatalf, which unwinds the goroutine
+// without ever reaching that restore.
+func captureStream(t *testing.T, stream **os.File, fn func()) string {
 	t.Helper()
-	oldStdout := os.Stdout
+	previous := *stream
 	r, w, err := os.Pipe()
 	if err != nil {
 		t.Fatalf("os.Pipe: %v", err)
 	}
-	os.Stdout = w
+	*stream = w
+	t.Cleanup(func() {
+		*stream = previous
+		_ = w.Close()
+		_ = r.Close()
+	})
 	fn()
 	if err := w.Close(); err != nil {
 		t.Fatalf("close pipe writer: %v", err)
 	}
-	os.Stdout = oldStdout
-	return copyStdout(t, r)
+	*stream = previous
+	return copyStream(t, r)
+}
+
+func captureStdout(t *testing.T, fn func()) string {
+	t.Helper()
+	return captureStream(t, &os.Stdout, fn)
+}
+
+func captureStderr(t *testing.T, fn func()) string {
+	t.Helper()
+	return captureStream(t, &os.Stderr, fn)
 }
 
 func TestPrintJSON(t *testing.T) {
