@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -56,6 +58,39 @@ func requireTableOutput(t *testing.T, output string, headers ...string) {
 	lines := strings.Split(strings.TrimSpace(output), "\n")
 	if len(lines) < 2 {
 		t.Fatalf("expected a header and data row, got: %s", output)
+	}
+}
+
+// TestTableFallbackNotesOnStderr runs a real command with -O table so the note
+// names the command persistentPreRunE recorded, not a path the test wrote by
+// hand.
+func TestTableFallbackNotesOnStderr(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		writeResponse(t, w, []byte(`{"username":"alice"}`))
+	}))
+	t.Cleanup(server.Close)
+
+	resetRootFlags(t)
+	var stderr bytes.Buffer
+	rootCmd.SetErr(&stderr)
+	rootCmd.SetArgs([]string{
+		cmdInfo, cmdUser, testTokenFlag, testTokenValue, testQuayURLFlag, server.URL, "-O", outputTable,
+	})
+
+	var execErr error
+	output := captureStdout(t, func() { execErr = rootCmd.Execute() })
+	if execErr != nil {
+		t.Fatalf("execute: %v", execErr)
+	}
+
+	var decoded map[string]any
+	if err := json.Unmarshal([]byte(output), &decoded); err != nil {
+		t.Errorf("stdout = %q, want pure JSON: %v", output, err)
+	}
+	want := "note: table output is not available for " + cliName + " " + cmdInfo + " " + cmdUser + "; printing json"
+	if !strings.Contains(stderr.String(), want) {
+		t.Errorf("stderr = %q, want it to contain %q", stderr.String(), want)
 	}
 }
 

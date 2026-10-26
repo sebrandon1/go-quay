@@ -35,12 +35,28 @@ var getCmd = &cobra.Command{
 	Short: "Get objects from Quay.io (legacy parent; prefer create/delete/update/list/info)",
 }
 
+// executedCommand is the command running right now. Cobra does not expose it to
+// helpers called from RunE, so persistentPreRunE records it for them. The
+// command is stored rather than its path because CommandPath allocates at every
+// level of the tree and only the table-fallback note reads the result.
+// The root path fallback assumes no subcommand replaces rootCmd's
+// PersistentPreRunE.
+var executedCommand *cobra.Command
+
+func currentCommandPath() string {
+	if executedCommand != nil {
+		return executedCommand.CommandPath()
+	}
+	return rootCmd.CommandPath()
+}
+
 func persistentPreRunE(cmd *cobra.Command, _ []string) error {
 	// Reaching this hook means the flags parsed, so any error from here on is a
 	// runtime failure (auth, network, API). Printing the usage block for those
 	// implies the invocation was malformed. Flag-parse errors never get this far,
 	// so they still show usage.
 	cmd.SilenceUsage = true
+	executedCommand = cmd
 
 	token = resolveFlag(flagChanged(cmd, "token"), token, os.Getenv("QUAY_TOKEN"), appCfg.Token)
 	quayURL = resolveFlag(flagChanged(cmd, "quay-url"), quayURL, os.Getenv("QUAY_URL"), appCfg.QuayURL, lib.DefaultQuayURL)
