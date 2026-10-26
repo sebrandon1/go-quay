@@ -2,8 +2,16 @@ coverage:
   status:
     project:
       default:
-        target: 75%
-    patch: false
+        # Current repository-wide statement coverage is ~79.8%; keep a small
+        # buffer so the gate fails on real erosion, not on rounding.
+        target: 78%
+        threshold: 0%
+    patch:
+      # New and changed lines must be at least as well covered as the repo
+      # average, so untested new code cannot land behind a green check.
+      default:
+        target: 80%
+        threshold: 0%
 
 comment:
   layout: "diff,flags,files"

@@ -50,6 +50,24 @@ go test ./lib/ -run TestCreateRepository -v
 Keep the pin at or above the Go toolchain in `go.mod`; a govulncheck build that
 predates a Go release may not understand that release's standard library.
 
+## Test Coverage
+
+Every pull request is checked by Codecov on two axes:
+
+- **project** — repository-wide statement coverage must stay at or above 78%.
+- **patch** — lines you add or change must be at least 80% covered.
+
+Run the suite with a coverage report locally before opening a PR:
+
+```bash
+make coverage                      # total, per-function summary
+go test ./cmd/ -coverprofile=/tmp/c.out && go tool cover -func=/tmp/c.out
+```
+
+If a file is genuinely uncoverable (generated code, for example), propose adding
+it to the `ignore:` list in `codecov.yml` in your pull request rather than
+lowering the gate for everyone else.
+
 ## Code Style
 
 - Follow standard Go conventions and run `go fmt` before committing
