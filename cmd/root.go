@@ -36,6 +36,12 @@ var getCmd = &cobra.Command{
 }
 
 func persistentPreRunE(cmd *cobra.Command, _ []string) error {
+	// Reaching this hook means the flags parsed, so any error from here on is a
+	// runtime failure (auth, network, API). Printing the usage block for those
+	// implies the invocation was malformed. Flag-parse errors never get this far,
+	// so they still show usage.
+	cmd.SilenceUsage = true
+
 	token = resolveFlag(flagChanged(cmd, "token"), token, os.Getenv("QUAY_TOKEN"), appCfg.Token)
 	quayURL = resolveFlag(flagChanged(cmd, "quay-url"), quayURL, os.Getenv("QUAY_URL"), appCfg.QuayURL, lib.DefaultQuayURL)
 	if maxRetries < 0 {
