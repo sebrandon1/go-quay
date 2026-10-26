@@ -71,8 +71,9 @@ jobs:
       with:
         go-version-file: 'go.mod'
 
+    # Pinned to GOVULNCHECK_VERSION in the Makefile so nightly and local scans agree.
     - name: Install govulncheck
-      run: go install golang.org/x/vuln/cmd/govulncheck@latest
+      run: go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
 
     - name: Run govulncheck
       run: govulncheck ./...

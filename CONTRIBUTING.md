@@ -37,6 +37,19 @@ Run a single test:
 go test ./lib/ -run TestCreateRepository -v
 ```
 
+## Dependency and Tool Upgrades
+
+`govulncheck` is pinned to `GOVULNCHECK_VERSION` in the `Makefile`, and
+`.github/workflows/nightly.yaml` installs the same version. To bump it:
+
+1. Check the latest release at <https://pkg.go.dev/golang.org/x/vuln?tab=versions>.
+2. Update `GOVULNCHECK_VERSION` in the `Makefile`.
+3. Update the `go install .../govulncheck@vX.Y.Z` line in the nightly workflow.
+4. Run `make govulncheck` and confirm it reports the new version.
+
+Keep the pin at or above the Go toolchain in `go.mod`; a govulncheck build that
+predates a Go release may not understand that release's standard library.
+
 ## Code Style
 
 - Follow standard Go conventions and run `go fmt` before committing
