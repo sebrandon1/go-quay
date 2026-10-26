@@ -10,6 +10,11 @@ vet:
 
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 
+# govulncheck is pinned so local and CI scans agree. Bump deliberately; see
+# CONTRIBUTING.md. The nightly workflow in .github/workflows/nightly.yaml uses
+# the same version.
+GOVULNCHECK_VERSION ?= v1.9.0
+
 build:
 	go build -ldflags "-X main.version=$(VERSION)" -o $(APP_NAME)
 
@@ -33,7 +38,7 @@ coverage:
 	go tool cover -func=coverage.out
 
 govulncheck:
-	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+	go run golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION) ./...
 
 fmt:
 	gofmt -s -w .
