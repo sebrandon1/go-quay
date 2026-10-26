@@ -76,6 +76,8 @@ The command resolves each tag to a manifest digest, then fetches labels and secu
 | `get team list` | Name, role, member count, repository count |
 | `get secscan info` | Status, feature and vulnerability totals, severity counts |
 
+Every command accepts `--output table`, but only the commands above render columns. For the rest, the requested format is reported on stderr — `note: table output is not available for <command>; printing json` — and stdout still carries JSON, so a script expecting columns fails visibly instead of parsing a different shape.
+
 Optional config file (YAML):
 
 - Linux: `~/.config/go-quay/config.yaml`

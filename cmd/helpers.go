@@ -68,7 +68,10 @@ func printJSON(data interface{}) error {
 		// Table output requires command-specific formatting.
 		// Commands that support table mode check outputFormat (or --table)
 		// and render their own table before calling printJSON.
-		// For commands without custom table support, fall back to JSON.
+		// For commands without custom table support, fall back to JSON — but say
+		// so, since a caller piping into awk/cut wants columns and would otherwise
+		// silently parse a different shape.
+		fmt.Fprintf(rootCmd.ErrOrStderr(), "note: table output is not available for %s; printing json\n", currentCommandPath())
 		return printAsJSON(data)
 	default:
 		return printAsJSON(data)

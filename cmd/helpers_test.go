@@ -122,7 +122,11 @@ func TestPrintJSONYAML(t *testing.T) {
 func TestPrintJSONTableFallback(t *testing.T) {
 	orig := outputFormat
 	outputFormat = outputTable
-	t.Cleanup(func() { outputFormat = orig })
+	rootCmd.SetErr(&bytes.Buffer{})
+	t.Cleanup(func() {
+		outputFormat = orig
+		rootCmd.SetErr(nil)
+	})
 
 	output := captureStdout(t, func() {
 		if err := printJSON(map[string]string{"name": testPrintFieldValue}); err != nil {
