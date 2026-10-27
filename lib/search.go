@@ -24,7 +24,7 @@ func (c *Client) SearchRepositories(ctx context.Context, query string, page int)
 		return nil, fmt.Errorf("query is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/find/repositories"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/find/repositories"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search repositories request: %w", err)
 	}
@@ -49,7 +49,7 @@ func (c *Client) SearchAll(ctx context.Context, query string) (*SearchAllResult,
 		return nil, fmt.Errorf("query is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/find/all"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/find/all"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search all request: %w", err)
 	}

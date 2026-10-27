@@ -24,7 +24,7 @@ import (
 
 // GetUser retrieves information about the current authenticated user
 func (c *Client) GetUser(ctx context.Context) (*UserDetails, error) {
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user request: %w", err)
 	}
@@ -39,7 +39,7 @@ func (c *Client) GetUser(ctx context.Context) (*UserDetails, error) {
 
 // GetStarredRepositories retrieves repositories starred by the current user
 func (c *Client) GetStarredRepositories(ctx context.Context) (*StarredRepositories, error) {
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/starred"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/starred"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get starred repositories request: %w", err)
 	}
@@ -61,7 +61,7 @@ func (c *Client) StarRepository(ctx context.Context, namespace, repository strin
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodPut, c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodPut, c.buildURL("/repository/%s/%s/star", namespace, repository))
 	if err != nil {
 		return fmt.Errorf("failed to create star repository request: %w", err)
 	}
@@ -82,7 +82,7 @@ func (c *Client) UnstarRepository(ctx context.Context, namespace, repository str
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/star", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/star", namespace, repository))
 	if err != nil {
 		return fmt.Errorf("failed to create unstar repository request: %w", err)
 	}
@@ -100,7 +100,7 @@ func (c *Client) GetUserByUsername(ctx context.Context, username string) (*UserD
 		return nil, fmt.Errorf("username is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/users/%s", username), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/users/%s", username))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user by username request: %w", err)
 	}
@@ -115,7 +115,7 @@ func (c *Client) GetUserByUsername(ctx context.Context, username string) (*UserD
 
 // GetUserMarketplace retrieves marketplace information for the current user
 func (c *Client) GetUserMarketplace(ctx context.Context) (*MarketplaceInfo, error) {
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/marketplace"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/marketplace"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user marketplace request: %w", err)
 	}

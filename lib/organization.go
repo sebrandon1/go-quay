@@ -62,7 +62,7 @@ func (c *Client) GetOrganization(ctx context.Context, orgname string) (*Organiza
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization request: %w", err)
 	}
@@ -81,7 +81,7 @@ func (c *Client) DeleteOrganization(ctx context.Context, orgname string) error {
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s", orgname), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s", orgname))
 	if err != nil {
 		return fmt.Errorf("failed to create delete organization request: %w", err)
 	}
@@ -125,7 +125,7 @@ func (c *Client) GetOrganizationMembers(ctx context.Context, orgname string) (*O
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/members", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/members", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization members request: %w", err)
 	}
@@ -147,7 +147,7 @@ func (c *Client) GetOrganizationMember(ctx context.Context, orgname, membername 
 		return nil, fmt.Errorf("membername is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/members/%s", orgname, membername))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization member request: %w", err)
 	}
@@ -169,7 +169,7 @@ func (c *Client) AddOrganizationMember(ctx context.Context, orgname, membername 
 		return fmt.Errorf("membername is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodPut, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
+	req, err := newRequest(ctx, http.MethodPut, c.buildURL("/organization/%s/members/%s", orgname, membername))
 	if err != nil {
 		return fmt.Errorf("failed to create add organization member request: %w", err)
 	}
@@ -190,7 +190,7 @@ func (c *Client) RemoveOrganizationMember(ctx context.Context, orgname, memberna
 		return fmt.Errorf("membername is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/members/%s", orgname, membername), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/members/%s", orgname, membername))
 	if err != nil {
 		return fmt.Errorf("failed to create remove organization member request: %w", err)
 	}
@@ -210,7 +210,7 @@ func (c *Client) GetOrganizationRepositories(ctx context.Context, orgname string
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/repositories", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/repositories", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization repositories request: %w", err)
 	}
@@ -231,7 +231,7 @@ func (c *Client) GetOrganizationCollaborators(ctx context.Context, orgname strin
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/collaborators", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/collaborators", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization collaborators request: %w", err)
 	}

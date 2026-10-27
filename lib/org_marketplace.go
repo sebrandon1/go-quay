@@ -23,7 +23,7 @@ func (c *Client) GetOrganizationMarketplace(ctx context.Context, orgname string)
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/marketplace", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/marketplace", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization marketplace request: %w", err)
 	}
@@ -86,7 +86,7 @@ func (c *Client) DeleteOrganizationMarketplaceSubscription(ctx context.Context, 
 		return fmt.Errorf("subscriptionID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/marketplace/%s", orgname, subscriptionID), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/marketplace/%s", orgname, subscriptionID))
 	if err != nil {
 		return fmt.Errorf("failed to create delete marketplace subscription request: %w", err)
 	}

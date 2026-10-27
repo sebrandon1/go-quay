@@ -22,7 +22,7 @@ func (c *Client) GetProxyCacheConfig(ctx context.Context, orgname string) (*Prox
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/proxycache", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/proxycache", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get proxy cache config request: %w", err)
 	}
@@ -67,7 +67,7 @@ func (c *Client) DeleteProxyCacheConfig(ctx context.Context, orgname string) err
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/proxycache", orgname), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/proxycache", orgname))
 	if err != nil {
 		return fmt.Errorf("failed to create delete proxy cache config request: %w", err)
 	}

@@ -23,7 +23,7 @@ func (c *Client) GetErrorType(ctx context.Context, errorType string) (*ErrorType
 		return nil, fmt.Errorf("errorType is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/error/%s", errorType), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/error/%s", errorType))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create error type request: %w", err)
 	}

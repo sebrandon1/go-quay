@@ -23,7 +23,7 @@ func (c *Client) GetQuota(ctx context.Context, orgname string) (*Quota, error) {
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/quota", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/quota", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get quota request: %w", err)
 	}
@@ -84,7 +84,7 @@ func (c *Client) DeleteQuota(ctx context.Context, orgname string) error {
 		return fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/quota", orgname), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/quota", orgname))
 	if err != nil {
 		return fmt.Errorf("failed to create delete quota request: %w", err)
 	}

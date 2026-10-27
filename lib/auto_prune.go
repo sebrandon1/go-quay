@@ -24,7 +24,7 @@ func (c *Client) GetAutoPrunePolicies(ctx context.Context, orgname string) (*Aut
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/autoprunepolicy", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/autoprunepolicy", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get auto-prune policies request: %w", err)
 	}
@@ -72,7 +72,7 @@ func (c *Client) GetAutoPrunePolicy(ctx context.Context, orgname, policyUUID str
 		return nil, fmt.Errorf("policyUUID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get auto-prune policy request: %w", err)
 	}
@@ -123,7 +123,7 @@ func (c *Client) DeleteAutoPrunePolicy(ctx context.Context, orgname, policyUUID 
 		return fmt.Errorf("policyUUID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/autoprunepolicy/%s", orgname, policyUUID))
 	if err != nil {
 		return fmt.Errorf("failed to create delete auto-prune policy request: %w", err)
 	}

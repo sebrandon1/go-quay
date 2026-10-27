@@ -32,7 +32,7 @@ func (c *Client) GetRepoTokens(ctx context.Context, namespace, repository string
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tokens", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tokens", namespace, repository))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repo tokens request: %w", err)
 	}
@@ -83,7 +83,7 @@ func (c *Client) GetRepoToken(ctx context.Context, namespace, repository, code s
 		return nil, fmt.Errorf("code is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repo token request: %w", err)
 	}
@@ -137,7 +137,7 @@ func (c *Client) DeleteRepoToken(ctx context.Context, namespace, repository, cod
 		return fmt.Errorf("code is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/tokens/%s", namespace, repository, code))
 	if err != nil {
 		return fmt.Errorf("failed to create delete repo token request: %w", err)
 	}

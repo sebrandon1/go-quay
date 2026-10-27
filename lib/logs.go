@@ -52,7 +52,7 @@ func (c *Client) GetAggregatedLogs(ctx context.Context, namespace, repository, s
 	}
 
 	// Get new request
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/aggregatelogs", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/aggregatelogs", namespace, repository))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repository aggregate logs request: %w", err)
 	}
@@ -80,7 +80,7 @@ func (c *Client) GetLogs(ctx context.Context, namespace, repository, nextPage, s
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/logs", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/logs", namespace, repository))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get repository logs request: %w", err)
 	}
@@ -101,7 +101,7 @@ func (c *Client) GetOrganizationLogs(ctx context.Context, orgname, nextPage, sta
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/logs", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/logs", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization logs request: %w", err)
 	}
@@ -122,7 +122,7 @@ func (c *Client) GetOrganizationAggregatedLogs(ctx context.Context, orgname, sta
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/aggregatelogs", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/aggregatelogs", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization aggregate logs request: %w", err)
 	}
@@ -160,7 +160,7 @@ func (c *Client) ExportOrganizationLogs(ctx context.Context, orgname string, req
 
 // GetUserLogs returns the logs for the current user
 func (c *Client) GetUserLogs(ctx context.Context, nextPage, startDate, endDate string) (*Logs, error) {
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/logs"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/logs"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user logs request: %w", err)
 	}
@@ -177,7 +177,7 @@ func (c *Client) GetUserLogs(ctx context.Context, nextPage, startDate, endDate s
 
 // GetUserAggregatedLogs returns the aggregated logs for the current user
 func (c *Client) GetUserAggregatedLogs(ctx context.Context, startDate, endDate string) (*AggregatedLogs, error) {
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/aggregatelogs"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/aggregatelogs"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user aggregate logs request: %w", err)
 	}

@@ -11,10 +11,9 @@ HTTP Helper Methods:
   - do(req, v, acceptedStatuses...)          - Core HTTP executor (auth, headers, status check, decode)
   - get(req, v) / post(req, v) / put(req, v) / delete(req) - Thin wrappers with preset accepted statuses
 
-Request Helpers:
-  - newRequest(ctx, method, url string, body io.Reader) (*http.Request, error)
+Request Helpers (thin wrappers over go-toolbox/httpx):
+  - newRequest(ctx, method, url string) (*http.Request, error)
   - newRequestWithBody(ctx, method, url string, body any) (*http.Request, error)
-  - decodeJSON(r io.Reader, v any) error
 
 All HTTP methods include:
   - Bearer token authentication
@@ -25,19 +24,16 @@ All HTTP methods include:
 package lib
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"math"
-	"net"
 	"net/http"
 	"net/url"
-	"strconv"
-	"strings"
 	"time"
+
+	"github.com/sebrandon1/go-toolbox/httpx"
 )
 
 const maxErrorBodySize = 1 << 20 // 1 MB
@@ -74,21 +70,15 @@ type Client struct {
 var _ RepositoryReader = (*Client)(nil)
 
 func NewClientWithURL(bearerToken, baseURL string) (*Client, error) {
-	transport := &http.Transport{
-		DialContext: (&net.Dialer{
-			Timeout: 10 * time.Second,
-		}).DialContext,
-		TLSHandshakeTimeout: 10 * time.Second,
-	}
-
 	return &Client{
 		BearerToken: bearerToken,
 		BaseURL:     baseURL,
 		Version:     "dev",
-		HTTPClient: &http.Client{
-			Timeout:   30 * time.Second,
-			Transport: transport,
-		},
+		HTTPClient: httpx.NewHTTPClient(httpx.Options{
+			Timeout:             30 * time.Second,
+			DialTimeout:         10 * time.Second,
+			TLSHandshakeTimeout: 10 * time.Second,
+		}),
 	}, nil
 }
 
@@ -100,7 +90,7 @@ func (c *Client) buildURL(pathFmt string, args ...any) string {
 	escaped := make([]any, len(args))
 	for i, a := range args {
 		if s, ok := a.(string); ok {
-			escaped[i] = url.PathEscape(s)
+			escaped[i] = httpx.PathSeg(s)
 		} else {
 			escaped[i] = a
 		}
@@ -185,12 +175,12 @@ func (c *Client) doOnce(req *http.Request, v any, acceptedStatuses []int, attemp
 
 	if isAccepted(resp.StatusCode, acceptedStatuses) {
 		if v != nil && resp.StatusCode != http.StatusNoContent {
-			return decodeJSON(resp.Body, v), nil
+			return httpx.DecodeJSON(resp.Body, v), nil
 		}
 		return nil, nil
 	}
 
-	body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodySize))
+	body := httpx.ReadErrorBody(resp.Body, maxErrorBodySize)
 	apiErr := buildAPIError(resp.StatusCode, body)
 
 	if isRetryableStatus(resp.StatusCode) {
@@ -204,23 +194,7 @@ func (c *Client) doOnce(req *http.Request, v any, acceptedStatuses []int, attemp
 }
 
 func redactRequestURL(requestURL *url.URL) string {
-	if requestURL == nil {
-		return "<unknown>"
-	}
-
-	redacted := *requestURL
-	redacted.User = nil
-	query := redacted.Query()
-	for key := range query {
-		lowerKey := strings.ToLower(key)
-		if strings.Contains(lowerKey, "token") || strings.Contains(lowerKey, "secret") ||
-			strings.Contains(lowerKey, "password") || strings.Contains(lowerKey, "auth") ||
-			strings.Contains(lowerKey, "api_key") || strings.Contains(lowerKey, "apikey") {
-			query[key] = []string{"[REDACTED]"}
-		}
-	}
-	redacted.RawQuery = query.Encode()
-	return redacted.String()
+	return httpx.RedactURLQuery(requestURL)
 }
 
 func isAccepted(status int, accepted []int) bool {
@@ -232,13 +206,13 @@ func isAccepted(status int, accepted []int) bool {
 	return false
 }
 
-func buildAPIError(status int, body []byte) error {
+func buildAPIError(status int, body string) error {
 	var quayErr QuayError
-	if json.Unmarshal(body, &quayErr) == nil && quayErr.Message != "" {
+	if json.Unmarshal([]byte(body), &quayErr) == nil && quayErr.Message != "" {
 		quayErr.Status = status
 		return &quayErr
 	}
-	return fmt.Errorf("unexpected status code: %d, response: %s", status, string(body))
+	return fmt.Errorf("unexpected status code: %d, response: %s", status, body)
 }
 
 func isRetryableError(err error) (bool, int) {
@@ -280,14 +254,7 @@ func isRetryableStatus(status int) bool {
 }
 
 func parseRetryAfter(header string) int {
-	if header == "" {
-		return 0
-	}
-	seconds, err := strconv.Atoi(header)
-	if err != nil {
-		return 0
-	}
-	return seconds
+	return int(httpx.ParseRetryAfter(header) / time.Second)
 }
 
 func (c *Client) get(req *http.Request, v any) error {
@@ -307,30 +274,14 @@ func (c *Client) delete(req *http.Request) error {
 }
 
 func addQueryParams(req *http.Request, params map[string]string) {
-	q := req.URL.Query()
-	for key, value := range params {
-		q.Add(key, value)
-	}
-	req.URL.RawQuery = q.Encode()
+	httpx.AddQueryParams(req, params)
 }
 
-func decodeJSON(r io.Reader, v any) error {
-	return json.NewDecoder(r).Decode(v)
-}
-
-func newRequest(ctx context.Context, method, url string, body io.Reader) (*http.Request, error) {
-	return http.NewRequestWithContext(ctx, method, url, body)
+func newRequest(ctx context.Context, method, requestURL string) (*http.Request, error) {
+	return httpx.NewRequest(ctx, method, requestURL)
 }
 
 // newRequestWithBody creates a new HTTP request with JSON body
-func newRequestWithBody(ctx context.Context, method, url string, body any) (*http.Request, error) {
-	var bodyReader io.Reader
-	if body != nil {
-		data, err := json.Marshal(body)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal JSON: %w", err)
-		}
-		bodyReader = bytes.NewReader(data)
-	}
-	return newRequest(ctx, method, url, bodyReader)
+func newRequestWithBody(ctx context.Context, method, requestURL string, body any) (*http.Request, error) {
+	return httpx.NewRequestWithBody(ctx, method, requestURL, body)
 }

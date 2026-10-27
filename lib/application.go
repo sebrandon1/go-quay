@@ -25,7 +25,7 @@ func (c *Client) GetApplications(ctx context.Context, orgname string) (*Applicat
 		return nil, fmt.Errorf("orgname is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/applications", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/applications", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get applications request: %w", err)
 	}
@@ -74,7 +74,7 @@ func (c *Client) GetApplication(ctx context.Context, orgname, clientID string) (
 		return nil, fmt.Errorf("clientID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/applications/%s", orgname, clientID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/applications/%s", orgname, clientID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get application request: %w", err)
 	}
@@ -123,7 +123,7 @@ func (c *Client) DeleteApplication(ctx context.Context, orgname, clientID string
 		return fmt.Errorf("clientID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/applications/%s", orgname, clientID), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/organization/%s/applications/%s", orgname, clientID))
 	if err != nil {
 		return fmt.Errorf("failed to create delete application request: %w", err)
 	}
@@ -144,7 +144,7 @@ func (c *Client) ResetApplicationClientSecret(ctx context.Context, orgname, clie
 		return nil, fmt.Errorf("clientID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodPost, c.buildURL("/organization/%s/applications/%s/resetclientsecret", orgname, clientID), nil)
+	req, err := newRequest(ctx, http.MethodPost, c.buildURL("/organization/%s/applications/%s/resetclientsecret", orgname, clientID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create reset application client secret request: %w", err)
 	}
