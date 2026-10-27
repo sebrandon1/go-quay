@@ -37,7 +37,7 @@ func (c *Client) GetTriggers(ctx context.Context, namespace, repository string) 
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/trigger/", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/trigger/", namespace, repository))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get triggers request: %w", err)
 	}
@@ -62,7 +62,7 @@ func (c *Client) GetTrigger(ctx context.Context, namespace, repository, triggerU
 		return nil, fmt.Errorf("triggerUUID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get trigger request: %w", err)
 	}
@@ -87,7 +87,7 @@ func (c *Client) DeleteTrigger(ctx context.Context, namespace, repository, trigg
 		return fmt.Errorf("triggerUUID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/trigger/%s", namespace, repository, triggerUUID))
 	if err != nil {
 		return fmt.Errorf("failed to create delete trigger request: %w", err)
 	}
@@ -193,7 +193,7 @@ func (c *Client) GetTriggerBuilds(ctx context.Context, namespace, repository, tr
 		return nil, fmt.Errorf("triggerUUID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/trigger/%s/builds", namespace, repository, triggerUUID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/trigger/%s/builds", namespace, repository, triggerUUID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get trigger builds request: %w", err)
 	}

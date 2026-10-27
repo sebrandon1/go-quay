@@ -35,7 +35,7 @@ func (c *Client) GetBuilds(ctx context.Context, namespace, repository string, li
 		url = fmt.Sprintf("%s?limit=%d", url, limit)
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, url, nil)
+	req, err := newRequest(ctx, http.MethodGet, url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get builds request: %w", err)
 	}
@@ -60,7 +60,7 @@ func (c *Client) GetBuild(ctx context.Context, namespace, repository, buildUUID 
 		return nil, fmt.Errorf("buildUUID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/build/%s", namespace, repository, buildUUID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/build/%s", namespace, repository, buildUUID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get build request: %w", err)
 	}
@@ -85,7 +85,7 @@ func (c *Client) GetBuildLogs(ctx context.Context, namespace, repository, buildU
 		return nil, fmt.Errorf("buildUUID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/build/%s/logs", namespace, repository, buildUUID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/build/%s/logs", namespace, repository, buildUUID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get build logs request: %w", err)
 	}
@@ -132,7 +132,7 @@ func (c *Client) CancelBuild(ctx context.Context, namespace, repository, buildUU
 		return fmt.Errorf("buildUUID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/build/%s", namespace, repository, buildUUID), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/build/%s", namespace, repository, buildUUID))
 	if err != nil {
 		return fmt.Errorf("failed to create cancel build request: %w", err)
 	}
@@ -156,7 +156,7 @@ func (c *Client) GetBuildStatus(ctx context.Context, namespace, repository, buil
 		return nil, fmt.Errorf("buildUUID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/build/%s/status", namespace, repository, buildUUID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/build/%s/status", namespace, repository, buildUUID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get build status request: %w", err)
 	}

@@ -32,7 +32,7 @@ func (c *Client) GetOrganizationBilling(ctx context.Context, orgname string) (*B
 	}
 
 	// Get new request
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/plan", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/plan", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization billing request: %w", err)
 	}
@@ -48,7 +48,7 @@ func (c *Client) GetOrganizationBilling(ctx context.Context, orgname string) (*B
 // GetUserBilling returns billing information for the current user
 func (c *Client) GetUserBilling(ctx context.Context) (*BillingInfo, error) {
 	// Get new request
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/plan"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/plan"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user billing request: %w", err)
 	}
@@ -68,7 +68,7 @@ func (c *Client) GetOrganizationSubscription(ctx context.Context, orgname string
 	}
 
 	// Get new request
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/plan", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/plan", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization subscription request: %w", err)
 	}
@@ -84,7 +84,7 @@ func (c *Client) GetOrganizationSubscription(ctx context.Context, orgname string
 // GetUserSubscription returns subscription details for the current user
 func (c *Client) GetUserSubscription(ctx context.Context) (*Subscription, error) {
 	// Get new request
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/plan"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/user/plan"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get user subscription request: %w", err)
 	}
@@ -104,7 +104,7 @@ func (c *Client) GetOrganizationInvoices(ctx context.Context, orgname string) ([
 	}
 
 	// Get new request
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/invoices", orgname), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/organization/%s/invoices", orgname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get organization invoices request: %w", err)
 	}
@@ -127,7 +127,7 @@ func (c *Client) GetUserInvoices(_ context.Context) ([]Invoice, error) {
 // GetAvailablePlans returns available subscription plans
 func (c *Client) GetAvailablePlans(ctx context.Context) ([]Subscription, error) {
 	// Get new request
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/plans"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/plans"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get available plans request: %w", err)
 	}

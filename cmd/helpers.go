@@ -1,15 +1,13 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
-	"text/tabwriter"
 	"time"
 
 	"github.com/sebrandon1/go-quay/lib"
-	"gopkg.in/yaml.v3"
+	"github.com/sebrandon1/go-toolbox/cliout"
+	"github.com/sebrandon1/go-toolbox/yamlx"
 )
 
 // outputFormat holds the selected output format (json, yaml, or table).
@@ -20,8 +18,6 @@ const (
 	tableHeaderName      = "NAME"
 	tableSeverityUnknown = "UNKNOWN"
 )
-
-var tableCellReplacer = strings.NewReplacer("\t", " ", "\n", " ", "\r", " ")
 
 // getClient creates a Quay client with the configured token and URL.
 func getClient() (*lib.Client, error) {
@@ -58,12 +54,7 @@ func getClient() (*lib.Client, error) {
 func printJSON(data interface{}) error {
 	switch outputFormat {
 	case outputYAML:
-		output, err := yaml.Marshal(data)
-		if err != nil {
-			return fmt.Errorf("marshaling YAML: %w", err)
-		}
-		fmt.Print(string(output))
-		return nil
+		return yamlx.Print(os.Stdout, data)
 	case outputTable:
 		// Table output requires command-specific formatting.
 		// Commands that support table mode check outputFormat (or --table)
@@ -80,41 +71,10 @@ func printJSON(data interface{}) error {
 
 // printAsJSON marshals and prints data as indented JSON.
 func printAsJSON(data interface{}) error {
-	output, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshaling JSON: %w", err)
-	}
-	fmt.Println(string(output))
-	return nil
+	return cliout.PrintJSON(os.Stdout, data)
 }
 
 // printTable writes a tab-separated table with aligned columns to stdout.
 func printTable(headers []string, rows [][]string) error {
-	for i, row := range rows {
-		if len(row) != len(headers) {
-			return fmt.Errorf("table row %d has %d columns, want %d", i+1, len(row), len(headers))
-		}
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	if _, err := fmt.Fprintln(w, joinTableCells(headers)); err != nil {
-		return fmt.Errorf("writing table header: %w", err)
-	}
-	for _, row := range rows {
-		if _, err := fmt.Fprintln(w, joinTableCells(row)); err != nil {
-			return fmt.Errorf("writing table row: %w", err)
-		}
-	}
-	if err := w.Flush(); err != nil {
-		return fmt.Errorf("flushing table output: %w", err)
-	}
-	return nil
-}
-
-func joinTableCells(cells []string) string {
-	clean := make([]string, len(cells))
-	for i, cell := range cells {
-		clean[i] = tableCellReplacer.Replace(cell)
-	}
-	return strings.Join(clean, "\t")
+	return cliout.PrintTable(os.Stdout, headers, rows)
 }

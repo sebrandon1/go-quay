@@ -19,7 +19,7 @@ import (
 
 // GetDiscovery retrieves API discovery information
 func (c *Client) GetDiscovery(ctx context.Context) (*Discovery, error) {
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/discovery"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/discovery"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create discovery request: %w", err)
 	}
@@ -34,7 +34,7 @@ func (c *Client) GetDiscovery(ctx context.Context) (*Discovery, error) {
 
 // GetRegistryCapabilities retrieves the registry capabilities including sparse manifest support and mirror architectures
 func (c *Client) GetRegistryCapabilities(ctx context.Context) (*RegistryCapabilities, error) {
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/registry/capabilities"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/registry/capabilities"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create registry capabilities request: %w", err)
 	}
@@ -53,7 +53,7 @@ func (c *Client) GetAppInfo(ctx context.Context, clientID string) (*Application,
 		return nil, fmt.Errorf("clientID is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/app/%s", clientID), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/app/%s", clientID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get app info request: %w", err)
 	}
@@ -72,7 +72,7 @@ func (c *Client) GetEntities(ctx context.Context, prefix string, includeOrgs, in
 		return nil, fmt.Errorf("prefix is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/entities/%s", prefix), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/entities/%s", prefix))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get entities request: %w", err)
 	}

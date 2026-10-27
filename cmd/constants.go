@@ -1,5 +1,7 @@
 package cmd
 
+import "github.com/sebrandon1/go-toolbox/cliout"
+
 const (
 	subcmdInfo        = "info"
 	subcmdList        = "list"
@@ -50,7 +52,7 @@ const (
 	cmdMarketplace    = "marketplace"
 
 	// Output format constants
-	outputJSON  = "json"
-	outputYAML  = "yaml"
-	outputTable = "table"
+	outputJSON  = cliout.FormatJSON
+	outputYAML  = cliout.FormatYAML
+	outputTable = cliout.FormatTable
 )

@@ -1,14 +1,12 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/sebrandon1/go-quay/lib"
+	"github.com/sebrandon1/go-toolbox/cobrautil"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +25,7 @@ var rootCmd = &cobra.Command{
 }
 
 func SetVersion(v string) {
-	rootCmd.Version = v
+	cobrautil.SetVersion(rootCmd, v)
 }
 
 var getCmd = &cobra.Command{
@@ -163,7 +161,5 @@ func init() {
 
 // Execute executes the root command, canceling in-flight HTTP on interrupt.
 func Execute() error {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-	return rootCmd.ExecuteContext(ctx)
+	return cobrautil.Execute(rootCmd)
 }

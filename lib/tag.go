@@ -33,7 +33,7 @@ func (c *Client) GetTag(ctx context.Context, namespace, repository, tag string) 
 		return nil, fmt.Errorf("tag is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get tag request: %w", err)
 	}
@@ -89,7 +89,7 @@ func (c *Client) DeleteTag(ctx context.Context, namespace, repository, tag strin
 		return fmt.Errorf("tag is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s/tag/%s", namespace, repository, tag))
 	if err != nil {
 		return fmt.Errorf("failed to create delete tag request: %w", err)
 	}
@@ -113,7 +113,7 @@ func (c *Client) GetTagHistory(ctx context.Context, namespace, repository, tag s
 		return nil, fmt.Errorf("tag is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/%s/history", namespace, repository, tag), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/%s/history", namespace, repository, tag))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get tag history request: %w", err)
 	}

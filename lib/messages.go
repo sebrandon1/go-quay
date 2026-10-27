@@ -19,7 +19,7 @@ import (
 
 // GetMessages retrieves system messages for the user
 func (c *Client) GetMessages(ctx context.Context) (*Messages, error) {
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/messages"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/messages"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create messages request: %w", err)
 	}

@@ -29,7 +29,7 @@ func (c *Client) GetManifestSecurity(ctx context.Context, namespace, repository,
 		return nil, fmt.Errorf("manifestRef is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/manifest/%s/security", namespace, repository, manifestRef), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/manifest/%s/security", namespace, repository, manifestRef))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get manifest security request: %w", err)
 	}

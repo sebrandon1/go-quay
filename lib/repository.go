@@ -60,7 +60,7 @@ func (c *Client) GetRepository(ctx context.Context, namespace, repository string
 	}
 
 	repoURL := c.buildURL("/repository/%s/%s", namespace, repository)
-	req, err := newRequest(ctx, http.MethodGet, repoURL, nil)
+	req, err := newRequest(ctx, http.MethodGet, repoURL)
 	if err != nil {
 		return RepositoryWithTags{}, fmt.Errorf("failed to create request for repository: %w", err)
 	}
@@ -152,7 +152,7 @@ func (c *Client) DeleteRepository(ctx context.Context, namespace, repository str
 		return fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodDelete, c.buildURL("/repository/%s/%s", namespace, repository))
 	if err != nil {
 		return fmt.Errorf("failed to create delete repository request: %w", err)
 	}
@@ -166,7 +166,7 @@ func (c *Client) DeleteRepository(ctx context.Context, namespace, repository str
 
 // ListRepositories lists all repositories visible to the user
 func (c *Client) ListRepositories(ctx context.Context, namespace string, public, starred, popularity bool, page, limit int) (*RepositoryList, error) {
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository"), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list repositories request: %w", err)
 	}
@@ -291,7 +291,7 @@ func (c *Client) ListTagsPage(ctx context.Context, namespace, repository string,
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/", namespace, repository))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list tags request: %w", err)
 	}
@@ -325,7 +325,7 @@ func (c *Client) ListTags(ctx context.Context, namespace, repository string, lim
 		return nil, fmt.Errorf("repository is required")
 	}
 
-	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/", namespace, repository), nil)
+	req, err := newRequest(ctx, http.MethodGet, c.buildURL("/repository/%s/%s/tag/", namespace, repository))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create list tags request: %w", err)
 	}
