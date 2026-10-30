@@ -557,7 +557,11 @@ config, err := client.UpdateMirrorConfig(ctx, namespace, repo, &lib.UpdateMirror
 
 ## Error Handling
 
-API errors that include a Quay JSON body are returned as `*lib.QuayError`:
+API errors that include a Quay JSON body are returned as `*lib.QuayError`, whatever
+shape the body takes: some endpoints use `{"error": ...}` and the authentication and
+not-found responses use `{"detail": ..., "error_message": ...}`. A non-JSON body
+(for example an HTML gateway error page) stays a plain error, so a typed error
+always means Quay actually answered.
 
 ```go
 import "errors"
@@ -570,7 +574,7 @@ if err != nil {
         case 404:
             // Not found
         case 401:
-            // Authentication failed
+            // Authentication failed, or a repository this token cannot see
         case 403:
             // Permission denied
         case 429:
@@ -581,6 +585,33 @@ if err != nil {
     // Network or other error
 }
 ```
+
+The status helpers avoid importing `net/http` just to compare numbers, and they
+work through the retry wrapper, so a 503 is still identifiable after retries are
+exhausted:
+
+```go
+switch {
+case lib.IsNotFound(err):
+    // 404
+case lib.IsUnauthorized(err):
+    // 401 — Quay answers 401 for repositories the token may not see, including
+    // ones that do not exist, so this is not proof of a missing repository
+case lib.IsForbidden(err):
+    // 403
+}
+
+if code, ok := lib.StatusCode(err); ok {
+    log.Printf("quay returned %d", code)
+}
+```
+
+### Partial tag lists
+
+`GetRepository` fetches a single page of tags. `RepositoryWithTags.TagsTruncated`
+reports whether the API has more, in which case any count derived from `Tags` is a
+lower bound. Quay returns tags newest-first, so `LatestTagTimestamp` is still the
+newest tag; use `ListAllTags` if an exact count is required.
 
 ## Rate Limiting
 

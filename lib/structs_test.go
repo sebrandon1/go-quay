@@ -16,7 +16,7 @@ func mustMarshalJSON(t *testing.T, v any) []byte {
 }
 
 func TestQuayErrorErrorWithoutDetail(t *testing.T) {
-	err := &QuayError{Status: 404, Message: "not_found"}
+	err := &QuayError{Status: 404, Message: testNotFoundErrorCode}
 	want := "quay API error (status 404): not_found"
 	if got := err.Error(); got != want {
 		t.Errorf("Error() = %q, want %q", got, want)

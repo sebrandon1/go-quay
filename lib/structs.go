@@ -886,15 +886,18 @@ type UpdateMirrorConfigRequest struct {
 
 // QuayError represents a Quay API error response and implements the error interface.
 type QuayError struct {
-	Status      int            `json:"status,omitempty"`
-	Message     string         `json:"error,omitempty"`
-	ErrorType   string         `json:"error_type,omitempty"`
-	Detail      string         `json:"detail,omitempty"`
-	ErrorDetail map[string]any `json:"error_detail,omitempty"`
+	Status       int            `json:"status,omitempty"`
+	Message      string         `json:"error,omitempty"`
+	ErrorMessage string         `json:"error_message,omitempty"`
+	ErrorType    string         `json:"error_type,omitempty"`
+	Detail       string         `json:"detail,omitempty"`
+	ErrorDetail  map[string]any `json:"error_detail,omitempty"`
 }
 
 func (e *QuayError) Error() string {
-	if e.Detail != "" {
+	// Some responses echo the same text in detail as in the message, which would
+	// otherwise print twice.
+	if e.Detail != "" && e.Detail != e.Message {
 		return fmt.Sprintf("quay API error (status %d): %s — %s", e.Status, e.Message, e.Detail)
 	}
 	return fmt.Sprintf("quay API error (status %d): %s", e.Status, e.Message)

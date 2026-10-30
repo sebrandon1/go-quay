@@ -47,7 +47,7 @@ Every API domain follows the same pattern:
 - **`lib.NewClient(bearerToken)`** creates a client against `DefaultQuayURL`. **`lib.NewClientWithURL(bearerToken, baseURL)`** is used by the CLI and by unit tests (point `baseURL` at `httptest.NewServer`).
 - All exported `Client` methods take `context.Context` as the first argument. CLI commands pass `cmd.Context()`.
 - **`Client.Retry`** (`*RetryConfig`) is optional. When set, HTTP calls retry on 429 and 5xx. Retry backoff honors the request context. `NewClient` leaves it nil.
-- API errors that include a Quay JSON body are returned as `*lib.QuayError` (implements `error`; use `errors.As` and `StatusCode()`).
+- API errors that include a Quay JSON body are returned as `*lib.QuayError` (implements `error`; use `errors.As`, `StatusCode()`, or the `IsNotFound` / `IsUnauthorized` / `IsForbidden` helpers). Quay uses `{"error": ...}` on some endpoints and `{"detail": ..., "error_message": ...}` on others; both are typed. Non-JSON bodies stay plain errors.
 - CLI authentication: `--token` / `-t`, else `$QUAY_TOKEN`, else the config file. API base URL: `--quay-url`, else `$QUAY_URL`, else config `quay-url`, else `DefaultQuayURL`. Output: `--output` / `-O` (`json`, `yaml`, or `table`).
 - Config file (optional defaults): `token`, `namespace`, `quay-url` in platform config dir (`~/.config/go-quay/config.yaml` on Linux). Flags and env vars override the file.
 - CLI commands use persistent flags (`--namespace`, `--repository`, `--token`) on parent commands so subcommands inherit them.
