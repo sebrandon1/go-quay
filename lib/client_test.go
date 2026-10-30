@@ -299,7 +299,7 @@ func TestQuayErrorParsing(t *testing.T) {
 		t.Errorf("Expected status 404, got %d", quayErr.StatusCode())
 	}
 
-	if quayErr.Message != "not_found" {
+	if quayErr.Message != testNotFoundErrorCode {
 		t.Errorf("Expected message 'not_found', got '%s'", quayErr.Message)
 	}
 

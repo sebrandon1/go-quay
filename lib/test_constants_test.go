@@ -82,6 +82,10 @@ const (
 	// Client test values
 	testTokenValue = "test-token"
 
+	// Error handling test values
+	testAuthMessage       = "Requires authentication"
+	testNotFoundErrorCode = "not_found"
+
 	// Billing test values
 	testBillingPlanFree          = "free"
 	testBillingPlanTypeFree      = "free"
