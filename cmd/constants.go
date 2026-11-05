@@ -55,4 +55,9 @@ const (
 	outputJSON  = cliout.FormatJSON
 	outputYAML  = cliout.FormatYAML
 	outputTable = cliout.FormatTable
+	outputCSV   = "csv"
+
+	// outputFlagName is the global output-format flag, checked when a command
+	// wants to override the default format.
+	outputFlagName = "output"
 )

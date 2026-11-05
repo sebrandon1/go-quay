@@ -129,7 +129,7 @@ func TestPrintJSONTableFallback(t *testing.T) {
 	})
 
 	output := captureStdout(t, func() {
-		if err := printJSON(map[string]string{"name": testPrintFieldValue}); err != nil {
+		if err := printJSON(map[string]string{testFlagName: testPrintFieldValue}); err != nil {
 			t.Fatalf("printJSON: %v", err)
 		}
 	})
@@ -223,5 +223,13 @@ func TestGetClient(t *testing.T) {
 	}
 	if client.Version != "v9.9.9" {
 		t.Errorf("Version = %q, want v9.9.9", client.Version)
+	}
+}
+
+func TestPrintJSONRejectsCSV(t *testing.T) {
+	setCommandTestValue(t, &outputFormat, outputCSV)
+	err := printJSON(map[string]string{testFlagName: testPrintFieldValue})
+	if err == nil || !strings.Contains(err.Error(), "csv output is not available") {
+		t.Fatalf("error = %v, want a csv-unavailable error", err)
 	}
 }

@@ -61,6 +61,8 @@ Configuration commands live at the root: `go-quay config init`, `go-quay config 
 
 Other root commands: `go-quay batch apply`, `go-quay completion`, and `go-quay diff tag`.
 
+Reporting: `go-quay list pull-traffic` ranks repositories by pull traffic (table output by default) and can break a sampled window down by tag (`--by-tag`) or by puller identity and IP (`--consumers`). `go-quay report consumers` aggregates the same sample namespace-wide. These live in `cmd/pulltraffic.go` and `cmd/report.go` rather than the alias registrations in `cmd/zz_verbs.go`.
+
 Legacy: all API commands still hang off `go-quay get` (`repository`, `billing`, `organization`, `permissions`, `tag`, `user`, `manifest`, `secscan`, `robot`, `search`, `team`, `build`, `notification`, `trigger`, `discovery`, `error`, `messages`, `prototype`, `repotoken`, `logs`, `mirror`). Mutating `get` subcommands are deprecated.
 
 ## Configuration

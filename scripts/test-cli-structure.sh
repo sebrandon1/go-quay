@@ -33,6 +33,9 @@ $BINARY create repository --help
 $BINARY delete repository --help
 $BINARY update repository --help
 $BINARY list repository --help
+$BINARY list pull-traffic --help
+$BINARY report --help
+$BINARY report consumers --help
 $BINARY info repository --help
 
 echo "Testing repository commands..."

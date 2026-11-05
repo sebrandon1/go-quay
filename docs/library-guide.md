@@ -362,10 +362,21 @@ err := client.DeleteAutoPrunePolicy(ctx, orgname, policyUUID)
 
 ### Logs Operations
 
+Dates may be `MM/DD/YYYY` (what the API expects) or `YYYY-MM-DD`; anything else
+returns an error instead of being silently ignored. `GetAggregatedLogsRange`
+splits ranges longer than the API's 30-day limit, and `GetAllLogs` follows
+`next_page` with a page cap.
+
 ```go
 // Repository logs
 logs, err := client.GetLogs(ctx, namespace, repo, nextPage, startDate, endDate)
 aggLogs, err := client.GetAggregatedLogs(ctx, namespace, repo, startDate, endDate)
+
+// Long ranges: split into 30-day windows and merged
+aggLogs, err := client.GetAggregatedLogsRange(ctx, namespace, repo, startDate, endDate)
+
+// Every entry across pages (truncated reports the page cap was hit)
+entries, truncated, err := client.GetAllLogs(ctx, namespace, repo, startDate, endDate, maxPages)
 
 // Organization logs
 logs, err := client.GetOrganizationLogs(ctx, orgname, nextPage, startDate, endDate)
