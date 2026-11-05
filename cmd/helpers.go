@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/csv"
 	"fmt"
 	"os"
 	"time"
@@ -55,6 +56,8 @@ func printJSON(data interface{}) error {
 	switch outputFormat {
 	case outputYAML:
 		return yamlx.Print(os.Stdout, data)
+	case outputCSV:
+		return fmt.Errorf("csv output is not available for %s; only report commands render csv", currentCommandPath())
 	case outputTable:
 		// Table output requires command-specific formatting.
 		// Commands that support table mode check outputFormat (or --table)
@@ -77,4 +80,29 @@ func printAsJSON(data interface{}) error {
 // printTable writes a tab-separated table with aligned columns to stdout.
 func printTable(headers []string, rows [][]string) error {
 	return cliout.PrintTable(os.Stdout, headers, rows)
+}
+
+// printRows writes report rows as csv when requested and as an aligned table
+// otherwise. Callers handle the json/yaml case themselves.
+func printRows(headers []string, rows [][]string) error {
+	if outputFormat == outputCSV {
+		return printCSV(headers, rows)
+	}
+	return printTable(headers, rows)
+}
+
+// printCSV writes comma-separated values with a header row to stdout, for
+// reports meant to be loaded into a spreadsheet or notebook.
+func printCSV(headers []string, rows [][]string) error {
+	w := csv.NewWriter(os.Stdout)
+	if err := w.Write(headers); err != nil {
+		return fmt.Errorf("writing csv header: %w", err)
+	}
+	for _, row := range rows {
+		if err := w.Write(row); err != nil {
+			return fmt.Errorf("writing csv row: %w", err)
+		}
+	}
+	w.Flush()
+	return w.Error()
 }

@@ -76,10 +76,10 @@ Get your token at https://quay.io/organization/<org>?tab=applications`, configFi
 	}
 
 	switch outputFormat {
-	case outputJSON, outputYAML, outputTable:
+	case outputJSON, outputYAML, outputTable, outputCSV:
 		// valid
 	default:
-		return fmt.Errorf("invalid output format %q: must be json, yaml, or table", outputFormat)
+		return fmt.Errorf("invalid output format %q: must be json, yaml, table, or csv", outputFormat)
 	}
 
 	return nil
@@ -126,7 +126,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Quay.io API token ($QUAY_TOKEN or config file)")
 	rootCmd.PersistentFlags().StringVar(&quayURL, "quay-url", lib.DefaultQuayURL, "Quay API base URL ($QUAY_URL or config file)")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Show API requests without sending them")
-	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, or table")
+	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, table, or csv (csv is report-only)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Log HTTP requests and responses to stderr")
 	rootCmd.PersistentFlags().IntVar(&maxRetries, "max-retries", 0, "Maximum retries after the initial request (0 disables retries)")
 	rootCmd.PersistentFlags().DurationVar(&retryBackoff, "retry-backoff", 500*time.Millisecond, "Initial delay between retry attempts")

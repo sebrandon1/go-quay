@@ -7,12 +7,14 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
-	testStartDate    = "2026-05-01"
-	testEndDate      = "2026-05-21"
-	testEndDateMay   = "2026-05-31"
+	// The log API only honors MM/DD/YYYY; requests normalize to this form.
+	testStartDate    = "05/01/2026"
+	testEndDate      = "05/21/2026"
+	testEndDateMay   = "05/31/2026"
 	testDatetime     = "Mon, 19 May 2026 00:00:00 -0000"
 	testNextPage     = "abc123"
 	testKindPullRepo = "pull_repo"
@@ -500,5 +502,253 @@ func TestOrganizationRepositoryPopularityZero(t *testing.T) {
 	output := string(data)
 	if !strings.Contains(output, `"popularity":0`) && !strings.Contains(output, `"popularity": 0`) {
 		t.Errorf("Expected popularity field in JSON output even when zero, got: %s", output)
+	}
+}
+
+func TestNormalizeLogDate(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		want    string
+		wantErr bool
+	}{
+		{name: "api layout", input: testStartDate, want: testStartDate},
+		{name: "iso layout", input: "2026-05-01", want: testStartDate},
+		{name: "rfc3339", input: "2026-05-01T12:30:00Z", want: testStartDate},
+		{name: "empty", input: "", want: ""},
+		{name: "unparseable", input: "May 1, 2026", wantErr: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := normalizeLogDate(test.input)
+			if test.wantErr {
+				if err == nil || !strings.Contains(err.Error(), "invalid log date") {
+					t.Fatalf("normalizeLogDate(%q) error = %v, want an invalid-date error", test.input, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("normalizeLogDate(%q) returned error: %v", test.input, err)
+			}
+			if got != test.want {
+				t.Errorf("normalizeLogDate(%q) = %q, want %q", test.input, got, test.want)
+			}
+		})
+	}
+}
+
+func TestLogRequestsNormalizeISODates(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.URL.Query().Get("starttime"); got != testStartDate {
+			t.Errorf("starttime = %q, want %q", got, testStartDate)
+		}
+		if got := r.URL.Query().Get("endtime"); got != testEndDate {
+			t.Errorf("endtime = %q, want %q", got, testEndDate)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mustMarshal(t, AggregatedLogs{}))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	if _, err := client.GetAggregatedLogs(context.Background(), testNamespace, testRepository, "2026-05-01", "2026-05-21"); err != nil {
+		t.Fatalf("GetAggregatedLogs with ISO dates returned error: %v", err)
+	}
+}
+
+func TestAggregatedLogsOmitUnsetDates(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := r.URL.Query()["starttime"]; ok {
+			t.Errorf("starttime should be omitted when empty, got %q", r.URL.Query().Get("starttime"))
+		}
+		if _, ok := r.URL.Query()["endtime"]; ok {
+			t.Errorf("endtime should be omitted when empty, got %q", r.URL.Query().Get("endtime"))
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mustMarshal(t, AggregatedLogs{}))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	if _, err := client.GetAggregatedLogs(context.Background(), testNamespace, testRepository, "", ""); err != nil {
+		t.Fatalf("GetAggregatedLogs without dates returned error: %v", err)
+	}
+}
+
+func TestLogsRejectInvalidDate(t *testing.T) {
+	client, err := NewClient("")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	if _, err := client.GetAggregatedLogs(context.Background(), testNamespace, testRepository, "not-a-date", ""); err == nil {
+		t.Fatal("GetAggregatedLogs accepted an invalid date")
+	}
+	if _, err := client.GetLogs(context.Background(), testNamespace, testRepository, "", "", "not-a-date"); err == nil {
+		t.Fatal("GetLogs accepted an invalid date")
+	}
+	if _, _, err := ValidateLogDateRange("2026-05-01", "2026-05-21"); err != nil {
+		t.Errorf("ValidateLogDateRange rejected valid dates: %v", err)
+	}
+}
+
+func TestGetAggregatedLogsRangeSplitsWindows(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		start, err := time.Parse("01/02/2006", r.URL.Query().Get("starttime"))
+		if err != nil {
+			t.Errorf("bad starttime %q: %v", r.URL.Query().Get("starttime"), err)
+		}
+		end, err := time.Parse("01/02/2006", r.URL.Query().Get("endtime"))
+		if err != nil {
+			t.Errorf("bad endtime %q: %v", r.URL.Query().Get("endtime"), err)
+		}
+		if days := end.Sub(start).Hours()/24 + 1; days > maxAggregatedLogWindowDays {
+			t.Errorf("window %s..%s spans %.0f days, want <= %d", start, end, days, maxAggregatedLogWindowDays)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mustMarshal(t, AggregatedLogs{Aggregated: []AggregatedLogEntry{
+			{Kind: testKindPullRepo, Count: 1, Datetime: testDatetime},
+		}}))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	logs, err := client.GetAggregatedLogsRange(context.Background(), testNamespace, testRepository, "2026-01-01", "2026-03-31")
+	if err != nil {
+		t.Fatalf("GetAggregatedLogsRange returned error: %v", err)
+	}
+	if requests != 3 {
+		t.Errorf("requests = %d, want 3 windows for a 90-day range", requests)
+	}
+	if len(logs.Aggregated) != 3 {
+		t.Errorf("entries = %d, want 3 merged windows", len(logs.Aggregated))
+	}
+}
+
+func TestGetAggregatedLogsRangeRejectsReversedRange(t *testing.T) {
+	client, err := NewClient("")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	_, err = client.GetAggregatedLogsRange(context.Background(), testNamespace, testRepository, "05/21/2026", "05/01/2026")
+	if err == nil || !strings.Contains(err.Error(), "before start date") {
+		t.Fatalf("error = %v, want a reversed-range error", err)
+	}
+}
+
+func TestGetAllLogsFollowsNextPage(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		response := Logs{Logs: []LogEntry{{Kind: testKindPullRepo, Metadata: Metadata{Tag: "first"}}}}
+		if r.URL.Query().Get("next_page") == "" {
+			response.NextPage = testNextPage
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mustMarshal(t, response))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	entries, truncated, err := client.GetAllLogs(context.Background(), testNamespace, testRepository, "", "", 5)
+	if err != nil {
+		t.Fatalf("GetAllLogs returned error: %v", err)
+	}
+	if requests != 2 || len(entries) != 2 {
+		t.Errorf("requests = %d, entries = %d; want 2 and 2", requests, len(entries))
+	}
+	if truncated {
+		t.Error("truncated = true, want false when the stream ends")
+	}
+}
+
+func TestGetAllLogsStopsAtPageLimit(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mustMarshal(t, Logs{
+			Logs:     []LogEntry{{Kind: testKindPullRepo}},
+			NextPage: testNextPage,
+		}))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	entries, truncated, err := client.GetAllLogs(context.Background(), testNamespace, testRepository, "", "", 2)
+	if err != nil {
+		t.Fatalf("GetAllLogs returned error: %v", err)
+	}
+	if requests != 2 || len(entries) != 2 {
+		t.Errorf("requests = %d, entries = %d; want 2 and 2", requests, len(entries))
+	}
+	if !truncated {
+		t.Error("truncated = false, want true when the page cap is hit")
+	}
+}
+
+func TestGetAggregatedLogsRangeSingleRequestWhenOpenEnded(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mustMarshal(t, AggregatedLogs{}))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	if _, err := client.GetAggregatedLogsRange(context.Background(), testNamespace, testRepository, "", ""); err != nil {
+		t.Fatalf("GetAggregatedLogsRange returned error: %v", err)
+	}
+	if requests != 1 {
+		t.Errorf("requests = %d, want 1 when the range is open-ended", requests)
+	}
+}
+
+func TestGetAggregatedLogsRangeStopsOnWindowError(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		if requests == 2 {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write(mustMarshal(t, map[string]string{"error": "denied"}))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(mustMarshal(t, AggregatedLogs{}))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL("test-token", server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	if _, err := client.GetAggregatedLogsRange(context.Background(), testNamespace, testRepository, "2026-01-01", "2026-03-31"); err == nil {
+		t.Fatal("GetAggregatedLogsRange swallowed a window error")
+	}
+	if requests != 2 {
+		t.Errorf("requests = %d, want the range query to stop at the failing window", requests)
 	}
 }

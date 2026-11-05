@@ -39,7 +39,7 @@ Every command inherits these flags:
 |------|----------------|-------------|
 | `--token` / `-t` | `QUAY_TOKEN` or config `token` | Quay.io API token |
 | `--quay-url` | `QUAY_URL` or config `quay-url` | API base URL (default `https://quay.io/api/v1`) |
-| `--output` / `-O` | — | `json` (default), `yaml`, or `table` |
+| `--output` / `-O` | — | `json` (default), `yaml`, or `table`; `list pull-traffic` defaults to `table` |
 | `--dry-run` | — | Show API requests without sending them |
 | `--verbose` / `-v` | — | Log HTTP method, URL, status, duration, and attempt to stderr; credentials and request/response bodies are not logged |
 | `--max-retries` | — | Retry failed requests this many times after the initial attempt (default `0`, disabled) |
@@ -76,6 +76,7 @@ The command resolves each tag to a manifest digest, then fetches labels and secu
 | `get team list` / `list teams` | Name, role, member count, repository count |
 | `get secscan info` / `info secscan` | Status, feature and vulnerability totals, severity counts |
 | `get mirror info` / `info mirror` | Enabled, mirror type, external ref, sync interval, sync start date, robot, tag rule, tag rule kind |
+| `list pull-traffic` | Repository, pulls, pushes, share; with `--by-tag`: tags; with `--consumers`: puller, IP, last seen |
 
 Every command accepts `--output table`, but only the commands above render columns. For the rest, the requested format is reported on stderr — `note: table output is not available for <command>; printing json` — and stdout still carries JSON, so a script expecting columns fails visibly instead of parsing a different shape.
 
@@ -419,6 +420,14 @@ go-quay delete notification \
 
 Repository, organization, and user activity logs with optional date range filtering.
 
+Dates accept `MM/DD/YYYY` (the only form the Quay API honours) or `YYYY-MM-DD`,
+which the client converts. Any other value is rejected instead of being sent,
+because Quay ignores unparseable dates and falls back to a 48-hour window.
+
+Aggregated logs accept at most 30 days per request, and Quay retains roughly 30
+days of usage logs. Ranges outside the retention period return no data rather
+than an error.
+
 ### Get aggregated repository logs
 ```bash
 go-quay get logs repo-aggregated-logs \
@@ -438,6 +447,51 @@ go-quay get logs repo-logs \
   --enddate "2024-05-31" \
   -t YOUR_TOKEN
 ```
+
+### Rank repositories by pull traffic
+```bash
+# Last 30 days, every repository, ranked (table by default)
+go-quay list pull-traffic -n NAMESPACE -t YOUR_TOKEN
+
+# Top 5 repositories with their busiest tags
+go-quay list pull-traffic -n NAMESPACE --top 5 --by-tag -t YOUR_TOKEN
+
+# Top 5 repositories and who is pulling them
+go-quay list pull-traffic -n NAMESPACE --top 5 --consumers -t YOUR_TOKEN
+
+# Explicit range, machine-readable output
+go-quay list pull-traffic -n NAMESPACE -s "2024-05-01" -e "2024-05-31" -O json -t YOUR_TOKEN
+```
+
+Without `--startdate`/`--enddate` the command covers the last 30 days, which is
+about as far back as Quay retains usage logs. Longer ranges are split into 30-day
+windows and summed. The report records the range Quay actually covered
+(`covered_start`/`covered_end`) when retention is shorter than the request, and it
+fails with an explicit token error instead of reporting zero traffic when Quay
+answers an unauthenticated namespace listing with an empty result.
+
+Output is a table unless `-O json`, `-O yaml`, or `-O csv` is given. Dates also
+accept a relative value: `-s 30d` starts 30 days ago. `--by-tag` and
+`--consumers` sample individual log entries (capped by `--max-pages`) and share a
+single sample. `--consumers` groups pulls by puller identity, source IP and
+user agent, which is what distinguishes one cluster pulling repeatedly from many
+clusters.
+
+### Show who is pulling a namespace
+```bash
+# Last 30 days, busiest 10 repositories, top 20 consumers
+go-quay report consumers -n NAMESPACE -t YOUR_TOKEN
+
+# Narrow the sample and export it
+go-quay report consumers -n NAMESPACE --repos 5 --limit 10 -O csv -t YOUR_TOKEN
+```
+
+`report consumers` samples the busiest repositories and merges pulls by the same
+puller and IP across them, so one row describes one cluster or CI identity. It
+reports how many repositories that identity pulled and when it was last seen.
+`--repos` controls how many repositories are sampled and `--max-pages` how many
+log pages per repository.
+
 
 ### Get organization and user logs
 ```bash

@@ -93,6 +93,12 @@ go-quay list repository -n myorg --popularity --table -t "$QUAY_TOKEN"
 
 # Security scan a manifest
 go-quay info secscan -n myorg -r myapp -m sha256:abc123... -t "$QUAY_TOKEN"
+
+# Rank repositories by pull traffic (last 30 days)
+go-quay list pull-traffic -n myorg --top 5 -t "$QUAY_TOKEN"
+
+# See which identities are pulling the namespace
+go-quay report consumers -n myorg --limit 10 -t "$QUAY_TOKEN"
 ```
 
 Mutating commands use the same verb-first shape (`create` / `delete` / `update`). `go-quay get …` still works; mutating actions under `get` are deprecated.
@@ -146,7 +152,7 @@ Each API links to the corresponding [Quay.io Swagger documentation](https://docs
 ## Authentication
 
 1. Go to [Quay.io](https://quay.io) and log in
-2. Create an **application token** (Account Settings → Applications) or a **robot account** token. Encrypted/CLI passwords are for `docker login`, not this API.
+2. Create an **application token** (Account Settings → Applications). Encrypted/CLI passwords are for `docker login`, and robot account tokens authenticate the registry (`/v2/`) — neither works on this API (`/api/v1/`).
 3. Use the token with `--token` / `-t`, `QUAY_TOKEN`, or a config file (`token:` in `~/.config/go-quay/config.yaml` on Linux)
 
 Optional: `--quay-url` / `QUAY_URL` for a self-hosted registry. Output format: `--output` / `-O` (`json`, `yaml`, `table`). See [CLI Reference](docs/cli-reference.md).
