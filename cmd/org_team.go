@@ -1,104 +1,64 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 )
+
+// The commands in this file are deprecated shims kept for one release. The
+// canonical implementation lives in cmd/team.go and uses --organization/--name
+// everywhere; these legacy paths keep their original --team/--email flags so
+// existing scripts continue to work while pointing users at the new forms.
 
 // Organization Teams
 var orgTeamsCmd = &cobra.Command{
 	Use:   "teams",
-	Short: "Get organization teams",
+	Short: "Get organization teams (deprecated)",
 	Long:  `Get list of all teams in an organization.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client, err := getClient()
-		if err != nil {
-			return fmt.Errorf("creating client: %w", err)
-		}
-		teams, err := client.GetTeams(cmd.Context(), orgName)
-		if err != nil {
-			return fmt.Errorf("getting organization teams: %w", err)
-		}
-		return printJSON(teams)
+		return runTeamList(cmd, orgName)
 	},
 }
 
 // Team Info
 var teamInfoCmd = &cobra.Command{
 	Use:   "team",
-	Short: "Get team information",
+	Short: "Get team information (deprecated)",
 	Long:  `Get detailed information about a specific team.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client, err := getClient()
-		if err != nil {
-			return fmt.Errorf("creating client: %w", err)
-		}
-		team, err := client.GetTeam(cmd.Context(), orgName, teamName)
-		if err != nil {
-			return fmt.Errorf("getting team: %w", err)
-		}
-		return printJSON(team)
+		return runTeamInfo(cmd, orgName, teamName)
 	},
 }
 
 // Team Members
 var teamMembersCmd = &cobra.Command{
 	Use:   "team-members",
-	Short: "Get team members",
+	Short: "Get team members (deprecated)",
 	Long:  `Get list of all members in a specific team.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client, err := getClient()
-		if err != nil {
-			return fmt.Errorf("creating client: %w", err)
-		}
-		members, err := client.GetTeamMembers(cmd.Context(), orgName, teamName)
-		if err != nil {
-			return fmt.Errorf("getting team members: %w", err)
-		}
-		return printJSON(members)
+		return runTeamMembers(cmd, orgName, teamName)
 	},
 }
 
 // Invite Team Member
-var inviteMemberCmd = &cobra.Command{
+var orgInviteMemberCmd = &cobra.Command{
 	Use:   "invite-member",
-	Short: "Invite a member to a team",
+	Short: "Invite a member to a team (deprecated)",
 	Long:  `Invite a member to a team by email.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client, err := getClient()
-		if err != nil {
-			return fmt.Errorf("creating client: %w", err)
-		}
-		err = client.InviteTeamMember(cmd.Context(), orgName, teamName, email)
-		if err != nil {
-			return fmt.Errorf("inviting team member: %w", err)
-		}
-		fmt.Fprintln(os.Stderr, "Team member invited successfully")
-		return nil
+		return runTeamInvite(cmd, orgName, teamName, email)
 	},
 }
 
 // Cancel Team Invite
-var cancelInviteCmd = &cobra.Command{
+var orgCancelInviteCmd = &cobra.Command{
 	Use:   "cancel-invite",
-	Short: "Cancel a team member invitation",
+	Short: "Cancel a team member invitation (deprecated)",
 	Long:  `Cancel a pending team member invitation. Requires --confirm flag.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !confirm {
-			return fmt.Errorf("must pass --confirm to cancel an invite")
+			return errConfirmCancelInvite
 		}
-		client, err := getClient()
-		if err != nil {
-			return fmt.Errorf("creating client: %w", err)
-		}
-		err = client.DeleteTeamInvite(cmd.Context(), orgName, teamName, email)
-		if err != nil {
-			return fmt.Errorf("canceling team invite: %w", err)
-		}
-		fmt.Fprintln(os.Stderr, "Team invite canceled successfully")
-		return nil
+		return runTeamCancelInvite(cmd, orgName, teamName, email)
 	},
 }
 
@@ -111,24 +71,30 @@ func initOrgTeamFlags() {
 }
 
 func initOrgInviteFlags() {
-	inviteMemberCmd.Flags().StringVarP(&teamName, "team", "T", "", "Team name")
-	_ = inviteMemberCmd.MarkFlagRequired("team")
-	inviteMemberCmd.Flags().StringVar(&email, "email", "", "Email address")
-	_ = inviteMemberCmd.MarkFlagRequired("email")
+	orgInviteMemberCmd.Flags().StringVarP(&teamName, "team", "T", "", "Team name")
+	_ = orgInviteMemberCmd.MarkFlagRequired("team")
+	orgInviteMemberCmd.Flags().StringVar(&email, "email", "", "Email address")
+	_ = orgInviteMemberCmd.MarkFlagRequired("email")
 
-	cancelInviteCmd.Flags().StringVarP(&teamName, "team", "T", "", "Team name")
-	_ = cancelInviteCmd.MarkFlagRequired("team")
-	cancelInviteCmd.Flags().StringVar(&email, "email", "", "Email address")
-	_ = cancelInviteCmd.MarkFlagRequired("email")
-	cancelInviteCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm cancellation")
+	orgCancelInviteCmd.Flags().StringVarP(&teamName, "team", "T", "", "Team name")
+	_ = orgCancelInviteCmd.MarkFlagRequired("team")
+	orgCancelInviteCmd.Flags().StringVar(&email, "email", "", "Email address")
+	_ = orgCancelInviteCmd.MarkFlagRequired("email")
+	orgCancelInviteCmd.Flags().BoolVar(&confirm, "confirm", false, "Confirm cancellation")
 }
 
 func init() {
 	organizationCmd.AddCommand(orgTeamsCmd)
 	organizationCmd.AddCommand(teamInfoCmd)
 	organizationCmd.AddCommand(teamMembersCmd)
-	organizationCmd.AddCommand(inviteMemberCmd)
-	organizationCmd.AddCommand(cancelInviteCmd)
+	organizationCmd.AddCommand(orgInviteMemberCmd)
+	organizationCmd.AddCommand(orgCancelInviteCmd)
+
+	deprecate(orgTeamsCmd, cmdList, "teams")
+	deprecate(teamInfoCmd, cmdInfo, cmdTeam)
+	deprecate(teamMembersCmd, cmdList, "team-members")
+	deprecate(orgInviteMemberCmd, cmdCreate, "invite")
+	deprecate(orgCancelInviteCmd, cmdDelete, "invite")
 
 	initOrgTeamFlags()
 	initOrgInviteFlags()
