@@ -241,6 +241,114 @@ func TestVerbLeafValidatesTagBeforeBuildingClient(t *testing.T) {
 	}
 }
 
+// TestEveryVerbLeafMatchesSource walks every alias recorded by addVerbs and
+// fails when the clone drifts from its legacy source: a flag that was not
+// copied, a missing Args validator, a different RunE, or a bad example path.
+func TestEveryVerbLeafMatchesSource(t *testing.T) {
+	if len(verbRegistrations) == 0 {
+		t.Fatal("no verb registrations recorded; addVerbs never ran")
+	}
+
+	for _, reg := range verbRegistrations {
+		t.Run(reg.parentUse+" "+reg.leaf.Use, func(t *testing.T) {
+			want := sourceVerbFlags(reg.src)
+			got := localVerbFlags(reg.leaf)
+			for name, wantType := range want {
+				gotType, ok := got[name]
+				if !ok {
+					t.Errorf("missing flag --%s (%s) copied from %q", name, wantType, reg.src.CommandPath())
+					continue
+				}
+				if gotType != wantType {
+					t.Errorf("flag --%s has type %s, source has %s", name, gotType, wantType)
+				}
+			}
+			for name := range got {
+				if _, ok := want[name]; !ok {
+					t.Errorf("unexpected flag --%s not present on %q", name, reg.src.CommandPath())
+				}
+			}
+
+			if (reg.leaf.Args == nil) != (reg.src.Args == nil) {
+				t.Errorf("Args parity broken: leaf nil=%t, source nil=%t", reg.leaf.Args == nil, reg.src.Args == nil)
+			}
+			if funcPointer(reg.leaf.RunE) != funcPointer(reg.src.RunE) {
+				t.Error("RunE differs from the source command")
+			}
+
+			if reg.leaf.Example != "" {
+				wantPrefix := "  " + cliName + " " + reg.parentUse + " " + reg.leaf.Use
+				if !strings.HasPrefix(reg.leaf.Example, wantPrefix) {
+					t.Errorf("example = %q, want prefix %q", reg.leaf.Example, wantPrefix)
+				}
+			}
+			if reg.leaf.Deprecated != "" {
+				t.Errorf("verb-first leaf must not be deprecated, got %q", reg.leaf.Deprecated)
+			}
+		})
+	}
+}
+
+// TestDeprecatedSourcesPointAtLiveLeaf cross-checks the registry against the
+// command tree: each recorded leaf must actually be attached to its verb parent,
+// and every deprecated legacy source must name a path that resolves to a leaf.
+func TestDeprecatedSourcesPointAtLiveLeaf(t *testing.T) {
+	var deprecated int
+	for _, reg := range verbRegistrations {
+		parent := subcommand(rootCmd, reg.parentUse)
+		if parent == nil {
+			t.Errorf("%s: verb parent not registered", reg.parentUse)
+			continue
+		}
+		if leaf := subcommand(parent, reg.leaf.Use); leaf != reg.leaf {
+			t.Errorf("%s %s: registered leaf %q is not the one attached to the parent", reg.parentUse, reg.leaf.Use, reg.leaf.Use)
+			continue
+		}
+
+		if reg.src.Deprecated == "" {
+			continue
+		}
+		deprecated++
+		want := cliName + " " + reg.parentUse + " " + reg.leaf.Use
+		if !strings.Contains(reg.src.Deprecated, want) {
+			t.Errorf("%s deprecation = %q, want it to point at %q", reg.src.CommandPath(), reg.src.Deprecated, want)
+		}
+		if reg.leaf.Deprecated != "" {
+			t.Errorf("%s %s is deprecated; the replacement must be live", reg.parentUse, reg.leaf.Use)
+		}
+	}
+	if deprecated == 0 {
+		t.Fatal("no deprecated source commands found; the check proved nothing")
+	}
+}
+
+// sourceVerbFlags returns the flags verbLeaf is expected to copy: the source's
+// local flags plus the resource flags it inherits, minus root persistent flags
+// (which the verb tree deliberately does not duplicate).
+func sourceVerbFlags(src *cobra.Command) map[string]string {
+	flags := map[string]string{}
+	src.LocalNonPersistentFlags().VisitAll(func(f *pflag.Flag) {
+		flags[f.Name] = f.Value.Type()
+	})
+	src.InheritedFlags().VisitAll(func(f *pflag.Flag) {
+		if rootCmd.PersistentFlags().Lookup(f.Name) != nil {
+			return
+		}
+		flags[f.Name] = f.Value.Type()
+	})
+	delete(flags, "help")
+	return flags
+}
+
+func localVerbFlags(c *cobra.Command) map[string]string {
+	flags := map[string]string{}
+	c.LocalNonPersistentFlags().VisitAll(func(f *pflag.Flag) {
+		flags[f.Name] = f.Value.Type()
+	})
+	delete(flags, "help")
+	return flags
+}
+
 func TestVerbLeafDoesNotCopyRootFlags(t *testing.T) {
 	leaf := subcommand(createCmd, cmdRepository)
 	if leaf == nil {

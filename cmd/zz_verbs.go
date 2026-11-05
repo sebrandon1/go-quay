@@ -91,13 +91,30 @@ type verbSpec struct {
 	exampleArgs string
 }
 
+// registeredVerb records one alias created by addVerbs so tests can assert that
+// every leaf still mirrors its legacy source. It stays unexported: the registry
+// exists only for introspection in this package.
+type registeredVerb struct {
+	parentUse string
+	leaf      *cobra.Command
+	src       *cobra.Command
+}
+
+var verbRegistrations []registeredVerb
+
 func addVerbs(parent *cobra.Command, deprecateSrc bool, leaves ...verbSpec) {
 	for _, leaf := range leaves {
 		example := ""
 		if leaf.exampleArgs != "" {
 			example = "  " + cliName + " " + parent.Use + " " + leaf.use + " " + leaf.exampleArgs
 		}
-		parent.AddCommand(verbLeaf(leaf.use, example, leaf.src))
+		leafCmd := verbLeaf(leaf.use, example, leaf.src)
+		parent.AddCommand(leafCmd)
+		verbRegistrations = append(verbRegistrations, registeredVerb{
+			parentUse: parent.Use,
+			leaf:      leafCmd,
+			src:       leaf.src,
+		})
 		if deprecateSrc {
 			deprecate(leaf.src, parent.Use, leaf.use)
 		}
