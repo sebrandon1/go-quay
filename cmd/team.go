@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 )
+
+var errConfirmCancelInvite = errors.New("must pass --confirm to cancel an invite")
 
 var (
 	teamCmdOrgname        string
@@ -15,9 +18,11 @@ var (
 	teamCmdMemberName     string
 	teamCmdRepository     string
 	teamCmdPermissionRole string
+	teamCmdEmail          string
 	confirmTeamDelete     bool
 	confirmTeamMemberDel  bool
 	confirmTeamPermDel    bool
+	confirmTeamInvite     bool
 )
 
 // teamCmd represents the team command group
@@ -52,31 +57,37 @@ var teamListCmd = &cobra.Command{
 
 Table columns: NAME, ROLE, MEMBERS, REPOSITORIES.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client, err := getClient()
-		if err != nil {
-			return fmt.Errorf("creating client: %w", err)
-		}
-
-		teams, err := client.GetTeams(cmd.Context(), teamCmdOrgname)
-		if err != nil {
-			return fmt.Errorf("getting teams: %w", err)
-		}
-
-		fmt.Fprintf(os.Stderr, "Teams in organization '%s':\n", teamCmdOrgname)
-		if outputFormat == outputTable {
-			rows := make([][]string, 0, len(teams))
-			for _, team := range teams {
-				rows = append(rows, []string{
-					team.Name,
-					team.Role,
-					fmt.Sprintf("%d", team.MemberCount),
-					fmt.Sprintf("%d", team.RepoCount),
-				})
-			}
-			return printTable([]string{tableHeaderName, "ROLE", "MEMBERS", "REPOSITORIES"}, rows)
-		}
-		return printJSON(teams)
+		return runTeamList(cmd, teamCmdOrgname)
 	},
+}
+
+// runTeamList is shared by the canonical `team list` command and the deprecated
+// `get organization teams` shim, so both paths print exactly the same output.
+func runTeamList(cmd *cobra.Command, organization string) error {
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("creating client: %w", err)
+	}
+
+	teams, err := client.GetTeams(cmd.Context(), organization)
+	if err != nil {
+		return fmt.Errorf("getting teams: %w", err)
+	}
+
+	fmt.Fprintf(os.Stderr, "Teams in organization '%s':\n", organization)
+	if outputFormat == outputTable {
+		rows := make([][]string, 0, len(teams))
+		for _, team := range teams {
+			rows = append(rows, []string{
+				team.Name,
+				team.Role,
+				fmt.Sprintf("%d", team.MemberCount),
+				fmt.Sprintf("%d", team.RepoCount),
+			})
+		}
+		return printTable([]string{tableHeaderName, "ROLE", "MEMBERS", "REPOSITORIES"}, rows)
+	}
+	return printJSON(teams)
 }
 
 // Team Info
@@ -85,19 +96,23 @@ var teamCmdInfoCmd = &cobra.Command{
 	Short: "Get team details",
 	Long:  `Get detailed information about a specific team.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client, err := getClient()
-		if err != nil {
-			return fmt.Errorf("creating client: %w", err)
-		}
-
-		team, err := client.GetTeam(cmd.Context(), teamCmdOrgname, teamCmdName)
-		if err != nil {
-			return fmt.Errorf("getting team: %w", err)
-		}
-
-		fmt.Fprintf(os.Stderr, "Team: %s/%s\n", teamCmdOrgname, teamCmdName)
-		return printJSON(team)
+		return runTeamInfo(cmd, teamCmdOrgname, teamCmdName)
 	},
+}
+
+func runTeamInfo(cmd *cobra.Command, organization, team string) error {
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("creating client: %w", err)
+	}
+
+	info, err := client.GetTeam(cmd.Context(), organization, team)
+	if err != nil {
+		return fmt.Errorf("getting team: %w", err)
+	}
+
+	fmt.Fprintf(os.Stderr, "Team: %s/%s\n", organization, team)
+	return printJSON(info)
 }
 
 // Team Create
@@ -178,19 +193,74 @@ var teamCmdMembersCmd = &cobra.Command{
 	Short: "List team members",
 	Long:  `List all members of a specific team.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client, err := getClient()
-		if err != nil {
-			return fmt.Errorf("creating client: %w", err)
-		}
-
-		members, err := client.GetTeamMembers(cmd.Context(), teamCmdOrgname, teamCmdName)
-		if err != nil {
-			return fmt.Errorf("getting team members: %w", err)
-		}
-
-		fmt.Fprintf(os.Stderr, "Members of team '%s/%s':\n", teamCmdOrgname, teamCmdName)
-		return printJSON(members)
+		return runTeamMembers(cmd, teamCmdOrgname, teamCmdName)
 	},
+}
+
+func runTeamMembers(cmd *cobra.Command, organization, team string) error {
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("creating client: %w", err)
+	}
+
+	members, err := client.GetTeamMembers(cmd.Context(), organization, team)
+	if err != nil {
+		return fmt.Errorf("getting team members: %w", err)
+	}
+
+	fmt.Fprintf(os.Stderr, "Members of team '%s/%s':\n", organization, team)
+	return printJSON(members)
+}
+
+// Team Invite Member
+var inviteMemberCmd = &cobra.Command{
+	Use:   "invite-member",
+	Short: "Invite a member to a team",
+	Long:  `Invite a member to a team by email.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runTeamInvite(cmd, teamCmdOrgname, teamCmdName, teamCmdEmail)
+	},
+}
+
+func runTeamInvite(cmd *cobra.Command, organization, team, memberEmail string) error {
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("creating client: %w", err)
+	}
+
+	if err := client.InviteTeamMember(cmd.Context(), organization, team, memberEmail); err != nil {
+		return fmt.Errorf("inviting team member: %w", err)
+	}
+
+	fmt.Fprintln(os.Stderr, "Team member invited successfully")
+	return nil
+}
+
+// Cancel Team Invite
+var cancelInviteCmd = &cobra.Command{
+	Use:   "cancel-invite",
+	Short: "Cancel a team member invitation",
+	Long:  `Cancel a pending team member invitation. Requires --confirm flag.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if !confirmTeamInvite {
+			return errConfirmCancelInvite
+		}
+		return runTeamCancelInvite(cmd, teamCmdOrgname, teamCmdName, teamCmdEmail)
+	},
+}
+
+func runTeamCancelInvite(cmd *cobra.Command, organization, team, memberEmail string) error {
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("creating client: %w", err)
+	}
+
+	if err := client.DeleteTeamInvite(cmd.Context(), organization, team, memberEmail); err != nil {
+		return fmt.Errorf("canceling team invite: %w", err)
+	}
+
+	fmt.Fprintln(os.Stderr, "Team invite canceled successfully")
+	return nil
 }
 
 // Team Add Member
@@ -322,6 +392,8 @@ func init() {
 	teamCmd.AddCommand(teamUpdateCmd)
 	teamCmd.AddCommand(teamDeleteCmd)
 	teamCmd.AddCommand(teamCmdMembersCmd)
+	teamCmd.AddCommand(inviteMemberCmd)
+	teamCmd.AddCommand(cancelInviteCmd)
 	teamCmd.AddCommand(teamAddMemberCmd)
 	teamCmd.AddCommand(teamRemoveMemberCmd)
 	teamCmd.AddCommand(teamPermissionsCmd)
@@ -331,6 +403,7 @@ func init() {
 	initTeamGlobalFlags()
 	initTeamCmdFlags()
 	initTeamMemberCmdFlags()
+	initTeamInviteCmdFlags()
 	initTeamPermissionCmdFlags()
 }
 
@@ -379,6 +452,19 @@ func initTeamMemberCmdFlags() {
 	teamRemoveMemberCmd.Flags().BoolVar(&confirmTeamMemberDel, "confirm", false, "Confirm member removal")
 	_ = teamRemoveMemberCmd.MarkFlagRequired("name")
 	_ = teamRemoveMemberCmd.MarkFlagRequired("member")
+}
+
+func initTeamInviteCmdFlags() {
+	inviteMemberCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
+	inviteMemberCmd.Flags().StringVar(&teamCmdEmail, "email", "", "Email address")
+	_ = inviteMemberCmd.MarkFlagRequired("name")
+	_ = inviteMemberCmd.MarkFlagRequired("email")
+
+	cancelInviteCmd.Flags().StringVarP(&teamCmdName, "name", "n", "", "Team name")
+	cancelInviteCmd.Flags().StringVar(&teamCmdEmail, "email", "", "Email address")
+	cancelInviteCmd.Flags().BoolVar(&confirmTeamInvite, "confirm", false, "Confirm cancellation")
+	_ = cancelInviteCmd.MarkFlagRequired("name")
+	_ = cancelInviteCmd.MarkFlagRequired("email")
 }
 
 func initTeamPermissionCmdFlags() {

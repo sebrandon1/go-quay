@@ -23,9 +23,11 @@ func setTeamCmdVars(t *testing.T) {
 	setCommandTestValue(t, &teamCmdMemberName, testTeamMember)
 	setCommandTestValue(t, &teamCmdRepository, testRepository)
 	setCommandTestValue(t, &teamCmdPermissionRole, testPermRole)
+	setCommandTestValue(t, &teamCmdEmail, testOrgTeamEmail)
 	setCommandTestValue(t, &confirmTeamDelete, true)
 	setCommandTestValue(t, &confirmTeamMemberDel, true)
 	setCommandTestValue(t, &confirmTeamPermDel, true)
+	setCommandTestValue(t, &confirmTeamInvite, true)
 }
 
 func TestTeamDomainCommands(t *testing.T) {
@@ -67,6 +69,18 @@ func TestTeamDomainCommands(t *testing.T) {
 			response: `{"name":"devs","members":[{"name":"dave"}]}`, wantOutput: testTeamMember, setup: setTeamCmdVars,
 		},
 		apiErrorCase("team cmd members", teamCmdMembersCmd.RunE, testHTTPGet, testTeamBasePath+"/members", http.StatusNotFound, "getting team members", setTeamCmdVars),
+		{
+			name: "team cmd invite member", run: inviteMemberCmd.RunE,
+			request: commandRequestExpectation{method: testHTTPPut, path: testTeamBasePath + "/invite/" + testOrgTeamEmail, status: http.StatusNoContent},
+			setup:   setTeamCmdVars,
+		},
+		apiErrorCase("team cmd invite member", inviteMemberCmd.RunE, testHTTPPut, testTeamBasePath+"/invite/"+testOrgTeamEmail, http.StatusBadRequest, "inviting team member", setTeamCmdVars),
+		{
+			name: "team cmd cancel invite", run: cancelInviteCmd.RunE,
+			request: commandRequestExpectation{method: testHTTPDelete, path: testTeamBasePath + "/invite/" + testOrgTeamEmail, status: http.StatusNoContent},
+			setup:   setTeamCmdVars,
+		},
+		apiErrorCase("team cmd cancel invite", cancelInviteCmd.RunE, testHTTPDelete, testTeamBasePath+"/invite/"+testOrgTeamEmail, http.StatusNotFound, "canceling team invite", setTeamCmdVars),
 		{
 			name: "team cmd add member", run: teamAddMemberCmd.RunE,
 			request: commandRequestExpectation{method: testHTTPPut, path: testTeamMemberURL, status: http.StatusNoContent},
@@ -122,6 +136,7 @@ func TestTeamDomainConfirmGuards(t *testing.T) {
 		{"team cmd delete guard", teamDeleteCmd.RunE, &confirmTeamDelete, "are you sure you want to delete team"},
 		{"team cmd remove member guard", teamRemoveMemberCmd.RunE, &confirmTeamMemberDel, "are you sure you want to remove"},
 		{"team cmd remove permission guard", teamRemovePermissionCmd.RunE, &confirmTeamPermDel, "are you sure you want to remove permissions"},
+		{"team cmd cancel invite guard", cancelInviteCmd.RunE, &confirmTeamInvite, "must pass --confirm to cancel an invite"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -142,6 +157,22 @@ func TestTeamDomainRequiredFlags(t *testing.T) {
 		{name: "team cmd info", args: team(subcmdInfo), want: []string{testRequiredFlagError, testFlagName}},
 		{name: "team cmd create", args: team(subcmdCreate), want: []string{testRequiredFlagError, testFlagName}},
 		{name: "team cmd add member", args: team("add-member"), want: []string{testRequiredFlagError, testFlagName, testFlagMember}},
+		{name: "team cmd invite", args: team("invite-member"), want: []string{testRequiredFlagError, testFlagName, testFlagEmail}},
+		{name: "team cmd cancel invite", args: team("cancel-invite"), want: []string{testRequiredFlagError, testFlagName, testFlagEmail}},
 		{name: "team cmd set permission", args: team("set-permission"), want: []string{testRequiredFlagError, testFlagName}},
 	})
+}
+
+// TestTeamCanonicalCommandsNotDeprecated pins the direction of the migration:
+// cmd/team.go owns the live commands, cmd/org_team.go holds the shims. The
+// create/delete sources are excluded because addVerbs deprecates every source
+// that has a verb-first alias, invites included.
+func TestTeamCanonicalCommandsNotDeprecated(t *testing.T) {
+	for _, c := range []*cobra.Command{
+		teamListCmd, teamCmdInfoCmd, teamCmdMembersCmd,
+	} {
+		if c.Deprecated != "" {
+			t.Errorf("%s is deprecated (%q); the canonical command must stay live", c.Name(), c.Deprecated)
+		}
+	}
 }

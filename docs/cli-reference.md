@@ -1042,14 +1042,25 @@ go-quay get organization members -o myorg -t YOUR_TOKEN
 
 ### List teams
 ```bash
-go-quay get organization teams -o myorg -t YOUR_TOKEN
+go-quay list teams -o myorg -t YOUR_TOKEN
 ```
 
 ### Get specific team information
 ```bash
-go-quay get organization team -o myorg --team TEAM_NAME -t YOUR_TOKEN
-go-quay get organization team-members -o myorg --team TEAM_NAME -t YOUR_TOKEN
+go-quay info team -o myorg --name TEAM_NAME -t YOUR_TOKEN
+go-quay list team-members -o myorg --name TEAM_NAME -t YOUR_TOKEN
 ```
+
+### Invite or cancel a team invitation
+```bash
+go-quay create invite -o myorg --name TEAM_NAME --email user@example.com -t YOUR_TOKEN
+go-quay delete invite -o myorg --name TEAM_NAME --email user@example.com --confirm -t YOUR_TOKEN
+```
+
+The legacy `get organization teams`, `get organization team`, `get organization team-members`,
+`get organization invite-member`, and `get organization cancel-invite` paths still work for one
+release. They keep their `--team/-T` flag, print a deprecation notice, and forward to the same
+implementation.
 
 ### List organization robot accounts
 ```bash
