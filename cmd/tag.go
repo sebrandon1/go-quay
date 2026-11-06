@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -56,6 +57,7 @@ Table columns: TAG, DIGEST, SIZE, LAST MODIFIED, EXPIRATION.`,
 		var rows [][]string
 		if tags != nil {
 			rows = make([][]string, 0, len(tags.Tags))
+			now := time.Now()
 			for _, tag := range tags.Tags {
 				rows = append(rows, []string{
 					tag.Name,
@@ -63,10 +65,11 @@ Table columns: TAG, DIGEST, SIZE, LAST MODIFIED, EXPIRATION.`,
 					fmt.Sprintf("%d", tag.Size),
 					tag.LastModified,
 					tag.Expiration,
+					string(tag.Lifecycle(now)),
 				})
 			}
 		}
-		return printTable([]string{"TAG", "DIGEST", "SIZE", "LAST MODIFIED", "EXPIRATION"}, rows)
+		return printTable([]string{"TAG", "DIGEST", "SIZE", "LAST MODIFIED", "EXPIRATION", "LIFECYCLE"}, rows)
 	},
 }
 
