@@ -271,6 +271,91 @@ func TestRankPullTrafficTags(t *testing.T) {
 	}
 }
 
+func TestPullTrafficRowStatusDerivation(t *testing.T) {
+	tests := []struct {
+		name string
+		row  pullTrafficRepo
+		want reportRowStatus
+	}{
+		{name: "complete", row: pullTrafficRepo{}, want: rowStatusOK},
+		{name: "error wins", row: pullTrafficRepo{Error: "boom", TagsTruncated: true}, want: rowStatusError},
+		{name: "tags truncated", row: pullTrafficRepo{TagsTruncated: true}, want: rowStatusTruncated},
+		{name: "consumers truncated", row: pullTrafficRepo{ConsumersTruncated: true}, want: rowStatusTruncated},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.row.setStatus()
+			if tt.row.Status != tt.want {
+				t.Fatalf("status = %q, want %q", tt.row.Status, tt.want)
+			}
+		})
+	}
+}
+
+func TestCollectPullTrafficRowStatuses(t *testing.T) {
+	const errorRepo = "repo-12"
+	repositories := make([]string, 0, 13)
+	for i := 0; i < 13; i++ {
+		repositories = append(repositories, fmt.Sprintf("repo-%02d", i))
+	}
+
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == pullTrafficRepositoryPath:
+			list := lib.RepositoryList{}
+			for _, name := range repositories {
+				list.Repositories = append(list.Repositories, lib.OrganizationRepository{Name: name})
+			}
+			writeJSON(t, w, list)
+		case strings.HasSuffix(r.URL.Path, "/aggregatelogs"):
+			name := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, "/api/v1/repository/"+testNamespace+"/"), "/aggregatelogs")
+			if name == errorRepo {
+				w.WriteHeader(http.StatusInternalServerError)
+				writeJSON(t, w, map[string]string{testPullTrafficErrorKey: "unreadable"})
+				return
+			}
+			writeJSON(t, w, lib.AggregatedLogs{Aggregated: []lib.AggregatedLogEntry{{Kind: pullTrafficKindPull, Count: 100}}})
+		case strings.HasSuffix(r.URL.Path, "/logs"):
+			// repo-01 always reports another page, so the sample cap truncates it.
+			next := ""
+			if strings.Contains(r.URL.Path, "/repo-01/") {
+				next = "next-page"
+			}
+			writeJSON(t, w, lib.Logs{Logs: []lib.LogEntry{{Kind: pullTrafficKindPull}}, NextPage: next})
+		default:
+			t.Errorf("unexpected path %s", r.URL.Path)
+		}
+	}
+	client := newPullTrafficTestClient(t, handler)
+
+	report, err := collectPullTraffic(context.Background(), client, pullTrafficOptions{
+		Namespace: testNamespace,
+		StartDate: pullTrafficTestStart,
+		EndDate:   pullTrafficTestStart,
+		ByTag:     true,
+		MaxPages:  2,
+	})
+	if err != nil {
+		t.Fatalf("collectPullTraffic returned error: %v", err)
+	}
+
+	statuses := map[string]reportRowStatus{}
+	for _, row := range report.Repositories {
+		statuses[row.Repository] = row.Status
+	}
+	want := map[string]reportRowStatus{
+		"repo-00": rowStatusOK,
+		"repo-01": rowStatusTruncated,
+		"repo-11": rowStatusPartial,
+		errorRepo: rowStatusError,
+	}
+	for name, wantStatus := range want {
+		if got := statuses[name]; got != wantStatus {
+			t.Errorf("%s status = %q, want %q", name, got, wantStatus)
+		}
+	}
+}
+
 func TestPrintPullTrafficTable(t *testing.T) {
 	setCommandTestValue(t, &outputFormat, outputTable)
 	report := &pullTrafficReport{
