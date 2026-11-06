@@ -658,7 +658,7 @@ type AddManifestLabelRequest struct {
 
 // SecurityScan represents the security scan result for an image
 type SecurityScan struct {
-	Status string        `json:"status,omitempty"`
+	Status ScanStatus    `json:"status,omitempty"`
 	Data   *SecurityData `json:"data,omitempty"`
 }
 

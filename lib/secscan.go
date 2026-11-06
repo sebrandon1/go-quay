@@ -15,7 +15,35 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 )
+
+// ScanStatus is the state of a Quay security scan.
+type ScanStatus string
+
+const (
+	ScanQueued      ScanStatus = "queued"
+	ScanScanning    ScanStatus = "scanning"
+	ScanScanned     ScanStatus = "scanned"
+	ScanFailed      ScanStatus = "failed"
+	ScanUnsupported ScanStatus = "unsupported"
+)
+
+// Normalize lowercases and trims the status so comparisons are insensitive to
+// how Quay spelled it.
+func (s ScanStatus) Normalize() ScanStatus {
+	return ScanStatus(strings.ToLower(strings.TrimSpace(string(s))))
+}
+
+// Terminal reports whether the scan can make no further progress. Unknown
+// statuses are not terminal, so callers keep waiting rather than failing.
+func (s ScanStatus) Terminal() bool {
+	switch s.Normalize() {
+	case ScanScanned, ScanFailed, ScanUnsupported:
+		return true
+	}
+	return false
+}
 
 // GetManifestSecurity retrieves security scan information for a specific manifest
 func (c *Client) GetManifestSecurity(ctx context.Context, namespace, repository, manifestRef string, vulnerabilities bool) (*SecurityScan, error) {

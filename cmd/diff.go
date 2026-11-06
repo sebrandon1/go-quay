@@ -106,8 +106,8 @@ func compareTags(ctx context.Context, client *lib.Client, namespace, repository,
 	)
 
 	return &tagDiffResult{
-		TagA:                   tagDiffSide{Name: tagAName, ManifestDigest: tagA.ManifestDigest, SecurityStatus: securityA.Status},
-		TagB:                   tagDiffSide{Name: tagBName, ManifestDigest: tagB.ManifestDigest, SecurityStatus: securityB.Status},
+		TagA:                   tagDiffSide{Name: tagAName, ManifestDigest: tagA.ManifestDigest, SecurityStatus: string(securityA.Status)},
+		TagB:                   tagDiffSide{Name: tagBName, ManifestDigest: tagB.ManifestDigest, SecurityStatus: string(securityB.Status)},
 		AddedLabels:            addedLabels,
 		RemovedLabels:          removedLabels,
 		AddedVulnerabilities:   addedVulnerabilities,
