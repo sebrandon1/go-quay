@@ -10,6 +10,24 @@ import (
 
 // --- Teams (org-level) ---
 
+func TestTeamMemberInviteState(t *testing.T) {
+	tests := []struct {
+		name   string
+		member TeamMember
+		want   InviteState
+	}{
+		{name: "accepted member", member: TeamMember{}, want: InviteAccepted},
+		{name: "pending invite", member: TeamMember{Invited: true}, want: InvitePending},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.member.InviteState(); got != tt.want {
+				t.Fatalf("InviteState() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestGetTeams(t *testing.T) {
 	mockResponse := struct {
 		Teams []Team `json:"teams"`

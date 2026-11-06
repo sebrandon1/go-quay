@@ -209,6 +209,17 @@ func runTeamMembers(cmd *cobra.Command, organization, team string) error {
 	}
 
 	fmt.Fprintf(os.Stderr, "Members of team '%s/%s':\n", organization, team)
+	if outputFormat == outputTable {
+		rows := make([][]string, 0, len(members.Members))
+		for _, member := range members.Members {
+			rows = append(rows, []string{
+				member.Name,
+				valueOrDash(member.Kind),
+				string(member.InviteState()),
+			})
+		}
+		return printTable([]string{"NAME", "KIND", "INVITE"}, rows)
+	}
 	return printJSON(members)
 }
 
