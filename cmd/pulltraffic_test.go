@@ -364,7 +364,7 @@ func TestCollectPullTrafficRowStatuses(t *testing.T) {
 		Namespace: testNamespace,
 		StartDate: pullTrafficTestStart,
 		EndDate:   pullTrafficTestStart,
-		ByTag:     true,
+		Mode:      modeTags,
 		MaxPages:  2,
 	})
 	if err != nil {
