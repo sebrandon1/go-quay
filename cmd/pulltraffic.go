@@ -69,12 +69,23 @@ type pullTrafficConsumer struct {
 	LastSeen  string `json:"last_seen,omitempty"`
 }
 
+// reportRowStatus summarizes how complete one repository row is.
+type reportRowStatus string
+
+const (
+	rowStatusOK        reportRowStatus = "ok"
+	rowStatusPartial   reportRowStatus = "partial"
+	rowStatusTruncated reportRowStatus = "truncated"
+	rowStatusError     reportRowStatus = "error"
+)
+
 // pullTrafficRepo is one repository's traffic within the requested range.
 type pullTrafficRepo struct {
 	Repository         string                `json:"repository"`
 	Pulls              int                   `json:"pulls"`
 	Pushes             int                   `json:"pushes"`
 	SharePercent       float64               `json:"share_percent"`
+	Status             reportRowStatus       `json:"status,omitempty"`
 	TopTags            []pullTrafficTag      `json:"top_tags,omitempty"`
 	UntaggedPulls      int                   `json:"untagged_pulls,omitempty"`
 	TagsTruncated      bool                  `json:"tags_truncated,omitempty"`
@@ -84,6 +95,19 @@ type pullTrafficRepo struct {
 
 	firstEvent time.Time
 	lastEvent  time.Time
+}
+
+// setStatus derives the row status. Error wins over truncation, and truncation
+// wins over a complete row.
+func (r *pullTrafficRepo) setStatus() {
+	switch {
+	case r.Error != "":
+		r.Status = rowStatusError
+	case r.TagsTruncated || r.ConsumersTruncated:
+		r.Status = rowStatusTruncated
+	default:
+		r.Status = rowStatusOK
+	}
 }
 
 // pullTrafficReport is the machine-readable form of `list pull-traffic`.
@@ -258,6 +282,7 @@ func pullTrafficForRepo(ctx context.Context, client *lib.Client, opts pullTraffi
 	logs, err := client.GetAggregatedLogsRange(ctx, opts.Namespace, name, opts.StartDate, opts.EndDate)
 	if err != nil {
 		row.Error = err.Error()
+		row.setStatus()
 		return row
 	}
 	for _, entry := range logs.Aggregated {
@@ -276,6 +301,7 @@ func pullTrafficForRepo(ctx context.Context, client *lib.Client, opts pullTraffi
 			row.Pushes += entry.Count
 		}
 	}
+	row.setStatus()
 	return row
 }
 
@@ -316,6 +342,14 @@ func collectPullTrafficDetails(ctx context.Context, client *lib.Client, opts pul
 	if opts.Top <= 0 && limit > pullTrafficSampleRepoLimit {
 		limit = pullTrafficSampleRepoLimit
 	}
+
+	// Rows past the sample cap still have aggregate data but no breakdown.
+	for i := limit; i < len(report.Repositories); i++ {
+		if report.Repositories[i].Pulls > 0 {
+			report.Repositories[i].Status = rowStatusPartial
+		}
+	}
+
 	for i := 0; i < limit; i++ {
 		row := &report.Repositories[i]
 		if row.Pulls == 0 {
@@ -324,6 +358,7 @@ func collectPullTrafficDetails(ctx context.Context, client *lib.Client, opts pul
 		entries, truncated, err := client.GetAllLogs(ctx, opts.Namespace, row.Repository, opts.StartDate, opts.EndDate, opts.MaxPages)
 		if err != nil {
 			row.Error = err.Error()
+			row.setStatus()
 			continue
 		}
 		if opts.ByTag {
@@ -334,6 +369,7 @@ func collectPullTrafficDetails(ctx context.Context, client *lib.Client, opts pul
 			row.Consumers = rankPullTrafficConsumers(entries)
 			row.ConsumersTruncated = truncated
 		}
+		row.setStatus()
 	}
 }
 
@@ -484,6 +520,19 @@ func printPullTrafficSummary(report *pullTrafficReport) {
 	fmt.Fprintf(os.Stderr, "Pull traffic for '%s' (%s): %d pulls, %d pushes\n",
 		report.Namespace, reportWindowLabel(report.StartDate, report.EndDate, report.CoveredStart, report.CoveredEnd),
 		report.TotalPulls, report.TotalPushes)
+	if counts := report.statusCounts(); counts[rowStatusPartial]+counts[rowStatusTruncated]+counts[rowStatusError] > 0 {
+		fmt.Fprintf(os.Stderr, "Rows: %d partial, %d truncated, %d errors\n",
+			counts[rowStatusPartial], counts[rowStatusTruncated], counts[rowStatusError])
+	}
+}
+
+// statusCounts tallies rows by their derived status.
+func (r *pullTrafficReport) statusCounts() map[reportRowStatus]int {
+	counts := map[reportRowStatus]int{}
+	for _, row := range r.Repositories {
+		counts[row.Status]++
+	}
+	return counts
 }
 
 func pullTrafficRankingTable(report *pullTrafficReport) ([]string, [][]string) {
