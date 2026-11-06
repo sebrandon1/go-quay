@@ -41,6 +41,8 @@ Supported methods:
   - webhook: HTTP webhook
   - email: Email notification
   - slack: Slack notification
+  - hipchat: HipChat notification
+  - flowdock: Flowdock notification
 
 Available commands:
   list   - List notifications for a repository
@@ -93,6 +95,19 @@ var notificationInfoCmd = &cobra.Command{
 	},
 }
 
+// notificationConfig maps a notification method to the config key Quay expects
+// for the target, rejecting methods the API does not support.
+func notificationConfig(method, target string) (map[string]any, error) {
+	switch method {
+	case "webhook", "slack", "hipchat", "flowdock":
+		return map[string]any{"url": target}, nil
+	case "email":
+		return map[string]any{"email": target}, nil
+	default:
+		return nil, fmt.Errorf("unsupported method %q: supported methods are webhook, email, slack, hipchat, flowdock", method)
+	}
+}
+
 // Notification Create
 var notificationCreateCmd = &cobra.Command{
 	Use:   subcmdCreate,
@@ -103,19 +118,14 @@ For webhook method, provide the --url flag with the webhook endpoint.
 For email method, provide the --url flag with the email address.
 For slack method, provide the --url flag with the Slack webhook URL.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := notificationConfig(notificationMethod, notificationURL)
+		if err != nil {
+			return fmt.Errorf("creating notification: %w", err)
+		}
+
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
-		}
-
-		config := map[string]interface{}{}
-		switch notificationMethod {
-		case "webhook":
-			config["url"] = notificationURL
-		case "email":
-			config["email"] = notificationURL
-		case "slack":
-			config["url"] = notificationURL
 		}
 
 		notificationReq := &lib.CreateNotificationRequest{
@@ -207,19 +217,14 @@ var notificationUpdateCmd = &cobra.Command{
 	Short: "Update a notification",
 	Long:  `Update an existing notification (webhook) configuration.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := notificationConfig(notificationMethod, notificationURL)
+		if err != nil {
+			return fmt.Errorf("updating notification: %w", err)
+		}
+
 		client, err := getClient()
 		if err != nil {
 			return fmt.Errorf("creating client: %w", err)
-		}
-
-		config := map[string]interface{}{}
-		switch notificationMethod {
-		case "webhook":
-			config["url"] = notificationURL
-		case "email":
-			config["email"] = notificationURL
-		case "slack":
-			config["url"] = notificationURL
 		}
 
 		notificationReq := &lib.CreateNotificationRequest{
@@ -266,7 +271,7 @@ func init() {
 func initNotificationUpdateFlags() {
 	notificationUpdateCmd.Flags().StringVarP(&notificationUUID, "uuid", "u", "", "Notification UUID")
 	notificationUpdateCmd.Flags().StringVarP(&notificationEvent, "event", "e", "", "Event type (repo_push, build_success, etc.)")
-	notificationUpdateCmd.Flags().StringVarP(&notificationMethod, "method", "m", "", "Method (webhook, email, slack)")
+	notificationUpdateCmd.Flags().StringVarP(&notificationMethod, "method", "m", "", "Method (webhook, email, slack, hipchat, flowdock)")
 	notificationUpdateCmd.Flags().StringVar(&notificationURL, "url", "", "Webhook URL or email address")
 	notificationUpdateCmd.Flags().StringVar(&notificationTitle, "title", "", "Notification title")
 	_ = notificationUpdateCmd.MarkFlagRequired("uuid")
@@ -279,7 +284,7 @@ func initNotificationInfoFlags() {
 
 func initNotificationCreateFlags() {
 	notificationCreateCmd.Flags().StringVarP(&notificationEvent, "event", "e", "", "Event type (repo_push, build_success, etc.)")
-	notificationCreateCmd.Flags().StringVarP(&notificationMethod, "method", "m", "", "Method (webhook, email, slack)")
+	notificationCreateCmd.Flags().StringVarP(&notificationMethod, "method", "m", "", "Method (webhook, email, slack, hipchat, flowdock)")
 	notificationCreateCmd.Flags().StringVar(&notificationURL, "url", "", "Webhook URL or email address")
 	notificationCreateCmd.Flags().StringVar(&notificationTitle, "title", "", "Notification title")
 	_ = notificationCreateCmd.MarkFlagRequired("event")
