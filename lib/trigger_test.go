@@ -13,6 +13,28 @@ const (
 	testTriggerService = "github"
 )
 
+func TestBuildTriggerState(t *testing.T) {
+	tests := []struct {
+		name    string
+		trigger BuildTrigger
+		want    TriggerState
+	}{
+		{name: "never activated", trigger: BuildTrigger{}, want: TriggerNeverActivated},
+		{name: "never activated wins over server block", trigger: BuildTrigger{CanInvoke: false}, want: TriggerNeverActivated},
+		{name: "active trigger", trigger: BuildTrigger{IsActive: true, CanInvoke: true, Enabled: true}, want: TriggerActive},
+		{name: "manually disabled", trigger: BuildTrigger{IsActive: true, CanInvoke: true}, want: TriggerDisabled},
+		{name: "server disabled", trigger: BuildTrigger{IsActive: true, Enabled: true}, want: TriggerServerDisabled},
+		{name: "server disabled wins over manual disable", trigger: BuildTrigger{IsActive: true}, want: TriggerServerDisabled},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.trigger.State(); got != tt.want {
+				t.Fatalf("State() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestGetTriggers(t *testing.T) {
 	mockResponse := BuildTriggers{
 		Triggers: []BuildTrigger{
