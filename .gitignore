@@ -29,3 +29,6 @@ go-quay
 /examples/security-scan/security-scan
 .vscode
 *.bck.yml
+
+# Playwright MCP artifacts (console logs, page snapshots)
+.playwright-mcp/
