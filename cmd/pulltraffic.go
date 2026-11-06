@@ -42,6 +42,29 @@ var (
 	pullTrafficConsumers bool
 )
 
+// reportMode selects the breakdown a report renders and samples.
+type reportMode int
+
+const (
+	modeRanking reportMode = iota
+	modeTags
+	modeConsumers
+)
+
+// reportModeFromFlags picks the mode and rejects the ambiguous combination.
+func reportModeFromFlags(byTag, consumers bool) (reportMode, error) {
+	switch {
+	case byTag && consumers:
+		return modeRanking, fmt.Errorf("--by-tag and --consumers are mutually exclusive")
+	case consumers:
+		return modeConsumers, nil
+	case byTag:
+		return modeTags, nil
+	default:
+		return modeRanking, nil
+	}
+}
+
 // pullTrafficOptions configures one pull-traffic report.
 type pullTrafficOptions struct {
 	Namespace string
@@ -49,8 +72,7 @@ type pullTrafficOptions struct {
 	EndDate   string
 	Top       int
 	MaxPages  int
-	ByTag     bool
-	Consumers bool
+	Mode      reportMode
 }
 
 // pullTrafficTag is one tag and how often it was pulled in the sampled logs.
@@ -138,14 +160,18 @@ Dates accept MM/DD/YYYY or YYYY-MM-DD. Output is a table unless -O json or
 			start, end = defaultReportWindow(now)
 		}
 
+		mode, err := reportModeFromFlags(pullTrafficByTag, pullTrafficConsumers)
+		if err != nil {
+			return err
+		}
+
 		opts := pullTrafficOptions{
 			Namespace: pullTrafficNamespace,
 			StartDate: start,
 			EndDate:   end,
 			Top:       pullTrafficTop,
 			MaxPages:  pullTrafficMaxPages,
-			ByTag:     pullTrafficByTag,
-			Consumers: pullTrafficConsumers,
+			Mode:      mode,
 		}
 
 		report, err := collectPullTraffic(cmd.Context(), client, opts)
@@ -196,7 +222,7 @@ func collectPullTraffic(ctx context.Context, client *lib.Client, opts pullTraffi
 	if err := summarizePullTraffic(report, opts); err != nil {
 		return nil, err
 	}
-	if opts.ByTag || opts.Consumers {
+	if opts.Mode != modeRanking {
 		collectPullTrafficDetails(ctx, client, opts, report)
 	}
 	return report, nil
@@ -326,11 +352,11 @@ func collectPullTrafficDetails(ctx context.Context, client *lib.Client, opts pul
 			row.Error = err.Error()
 			continue
 		}
-		if opts.ByTag {
+		if opts.Mode == modeTags {
 			row.TopTags, row.UntaggedPulls = rankPullTrafficTags(entries)
 			row.TagsTruncated = truncated
 		}
-		if opts.Consumers {
+		if opts.Mode == modeConsumers {
 			row.Consumers = rankPullTrafficConsumers(entries)
 			row.ConsumersTruncated = truncated
 		}
@@ -470,10 +496,10 @@ func printPullTraffic(report *pullTrafficReport, opts pullTrafficOptions) error 
 // pullTrafficTable selects the column layout that matches the requested
 // breakdown. Table and CSV output share it.
 func pullTrafficTable(report *pullTrafficReport, opts pullTrafficOptions) ([]string, [][]string) {
-	switch {
-	case opts.Consumers:
+	switch opts.Mode {
+	case modeConsumers:
 		return pullTrafficConsumerTable(report)
-	case opts.ByTag:
+	case modeTags:
 		return pullTrafficTagTable(report)
 	default:
 		return pullTrafficRankingTable(report)

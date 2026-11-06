@@ -81,6 +81,38 @@ func pullTrafficHandler(t *testing.T, repositories []string, counts map[string]m
 	}
 }
 
+func TestReportModeFromFlags(t *testing.T) {
+	tests := []struct {
+		name      string
+		byTag     bool
+		consumers bool
+		want      reportMode
+		wantErr   bool
+	}{
+		{name: "ranking", want: modeRanking},
+		{name: "tags", byTag: true, want: modeTags},
+		{name: "consumers", consumers: true, want: modeConsumers},
+		{name: "both rejected", byTag: true, consumers: true, wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := reportModeFromFlags(tt.byTag, tt.consumers)
+			if tt.wantErr {
+				if err == nil {
+					t.Fatal("expected an error for both flags")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("reportModeFromFlags: %v", err)
+			}
+			if got != tt.want {
+				t.Fatalf("mode = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestCollectPullTrafficRanksRepositories(t *testing.T) {
 	client := newPullTrafficTestClient(t, pullTrafficHandler(t,
 		[]string{testPullTrafficAlpha, testPullTrafficBeta, testPullTrafficGamma},
@@ -232,7 +264,7 @@ func TestCollectPullTrafficByTag(t *testing.T) {
 		Namespace: testNamespace,
 		StartDate: pullTrafficTestStart,
 		EndDate:   pullTrafficTestStart,
-		ByTag:     true,
+		Mode:      modeTags,
 		MaxPages:  5,
 	})
 	if err != nil {
@@ -352,7 +384,7 @@ func TestCollectPullTrafficTagErrorsRecorded(t *testing.T) {
 		Namespace: testNamespace,
 		StartDate: pullTrafficTestStart,
 		EndDate:   pullTrafficTestStart,
-		ByTag:     true,
+		Mode:      modeTags,
 		MaxPages:  2,
 	})
 	if err != nil {
@@ -522,8 +554,7 @@ func TestCollectPullTrafficConsumers(t *testing.T) {
 		Namespace: testNamespace,
 		StartDate: pullTrafficTestStart,
 		EndDate:   pullTrafficTestStart,
-		ByTag:     true,
-		Consumers: true,
+		Mode:      modeConsumers,
 		MaxPages:  2,
 	})
 	if err != nil {
@@ -549,7 +580,7 @@ func TestPrintPullTrafficConsumersTable(t *testing.T) {
 		}},
 	}
 	output := captureStdout(t, func() {
-		if err := printPullTraffic(report, pullTrafficOptions{Consumers: true}); err != nil {
+		if err := printPullTraffic(report, pullTrafficOptions{Mode: modeConsumers}); err != nil {
 			t.Fatalf("printPullTraffic returned error: %v", err)
 		}
 	})
@@ -571,7 +602,7 @@ func TestPrintPullTrafficTagsTable(t *testing.T) {
 		}},
 	}
 	output := captureStdout(t, func() {
-		if err := printPullTraffic(report, pullTrafficOptions{ByTag: true}); err != nil {
+		if err := printPullTraffic(report, pullTrafficOptions{Mode: modeTags}); err != nil {
 			t.Fatalf("printPullTraffic returned error: %v", err)
 		}
 	})
