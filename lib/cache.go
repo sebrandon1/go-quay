@@ -51,11 +51,16 @@ func cacheKey(namespace, repository string) string {
 	return namespace + "\x00" + repository
 }
 
+// isFresh reports whether an entry is still within the TTL at now.
+func (c *CachedClient) isFresh(entry cacheEntry, now time.Time) bool {
+	return now.Sub(entry.timestamp) < c.ttl
+}
+
 func (c *CachedClient) GetRepository(ctx context.Context, namespace, repository string) (RepositoryWithTags, error) {
 	key := cacheKey(namespace, repository)
 
 	c.mu.RLock()
-	if entry, ok := c.cache[key]; ok && time.Since(entry.timestamp) < c.ttl {
+	if entry, ok := c.cache[key]; ok && c.isFresh(entry, time.Now()) {
 		c.mu.RUnlock()
 		return entry.repo, nil
 	}
@@ -108,8 +113,9 @@ func (c *CachedClient) CleanupExpired() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	now := time.Now()
 	for key, entry := range c.cache {
-		if time.Since(entry.timestamp) >= c.ttl {
+		if !c.isFresh(entry, now) {
 			delete(c.cache, key)
 		}
 	}

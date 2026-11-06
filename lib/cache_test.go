@@ -92,6 +92,29 @@ func TestCachedClient_ClearCache(t *testing.T) {
 	}
 }
 
+func TestCachedClientIsFreshAtTTLBoundary(t *testing.T) {
+	now := time.Now()
+	cached := NewCachedClient(&mockReader{}, WithCacheTTL(time.Minute))
+	tests := []struct {
+		name string
+		age  time.Duration
+		want bool
+	}{
+		{name: "just written", age: 0, want: true},
+		{name: "inside the ttl", age: 59 * time.Second, want: true},
+		{name: "exactly at the ttl", age: time.Minute, want: false},
+		{name: "past the ttl", age: time.Minute + time.Second, want: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			entry := cacheEntry{timestamp: now.Add(-tt.age)}
+			if got := cached.isFresh(entry, now); got != tt.want {
+				t.Fatalf("isFresh(age=%s) = %v, want %v", tt.age, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestCachedClient_CleanupExpired(t *testing.T) {
 	mock := &mockReader{
 		repo: RepositoryWithTags{
