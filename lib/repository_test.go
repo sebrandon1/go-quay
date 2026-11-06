@@ -448,3 +448,105 @@ func TestListAllTags(t *testing.T) {
 		t.Errorf("Expected 2 tags across 2 pages, got %d", len(tags))
 	}
 }
+
+const (
+	testInvalidVisibility = "internal"
+	testVisibilityError   = "visibility must be public or private"
+)
+
+func TestValidateVisibility(t *testing.T) {
+	tests := []struct {
+		name       string
+		visibility string
+		wantErr    bool
+	}{
+		{name: "public", visibility: VisibilityPublic},
+		{name: "private", visibility: VisibilityPrivate},
+		{name: "invalid value", visibility: testInvalidVisibility, wantErr: true},
+		{name: "missing value", visibility: "", wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ValidateVisibility(tt.visibility)
+			if tt.wantErr {
+				if err == nil || err.Error() != testVisibilityError {
+					t.Fatalf("ValidateVisibility(%q) = %v, want %q", tt.visibility, err, testVisibilityError)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("ValidateVisibility(%q) returned error: %v", tt.visibility, err)
+			}
+		})
+	}
+}
+
+func TestRepositoryMethodsAcceptValidVisibility(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte("{}"))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	ctx := context.Background()
+	for _, visibility := range []string{VisibilityPublic, VisibilityPrivate} {
+		t.Run("create "+visibility, func(t *testing.T) {
+			if _, err := client.CreateRepository(ctx, testNamespace, testRepository, visibility, testRepoDescription); err != nil {
+				t.Fatalf("CreateRepository(%q) returned error: %v", visibility, err)
+			}
+		})
+		t.Run("update "+visibility, func(t *testing.T) {
+			if _, err := client.UpdateRepository(ctx, testNamespace, testRepository, "", visibility); err != nil {
+				t.Fatalf("UpdateRepository(%q) returned error: %v", visibility, err)
+			}
+		})
+		t.Run("change "+visibility, func(t *testing.T) {
+			if err := client.ChangeRepositoryVisibility(ctx, testNamespace, testRepository, visibility); err != nil {
+				t.Fatalf("ChangeRepositoryVisibility(%q) returned error: %v", visibility, err)
+			}
+		})
+	}
+}
+
+func TestRepositoryMethodsRejectInvalidVisibility(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		t.Error("invalid visibility should be rejected before any request")
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	ctx := context.Background()
+	tests := []struct {
+		name string
+		call func() error
+	}{
+		{name: "CreateRepository", call: func() error {
+			_, err := client.CreateRepository(ctx, testNamespace, testRepository, testInvalidVisibility, testRepoDescription)
+			return err
+		}},
+		{name: "UpdateRepository", call: func() error {
+			_, err := client.UpdateRepository(ctx, testNamespace, testRepository, "", testInvalidVisibility)
+			return err
+		}},
+		{name: "ChangeRepositoryVisibility", call: func() error {
+			return client.ChangeRepositoryVisibility(ctx, testNamespace, testRepository, testInvalidVisibility)
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.call()
+			if err == nil || err.Error() != testVisibilityError {
+				t.Fatalf("%s error = %v, want %q", tt.name, err, testVisibilityError)
+			}
+		})
+	}
+}
