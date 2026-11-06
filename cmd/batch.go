@@ -13,12 +13,32 @@ import (
 
 const batchAPIVersion = "go-quay/v1alpha1"
 
+// batchStatus is the outcome of one batch item.
+type batchStatus string
+
 const (
-	batchStatusSucceeded = "succeeded"
-	batchStatusFailed    = "failed"
-	batchStatusNotRun    = "not_run"
-	batchStatusDryRun    = "dry_run"
+	batchStatusSucceeded batchStatus = "succeeded"
+	batchStatusFailed    batchStatus = "failed"
+	batchStatusNotRun    batchStatus = "not_run"
+	batchStatusDryRun    batchStatus = "dry_run"
 )
+
+// Valid reports whether the status is one this command can emit.
+func (s batchStatus) Valid() bool {
+	switch s {
+	case batchStatusSucceeded, batchStatusFailed, batchStatusNotRun, batchStatusDryRun:
+		return true
+	}
+	return false
+}
+
+// classifyBatchItem maps an item outcome to its status.
+func classifyBatchItem(err error) batchStatus {
+	if err != nil {
+		return batchStatusFailed
+	}
+	return batchStatusSucceeded
+}
 
 var (
 	batchFile     string
@@ -41,11 +61,11 @@ type repositoryBatchItem struct {
 }
 
 type repositoryBatchResult struct {
-	Action     string `json:"action"`
-	Namespace  string `json:"namespace"`
-	Repository string `json:"repository"`
-	Status     string `json:"status"`
-	Error      string `json:"error,omitempty"`
+	Action     string      `json:"action"`
+	Namespace  string      `json:"namespace"`
+	Repository string      `json:"repository"`
+	Status     batchStatus `json:"status"`
+	Error      string      `json:"error,omitempty"`
 }
 
 var batchCmd = &cobra.Command{
@@ -104,9 +124,9 @@ are reported per item and the command exits with an error if any item fails.`,
 			result := repositoryBatchResult{
 				Action: item.Action, Namespace: item.Namespace, Repository: item.Repository, Status: batchStatusSucceeded,
 			}
-			if err := applyRepositoryBatchItem(cmd, client, item); err != nil {
-				result.Status = batchStatusFailed
-				result.Error = err.Error()
+			if applyErr := applyRepositoryBatchItem(cmd, client, item); applyErr != nil {
+				result.Status = classifyBatchItem(applyErr)
+				result.Error = applyErr.Error()
 				failed++
 			}
 			results = append(results, result)
