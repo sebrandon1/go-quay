@@ -28,6 +28,32 @@ import (
 	"net/http"
 )
 
+// TriggerState is the effective state of a build trigger.
+type TriggerState string
+
+const (
+	TriggerNeverActivated TriggerState = "never_activated"
+	TriggerActive         TriggerState = "active"
+	TriggerDisabled       TriggerState = "disabled"
+	TriggerServerDisabled TriggerState = "server_disabled"
+)
+
+// State derives the trigger state from its overlapping flags. A trigger that
+// was never activated wins over the enabled flags, and a server-side block wins
+// over a manual disable.
+func (t BuildTrigger) State() TriggerState {
+	switch {
+	case !t.IsActive:
+		return TriggerNeverActivated
+	case !t.CanInvoke:
+		return TriggerServerDisabled
+	case !t.Enabled:
+		return TriggerDisabled
+	default:
+		return TriggerActive
+	}
+}
+
 // GetTriggers retrieves all build triggers for a repository
 func (c *Client) GetTriggers(ctx context.Context, namespace, repository string) (*BuildTriggers, error) {
 	if namespace == "" {

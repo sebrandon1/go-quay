@@ -15,6 +15,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -77,8 +78,28 @@ var triggerInfoCmd = &cobra.Command{
 			return fmt.Errorf("getting trigger: %w", err)
 		}
 
+		if outputFormat == outputTable {
+			return printTriggerSummary(trigger)
+		}
 		return printJSON(trigger)
 	},
+}
+
+func printTriggerSummary(trigger *lib.BuildTrigger) error {
+	if trigger == nil {
+		return fmt.Errorf("empty trigger response")
+	}
+	return printTable(
+		[]string{"ID", "SERVICE", "STATE", "ENABLED", "ACTIVE", "DISABLE REASON"},
+		[][]string{{
+			trigger.ID,
+			valueOrDash(trigger.Service),
+			string(trigger.State()),
+			strconv.FormatBool(trigger.Enabled),
+			strconv.FormatBool(trigger.IsActive),
+			valueOrDash(trigger.DisableReason),
+		}},
+	)
 }
 
 // triggerDeleteCmd represents the trigger delete command
