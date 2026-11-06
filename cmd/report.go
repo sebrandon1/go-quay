@@ -155,7 +155,7 @@ func collectReportConsumers(ctx context.Context, client *lib.Client, namespace, 
 		EndDate:   end,
 		Top:       repositories,
 		MaxPages:  maxPages,
-		Consumers: true,
+		Mode:      modeConsumers,
 	})
 	if err != nil {
 		return nil, err
