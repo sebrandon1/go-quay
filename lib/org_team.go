@@ -32,6 +32,24 @@ import (
 	"net/http"
 )
 
+// InviteState is whether a team member has accepted membership or is still
+// pending an invitation.
+type InviteState string
+
+const (
+	InviteAccepted InviteState = "accepted"
+	InvitePending  InviteState = "pending"
+)
+
+// InviteState reports pending while Invited is true: Quay sets that field for
+// invitations that have not been accepted yet.
+func (m TeamMember) InviteState() InviteState {
+	if m.Invited {
+		return InvitePending
+	}
+	return InviteAccepted
+}
+
 // Team Management
 
 // GetTeams retrieves all teams for an organization
