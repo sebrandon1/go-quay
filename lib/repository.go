@@ -203,21 +203,19 @@ func (c *Client) ListRepositories(ctx context.Context, namespace string, public,
 // ListAllRepositories fetches all repositories by following pagination automatically.
 func (c *Client) ListAllRepositories(ctx context.Context, namespace string, public, starred, popularity bool) ([]OrganizationRepository, error) {
 	var all []OrganizationRepository
-	page := 1
 	const pageSize = 100
 
-	for {
+	_, err := Paginate(0, func(page int, _ string) (PageResult, error) {
 		repos, err := c.ListRepositories(ctx, namespace, public, starred, popularity, page, pageSize)
 		if err != nil {
-			return nil, err
+			return PageResult{}, err
 		}
 
 		all = append(all, repos.Repositories...)
-
-		if !repos.HasAdditional {
-			break
-		}
-		page++
+		return PageResult{HasMore: repos.HasAdditional, Next: repos.NextPage}, nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return all, nil
@@ -233,21 +231,19 @@ func (c *Client) ListAllTags(ctx context.Context, namespace, repository string, 
 	}
 
 	var all []Tag
-	page := 1
 	const pageSize = 100
 
-	for {
+	_, err := Paginate(0, func(page int, _ string) (PageResult, error) {
 		tags, err := c.ListTagsPage(ctx, namespace, repository, pageSize, page, onlyActive)
 		if err != nil {
-			return nil, err
+			return PageResult{}, err
 		}
 
 		all = append(all, tags.Tags...)
-
-		if !tags.HasAdditional {
-			break
-		}
-		page++
+		return PageResult{HasMore: tags.HasAdditional}, nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return all, nil

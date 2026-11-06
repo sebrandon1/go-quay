@@ -424,17 +424,19 @@ func rankPullTrafficTags(entries []lib.LogEntry) ([]pullTrafficTag, int) {
 // listPullTrafficRepositories returns every repository name in the namespace.
 func listPullTrafficRepositories(ctx context.Context, client *lib.Client, namespace string) ([]string, error) {
 	names := []string{}
-	for page := 1; page <= pullTrafficMaxRepoPages; page++ {
+	_, err := lib.Paginate(pullTrafficMaxRepoPages, func(page int, _ string) (lib.PageResult, error) {
 		list, err := client.ListRepositories(ctx, namespace, false, false, false, page, pullTrafficRepositoryPageSize)
 		if err != nil {
-			return nil, fmt.Errorf("listing repositories: %w", err)
+			return lib.PageResult{}, fmt.Errorf("listing repositories: %w", err)
 		}
+
 		for _, repository := range list.Repositories {
 			names = append(names, repository.Name)
 		}
-		if !list.HasAdditional {
-			break
-		}
+		return lib.PageResult{HasMore: list.HasAdditional}, nil
+	})
+	if err != nil {
+		return nil, err
 	}
 	if len(names) > 0 {
 		return names, nil
