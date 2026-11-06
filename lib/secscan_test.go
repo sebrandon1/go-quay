@@ -11,6 +11,34 @@ const (
 	testSecScanManifestRef = "sha256:abc123def456789"
 )
 
+func TestScanStatusNormalizeAndTerminal(t *testing.T) {
+	tests := []struct {
+		name     string
+		raw      ScanStatus
+		want     ScanStatus
+		terminal bool
+	}{
+		{name: "scanned", raw: "scanned", want: ScanScanned, terminal: true},
+		{name: "mixed case and spaces", raw: " Scanned ", want: ScanScanned, terminal: true},
+		{name: "failed", raw: "FAILED", want: ScanFailed, terminal: true},
+		{name: "unsupported status", raw: "Unsupported", want: ScanUnsupported, terminal: true},
+		{name: "queued status", raw: ScanQueued, want: ScanQueued, terminal: false},
+		{name: "scanning", raw: "scanning", want: ScanScanning, terminal: false},
+		{name: "unknown status keeps waiting", raw: "mystery", want: ScanStatus("mystery"), terminal: false},
+		{name: "blank status", raw: "", want: ScanStatus(""), terminal: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.raw.Normalize(); got != tt.want {
+				t.Fatalf("Normalize() = %q, want %q", got, tt.want)
+			}
+			if got := tt.raw.Terminal(); got != tt.terminal {
+				t.Fatalf("Terminal() = %v, want %v", got, tt.terminal)
+			}
+		})
+	}
+}
+
 func TestGetManifestSecurity(t *testing.T) {
 	mockSecurityScan := SecurityScan{
 		Status: testSecScanStatus,

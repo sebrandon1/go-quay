@@ -78,7 +78,7 @@ Use --watch to poll until the scan reaches a terminal state.`,
 		if err != nil {
 			return err
 		}
-		if secScanWatch && strings.EqualFold(strings.TrimSpace(security.Status), "failed") {
+		if secScanWatch && security.Status.Normalize() == lib.ScanFailed {
 			return fmt.Errorf("security scan failed with status %q", security.Status)
 		}
 		return nil
@@ -109,12 +109,11 @@ func waitForSecurityScan(cmd *cobra.Command, client *lib.Client) (*lib.SecurityS
 			return nil, err
 		}
 
-		status := ""
+		status := lib.ScanStatus("")
 		if scan != nil {
-			status = strings.ToLower(strings.TrimSpace(scan.Status))
+			status = scan.Status.Normalize()
 		}
-		switch status {
-		case "scanned", "failed", "unsupported":
+		if status.Terminal() {
 			return scan, nil
 		}
 
@@ -156,7 +155,7 @@ func printSecuritySummary(scan *lib.SecurityScan) error {
 	}
 	status := ""
 	if scan != nil {
-		status = scan.Status
+		status = string(scan.Status)
 	}
 	total := 0
 	for _, count := range counts {
