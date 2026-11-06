@@ -19,7 +19,58 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 )
+
+// TagExpiringWindow is how close to expiration a tag must be to be reported as
+// expiring rather than active.
+const TagExpiringWindow = 24 * time.Hour
+
+// TagLifecycle is where a tag sits relative to its expiration.
+type TagLifecycle string
+
+const (
+	TagActive   TagLifecycle = "active"
+	TagExpiring TagLifecycle = "expiring"
+	TagExpired  TagLifecycle = "expired"
+)
+
+// Lifecycle reports the tag's lifecycle at now. A tag with no usable
+// expiration is active: the client does not guess that it has expired.
+func (t Tag) Lifecycle(now time.Time) TagLifecycle {
+	expires, ok := t.expiry()
+	if !ok {
+		return TagActive
+	}
+	if !now.Before(expires) {
+		return TagExpired
+	}
+	if expires.Sub(now) <= TagExpiringWindow {
+		return TagExpiring
+	}
+	return TagActive
+}
+
+// Expired reports whether the tag has reached its expiration at now.
+func (t Tag) Expired(now time.Time) bool {
+	return t.Lifecycle(now) == TagExpired
+}
+
+// expiry returns the tag's expiration, preferring the dated Expiration field
+// and falling back to the EndTs epoch.
+func (t Tag) expiry() (time.Time, bool) {
+	if t.Expiration != "" {
+		for _, layout := range []string{time.RFC3339, "2006-01-02T15:04:05", "2006-01-02"} {
+			if parsed, err := time.Parse(layout, t.Expiration); err == nil {
+				return parsed, true
+			}
+		}
+	}
+	if t.EndTs > 0 {
+		return time.Unix(t.EndTs, 0), true
+	}
+	return time.Time{}, false
+}
 
 // GetTag retrieves detailed information about a specific tag
 func (c *Client) GetTag(ctx context.Context, namespace, repository, tag string) (*Tag, error) {

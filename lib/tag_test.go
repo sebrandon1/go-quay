@@ -6,11 +6,40 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 const (
 	testManifestDigest = "sha256:def456"
 )
+
+func TestTagLifecycle(t *testing.T) {
+	now := time.Date(2026, time.November, 6, 12, 0, 0, 0, time.UTC)
+	tests := []struct {
+		name string
+		tag  Tag
+		want TagLifecycle
+	}{
+		{name: "no expiration is active", tag: Tag{}, want: TagActive},
+		{name: "future expiry is active", tag: Tag{Expiration: "2026-11-20T12:00:00Z"}, want: TagActive},
+		{name: "within window is expiring", tag: Tag{Expiration: "2026-11-07T11:00:00Z"}, want: TagExpiring},
+		{name: "exactly now is expired", tag: Tag{Expiration: "2026-11-06T12:00:00Z"}, want: TagExpired},
+		{name: "past is expired", tag: Tag{Expiration: "2026-11-01T12:00:00Z"}, want: TagExpired},
+		{name: "end ts fallback", tag: Tag{EndTs: now.Add(-time.Hour).Unix()}, want: TagExpired},
+		{name: "invalid expiration falls back to end ts", tag: Tag{Expiration: "not-a-date", EndTs: now.Add(-time.Hour).Unix()}, want: TagExpired},
+		{name: "invalid expiration without end ts is active", tag: Tag{Expiration: "not-a-date"}, want: TagActive},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.tag.Lifecycle(now); got != tt.want {
+				t.Fatalf("Lifecycle() = %q, want %q", got, tt.want)
+			}
+			if got := tt.tag.Expired(now); got != (tt.want == TagExpired) {
+				t.Fatalf("Expired() = %v, want %v", got, tt.want == TagExpired)
+			}
+		})
+	}
+}
 
 func TestGetTag(t *testing.T) {
 	mockTag := Tag{
