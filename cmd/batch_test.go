@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -94,6 +95,26 @@ func assertBatchCreateRequest(t *testing.T, r *http.Request) {
 	}
 	if body.Namespace != testNamespace || body.Repository != "new-repo" || body.Visibility != "public" || body.Description != "batch-created" {
 		t.Errorf("create request body = %+v", body)
+	}
+}
+
+func TestClassifyBatchItem(t *testing.T) {
+	if got := classifyBatchItem(nil); got != batchStatusSucceeded {
+		t.Errorf("classifyBatchItem(nil) = %q, want %q", got, batchStatusSucceeded)
+	}
+	if got := classifyBatchItem(errors.New("boom")); got != batchStatusFailed {
+		t.Errorf("classifyBatchItem(error) = %q, want %q", got, batchStatusFailed)
+	}
+}
+
+func TestBatchStatusValid(t *testing.T) {
+	for _, status := range []batchStatus{batchStatusSucceeded, batchStatusFailed, batchStatusNotRun, batchStatusDryRun} {
+		if !status.Valid() {
+			t.Errorf("%q should be valid", status)
+		}
+	}
+	if batchStatus("unknown").Valid() {
+		t.Error("unknown status should not be valid")
 	}
 }
 
