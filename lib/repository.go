@@ -81,6 +81,23 @@ func (c *Client) GetRepository(ctx context.Context, namespace, repository string
 	}, nil
 }
 
+const (
+	// VisibilityPublic makes a repository readable by everyone.
+	VisibilityPublic = "public"
+	// VisibilityPrivate restricts a repository to its namespace and teams.
+	VisibilityPrivate = "private"
+)
+
+// ValidateVisibility rejects visibility values Quay does not accept.
+func ValidateVisibility(visibility string) error {
+	switch visibility {
+	case VisibilityPublic, VisibilityPrivate:
+		return nil
+	default:
+		return fmt.Errorf("visibility must be public or private")
+	}
+}
+
 // CreateRepository creates a new repository
 func (c *Client) CreateRepository(ctx context.Context, namespace, repository, visibility, description string) (*Repository, error) {
 	if namespace == "" {
@@ -91,6 +108,9 @@ func (c *Client) CreateRepository(ctx context.Context, namespace, repository, vi
 	}
 	if visibility == "" {
 		return nil, fmt.Errorf("visibility is required")
+	}
+	if err := ValidateVisibility(visibility); err != nil {
+		return nil, err
 	}
 
 	req, err := newRequestWithBody(ctx, http.MethodPost, c.buildURL("/repository"), CreateRepositoryRequest{
@@ -127,6 +147,9 @@ func (c *Client) UpdateRepository(ctx context.Context, namespace, repository, de
 		updateReq.Description = description
 	}
 	if visibility != "" {
+		if err := ValidateVisibility(visibility); err != nil {
+			return nil, err
+		}
 		updateReq.Visibility = visibility
 	}
 
@@ -259,6 +282,9 @@ func (c *Client) ChangeRepositoryVisibility(ctx context.Context, namespace, repo
 	}
 	if visibility == "" {
 		return fmt.Errorf("visibility is required")
+	}
+	if err := ValidateVisibility(visibility); err != nil {
+		return err
 	}
 
 	body := struct {

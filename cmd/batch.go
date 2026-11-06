@@ -207,8 +207,8 @@ func validateRepositoryBatch(batch *repositoryBatch) error {
 			if item.Visibility == "" {
 				item.Visibility = repoVisibilityPrivate
 			}
-			if item.Visibility != "public" && item.Visibility != repoVisibilityPrivate {
-				return fmt.Errorf("items[%d] visibility must be public or private", i)
+			if err := lib.ValidateVisibility(item.Visibility); err != nil {
+				return fmt.Errorf("items[%d] %w", i, err)
 			}
 		case subcmdDelete:
 			if item.Visibility != "" || item.Description != "" {
