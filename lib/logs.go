@@ -352,17 +352,18 @@ func (c *Client) GetAggregatedLogsRange(ctx context.Context, namespace, reposito
 // whether the result was truncated by the page cap.
 func (c *Client) GetAllLogs(ctx context.Context, namespace, repository, startDate, endDate string, maxPages int) ([]LogEntry, bool, error) {
 	entries := []LogEntry{}
-	nextPage := ""
-	for page := 0; maxPages <= 0 || page < maxPages; page++ {
-		logs, err := c.GetLogs(ctx, namespace, repository, nextPage, startDate, endDate)
+	truncated, err := Paginate(maxPages, func(_ int, token string) (PageResult, error) {
+		logs, err := c.GetLogs(ctx, namespace, repository, token, startDate, endDate)
 		if err != nil {
-			return nil, false, err
+			return PageResult{}, err
 		}
+
 		entries = append(entries, logs.Logs...)
-		nextPage = logs.NextPage
-		if nextPage == "" {
-			return entries, false, nil
-		}
+		return PageResult{HasMore: logs.NextPage != "", Next: logs.NextPage}, nil
+	})
+	if err != nil {
+		return nil, false, err
 	}
-	return entries, true, nil
+
+	return entries, truncated, nil
 }
