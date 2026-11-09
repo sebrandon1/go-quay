@@ -697,6 +697,79 @@ func TestRetryOn500(t *testing.T) {
 	}
 }
 
+func TestRetryByMethod(t *testing.T) {
+	respond := func(status int, body string) func(http.ResponseWriter) {
+		return func(w http.ResponseWriter) {
+			w.WriteHeader(status)
+			w.Write([]byte(body))
+		}
+	}
+	serverError := respond(http.StatusInternalServerError, `{"error":"boom"}`)
+	closeConnection := func(w http.ResponseWriter) {
+		conn, _, err := w.(http.Hijacker).Hijack()
+		if err != nil {
+			t.Errorf("Failed to hijack connection: %v", err)
+			return
+		}
+		conn.Close()
+	}
+
+	tests := []struct {
+		name         string
+		method       string
+		failFirst    func(http.ResponseWriter)
+		wantAttempts int32
+	}{
+		{"POST 500 is not retried", httpMethodPost, serverError, 1},
+		{"POST 503 is not retried", httpMethodPost, respond(http.StatusServiceUnavailable, `{"error":"down"}`), 1},
+		{"POST transport error is not retried", httpMethodPost, closeConnection, 1},
+		{"POST 429 is retried", httpMethodPost, respond(http.StatusTooManyRequests, `{"error":"rate_limited"}`), 2},
+		{"POST 429 with non-JSON body is retried", httpMethodPost, respond(http.StatusTooManyRequests, "slow down"), 2},
+		{"PUT 500 is retried", httpMethodPut, serverError, 2},
+		{"DELETE 500 is retried", httpMethodDelete, serverError, 2},
+		{"HEAD 500 is retried", http.MethodHead, serverError, 2},
+		{"GET transport error is retried", httpMethodGet, closeConnection, 2},
+		{"PATCH 500 is not retried", http.MethodPatch, serverError, 1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var attempts atomic.Int32
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				if attempts.Add(1) == 1 {
+					tt.failFirst(w)
+					return
+				}
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1")
+			if err != nil {
+				t.Fatalf("Failed to create client: %v", err)
+			}
+			client.Retry = &RetryConfig{
+				MaxRetries:     2,
+				InitialBackoff: 1 * time.Millisecond,
+				MaxBackoff:     10 * time.Millisecond,
+			}
+
+			req, err := newRequest(context.Background(), tt.method, server.URL+"/api/v1/test")
+			if err != nil {
+				t.Fatalf("Failed to create request: %v", err)
+			}
+
+			err = client.do(req, nil, http.StatusOK)
+			if got := attempts.Load(); got != tt.wantAttempts {
+				t.Errorf("Expected %d attempts, got %d", tt.wantAttempts, got)
+			}
+			if wantErr := tt.wantAttempts == 1; (err != nil) != wantErr {
+				t.Errorf("do() error = %v, wantErr %v", err, wantErr)
+			}
+		})
+	}
+}
+
 func TestRetryExhausted(t *testing.T) {
 	var attempts atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {

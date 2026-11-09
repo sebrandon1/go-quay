@@ -42,13 +42,13 @@ Every command inherits these flags:
 | `--output` / `-O` | — | `json` (default), `yaml`, or `table`; `list pull-traffic` defaults to `table` |
 | `--dry-run` | — | Show API requests without sending them |
 | `--verbose` / `-v` | — | Log HTTP method, URL, status, duration, and attempt to stderr; credentials and request/response bodies are not logged |
-| `--max-retries` | — | Retry failed requests this many times after the initial attempt (default `0`, disabled) |
+| `--max-retries` | — | Retry failed requests this many times after the initial attempt; POST requests retry only on 429 (default `0`, disabled) |
 | `--retry-backoff` | — | Initial delay between retry attempts (default `500ms`) |
 | `--retry-max-backoff` | — | Maximum delay between retry attempts (default `5s`) |
 
 The `-v` shorthand is already used by repository visibility options and manifest label values. On those four commands, use `--verbose` if request logging is needed; `-v` keeps its existing meaning.
 
-Retries apply to HTTP 429 and 5xx responses, plus retryable network errors. `--max-retries` counts attempts after the initial request and defaults to `0`, which disables retries. The backoff starts at `--retry-backoff`, doubles after each retryable failure, and is capped by `--retry-max-backoff`. A positive integer `Retry-After` value overrides the calculated delay; request context cancellation stops the wait.
+Retries apply to HTTP 429 responses for every method. HTTP 5xx responses and retryable network errors are retried only for GET, HEAD, PUT, and DELETE, because a POST that fails that way may already have been applied. `--max-retries` counts attempts after the initial request and defaults to `0`, which disables retries. The backoff starts at `--retry-backoff`, doubles after each retryable failure, and is capped by `--retry-max-backoff`. A positive integer `Retry-After` value overrides the calculated delay; request context cancellation stops the wait.
 
 Precedence: flags > environment variables > config file > built-in defaults.
 
