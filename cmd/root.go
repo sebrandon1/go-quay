@@ -128,7 +128,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Show API requests without sending them")
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, table, or csv (csv is report-only)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Log HTTP requests and responses to stderr")
-	rootCmd.PersistentFlags().IntVar(&maxRetries, "max-retries", 0, "Maximum retries after the initial request (0 disables retries)")
+	rootCmd.PersistentFlags().IntVar(&maxRetries, "max-retries", 0, "Maximum retries after the initial request; POST requests retry only on 429 (0 disables retries)")
 	rootCmd.PersistentFlags().DurationVar(&retryBackoff, "retry-backoff", 500*time.Millisecond, "Initial delay between retry attempts")
 	rootCmd.PersistentFlags().DurationVar(&retryMaxBackoff, "retry-max-backoff", 5*time.Second, "Maximum delay between retry attempts")
 	rootCmd.AddCommand(getCmd)

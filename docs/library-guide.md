@@ -34,7 +34,7 @@ func main() {
     // Self-hosted Quay:
     // client, err := lib.NewClientWithURL(token, "https://quay.example.com/api/v1")
 
-    // Optional retries on 429 and 5xx:
+    // Optional retries on 429, and on 5xx for non-POST requests:
     // client.Retry = &lib.RetryConfig{
     //     MaxRetries:     3,
     //     InitialBackoff: time.Second,
@@ -638,7 +638,7 @@ client.Retry = &lib.RetryConfig{
 }
 ```
 
-Retries apply to HTTP 429 and 5xx. `NewClient` leaves `Retry` nil until you set it. The CLI exposes the same behavior through `--max-retries` and `--retry-backoff`.
+Retries apply to HTTP 429 for every method. HTTP 5xx and network errors are retried only for GET, HEAD, PUT, and DELETE, because a POST that fails that way may already have been applied. `NewClient` leaves `Retry` nil until you set it. The CLI exposes the same behavior through `--max-retries` and `--retry-backoff`.
 
 ### Client-side rate limiting and caching
 
@@ -681,7 +681,7 @@ reader := lib.NewCachedRateLimitedClient(client, 10*time.Minute, 5, 10)
 
 1. **Environment Variables** - Store tokens in environment variables, not code
 2. **Error Handling** - Always check errors and handle appropriately
-3. **Rate Limiting** - Set `client.Retry` for 429/5xx backoff
+3. **Rate Limiting** - Set `client.Retry` for 429 backoff (and 5xx backoff on non-POST requests)
 4. **Pagination** - Use pagination for large result sets
 5. **Minimal Permissions** - Use tokens with minimal required permissions
 

@@ -119,12 +119,12 @@ func (c *Client) do(req *http.Request, v any, acceptedStatuses ...int) error {
 			return err
 		}
 
-		retryable, retryAfter := isRetryableError(err)
-		if !retryable {
+		var re *retryableError
+		if !errors.As(err, &re) || !canRetryMethod(req.Method, re.status) {
 			return err
 		}
 
-		if err := c.backoff(req.Context(), attempt, retryAfter); err != nil {
+		if err := c.backoff(req.Context(), attempt, re.retryAfter); err != nil {
 			return err
 		}
 	}
@@ -142,6 +142,7 @@ func (c *Client) setHeaders(req *http.Request) {
 
 type retryableError struct {
 	err        error
+	status     int // HTTP status; 0 for transport errors
 	retryAfter int
 }
 
@@ -187,6 +188,7 @@ func (c *Client) doOnce(req *http.Request, v any, acceptedStatuses []int, attemp
 	if isRetryableStatus(resp.StatusCode) {
 		return nil, &retryableError{
 			err:        apiErr,
+			status:     resp.StatusCode,
 			retryAfter: parseRetryAfter(resp.Header.Get("Retry-After")),
 		}
 	}
@@ -274,12 +276,20 @@ func IsForbidden(err error) bool {
 	return statusIs(err, http.StatusForbidden)
 }
 
-func isRetryableError(err error) (bool, int) {
-	var re *retryableError
-	if errors.As(err, &re) {
-		return true, re.retryAfter
+// canRetryMethod reports whether a failed request may be resent. A 429 means
+// Quay rejected the request unprocessed, so any method is safe. After a 5xx or
+// transport error the server may have applied it, so only idempotent methods are.
+func canRetryMethod(method string, status int) bool {
+	if status == http.StatusTooManyRequests {
+		return true
 	}
-	return false, 0
+
+	switch method {
+	case http.MethodGet, http.MethodHead, http.MethodPut, http.MethodDelete:
+		return true
+	default:
+		return false
+	}
 }
 
 func (c *Client) shouldRetry(attempt, maxAttempts int) bool {
