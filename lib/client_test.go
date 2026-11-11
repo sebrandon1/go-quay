@@ -596,6 +596,60 @@ func TestDeleteRequestError(t *testing.T) {
 	}
 }
 
+func TestBackoffDelay(t *testing.T) {
+	capped := &RetryConfig{
+		MaxRetries:     5,
+		InitialBackoff: 100 * time.Millisecond,
+		MaxBackoff:     500 * time.Millisecond,
+	}
+	uncapped := &RetryConfig{MaxRetries: 5, InitialBackoff: time.Second}
+
+	tests := []struct {
+		name           string
+		retry          *RetryConfig
+		attempt        int
+		retryAfterSecs int
+		want           time.Duration
+	}{
+		{"Retry-After honored exactly", capped, 3, 30, 30 * time.Second},
+		{"Retry-After is not capped", capped, 10, 60, 60 * time.Second},
+		{"first attempt uses initial backoff", capped, 0, 0, 100 * time.Millisecond},
+		{"second attempt doubles", capped, 1, 0, 200 * time.Millisecond},
+		{"third attempt doubles again", capped, 2, 0, 400 * time.Millisecond},
+		{"capped at MaxBackoff", capped, 10, 0, 500 * time.Millisecond},
+		{"MaxBackoff zero means no cap", uncapped, 2, 0, 4 * time.Second},
+		{"growth saturates instead of overflowing", uncapped, 200, 0, maxBackoffDelay},
+		{"nil Retry yields zero", nil, 3, 0, 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &Client{Retry: tt.retry}
+			if got := client.backoffDelay(tt.attempt, tt.retryAfterSecs); got != tt.want {
+				t.Errorf("backoffDelay(%d, %d) = %v, want %v", tt.attempt, tt.retryAfterSecs, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestJitterBounds(t *testing.T) {
+	base := 200 * time.Millisecond
+	half := base / 2
+
+	for range 1000 {
+		wait := jitter(base)
+		if wait < half || wait > base {
+			t.Fatalf("jitter(%v) = %v, out of bounds [%v, %v]", base, wait, half, base)
+		}
+	}
+}
+
+func TestJitterZero(t *testing.T) {
+	if got := jitter(0); got != 0 {
+		t.Errorf("jitter(0) = %v, want 0", got)
+	}
+}
+
 func TestRetryOn429(t *testing.T) {
 	var attempts atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
