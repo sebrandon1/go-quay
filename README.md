@@ -153,7 +153,7 @@ Each API links to the corresponding [Quay.io Swagger documentation](https://docs
 
 1. Go to [Quay.io](https://quay.io) and log in
 2. Create an **application token** (Account Settings → Applications). Encrypted/CLI passwords are for `docker login`, and robot account tokens authenticate the registry (`/v2/`) — neither works on this API (`/api/v1/`).
-3. Use the token with `--token` / `-t`, `QUAY_TOKEN`, or a config file (`token:` in `~/.config/go-quay/config.yaml` on Linux)
+3. Use the token with `--token` / `-t`, `--token-file` / `QUAY_TOKEN_FILE` (reads the token from a file, for CI and mounted secrets), `QUAY_TOKEN`, or a config file (`token:` in `~/.config/go-quay/config.yaml` on Linux). Precedence is flag, token file, environment variable, config file.
 
 Optional: `--quay-url` / `QUAY_URL` for a self-hosted registry. Output format: `--output` / `-O` (`json`, `yaml`, `table`). See [CLI Reference](docs/cli-reference.md).
 
