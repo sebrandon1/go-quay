@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -13,6 +14,13 @@ import (
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+)
+
+const (
+	testTokenFromFlag = "from-flag"
+	testTokenFromEnv  = "from-env"
+	testTokenFromFile = "from-file"
+	testReadTokenErr  = "reading token file"
 )
 
 func resetRootFlags(t *testing.T) {
@@ -94,6 +102,7 @@ func resetRetryFlags(t *testing.T) {
 func resetTokenAndURLFlags(t *testing.T) {
 	t.Helper()
 	token = ""
+	tokenFile = ""
 	quayURL = lib.DefaultQuayURL
 	dryRun = false
 	for _, f := range []*pflag.Flag{
@@ -104,6 +113,17 @@ func resetTokenAndURLFlags(t *testing.T) {
 			f.Changed = false
 			if err := f.Value.Set(""); err != nil {
 				t.Fatalf("reset token flag: %v", err)
+			}
+		}
+	}
+	for _, f := range []*pflag.Flag{
+		rootCmd.Flag("token-file"),
+		rootCmd.PersistentFlags().Lookup("token-file"),
+	} {
+		if f != nil {
+			f.Changed = false
+			if err := f.Value.Set(""); err != nil {
+				t.Fatalf("reset token-file flag: %v", err)
 			}
 		}
 	}
@@ -257,8 +277,8 @@ func TestVerboseFlagLogsRedactedRequestToStderrAndKeepsJSONOnStdout(t *testing.T
 
 func TestResolveFlag(t *testing.T) {
 	const (
-		fromFlag   = "from-flag"
-		fromEnv    = "from-env"
+		fromFlag   = testTokenFromFlag
+		fromEnv    = testTokenFromEnv
 		fromConfig = "from-config"
 	)
 
@@ -289,13 +309,13 @@ func TestResolveFlag(t *testing.T) {
 
 func TestPersistentPreRunResolvesTokenFromEnv(t *testing.T) {
 	resetRootFlags(t)
-	t.Setenv("QUAY_TOKEN", "from-env")
+	t.Setenv("QUAY_TOKEN", testTokenFromEnv)
 
 	if err := persistentPreRunE(rootCmd, nil); err != nil {
 		t.Fatalf("PersistentPreRunE: %v", err)
 	}
-	if token != "from-env" {
-		t.Errorf("token = %q, want %q", token, "from-env")
+	if token != testTokenFromEnv {
+		t.Errorf("token = %q, want %q", token, testTokenFromEnv)
 	}
 }
 
@@ -314,8 +334,8 @@ func TestPersistentPreRunResolvesTokenFromConfig(t *testing.T) {
 
 func TestPersistentPreRunFlagOverridesEnv(t *testing.T) {
 	resetRootFlags(t)
-	t.Setenv("QUAY_TOKEN", "from-env")
-	token = "from-flag"
+	t.Setenv("QUAY_TOKEN", testTokenFromEnv)
+	token = testTokenFromFlag
 	if f := rootCmd.Flag("token"); f != nil {
 		f.Changed = true
 	}
@@ -323,14 +343,14 @@ func TestPersistentPreRunFlagOverridesEnv(t *testing.T) {
 	if err := persistentPreRunE(rootCmd, nil); err != nil {
 		t.Fatalf("PersistentPreRunE: %v", err)
 	}
-	if token != "from-flag" {
-		t.Errorf("token = %q, want %q", token, "from-flag")
+	if token != testTokenFromFlag {
+		t.Errorf("token = %q, want %q", token, testTokenFromFlag)
 	}
 }
 
 func TestPersistentPreRunResolvesQuayURLFromEnv(t *testing.T) {
 	resetRootFlags(t)
-	t.Setenv("QUAY_TOKEN", "from-env")
+	t.Setenv("QUAY_TOKEN", testTokenFromEnv)
 	t.Setenv("QUAY_URL", "https://custom.example/api/v1")
 
 	if err := persistentPreRunE(rootCmd, nil); err != nil {
@@ -339,6 +359,150 @@ func TestPersistentPreRunResolvesQuayURLFromEnv(t *testing.T) {
 	if quayURL != "https://custom.example/api/v1" {
 		t.Errorf("quayURL = %q, want custom env URL", quayURL)
 	}
+}
+
+func TestTokenFileFlagExists(t *testing.T) {
+	flag := rootCmd.PersistentFlags().Lookup("token-file")
+	if flag == nil {
+		t.Fatal("Expected --token-file flag on rootCmd, not found")
+	}
+	if flag.DefValue != "" {
+		t.Errorf("token-file flag DefValue must be empty, got %q", flag.DefValue)
+	}
+}
+
+func TestReadTokenFile(t *testing.T) {
+	dir := t.TempDir()
+	write := func(t *testing.T, name, content string) string {
+		t.Helper()
+		path := filepath.Join(dir, name)
+		if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+			t.Fatalf("write %s: %v", name, err)
+		}
+		return path
+	}
+
+	tests := []struct {
+		name    string
+		path    string
+		wantErr string
+		want    string
+	}{
+		{name: "trailing newline trimmed", path: write(t, "newline", "abc\n"), want: "abc"},
+		{name: "surrounding whitespace trimmed", path: write(t, "spaces", "  abc \n\t"), want: "abc"},
+		{name: "missing file", path: filepath.Join(dir, "missing"), wantErr: testReadTokenErr},
+		{name: "empty file", path: write(t, "empty", ""), wantErr: "is empty"},
+		{name: "whitespace only", path: write(t, "blank", " \n\t"), wantErr: "is empty"},
+		{name: "directory", path: dir, wantErr: testReadTokenErr},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := readTokenFile(tt.path)
+			if tt.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+					t.Fatalf("readTokenFile() error = %v, want it to contain %q", err, tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("readTokenFile() error = %v", err)
+			}
+			if got != tt.want {
+				t.Errorf("readTokenFile() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPersistentPreRunResolvesTokenFromFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "token")
+	if err := os.WriteFile(path, []byte("from-file\n"), 0o600); err != nil {
+		t.Fatalf("write token file: %v", err)
+	}
+
+	tests := []struct {
+		name     string
+		envToken string
+		envFile  string
+		setToken bool
+		setFile  bool
+		filePath string
+		tokenVal string
+		want     string
+		wantErr  string
+	}{
+		{name: "flag reads file", setFile: true, filePath: path, want: testTokenFromFile},
+		{name: "env reads file", envFile: path, want: testTokenFromFile},
+		{name: "file beats env token", envToken: testTokenFromEnv, setFile: true, filePath: path, want: testTokenFromFile},
+		{name: "token flag beats token file", envToken: testTokenFromEnv, setToken: true, tokenVal: testTokenFromFlag, setFile: true, filePath: path, want: testTokenFromFlag},
+		{name: "flag path beats env path", envFile: filepath.Join(dir, "missing"), setFile: true, filePath: path, want: testTokenFromFile},
+		{name: "empty flag path falls back to env path", envFile: path, setFile: true, filePath: "", want: testTokenFromFile},
+		{name: "missing file errors", setFile: true, filePath: filepath.Join(dir, "missing"), wantErr: testReadTokenErr},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resetRootFlags(t)
+			t.Setenv("QUAY_TOKEN", tt.envToken)
+			t.Setenv("QUAY_TOKEN_FILE", tt.envFile)
+
+			if tt.setFile {
+				flag := rootCmd.PersistentFlags().Lookup("token-file")
+				if err := flag.Value.Set(tt.filePath); err != nil {
+					t.Fatalf("set --token-file: %v", err)
+				}
+				flag.Changed = true
+			}
+			if tt.setToken {
+				flag := rootCmd.PersistentFlags().Lookup("token")
+				if err := flag.Value.Set(tt.tokenVal); err != nil {
+					t.Fatalf("set --token: %v", err)
+				}
+				flag.Changed = true
+			}
+
+			err := persistentPreRunE(rootCmd, nil)
+			if tt.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+					t.Fatalf("error = %v, want it to contain %q", err, tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("PersistentPreRunE: %v", err)
+			}
+			if token != tt.want {
+				t.Errorf("token = %q, want %q", token, tt.want)
+			}
+		})
+	}
+}
+
+func TestTokenFileSendsBearerHeader(t *testing.T) {
+	resetRootFlags(t)
+	dir := t.TempDir()
+	path := filepath.Join(dir, "token")
+	if err := os.WriteFile(path, []byte("abc\n"), 0o600); err != nil {
+		t.Fatalf("write token file: %v", err)
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("Authorization"); got != "Bearer abc" {
+			t.Errorf("Authorization header = %q, want %q", got, "Bearer abc")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"username":"test-user"}`))
+	}))
+	defer server.Close()
+
+	rootCmd.SetArgs([]string{cmdInfo, cmdUser, "--token-file", path, testQuayURLFlag, server.URL})
+	captureStdout(t, func() {
+		if err := rootCmd.Execute(); err != nil {
+			t.Fatalf("execute info user with --token-file: %v", err)
+		}
+	})
 }
 
 func TestPersistentPreRunRequiresToken(t *testing.T) {
@@ -371,7 +535,7 @@ func TestIsAuthenticationExemptCommand(t *testing.T) {
 
 func TestPersistentPreRunInvalidOutputFormat(t *testing.T) {
 	resetRootFlags(t)
-	t.Setenv("QUAY_TOKEN", "from-env")
+	t.Setenv("QUAY_TOKEN", testTokenFromEnv)
 	outputFormat = "xml"
 
 	err := persistentPreRunE(rootCmd, nil)

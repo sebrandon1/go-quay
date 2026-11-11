@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/sebrandon1/go-quay/lib"
@@ -12,6 +13,7 @@ import (
 
 var (
 	quayURL         string
+	tokenFile       string
 	dryRun          bool
 	verbose         bool
 	maxRetries      int
@@ -56,7 +58,11 @@ func persistentPreRunE(cmd *cobra.Command, _ []string) error {
 	cmd.SilenceUsage = true
 	executedCommand = cmd
 
-	token = resolveFlag(flagChanged(cmd, "token"), token, os.Getenv("QUAY_TOKEN"), appCfg.Token)
+	var err error
+	token, err = resolveToken(flagChanged(cmd, "token"), flagChanged(cmd, "token-file"))
+	if err != nil {
+		return err
+	}
 	quayURL = resolveFlag(flagChanged(cmd, "quay-url"), quayURL, os.Getenv("QUAY_URL"), appCfg.QuayURL, lib.DefaultQuayURL)
 	if maxRetries < 0 {
 		return fmt.Errorf("--max-retries must be zero or greater")
@@ -71,7 +77,8 @@ func persistentPreRunE(cmd *cobra.Command, _ []string) error {
 	if token == "" && !dryRun && commandRequiresAuthentication(cmd) {
 		return fmt.Errorf(`authentication token required
 
-Set QUAY_TOKEN environment variable, use --token/-t flag, or add to config file (%s).
+Set QUAY_TOKEN, use --token/-t, point --token-file/$QUAY_TOKEN_FILE at a file containing
+the token, or add it to the config file (%s).
 Get your token at https://quay.io/organization/<org>?tab=applications`, configFilePath())
 	}
 
@@ -103,6 +110,45 @@ func flagChanged(cmd *cobra.Command, name string) bool {
 	return f != nil && f.Changed
 }
 
+// envTokenFile names the environment variable that behaves like --token-file.
+const envTokenFile = "QUAY_TOKEN_FILE" // #nosec G101 -- environment variable name, not a credential
+
+// resolveToken returns the API token. Precedence: --token, then --token-file or
+// $QUAY_TOKEN_FILE, then $QUAY_TOKEN, then the config file.
+func resolveToken(tokenSet, tokenFileSet bool) (string, error) {
+	if tokenSet {
+		return token, nil
+	}
+
+	filePath := os.Getenv(envTokenFile)
+	if tokenFileSet && tokenFile != "" {
+		filePath = tokenFile
+	}
+
+	if filePath != "" {
+		return readTokenFile(filePath)
+	}
+
+	return firstNonEmpty(os.Getenv("QUAY_TOKEN"), appCfg.Token), nil
+}
+
+// readTokenFile reads a token from path, trimming surrounding whitespace. A
+// missing, unreadable, or empty file is an error. The file contents never
+// appear in the error.
+func readTokenFile(path string) (string, error) {
+	data, err := os.ReadFile(path) // #nosec G304 G703 -- the operator supplies the token file path by design
+	if err != nil {
+		return "", fmt.Errorf("reading token file: %w", err)
+	}
+
+	value := strings.TrimSpace(string(data))
+	if value == "" {
+		return "", fmt.Errorf("token file %s is empty", path)
+	}
+
+	return value, nil
+}
+
 // resolveFlag returns flagValue when the flag was explicitly set; otherwise the first non-empty fallback.
 func resolveFlag(changed bool, flagValue string, fallbacks ...string) string {
 	if changed {
@@ -124,6 +170,7 @@ func firstNonEmpty(values ...string) string {
 func init() {
 	rootCmd.PersistentPreRunE = persistentPreRunE
 	rootCmd.PersistentFlags().StringVarP(&token, "token", "t", "", "Quay.io API token ($QUAY_TOKEN or config file)")
+	rootCmd.PersistentFlags().StringVar(&tokenFile, "token-file", "", "Read the Quay.io API token from a file ($QUAY_TOKEN_FILE)")
 	rootCmd.PersistentFlags().StringVar(&quayURL, "quay-url", lib.DefaultQuayURL, "Quay API base URL ($QUAY_URL or config file)")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Show API requests without sending them")
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "O", "json", "Output format: json, yaml, table, or csv (csv is report-only)")

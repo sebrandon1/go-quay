@@ -38,6 +38,7 @@ Every command inherits these flags:
 | Flag | Env / config | Description |
 |------|----------------|-------------|
 | `--token` / `-t` | `QUAY_TOKEN` or config `token` | Quay.io API token |
+| `--token-file` | `QUAY_TOKEN_FILE` | Read the token from a file, for CI and mounted secrets (trailing whitespace trimmed; an empty file is an error). Used when `--token` is not set; takes precedence over `QUAY_TOKEN` |
 | `--quay-url` | `QUAY_URL` or config `quay-url` | API base URL (default `https://quay.io/api/v1`) |
 | `--output` / `-O` | — | `json` (default), `yaml`, or `table`; `list pull-traffic` defaults to `table` |
 | `--dry-run` | — | Show API requests without sending them |
