@@ -11,6 +11,7 @@ import (
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	"gopkg.in/yaml.v3"
 )
@@ -195,7 +196,7 @@ func promptForConfig(reader io.Reader, writer io.Writer, cfg appConfig) (appConf
 	if cfg.Token != "" {
 		tokenPrompt = "Quay token (leave blank to keep current value): " // #nosec G101 -- this is a prompt label, not credential content
 	}
-	token, err := readConfigPrompt(input, writer, tokenPrompt, cfg.Token)
+	token, err := readTokenPrompt(reader, input, writer, tokenPrompt, cfg.Token)
 	if err != nil {
 		return appConfig{}, fmt.Errorf("reading token: %w", err)
 	}
@@ -241,13 +242,69 @@ func readConfigPrompt(reader *bufio.Reader, writer io.Writer, prompt, defaultVal
 	return value, nil
 }
 
-func isTerminal(reader io.Reader) bool {
+// readPassword reads a line from a terminal without echoing it. It is a
+// variable so tests can replace it.
+var readPassword = term.ReadPassword
+
+// isTerminalFD reports whether fd refers to a terminal. It is a variable so
+// tests can replace it.
+var isTerminalFD = term.IsTerminal
+
+// readTokenPrompt reads the API token. On a terminal it turns echo off so the
+// token never lands in scrollback, screen shares, or recordings; otherwise it
+// reads a plain line, which keeps piped input and tests working.
+func readTokenPrompt(raw io.Reader, input *bufio.Reader, writer io.Writer, prompt, defaultValue string) (string, error) {
+	fd, ok := terminalFD(raw)
+	if !ok {
+		return readConfigPrompt(input, writer, prompt, defaultValue)
+	}
+
+	// The token prompt must come first: readPassword reads the descriptor
+	// directly, so any bytes already buffered by input would be lost.
+	return readTokenWithoutEcho(fd, writer, prompt, defaultValue)
+}
+
+// readTokenWithoutEcho writes prompt, reads the token without echo, and returns
+// it trimmed. Blank input keeps defaultValue.
+func readTokenWithoutEcho(fd int, writer io.Writer, prompt, defaultValue string) (string, error) {
+	if _, err := fmt.Fprint(writer, prompt); err != nil {
+		return "", err
+	}
+
+	value, err := readPassword(fd)
+	if err != nil {
+		return "", err
+	}
+
+	// readPassword swallows the newline the user typed, so print one or the
+	// next prompt would run onto the same line.
+	if _, err := fmt.Fprintln(writer); err != nil {
+		return "", err
+	}
+
+	trimmed := strings.TrimSpace(string(value))
+	if trimmed == "" {
+		return defaultValue, nil
+	}
+
+	return trimmed, nil
+}
+
+// terminalFD returns the descriptor behind reader when it is a terminal.
+func terminalFD(reader io.Reader) (int, bool) {
 	file, ok := reader.(*os.File)
 	if !ok {
-		return false
+		return 0, false
 	}
-	info, err := file.Stat()
-	return err == nil && info.Mode()&os.ModeCharDevice != 0
+
+	fd := int(file.Fd()) // #nosec G115 -- file descriptors fit in an int
+
+	return fd, isTerminalFD(fd)
+}
+
+func isTerminal(reader io.Reader) bool {
+	_, ok := terminalFD(reader)
+	return ok
 }
 
 func writeConfig(path string, cfg appConfig) error {
