@@ -29,7 +29,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
+	"math/rand/v2"
 	"net/http"
 	"net/url"
 	"time"
@@ -296,16 +296,56 @@ func (c *Client) shouldRetry(attempt, maxAttempts int) bool {
 	return c.Retry != nil && attempt < maxAttempts-1
 }
 
-func (c *Client) backoff(ctx context.Context, attempt int, retryAfterSecs int) error {
-	var wait time.Duration
+// maxBackoffDelay bounds the exponential growth so it cannot overflow.
+const maxBackoffDelay = time.Duration(1<<63 - 1)
+
+// backoffDelay returns how long to wait before the given retry attempt. A
+// server-provided Retry-After is honored exactly. Otherwise the delay grows
+// exponentially from Retry.InitialBackoff, capped at Retry.MaxBackoff (zero
+// means no cap). The result is not jittered; backoff applies that.
+func (c *Client) backoffDelay(attempt, retryAfterSecs int) time.Duration {
 	if retryAfterSecs > 0 {
-		wait = time.Duration(retryAfterSecs) * time.Second
-	} else {
-		wait = c.Retry.InitialBackoff * time.Duration(math.Pow(2, float64(attempt)))
+		return time.Duration(retryAfterSecs) * time.Second
+	}
+
+	if c.Retry == nil || c.Retry.InitialBackoff <= 0 {
+		return 0
+	}
+
+	wait := c.Retry.InitialBackoff
+	for range attempt {
+		if wait > maxBackoffDelay/2 {
+			wait = maxBackoffDelay
+			break
+		}
+		wait *= 2
 	}
 
 	if c.Retry.MaxBackoff > 0 && wait > c.Retry.MaxBackoff {
 		wait = c.Retry.MaxBackoff
+	}
+
+	return wait
+}
+
+// jitter spreads a delay uniformly over [wait/2, wait]. Concurrent callers
+// that fail at the same time then do not retry in lockstep.
+func jitter(wait time.Duration) time.Duration {
+	if wait <= 0 {
+		return wait
+	}
+
+	half := wait / 2
+
+	return half + rand.N(half+1) // #nosec G404 -- retry jitter, not a security primitive
+}
+
+func (c *Client) backoff(ctx context.Context, attempt int, retryAfterSecs int) error {
+	wait := c.backoffDelay(attempt, retryAfterSecs)
+
+	// A Retry-After is a server instruction; never jitter it.
+	if retryAfterSecs <= 0 {
+		wait = jitter(wait)
 	}
 
 	t := time.NewTimer(wait)
