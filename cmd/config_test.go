@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"bufio"
 	"bytes"
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -21,6 +23,9 @@ const (
 	testConfigToken         = "setup-secret"
 	testConfigShowCommand   = "show"
 	testWindowsOS           = "windows"
+	testKeptToken           = "kept"
+	testTokenPrompt         = "Quay token: "
+	testTypedToken          = "typed-token"
 )
 
 func resetConfigCommandState(t *testing.T) {
@@ -329,6 +334,178 @@ func TestIsTerminalRejectsPipeInput(t *testing.T) {
 	defer writer.Close()
 	if isTerminal(reader) {
 		t.Fatal("pipe input must not be treated as a terminal")
+	}
+}
+
+func TestIsTerminalRejectsDevNull(t *testing.T) {
+	// /dev/null is a character device, so the old ModeCharDevice check called it
+	// interactive even though term.ReadPassword cannot read from it.
+	file, err := os.Open(os.DevNull)
+	if err != nil {
+		t.Fatalf("open %s: %v", os.DevNull, err)
+	}
+	defer file.Close()
+	if isTerminal(file) {
+		t.Fatalf("%s must not be treated as a terminal", os.DevNull)
+	}
+}
+
+func TestIsTerminalRejectsNonFileReader(t *testing.T) {
+	if isTerminal(strings.NewReader("")) {
+		t.Fatal("non-file readers must not be treated as terminals")
+	}
+}
+
+func TestReadTokenPromptFallsBackWithoutTerminal(t *testing.T) {
+	tests := []struct {
+		name         string
+		input        string
+		defaultValue string
+		want         string
+	}{
+		{name: "typed token", input: "typed-token\n", want: testTypedToken},
+		{name: "blank keeps default", input: "\n", defaultValue: testKeptToken, want: testKeptToken},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var prompt bytes.Buffer
+			got, err := readTokenPrompt(strings.NewReader(tt.input), bufio.NewReader(strings.NewReader(tt.input)), &prompt, testTokenPrompt, tt.defaultValue)
+			if err != nil {
+				t.Fatalf("readTokenPrompt: %v", err)
+			}
+			if got != tt.want {
+				t.Errorf("readTokenPrompt() = %q, want %q", got, tt.want)
+			}
+			if got := prompt.String(); got != testTokenPrompt {
+				t.Errorf("prompt output = %q, want the prompt only", got)
+			}
+		})
+	}
+}
+
+func TestReadTokenWithoutEchoHidesInput(t *testing.T) {
+	stubReadPassword(t, "  typed-token  ", nil)
+
+	var prompt bytes.Buffer
+	got, err := readTokenWithoutEcho(0, &prompt, testTokenPrompt, testKeptToken)
+	if err != nil {
+		t.Fatalf("readTokenWithoutEcho: %v", err)
+	}
+	if got != testTypedToken {
+		t.Errorf("readTokenWithoutEcho() = %q, want %q", got, testTypedToken)
+	}
+	if got := prompt.String(); got != "Quay token: \n" {
+		t.Errorf("prompt output = %q, want the prompt followed by a newline", got)
+	}
+	if strings.Contains(prompt.String(), testTypedToken) {
+		t.Error("prompt output must not echo the typed token")
+	}
+}
+
+func TestReadTokenWithoutEchoBlankKeepsDefault(t *testing.T) {
+	stubReadPassword(t, "", nil)
+
+	var prompt bytes.Buffer
+	got, err := readTokenWithoutEcho(0, &prompt, testTokenPrompt, testKeptToken)
+	if err != nil {
+		t.Fatalf("readTokenWithoutEcho: %v", err)
+	}
+	if got != testKeptToken {
+		t.Errorf("readTokenWithoutEcho() = %q, want the default %q", got, testKeptToken)
+	}
+}
+
+func TestReadTokenWithoutEchoPropagatesReadError(t *testing.T) {
+	stubReadPassword(t, "", errors.New("inappropriate ioctl for device"))
+
+	var prompt bytes.Buffer
+	_, err := readTokenWithoutEcho(0, &prompt, testTokenPrompt, "")
+	if err == nil || !strings.Contains(err.Error(), "inappropriate ioctl") {
+		t.Fatalf("readTokenWithoutEcho() error = %v, want the read error", err)
+	}
+}
+
+func TestReadTokenPromptUsesTerminalBranch(t *testing.T) {
+	stubIsTerminalFD(t, true)
+	stubReadPassword(t, testTypedToken, nil)
+
+	file, err := os.CreateTemp(t.TempDir(), "terminal")
+	if err != nil {
+		t.Fatalf("create temp file: %v", err)
+	}
+	defer file.Close()
+
+	var prompt bytes.Buffer
+	got, err := readTokenPrompt(file, bufio.NewReader(strings.NewReader("")), &prompt, testTokenPrompt, "")
+	if err != nil {
+		t.Fatalf("readTokenPrompt: %v", err)
+	}
+	if got != testTypedToken {
+		t.Errorf("readTokenPrompt() = %q, want %q", got, testTypedToken)
+	}
+	if want := testTokenPrompt + "\n"; prompt.String() != want {
+		t.Errorf("prompt output = %q, want %q", prompt.String(), want)
+	}
+}
+
+// failingWriter fails every write once allows successful writes are used up.
+type failingWriter struct{ allows int }
+
+func (w *failingWriter) Write(p []byte) (int, error) {
+	if w.allows <= 0 {
+		return 0, errors.New("write failed")
+	}
+	w.allows--
+	return len(p), nil
+}
+
+func TestReadTokenWithoutEchoPropagatesPromptWriteError(t *testing.T) {
+	stubReadPassword(t, testTypedToken, nil)
+
+	_, err := readTokenWithoutEcho(0, &failingWriter{}, testTokenPrompt, "")
+	if err == nil || !strings.Contains(err.Error(), "write failed") {
+		t.Fatalf("readTokenWithoutEcho() error = %v, want the write error", err)
+	}
+}
+
+func TestReadTokenWithoutEchoPropagatesNewlineWriteError(t *testing.T) {
+	stubReadPassword(t, testTypedToken, nil)
+
+	_, err := readTokenWithoutEcho(0, &failingWriter{allows: 1}, testTokenPrompt, "")
+	if err == nil || !strings.Contains(err.Error(), "write failed") {
+		t.Fatalf("readTokenWithoutEcho() error = %v, want the newline write error", err)
+	}
+}
+
+func stubIsTerminalFD(t *testing.T, terminal bool) {
+	t.Helper()
+	previous := isTerminalFD
+	isTerminalFD = func(int) bool { return terminal }
+	t.Cleanup(func() { isTerminalFD = previous })
+}
+
+func stubReadPassword(t *testing.T, value string, err error) {
+	t.Helper()
+	previous := readPassword
+	readPassword = func(int) ([]byte, error) { return []byte(value), err }
+	t.Cleanup(func() { readPassword = previous })
+}
+
+func TestPromptForConfigPropagatesTokenReadError(t *testing.T) {
+	stubIsTerminalFD(t, true)
+	stubReadPassword(t, "", errors.New("read failed"))
+
+	file, err := os.CreateTemp(t.TempDir(), "terminal")
+	if err != nil {
+		t.Fatalf("create temp file: %v", err)
+	}
+	defer file.Close()
+
+	var prompt bytes.Buffer
+	_, err = promptForConfig(file, &prompt, appConfig{})
+	if err == nil || !strings.Contains(err.Error(), "reading token") {
+		t.Fatalf("promptForConfig() error = %v, want a token read error", err)
 	}
 }
 
