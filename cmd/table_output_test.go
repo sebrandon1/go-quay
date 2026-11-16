@@ -126,6 +126,72 @@ func TestTeamListTableOutput(t *testing.T) {
 	requireTableOutput(t, output, tableHeaderName, "ROLE", "MEMBERS", "REPOSITORIES", "operators", "admin")
 }
 
+func TestBuildListTableOutput(t *testing.T) {
+	setCommandTestValue(t, &buildNamespace, testNamespace)
+	setCommandTestValue(t, &buildRepository, testRepository)
+	output := runTableCommand(t, `{"builds":[{"id":"build-1","phase":"complete","started":"2026-09-20T10:00:00Z","display_name":"v1.2.3"}]}`, func(cmd *cobra.Command) error {
+		return buildListCmd.RunE(cmd, nil)
+	})
+	requireTableOutput(t, output, "ID", "PHASE", "STARTED", "DISPLAY NAME", "build-1", "complete", "v1.2.3")
+}
+
+// requireHeadersOnly checks that an empty result still prints exactly one line:
+// the header row, with no data rows and no error.
+func requireHeadersOnly(t *testing.T, output string, headers ...string) {
+	t.Helper()
+	for _, header := range headers {
+		if !strings.Contains(output, header) {
+			t.Errorf("empty table output missing header %q: %s", header, output)
+		}
+	}
+	if lines := strings.Split(strings.TrimSpace(output), "\n"); len(lines) != 1 {
+		t.Errorf("empty table output should be headers only, got: %s", output)
+	}
+}
+
+func TestListTableOutputEmpty(t *testing.T) {
+	setCommandTestValue(t, &buildNamespace, testNamespace)
+	setCommandTestValue(t, &buildRepository, testRepository)
+	setCommandTestValue(t, &triggerNamespace, testNamespace)
+	setCommandTestValue(t, &triggerRepository, testRepository)
+	setCommandTestValue(t, &notificationNamespace, testNamespace)
+	setCommandTestValue(t, &notificationRepository, testRepository)
+
+	tests := []struct {
+		name     string
+		response string
+		run      func(*cobra.Command) error
+		headers  []string
+	}{
+		{"builds", `{"builds":[]}`, func(cmd *cobra.Command) error { return buildListCmd.RunE(cmd, nil) }, []string{"ID", "PHASE", "STARTED", "DISPLAY NAME"}},
+		{"triggers", `{"triggers":[]}`, func(cmd *cobra.Command) error { return triggerListCmd.RunE(cmd, nil) }, []string{"ID", "SERVICE", "ENABLED", "ACTIVE"}},
+		{"notification list", `{"notifications":[]}`, func(cmd *cobra.Command) error { return notificationListCmd.RunE(cmd, nil) }, []string{"UUID", "TITLE", "EVENT", "METHOD", "FAILURES"}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			requireHeadersOnly(t, runTableCommand(t, test.response, test.run), test.headers...)
+		})
+	}
+}
+
+func TestTriggerListTableOutput(t *testing.T) {
+	setCommandTestValue(t, &triggerNamespace, testNamespace)
+	setCommandTestValue(t, &triggerRepository, testRepository)
+	output := runTableCommand(t, `{"triggers":[{"id":"trigger-1","service":"github","enabled":true,"is_active":false}]}`, func(cmd *cobra.Command) error {
+		return triggerListCmd.RunE(cmd, nil)
+	})
+	requireTableOutput(t, output, "ID", "SERVICE", "ENABLED", "ACTIVE", "trigger-1", "github", "true", "false")
+}
+
+func TestNotificationListTableOutput(t *testing.T) {
+	setCommandTestValue(t, &notificationNamespace, testNamespace)
+	setCommandTestValue(t, &notificationRepository, testRepository)
+	output := runTableCommand(t, `{"notifications":[{"uuid":"notice-1","title":"Slack hook","event":"repo_push","method":"slack","number_of_failures":2}]}`, func(cmd *cobra.Command) error {
+		return notificationListCmd.RunE(cmd, nil)
+	})
+	requireTableOutput(t, output, "UUID", "TITLE", "EVENT", "METHOD", "FAILURES", "notice-1", "Slack hook", "repo_push", "slack", "2")
+}
+
 func TestSecurityScanTableOutput(t *testing.T) {
 	response := `{"status":"scanned","data":{"Layer":{"Features":[{"Name":"openssl","Vulnerabilities":[{"Name":"CVE-1","Severity":"Critical"},{"Name":"CVE-2","Severity":"high"}]},{"Name":"zlib","Vulnerabilities":[{"Name":"CVE-3","Severity":"unlisted"}]}]}}}`
 	output := runTableCommand(t, response, func(cmd *cobra.Command) error {

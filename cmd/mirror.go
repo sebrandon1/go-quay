@@ -58,7 +58,7 @@ func printMirrorSummary(config *lib.MirrorConfig) error {
 		interval = strconv.Itoa(config.SyncInterval)
 	}
 	return printTable(
-		[]string{"ENABLED", "MIRROR TYPE", "EXTERNAL REF", "SYNC INTERVAL (SEC)", "SYNC START DATE", "ROBOT", "TAG RULE", "TAG RULE KIND"},
+		[]string{tableHeaderEnabled, "MIRROR TYPE", "EXTERNAL REF", "SYNC INTERVAL (SEC)", "SYNC START DATE", "ROBOT", "TAG RULE", "TAG RULE KIND"},
 		[][]string{{
 			strconv.FormatBool(config.IsEnabled),
 			valueOrDash(config.MirrorType),

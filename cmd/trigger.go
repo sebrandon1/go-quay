@@ -46,7 +46,9 @@ connected source repositories like GitHub, GitLab, or Bitbucket.`,
 var triggerListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List all build triggers for a repository",
-	Long:  `List all build triggers configured for a repository.`,
+	Long: `List all build triggers configured for a repository.
+
+Table columns: ID, SERVICE, ENABLED, ACTIVE.`,
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -58,6 +60,22 @@ var triggerListCmd = &cobra.Command{
 			return fmt.Errorf("getting triggers: %w", err)
 		}
 
+		if outputFormat == outputTable {
+			var list []lib.BuildTrigger
+			if triggers != nil {
+				list = triggers.Triggers
+			}
+			rows := make([][]string, 0, len(list))
+			for _, trigger := range list {
+				rows = append(rows, []string{
+					trigger.ID,
+					trigger.Service,
+					strconv.FormatBool(trigger.Enabled),
+					strconv.FormatBool(trigger.IsActive),
+				})
+			}
+			return printTable([]string{"ID", "SERVICE", tableHeaderEnabled, "ACTIVE"}, rows)
+		}
 		return printJSON(triggers)
 	},
 }
@@ -90,7 +108,7 @@ func printTriggerSummary(trigger *lib.BuildTrigger) error {
 		return fmt.Errorf("empty trigger response")
 	}
 	return printTable(
-		[]string{"ID", "SERVICE", "STATE", "ENABLED", "ACTIVE", "DISABLE REASON"},
+		[]string{"ID", "SERVICE", "STATE", tableHeaderEnabled, "ACTIVE", "DISABLE REASON"},
 		[][]string{{
 			trigger.ID,
 			valueOrDash(trigger.Service),
