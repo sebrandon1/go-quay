@@ -104,7 +104,7 @@ go-quay config show
 go-quay config show --show-token
 ```
 
-`config init` prompts for the token, default namespace, and API URL. For automation, pass `--non-interactive --token TOKEN --namespace NAMESPACE`; `--quay-url` is optional. The config file and its directory are created with owner-only permissions. `config show` redacts the token unless `--show-token` is supplied.
+`config init` prompts for the token, default namespace, and API URL. For automation, pass `--non-interactive --namespace NAMESPACE` and supply the token through `--token TOKEN`, `--token-file PATH`, `$QUAY_TOKEN_FILE`, `$QUAY_TOKEN`, or the existing config file; `--quay-url` is optional. The config file and its directory are created with owner-only permissions. `config show` redacts the token unless `--show-token` is supplied.
 
 ## Shell completion
 
