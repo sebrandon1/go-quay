@@ -3,6 +3,7 @@ package lib
 import (
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -110,5 +111,62 @@ func TestPaginateSinglePageNeedsNoCap(t *testing.T) {
 	}
 	if calls != 1 {
 		t.Fatalf("calls = %d, want 1", calls)
+	}
+}
+
+func TestPaginateCapsUnboundedWalk(t *testing.T) {
+	old := maxPaginationPages
+	maxPaginationPages = 3
+	t.Cleanup(func() { maxPaginationPages = old })
+
+	calls := 0
+	_, err := Paginate(0, func(int, string) (PageResult, error) {
+		calls++
+		return PageResult{HasMore: true}, nil
+	})
+	if err == nil || !strings.Contains(err.Error(), "exceeded 3 pages") {
+		t.Fatalf("error = %v, want page-ceiling error", err)
+	}
+	if calls != 3 {
+		t.Fatalf("calls = %d, want 3", calls)
+	}
+}
+
+func TestPaginateRejectsRepeatedCursor(t *testing.T) {
+	calls := 0
+	_, err := Paginate(0, func(int, string) (PageResult, error) {
+		calls++
+		return PageResult{HasMore: true, Next: "same-cursor"}, nil
+	})
+	if err == nil || !strings.Contains(err.Error(), "did not advance") {
+		t.Fatalf("error = %v, want non-advancing-cursor error", err)
+	}
+	if calls != 2 {
+		t.Fatalf("calls = %d, want 2", calls)
+	}
+}
+
+func TestPaginateAllowsDistinctCursors(t *testing.T) {
+	next := []string{"page-two", "page-three"}
+	calls := 0
+
+	truncated, err := Paginate(0, func(_ int, token string) (PageResult, error) {
+		if calls > 0 && token != next[calls-1] {
+			t.Fatalf("token = %q, want %q", token, next[calls-1])
+		}
+		calls++
+		if calls > len(next) {
+			return PageResult{}, nil
+		}
+		return PageResult{HasMore: true, Next: next[calls-1]}, nil
+	})
+	if err != nil {
+		t.Fatalf("Paginate: %v", err)
+	}
+	if truncated {
+		t.Fatal("truncated = true, want false")
+	}
+	if calls != 3 {
+		t.Fatalf("calls = %d, want 3", calls)
 	}
 }
