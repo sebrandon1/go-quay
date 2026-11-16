@@ -32,6 +32,7 @@ import (
 	"math/rand/v2"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/sebrandon1/go-toolbox/httpx"
@@ -72,8 +73,10 @@ var _ RepositoryReader = (*Client)(nil)
 
 func NewClientWithURL(bearerToken, baseURL string) (*Client, error) {
 	return &Client{
+		// buildURL joins the base and a path that already starts with "/", so a
+		// trailing slash here would double the separator.
+		BaseURL:     strings.TrimRight(baseURL, "/"),
 		BearerToken: bearerToken,
-		BaseURL:     baseURL,
 		Version:     "dev",
 		HTTPClient: httpx.NewHTTPClient(httpx.Options{
 			Timeout:             30 * time.Second,

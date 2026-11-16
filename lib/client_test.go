@@ -78,6 +78,73 @@ func TestNewClientWithURL(t *testing.T) {
 	}
 }
 
+func TestNewClientWithURLTrimsTrailingSlash(t *testing.T) {
+	const wantBase = "https://quay.example/api/v1"
+	cases := []struct {
+		name    string
+		baseURL string
+	}{
+		{name: "no trailing slash", baseURL: wantBase},
+		{name: "one trailing slash", baseURL: wantBase + "/"},
+		{name: "several trailing slashes", baseURL: wantBase + "///"},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			client, err := NewClientWithURL(testTokenValue, tt.baseURL)
+			if err != nil {
+				t.Fatalf("NewClientWithURL: %v", err)
+			}
+			if client.BaseURL != wantBase {
+				t.Errorf("BaseURL = %q, want %q", client.BaseURL, wantBase)
+			}
+			if got, want := client.buildURL("/repository/%s/%s", "a", "b"), wantBase+"/repository/a/b"; got != want {
+				t.Errorf("buildURL = %q, want %q", got, want)
+			}
+		})
+	}
+}
+
+func TestNewClientWithURLEmptyBaseURL(t *testing.T) {
+	client, err := NewClientWithURL(testTokenValue, "")
+	if err != nil {
+		t.Fatalf("NewClientWithURL: %v", err)
+	}
+	if client.BaseURL != "" {
+		t.Errorf("BaseURL = %q, want empty", client.BaseURL)
+	}
+}
+
+func TestTrailingSlashBaseURLSendsSingleSlashPath(t *testing.T) {
+	var paths []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		paths = append(paths, r.URL.Path)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"name":"a/b"}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithURL(testTokenValue, server.URL+"/api/v1/")
+	if err != nil {
+		t.Fatalf("NewClientWithURL: %v", err)
+	}
+	if _, err := client.GetRepository(context.Background(), "a", "b"); err != nil {
+		t.Fatalf("GetRepository: %v", err)
+	}
+
+	if len(paths) == 0 {
+		t.Fatal("server saw no requests")
+	}
+	if want := "/api/v1/repository/a/b"; paths[0] != want {
+		t.Errorf("request path = %q, want %q", paths[0], want)
+	}
+	for _, path := range paths {
+		if strings.Contains(path, "//") {
+			t.Errorf("request path %q contains a doubled separator", path)
+		}
+	}
+}
+
 func TestNewClientWithURLEmptyToken(t *testing.T) {
 	client, err := NewClientWithURL("", "https://quay.example.com/api/v1")
 	if err != nil {
