@@ -75,6 +75,9 @@ The command resolves each tag to a manifest digest, then fetches labels and secu
 | `get robot list` / `list robots` | Name, description, created, last accessed (tokens omitted) |
 | `get organization members` / `list org-members` | Name, kind, team count, repository count |
 | `get team list` / `list teams` | Name, role, member count, repository count |
+| `get build list` / `list builds` | ID, phase, started, display name |
+| `get trigger list` / `list triggers` | ID, service, enabled, active |
+| `get notification list` / `list notifications` | UUID, title, event, method, failure count |
 | `get secscan info` / `info secscan` | Status, feature and vulnerability totals, severity counts |
 | `get mirror info` / `info mirror` | Enabled, mirror type, external ref, sync interval, sync start date, robot, tag rule, tag rule kind |
 | `list pull-traffic` | Repository, pulls, pushes, share; with `--by-tag`: tags; with `--consumers`: puller, IP, last seen |
@@ -171,6 +174,8 @@ go-quay get build list \
   --token YOUR_TOKEN
 ```
 
+Add `--output table` for columns `ID`, `PHASE`, `STARTED`, and `DISPLAY NAME`.
+
 ### Get build details
 ```bash
 go-quay get build info \
@@ -237,6 +242,8 @@ go-quay get trigger list \
   --repository REPOSITORY \
   --token YOUR_TOKEN
 ```
+
+Add `--output table` for columns `ID`, `SERVICE`, `ENABLED`, and `ACTIVE`.
 
 ### Get trigger details
 ```bash
@@ -328,6 +335,8 @@ go-quay get notification list \
   --repository REPOSITORY \
   --token YOUR_TOKEN
 ```
+
+Add `--output table` for columns `UUID`, `TITLE`, `EVENT`, `METHOD`, and `FAILURES`.
 
 ### Get notification details
 ```bash

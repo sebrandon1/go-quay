@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/sebrandon1/go-quay/lib"
 	"github.com/spf13/cobra"
@@ -57,7 +58,9 @@ Available commands:
 var notificationListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List notifications for a repository",
-	Long:  `List all notifications (webhooks) for the specified repository.`,
+	Long: `List all notifications (webhooks) for the specified repository.
+
+Table columns: UUID, TITLE, EVENT, METHOD, FAILURES.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -70,6 +73,23 @@ var notificationListCmd = &cobra.Command{
 		}
 
 		fmt.Fprintf(os.Stderr, "Notifications for %s/%s:\n", notificationNamespace, notificationRepository)
+		if outputFormat == outputTable {
+			var list []lib.RepositoryNotification
+			if notifications != nil {
+				list = notifications.Notifications
+			}
+			rows := make([][]string, 0, len(list))
+			for _, notification := range list {
+				rows = append(rows, []string{
+					notification.UUID,
+					notification.Title,
+					notification.Event,
+					notification.Method,
+					strconv.Itoa(notification.NumberOfFailures),
+				})
+			}
+			return printTable([]string{"UUID", "TITLE", "EVENT", "METHOD", "FAILURES"}, rows)
+		}
 		return printJSON(notifications)
 	},
 }

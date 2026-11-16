@@ -43,7 +43,9 @@ Available commands:
 var buildListCmd = &cobra.Command{
 	Use:   subcmdList,
 	Short: "List builds for a repository",
-	Long:  `List all builds for the specified repository.`,
+	Long: `List all builds for the specified repository.
+
+Table columns: ID, PHASE, STARTED, DISPLAY NAME.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := getClient()
 		if err != nil {
@@ -56,6 +58,17 @@ var buildListCmd = &cobra.Command{
 		}
 
 		fmt.Fprintf(os.Stderr, "Builds for %s/%s:\n", buildNamespace, buildRepository)
+		if outputFormat == outputTable {
+			var list []lib.Build
+			if builds != nil {
+				list = builds.Builds
+			}
+			rows := make([][]string, 0, len(list))
+			for _, build := range list {
+				rows = append(rows, []string{build.ID, build.Phase, build.Started, build.DisplayName})
+			}
+			return printTable([]string{"ID", "PHASE", "STARTED", "DISPLAY NAME"}, rows)
+		}
 		return printJSON(builds)
 	},
 }

@@ -17,6 +17,7 @@ var outputFormat string
 
 const (
 	tableHeaderName      = "NAME"
+	tableHeaderEnabled   = "ENABLED"
 	tableSeverityUnknown = "UNKNOWN"
 )
 
