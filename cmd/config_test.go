@@ -197,6 +197,108 @@ func TestConfigInitNonInteractive(t *testing.T) {
 	}
 }
 
+func TestLoadConfigRecordsParseError(t *testing.T) {
+	resetConfigCommandState(t)
+	setConfigTestDir(t, t.TempDir())
+	if err := os.MkdirAll(filepath.Dir(configFilePath()), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(configFilePath(), []byte("token: abc\nnamespace: [unclosed\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := loadConfig()
+	if cfg != (appConfig{}) {
+		t.Errorf("loadConfig = %+v, want empty config", cfg)
+	}
+	if configLoadErr == nil || !strings.Contains(configLoadErr.Error(), "parsing") {
+		t.Fatalf("configLoadErr = %v, want YAML parsing error", configLoadErr)
+	}
+}
+
+func TestLoadConfigWithoutConfigDirIsSilent(t *testing.T) {
+	resetConfigCommandState(t)
+	old := userConfigDir
+	userConfigDir = func() (string, error) { return "", errors.New("no config dir") }
+	t.Cleanup(func() { userConfigDir = old })
+
+	if cfg := loadConfig(); cfg != (appConfig{}) {
+		t.Errorf("loadConfig = %+v, want empty config", cfg)
+	}
+	if configLoadErr != nil {
+		t.Errorf("configLoadErr = %v, want nil when no config path exists", configLoadErr)
+	}
+}
+
+func TestLoadConfigRecordsReadError(t *testing.T) {
+	resetConfigCommandState(t)
+	setConfigTestDir(t, t.TempDir())
+	if err := os.MkdirAll(filepath.Dir(configFilePath()), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	// A directory at the config path makes ReadFile fail with a non-parse error.
+	if err := os.Mkdir(configFilePath(), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := loadConfig()
+	if cfg != (appConfig{}) {
+		t.Errorf("loadConfig = %+v, want empty config", cfg)
+	}
+	if configLoadErr == nil || !strings.Contains(configLoadErr.Error(), "reading") {
+		t.Fatalf("configLoadErr = %v, want read error", configLoadErr)
+	}
+}
+
+func TestPersistentPreRunWarnsAboutUnreadableConfig(t *testing.T) {
+	resetConfigCommandState(t)
+	setConfigTestDir(t, t.TempDir())
+	if err := os.MkdirAll(filepath.Dir(configFilePath()), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(configFilePath(), []byte("token: abc\nnamespace: [unclosed\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	loadConfig()
+
+	// Keep the auth failure deterministic regardless of the developer's shell.
+	t.Setenv("QUAY_TOKEN", "")
+	t.Setenv("QUAY_TOKEN_FILE", "")
+
+	var stdout, stderr bytes.Buffer
+	rootCmd.SetOut(&stdout)
+	rootCmd.SetErr(&stderr)
+	rootCmd.SetArgs([]string{"info", "user"})
+	if err := rootCmd.Execute(); err == nil || !strings.Contains(err.Error(), "authentication token required") {
+		t.Fatalf("error = %v, want authentication token error", err)
+	}
+	if !strings.Contains(stderr.String(), "warning: ignoring config file") {
+		t.Errorf("stderr = %q, want a config warning", stderr.String())
+	}
+	if got := strings.Count(stderr.String(), "warning:"); got != 1 {
+		t.Errorf("warning count = %d, want 1", got)
+	}
+}
+
+func TestPersistentPreRunSilentWithoutConfigFile(t *testing.T) {
+	resetConfigCommandState(t)
+	setConfigTestDir(t, t.TempDir())
+
+	var stdout, stderr bytes.Buffer
+	rootCmd.SetOut(&stdout)
+	rootCmd.SetErr(&stderr)
+	rootCmd.SetArgs([]string{testConfigRootCommand, "path"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatalf("config path: %v", err)
+	}
+	if stderr.Len() != 0 {
+		t.Errorf("stderr = %q, want no warning for a missing config file", stderr.String())
+	}
+	if configLoadErr != nil {
+		t.Errorf("configLoadErr = %v, want nil", configLoadErr)
+	}
+}
+
 func TestConfigInitDefaultsUseFlagEnvConfigPrecedence(t *testing.T) {
 	resetConfigCommandState(t)
 	setConfigTestDir(t, t.TempDir())

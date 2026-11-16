@@ -32,6 +32,7 @@ func resetRootFlags(t *testing.T) {
 	origRetryBackoff := retryBackoff
 	origRetryMaxBackoff := retryMaxBackoff
 	origCommand := executedCommand
+	origConfigLoadErr := configLoadErr
 	resetTokenAndURLFlags(t)
 	resetVerboseFlag(t)
 	resetRetryFlags(t)
@@ -47,6 +48,7 @@ func resetRootFlags(t *testing.T) {
 		retryBackoff = origRetryBackoff
 		retryMaxBackoff = origRetryMaxBackoff
 		appCfg = origCfg
+		configLoadErr = origConfigLoadErr
 		executedCommand = origCommand
 		rootCmd.SetArgs([]string{})
 		rootCmd.SetOut(nil)
@@ -58,6 +60,7 @@ func resetRootFlags(t *testing.T) {
 	outputFormat = outputJSON
 	executedCommand = nil
 	appCfg = appConfig{}
+	configLoadErr = nil
 }
 
 func resetVerboseFlag(t *testing.T) {

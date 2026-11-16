@@ -58,6 +58,13 @@ func persistentPreRunE(cmd *cobra.Command, _ []string) error {
 	cmd.SilenceUsage = true
 	executedCommand = cmd
 
+	// A config file that exists but cannot be read would otherwise look exactly
+	// like no config at all, and the authentication error would point the user
+	// at a file that does contain a token.
+	if configLoadErr != nil {
+		fmt.Fprintf(cmd.ErrOrStderr(), "warning: ignoring config file: %v\n", configLoadErr)
+	}
+
 	var err error
 	token, err = resolveToken(flagChanged(cmd, "token"), flagChanged(cmd, "token-file"))
 	if err != nil {

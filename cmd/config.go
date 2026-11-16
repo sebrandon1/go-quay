@@ -26,6 +26,11 @@ type appConfig struct {
 	QuayURL   string `yaml:"quay-url"`
 }
 
+// configLoadErr records why the config file could not be read at startup. A
+// missing file is not an error; an unreadable or unparsable one is, and the
+// command warns about it instead of silently acting as if no config existed.
+var configLoadErr error
+
 // appCfg is initialized at package load time, before any init() functions run.
 // This ensures config values are available when flags are registered.
 var appCfg = loadConfig()
@@ -125,10 +130,19 @@ Use --token and --namespace for non-interactive setup; --quay-url is optional. W
 }
 
 // loadConfig reads the config file from the user's config directory.
-// Returns an empty config if the file doesn't exist or can't be parsed.
+// Returns an empty config if the file doesn't exist or can't be parsed, and
+// records a parse or read failure in configLoadErr so the CLI can warn.
 func loadConfig() appConfig {
-	cfg, err := readConfig(configFilePath())
+	configLoadErr = nil
+	path := configFilePath()
+	if path == "" {
+		// No usable config directory, for example when HOME is unset in a
+		// container: there is no file to read and nothing to warn about.
+		return appConfig{}
+	}
+	cfg, err := readConfig(path)
 	if err != nil {
+		configLoadErr = err
 		return appConfig{}
 	}
 	return cfg
