@@ -80,7 +80,7 @@ var configInitCmd = &cobra.Command{
 	Short: "Initialize the CLI configuration file",
 	Long: `Create or update the CLI configuration file.
 
-Use --token and --namespace for non-interactive setup; --quay-url is optional. When stdin is not a terminal, --token and --namespace are required.`,
+Use --namespace for non-interactive setup; --quay-url is optional. When stdin is not a terminal, the token is read from --token, --token-file, $QUAY_TOKEN_FILE, $QUAY_TOKEN, or the existing config file, and --namespace is required.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		path := configFilePath()
 		if path == "" {
@@ -93,8 +93,8 @@ Use --token and --namespace for non-interactive setup; --quay-url is optional. W
 
 		interactive := !configInitNonInteractive && isTerminal(cmd.InOrStdin())
 		if !interactive {
-			if !flagChanged(cmd, "token") || cfg.Token == "" {
-				return fmt.Errorf("non-interactive config init requires --token")
+			if cfg.Token == "" {
+				return fmt.Errorf("non-interactive config init requires a token from --token, --token-file, $QUAY_TOKEN, $QUAY_TOKEN_FILE, or the config file")
 			}
 			if !cmd.Flags().Changed("namespace") || cfg.Namespace == "" {
 				return fmt.Errorf("non-interactive config init requires --namespace")
@@ -176,11 +176,12 @@ func configInitDefaults(cmd *cobra.Command) (appConfig, error) {
 	if err != nil {
 		return appConfig{}, err
 	}
-	cfg.Token = firstNonEmpty(os.Getenv("QUAY_TOKEN"), cfg.Token)
+	// token already holds the value resolved from --token, --token-file,
+	// $QUAY_TOKEN_FILE, $QUAY_TOKEN, and the config file by persistentPreRunE,
+	// so an explicitly empty --token stays empty instead of resurrecting the
+	// saved value.
+	cfg.Token = token
 	cfg.QuayURL = firstNonEmpty(os.Getenv("QUAY_URL"), cfg.QuayURL, lib.DefaultQuayURL)
-	if flagChanged(cmd, "token") {
-		cfg.Token = cmd.Flag("token").Value.String()
-	}
 	if cmd.Flags().Changed("namespace") {
 		cfg.Namespace = configNamespace
 	}

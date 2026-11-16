@@ -48,7 +48,7 @@ Every API domain follows the same pattern:
 - All exported `Client` methods take `context.Context` as the first argument. CLI commands pass `cmd.Context()`.
 - **`Client.Retry`** (`*RetryConfig`) is optional. When set, HTTP calls retry on 429; 5xx and transport errors retry only for GET, HEAD, PUT, and DELETE, so a POST is never resent after it may have been applied. Retry backoff honors the request context. `NewClient` leaves it nil.
 - API errors that include a Quay JSON body are returned as `*lib.QuayError` (implements `error`; use `errors.As`, `StatusCode()`, or the `IsNotFound` / `IsUnauthorized` / `IsForbidden` helpers). Quay uses `{"error": ...}` on some endpoints and `{"detail": ..., "error_message": ...}` on others; both are typed. Non-JSON bodies stay plain errors.
-- CLI authentication: `--token` / `-t`, else `$QUAY_TOKEN`, else the config file. API base URL: `--quay-url`, else `$QUAY_URL`, else config `quay-url`, else `DefaultQuayURL`. Output: `--output` / `-O` (`json`, `yaml`, or `table`).
+- CLI authentication: `--token` / `-t`, else `--token-file` / `$QUAY_TOKEN_FILE`, else `$QUAY_TOKEN`, else the config file. API base URL: `--quay-url`, else `$QUAY_URL`, else config `quay-url`, else `DefaultQuayURL`. Output: `--output` / `-O` (`json`, `yaml`, `table`, or report-only `csv`).
 - Config file (optional defaults): `token`, `namespace`, `quay-url` in platform config dir (`~/.config/go-quay/config.yaml` on Linux). Flags and env vars override the file.
 - CLI commands use persistent flags (`--namespace`, `--repository`, `--token`) on parent commands so subcommands inherit them.
 - The `cmd/helpers.go` file contains shared CLI utilities like `getClient()` and `printJSON()`.
@@ -68,7 +68,8 @@ Legacy: all API commands still hang off `go-quay get` (`repository`, `billing`, 
 ## Configuration
 
 ```bash
-export QUAY_TOKEN="your-token"          # required for API calls
+export QUAY_TOKEN="your-token"          # required for API calls unless a token file or config file supplies one
+export QUAY_TOKEN_FILE="/run/secrets/quay-token"  # optional; read the token from a file
 export QUAY_URL="https://quay.io/api/v1"  # optional; self-hosted Quay
 ```
 

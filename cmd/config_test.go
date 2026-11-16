@@ -15,17 +15,18 @@ import (
 )
 
 const (
-	testConfigNamespaceFlag = "--namespace"
-	testConfigInitCommand   = "init"
-	testConfigRootCommand   = "config"
-	testConfigNamespace     = "demo"
-	testConfigFlagNamespace = "flag-namespace"
-	testConfigToken         = "setup-secret"
-	testConfigShowCommand   = "show"
-	testWindowsOS           = "windows"
-	testKeptToken           = "kept"
-	testTokenPrompt         = "Quay token: "
-	testTypedToken          = "typed-token"
+	testConfigNamespaceFlag      = "--namespace"
+	testConfigNonInteractiveFlag = "--non-interactive"
+	testConfigInitCommand        = "init"
+	testConfigRootCommand        = "config"
+	testConfigNamespace          = "demo"
+	testConfigFlagNamespace      = "flag-namespace"
+	testConfigToken              = "setup-secret"
+	testConfigShowCommand        = "show"
+	testWindowsOS                = "windows"
+	testKeptToken                = "kept"
+	testTokenPrompt              = "Quay token: "
+	testTypedToken               = "typed-token"
 )
 
 func resetConfigCommandState(t *testing.T) {
@@ -59,6 +60,13 @@ func setConfigTestDir(t *testing.T, path string) {
 	old := userConfigDir
 	userConfigDir = func() (string, error) { return path, nil }
 	t.Cleanup(func() { userConfigDir = old })
+}
+
+// clearTokenEnv keeps token-source tests independent of the developer's shell.
+func clearTokenEnv(t *testing.T) {
+	t.Helper()
+	t.Setenv("QUAY_TOKEN", "")
+	t.Setenv("QUAY_TOKEN_FILE", "")
 }
 
 func TestLoadConfigMissingFile(t *testing.T) {
@@ -158,7 +166,7 @@ func TestConfigFilePath(t *testing.T) {
 func TestConfigInitNonInteractive(t *testing.T) {
 	resetConfigCommandState(t)
 	setConfigTestDir(t, t.TempDir())
-	rootCmd.SetArgs([]string{testConfigRootCommand, testConfigInitCommand, "--non-interactive", testTokenFlag, testConfigToken, testConfigNamespaceFlag, testConfigNamespace})
+	rootCmd.SetArgs([]string{testConfigRootCommand, testConfigInitCommand, testConfigNonInteractiveFlag, testTokenFlag, testConfigToken, testConfigNamespaceFlag, testConfigNamespace})
 	var runErr error
 	output := captureStdout(t, func() { runErr = rootCmd.Execute() })
 	if runErr != nil {
@@ -209,20 +217,21 @@ func TestConfigInitDefaultsUseFlagEnvConfigPrecedence(t *testing.T) {
 	}
 	t.Setenv("QUAY_TOKEN", "env-token")
 	t.Setenv("QUAY_URL", "https://env.example/api/v1")
+	// persistentPreRunE resolves the token before RunE runs; these cases call
+	// configInitDefaults directly, so stand in for that hook.
+	token = "env-token"
 
 	cfg, err := configInitDefaults(configInitCmd)
 	if err != nil {
 		t.Fatalf("configInitDefaults: %v", err)
 	}
 	if cfg.Token != "env-token" || cfg.Namespace != "file-namespace" || cfg.QuayURL != "https://env.example/api/v1" {
-		t.Errorf("environment defaults = %+v, want env token/URL and file namespace", cfg)
+		t.Errorf("environment defaults = %+v, want resolved token, env URL, and file namespace", cfg)
 	}
 
-	tokenFlag := rootCmd.PersistentFlags().Lookup("token")
 	urlFlag := rootCmd.PersistentFlags().Lookup("quay-url")
 	namespaceFlag := configInitCmd.Flags().Lookup("namespace")
 	for flag, value := range map[*pflag.Flag]string{
-		tokenFlag:     "flag-token",
 		urlFlag:       "https://flag.example/api/v1",
 		namespaceFlag: testConfigFlagNamespace,
 	} {
@@ -232,6 +241,7 @@ func TestConfigInitDefaultsUseFlagEnvConfigPrecedence(t *testing.T) {
 		flag.Changed = true
 	}
 	configNamespace = testConfigFlagNamespace
+	token = "flag-token"
 	cfg, err = configInitDefaults(configInitCmd)
 	if err != nil {
 		t.Fatalf("configInitDefaults with flags: %v", err)
@@ -286,9 +296,104 @@ func TestConfigShowRedactsTokenByDefault(t *testing.T) {
 func TestConfigInitNonInteractiveRequiresFlags(t *testing.T) {
 	resetConfigCommandState(t)
 	setConfigTestDir(t, t.TempDir())
-	rootCmd.SetArgs([]string{testConfigRootCommand, testConfigInitCommand, "--non-interactive", testConfigNamespaceFlag, testConfigNamespace})
-	if err := rootCmd.Execute(); err == nil || !strings.Contains(err.Error(), "requires --token") {
+	// The token now comes from every CLI source, so clear the environment to
+	// keep the test independent of the developer's shell.
+	clearTokenEnv(t)
+	rootCmd.SetArgs([]string{testConfigRootCommand, testConfigInitCommand, testConfigNonInteractiveFlag, testConfigNamespaceFlag, testConfigNamespace})
+	if err := rootCmd.Execute(); err == nil || !strings.Contains(err.Error(), "requires a token") {
 		t.Fatalf("config init error = %v, want missing-token error", err)
+	}
+}
+
+func TestConfigInitNonInteractiveRequiresNamespace(t *testing.T) {
+	resetConfigCommandState(t)
+	setConfigTestDir(t, t.TempDir())
+	clearTokenEnv(t)
+	rootCmd.SetArgs([]string{testConfigRootCommand, testConfigInitCommand, testConfigNonInteractiveFlag, testTokenFlag, testConfigToken})
+	if err := rootCmd.Execute(); err == nil || !strings.Contains(err.Error(), "requires --namespace") {
+		t.Fatalf("config init error = %v, want missing-namespace error", err)
+	}
+}
+
+func TestConfigInitNonInteractiveUsesResolvedTokenSources(t *testing.T) {
+	tokenFile := filepath.Join(t.TempDir(), "token")
+	if err := os.WriteFile(tokenFile, []byte("file-source-token\n"), 0o600); err != nil {
+		t.Fatalf("write token file: %v", err)
+	}
+
+	cases := []struct {
+		name  string
+		extra []string
+		env   map[string]string
+		want  string
+	}{
+		{
+			name:  "token-file flag",
+			extra: []string{"--token-file", tokenFile},
+			want:  "file-source-token",
+		},
+		{
+			name: "token-file env",
+			env:  map[string]string{"QUAY_TOKEN_FILE": tokenFile},
+			want: "file-source-token",
+		},
+		{
+			name: "token env",
+			env:  map[string]string{"QUAY_TOKEN": "env-source-token"},
+			want: "env-source-token",
+		},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			resetConfigCommandState(t)
+			setConfigTestDir(t, t.TempDir())
+			clearTokenEnv(t)
+			for key, value := range tt.env {
+				t.Setenv(key, value)
+			}
+
+			args := append([]string{testConfigRootCommand, testConfigInitCommand, testConfigNonInteractiveFlag}, tt.extra...)
+			rootCmd.SetArgs(append(args, testConfigNamespaceFlag, testConfigNamespace))
+			var runErr error
+			output := captureStdout(t, func() { runErr = rootCmd.Execute() })
+			if runErr != nil {
+				t.Fatalf("config init: %v", runErr)
+			}
+			if strings.Contains(output, tt.want) {
+				t.Fatal("config init output must not include the token")
+			}
+			if cfg := loadConfig(); cfg.Token != tt.want {
+				t.Errorf("saved token = %q, want %q", cfg.Token, tt.want)
+			}
+		})
+	}
+}
+
+func TestConfigInitNonInteractiveRejectsExplicitlyEmptyToken(t *testing.T) {
+	resetConfigCommandState(t)
+	setConfigTestDir(t, t.TempDir())
+	if err := writeConfig(configFilePath(), appConfig{Token: "saved-token", Namespace: testConfigNamespace}); err != nil {
+		t.Fatalf("writeConfig: %v", err)
+	}
+	rootCmd.SetArgs([]string{testConfigRootCommand, testConfigInitCommand, testConfigNonInteractiveFlag, testTokenFlag, "", testConfigNamespaceFlag, testConfigNamespace})
+	if err := rootCmd.Execute(); err == nil || !strings.Contains(err.Error(), "requires a token") {
+		t.Fatalf("config init error = %v, want missing-token error", err)
+	}
+}
+
+func TestConfigInitRejectsMalformedConfig(t *testing.T) {
+	resetConfigCommandState(t)
+	setConfigTestDir(t, t.TempDir())
+	if err := os.MkdirAll(filepath.Dir(configFilePath()), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(configFilePath(), []byte("{invalid"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	rootCmd.SetArgs([]string{testConfigRootCommand, testConfigInitCommand, testConfigNonInteractiveFlag, testTokenFlag, testConfigToken, testConfigNamespaceFlag, testConfigNamespace})
+	if err := rootCmd.Execute(); err == nil || !strings.Contains(err.Error(), "parsing") {
+		t.Fatalf("config init error = %v, want YAML parsing error", err)
 	}
 }
 
